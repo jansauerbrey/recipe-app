@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html ng-app="app">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+</head>
+<body>
+
+<ng-view></ng-view>
+
+<!-- Libraries -->
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular-route.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular-resource.min.js"></script>
+<script src="/javascripts/ui-bootstrap-tpls.min.js"></script>
+<script src="/javascripts/angular-bootstrap-checkbox.js"></script>
+<script src="/javascripts/todoapp.js"></script>
+  
+<!-- Template -->   
+<script type="text/ng-template" id="/todos.html">
+<div class="container">
+  <div class="row">
+       <input type="text" ng-model="search.name" class="form-control" placeholder="Search...">
+  </div>
+  <div class="row list-group">
+    <div ng-repeat="todo in todos | filter: search" class="list-group-item">
+      <div class="container-fluid">
+          <div class="">
+            <a ng-show="!editing[$index]" href="#/{{todo._id}}">
+              <h4>{{todo.name}}</h4>
+            </a>
+            <input ng-show="editing[$index]" type="text" ng-model="todo.name" class="form-control">
+            <p ng-show="!editing[$index]">{{todo.note}}</p>
+            <input ng-show="editing[$index]" type="text" ng-model="todo.note" class="form-control">
+          </div>
+          <div class="">
+            <checkbox ng-model="todo.completed" ng-change="update($index)" larger class=""></checkbox>
+            <button ng-show="!editing[$index]" ng-click="edit($index)" class="btn btn-default">edit</button>
+            <button ng-show="!editing[$index]" ng-click="remove($index)" class="btn btn-default">remove</button>
+            <button ng-show="editing[$index]" ng-click="update($index)" class="btn btn-default">update</button>
+            <button ng-show="editing[$index]" ng-click="cancel($index)" class="btn btn-default">cancel</button>
+          </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="form-inline form-group">
+      <input type="text" ng-model="newTodo" class="form-control" placeholder="New task..."><button ng-click="save()" class="btn btn-default">create</button>
+    </div>
+  </div>
+</div>
+</script>
+
+<script type="text/ng-template" id="/todoDetails.html">
+<div class="container">
+  <div class="row">
+    <h3>{{ todo.name }}</h3>
+  </div>
+  <div class="row">
+    <div class="form-horizontal">
+      <div class="form-group">
+        <label class="control-label">Completed:</label>
+        <checkbox ng-model="todo.completed" larger></checkbox>
+      </div>
+      <div class="form-group">
+        <label class="control-label">Note:</label>
+        <textarea ng-model="todo.note" class="form-control" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <button ng-click="update()" class="btn btn-default">update</button>
+        <button ng-click="remove()" class="btn btn-default">remove</button>
+        <a class="btn btn-default" href="/" role="button">cancel</a>
+      </div>
+    </div>
+  </div>
+</div>
+</script>
+
+</body>
+</html>
