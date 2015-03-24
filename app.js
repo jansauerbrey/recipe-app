@@ -5,18 +5,25 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var routes = require('./routes/index');
-var todos = require('./routes/todos');
+//var routes = require('./routes/index');
+//var todos = require('./routes/todos');
+var main = require('./routes/index');
 var units = require('./routes/units');
+var ingredients = require('./routes/ingredients');
+var recipes = require('./routes/recipes');
+var tags = require('./routes/tags');
+var schedules = require('./routes/schedules');
+var shopitems = require('./routes/shopitems');
 
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/TodoApp', function(err) {
+mongoose.connect('mongodb://localhost/recipeApp', function(err) {
     if(err) {
         console.log('connection error', err);
     } else {
         console.log('connection successful');
     }
 });
+mongoose.set('debug', true)
 
 var app = express();
 
@@ -32,9 +39,13 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', routes);
-app.use('/todos', todos);
+app.use('/', main);
 app.use('/units', units);
+app.use('/ingredients', ingredients);
+app.use('/recipes', recipes);
+app.use('/tags', tags);
+app.use('/schedules', schedules);
+app.use('/shopitems', shopitems);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

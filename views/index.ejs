@@ -16,67 +16,98 @@
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular-resource.min.js"></script>
 <script src="/javascripts/ui-bootstrap-tpls.min.js"></script>
 <script src="/javascripts/angular-bootstrap-checkbox.js"></script>
-<script src="/javascripts/todoapp.js"></script>
+<script src="/javascripts/recipeapp.js"></script>
   
 <!-- Template -->   
-<script type="text/ng-template" id="/todos.html">
+<script type="text/ng-template" id="/index.html">
+  <a class="btn btn-default" href="/#/shopitems/" role="button">shopitems</a>
+  <a class="btn btn-default" href="/#/schedules/" role="button">schedules</a>
+  <a class="btn btn-default" href="/#/recipes/" role="button">recipes</a>
+  <a class="btn btn-default" href="/#/tags/" role="button">tags</a>
+  <a class="btn btn-default" href="/#/ingredients/" role="button">ingredients</a>
+  <a class="btn btn-default" href="/#/units/" role="button">units</a>
+
+</script>
+
+
+<script type="text/ng-template" id="/units.html">
 <div class="container">
   <div class="row">
-       <input type="text" ng-model="search.name" class="form-control" placeholder="Search...">
-  </div>
-  <div class="row list-group">
-    <div ng-repeat="todo in todos | filter: search" class="list-group-item">
-      <div class="container-fluid">
-          <div class="">
-            <a ng-show="!editing[$index]" href="#/{{todo._id}}">
-              <h4>{{todo.name}}</h4>
-            </a>
-            <input ng-show="editing[$index]" type="text" ng-model="todo.name" class="form-control">
-            <p ng-show="!editing[$index]">{{todo.note}}</p>
-            <input ng-show="editing[$index]" type="text" ng-model="todo.note" class="form-control">
-          </div>
-          <div class="">
-            <checkbox ng-model="todo.completed" ng-change="update($index)" larger class=""></checkbox>
-            <button ng-show="!editing[$index]" ng-click="edit($index)" class="btn btn-default">edit</button>
-            <button ng-show="!editing[$index]" ng-click="remove($index)" class="btn btn-default">remove</button>
-            <button ng-show="editing[$index]" ng-click="update($index)" class="btn btn-default">update</button>
-            <button ng-show="editing[$index]" ng-click="cancel($index)" class="btn btn-default">cancel</button>
-          </div>
+    <input type="text" ng-model="search.name.de" class="form-control visible-xs-block" placeholder="Search...">
+    <input type="text" ng-model="search.name" class="form-control hidden-xs" placeholder="Search...">
+    <div class="container">
+      <h4 class="col-sm-4 hidden-xs">Englisch:</h4>
+      <h4 class="col-sm-4 hidden-xs">Deutsch:</h4>
+      <h4 class="col-sm-4 hidden-xs">Finnisch:</h4>      
+    </div>
+    <div class="list-group">
+      <div ng-repeat="unit in units | filter: search">
+        <a class="list-group-item container" href="#/units/{{unit._id}}">
+          <div class="col-xs-12 col-sm-4">{{unit.name.en}}</div>
+          <div class="col-sm-4 hidden-xs">{{unit.name.de}}</div>
+          <div class="col-sm-4 hidden-xs">{{unit.name.fi}}</div>
+        </a>
       </div>
     </div>
-  </div>
-  <div class="row">
     <div class="form-inline form-group">
-      <input type="text" ng-model="newTodo" class="form-control" placeholder="New task..."><button ng-click="save()" class="btn btn-default">create</button>
+      <a class="btn btn-primary" href="/#/unitadd/" role="button">add</a>
     </div>
   </div>
 </div>
 </script>
 
-<script type="text/ng-template" id="/todoDetails.html">
+<script type="text/ng-template" id="/unitdetails.html">
 <div class="container">
   <div class="row">
-    <h3>{{ todo.name }}</h3>
-  </div>
-  <div class="row">
-    <div class="form-horizontal">
+    <div class="form">
       <div class="form-group">
-        <label class="control-label">Completed:</label>
-        <checkbox ng-model="todo.completed" larger></checkbox>
+        <label class="control-label">Englisch:</label>
+        <input type="text" ng-model="unit.name.en" class="form-control">
       </div>
       <div class="form-group">
-        <label class="control-label">Note:</label>
-        <textarea ng-model="todo.note" class="form-control" rows="3"></textarea>
+        <label class="control-label">Deutsch:</label>
+        <input type="text" ng-model="unit.name.de" class="form-control">
       </div>
       <div class="form-group">
-        <button ng-click="update()" class="btn btn-default">update</button>
-        <button ng-click="remove()" class="btn btn-default">remove</button>
-        <a class="btn btn-default" href="/" role="button">cancel</a>
+        <label class="control-label">Finnisch:</label>
+        <input type="text" ng-model="unit.name.fi" class="form-control">
+      </div>
+      <div class="form-group">
+        <button ng-click="update()" class="btn btn-primary">update</button>
+        <a class="btn btn-default" href="/#/units/" role="button">cancel</a>
+        <button ng-click="remove()" class="btn btn-default pull-right">remove</button>
       </div>
     </div>
   </div>
 </div>
 </script>
+
+
+<script type="text/ng-template" id="/unitadd.html">
+<div class="container">
+  <div class="row">
+    <div class="form">
+      <div class="form-group">
+        <label class="control-label">Englisch:</label>
+        <input type="text" ng-model="newunit.name.en" class="form-control">
+      </div>
+      <div class="form-group">
+        <label class="control-label">Deutsch:</label>
+        <input type="text" ng-model="newunit.name.de" class="form-control">
+      </div>
+      <div class="form-group">
+        <label class="control-label">Finnisch:</label>
+        <input type="text" ng-model="newunit.name.fi" class="form-control">
+      </div>
+      <div class="form-group">
+        <button ng-click="save()" class="btn btn-primary">create</button>
+        <a class="btn btn-default" href="/#/units/" role="button">cancel</a>
+      </div>
+    </div>
+  </div>
+</div>
+</script>
+
 
 </body>
 </html>

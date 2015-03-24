@@ -1,9 +1,12 @@
 var mongoose = require('mongoose');
 
 var UnitSchema = new mongoose.Schema({
-  unit_en: String,
-  unit_de: String,
-  unit_fi: String,
+  name: {
+	en: String,
+	de: String,
+	fi: String
+	},
+  author: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
   updated_at: { type: Date, default: Date.now },
 });
 
