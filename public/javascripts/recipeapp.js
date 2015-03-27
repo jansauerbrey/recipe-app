@@ -44,13 +44,15 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
 // Controllers
 //---------------
 
-    .controller('MainController', ['$scope', 'Main', function ($scope, Main) {
+
+    .controller('StartpageController', ['$scope', function ($scope) {
     }])
 
 // Units
 
     .controller('UnitsController', ['$scope', 'Units', function ($scope, Units) {
       $scope.editing = [];
+      $scope.loading = true;
       $scope.units = Units.query(function(response) {
         $scope.loading = false;
       });
@@ -176,6 +178,71 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
     }])
 
 
+// Recipes
+
+    .controller('RecipesController', ['$scope', 'Recipes', function ($scope, Recipes) {
+      $scope.editing = [];
+      $scope.loading = true;
+      $scope.recipes = Recipes.query(function(response) {
+        $scope.loading = false;
+      });
+
+      $scope.update = function(index){
+        var recipe = $scope.recipes[index];
+        Recipes.update({id: recipe._id}, recipe);
+        $scope.editing[index] = false;
+      }
+
+      $scope.edit = function(index){
+        $scope.editing[index] = angular.copy($scope.recipes[index]);
+      }
+
+      $scope.cancel = function(index){
+        $scope.recipes[index] = angular.copy($scope.editing[index]);
+        $scope.editing[index] = false;
+      }
+
+      $scope.remove = function(index){
+        var recipe = $scope.recipes[index];
+        Recipes.remove({id: recipe._id}, function(){
+          $scope.recipes.splice(index, 1);
+        });
+      }
+
+    }])
+
+    .controller('RecipeDetailCtrl', ['$scope', '$routeParams', 'Recipes', '$location', function ($scope, $routeParams, Resipes, $location) {
+      $scope.recipe = Recipes.get({id: $routeParams.id });
+
+      $scope.update = function(){
+        Recipes.update({id: $scope.recipe._id}, $scope.recipe, function(){
+          $location.url('/recipes/');
+        });
+      }
+
+      $scope.remove = function(){
+        Recipes.remove({id: $scope.recipe._id}, function(){
+          $location.url('/recipes/');
+        });
+      }
+
+    }])
+
+
+    .controller('RecipeAddCtrl', ['$scope', '$routeParams', 'Recipes', '$location', function ($scope, $routeParams, Recipes, $location) {
+
+      $scope.save = function(){
+        if(!$scope.newrecipe || $scope.newrecipe.length < 1) return;
+        var recipe = new Recipes({ name: $scope.newrecipe.name });
+
+        recipe.$save(function(){
+          $location.url('/recipes/');
+        });
+      }
+
+    }])
+
+
 //---------------
 // Directives
 //---------------
@@ -185,7 +252,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
         restrict: "E",
         replace: true,
         templateUrl: "navigation-directive.tpl.html",
-        controller: function ($scope) {
+        controller:  function ($scope) {
+          $scope.hideMobileNav = true;
           $scope.routes = routeNavigation.routes;
           $scope.activeRoute = routeNavigation.activeRoute;
         }
@@ -201,7 +269,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
     $routeProvider
       .when('/', {
         templateUrl: 'startpage.tpl.html',
-        controller: 'MainController',
+        controller: 'StartpageController',
       })
 
       .when('/units/', {
@@ -219,6 +287,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
         templateUrl: 'unitadd.tpl.html',
         controller: 'UnitAddCtrl'
       })
+
+
       .when('/ingredients/', {
         templateUrl: 'ingredients.tpl.html',
         controller: 'IngredientsController',
@@ -233,6 +303,23 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
       .when('/ingredientadd', {
         templateUrl: 'ingredientadd.tpl.html',
         controller: 'IngredientAddCtrl'
+      })
+
+
+      .when('/recipes/', {
+        templateUrl: 'recipes.tpl.html',
+        controller: 'RecipesController',
+        name: 'Recipes'
+      })
+    
+      .when('/recipes/:id', {
+        templateUrl: 'recipedetails.tpl.html',
+        controller: 'RecipeDetailCtrl'
+     })
+
+      .when('/recipeadd', {
+        templateUrl: 'recipeadd.tpl.html',
+        controller: 'RecipeAddCtrl'
       })
     ;
   }]);
