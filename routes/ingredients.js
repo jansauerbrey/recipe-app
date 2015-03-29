@@ -6,7 +6,7 @@ var Ingredient = require('../models/Ingredient.js');
 
 /* GET /ingredients listing. */
 router.get('/', function(req, res, next) {
-  Ingredient.find(function (err, ingredients) {
+  Ingredient.find(req.query, function (err, ingredients) {
     if (err) return next(err);
     res.json(ingredients);
   });
@@ -43,5 +43,6 @@ router.delete('/:id', function(req, res, next) {
     res.json(post);
   });
 });
+
 
 module.exports = router;

@@ -178,6 +178,20 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
     }])
 
 
+
+// TypeAhead Ingredients
+
+    .controller('TAIngredientsCtrl', ['$scope', 'Ingredients', function ($scope, Ingredients) {
+      
+      $scope.GetIngredients = function($viewValue){
+        return Ingredients.query({'name.de': $vieValue}, function($response){
+          
+        });
+      }
+    }])
+
+
+
 // Recipes
 
     .controller('RecipesController', ['$scope', 'Recipes', function ($scope, Recipes) {
