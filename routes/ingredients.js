@@ -20,7 +20,7 @@ router.post('/', function(req, res, next) {
   });
 });
 
-/* GET /ingredients/id */
+/* GET /ingredients/:id */
 router.get('/:id', function(req, res, next) {
   Ingredient.findById(req.params.id, function (err, post) {
     if (err) return next(err);

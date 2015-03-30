@@ -23,19 +23,19 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
         })
 
         .factory('Units', ['$resource', function($resource){
-          return $resource('/units/:id', null, {
+          return $resource('/api/units/:id', null, {
             'update': { method:'PUT' }
           });
         }])
 
         .factory('Ingredients', ['$resource', function($resource){
-          return $resource('/ingredients/:id', null, {
+          return $resource('/api/ingredients/:id', null, {
             'update': { method:'PUT' }
           });
         }])
 
         .factory('Recipes', ['$resource', function($resource){
-          return $resource('/recipes/:id', null, {
+          return $resource('/api/recipes/:id', null, {
             'update': { method:'PUT' }
           });
         }])
@@ -178,20 +178,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
     }])
 
 
-
-// TypeAhead Ingredients
-
-    .controller('TAIngredientsCtrl', ['$scope', 'Ingredients', function ($scope, Ingredients) {
-      
-      $scope.GetIngredients = function($viewValue){
-        return Ingredients.query({'name.de': $vieValue}, function($response){
-          
-        });
-      }
-    }])
-
-
-
 // Recipes
 
     .controller('RecipesController', ['$scope', 'Recipes', function ($scope, Recipes) {
@@ -225,10 +211,35 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
 
     }])
 
-    .controller('RecipeDetailCtrl', ['$scope', '$routeParams', 'Recipes', '$location', function ($scope, $routeParams, Resipes, $location) {
-      $scope.recipe = Recipes.get({id: $routeParams.id });
+    .controller('RecipeDetailCtrl', ['$scope', '$routeParams', 'Recipes', 'Ingredients', 'Units', '$location', function ($scope, $routeParams, Recipes, Ingredients, Units, $location) {
+      $scope.recipe = Recipes.get({id: $routeParams.id }, function(response) {
+        for(i=0;i<$scope.recipe.ingredients.length;i++){
+          $scope.recipe.ingredients[i].ingredient = Ingredients.get({id: $scope.recipe.ingredients[i].ingredient });
+        };
+        $scope.recipe.ingredients.push('');
+      });
+
+
+      $scope.units = Units.query();
+
+      $scope.onTypeaheadSelect = function ($item, $model, $label) {
+        if(!$scope.recipe.ingredients.filter(function(n){ return n == '' }).length) {
+          $scope.recipe.ingredients.push('');
+        }
+      };
+
+      $scope.GetIngredients = function($viewValue){
+        return Ingredients.query({'name.de': $viewValue})
+          .$promise.then(function(response) {
+            return response;
+          });
+      }
 
       $scope.update = function(){
+        $scope.recipe.ingredients = $scope.recipe.ingredients.filter(function(n){ return n != ''});
+        for(i=0;i<$scope.recipe.ingredients.length;i++){
+          $scope.recipe.ingredients[i].ingredient = $scope.recipe.ingredients[i].ingredient._id;
+        }
         Recipes.update({id: $scope.recipe._id}, $scope.recipe, function(){
           $location.url('/recipes/');
         });
@@ -243,13 +254,35 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
     }])
 
 
-    .controller('RecipeAddCtrl', ['$scope', '$routeParams', 'Recipes', '$location', function ($scope, $routeParams, Recipes, $location) {
+    .controller('RecipeAddCtrl', ['$scope', '$routeParams', 'Recipes', 'Ingredients', 'Units', '$location', function ($scope, $routeParams, Recipes, Ingredients, Units, $location) {
+
+      $scope.units = Units.query();
+
+      $scope.recipe = new Recipes();
+      $scope.recipe.ingredients = [];
+      $scope.recipe.ingredients.push('');
+
+      $scope.onTypeaheadSelect = function ($item, $model, $label) {
+        if(!$scope.recipe.ingredients.filter(function(n){ return n == '' }).length) {
+          $scope.recipe.ingredients.push('');
+        }
+      };
+
+      $scope.GetIngredients = function($viewValue){
+        return Ingredients.query({'name.de': $viewValue})
+        .$promise.then(function(response) {
+          return response;
+        });
+      };
+
 
       $scope.save = function(){
-        if(!$scope.newrecipe || $scope.newrecipe.length < 1) return;
-        var recipe = new Recipes({ name: $scope.newrecipe.name });
-
-        recipe.$save(function(){
+        if(!$scope.recipe || $scope.recipe.length < 1) return;
+        $scope.recipe.ingredients = $scope.recipe.ingredients.filter(function(n){ return n != ''});
+        for(i=0;i<$scope.recipe.ingredients.length;i++){
+          $scope.recipe.ingredients[i].ingredient = $scope.recipe.ingredients[i].ingredient._id;
+        }
+        $scope.recipe.$save(function(){
           $location.url('/recipes/');
         });
       }
