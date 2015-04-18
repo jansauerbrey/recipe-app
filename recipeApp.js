@@ -1,17 +1,21 @@
 var express = require('express');
 var path = require('path');
-var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var main = require('./routes/index');
+var auth = require('./auth/auth');
+
+var admin = require('./routes/admin');
+var user = require('./routes/user');
 var units = require('./routes/units');
 var ingredients = require('./routes/ingredients');
 var recipes = require('./routes/recipes');
 var tags = require('./routes/tags');
 var schedules = require('./routes/schedules');
 var shopitems = require('./routes/shopitems');
+
+var PORT = 3000;
 
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/recipeApp', function(err) {
@@ -23,6 +27,7 @@ mongoose.connect('mongodb://localhost/recipeApp', function(err) {
 });
 mongoose.set('debug', true)
 
+
 var app = express();
 
 // view engine setup
@@ -30,14 +35,19 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 // uncomment after placing your favicon in /public
-//app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', main);
+
+app.get('/', function(req, res, next) {
+  res.render('index', { title: 'Recipe App' });
+});
+
+app.use('/api/admin', admin);
+app.use('/api/user', user);
 app.use('/api/units', units);
 app.use('/api/ingredients', ingredients);
 app.use('/api/recipes', recipes);
@@ -87,11 +97,10 @@ var debug = require('debug')('recipeApp:server');
 var http = require('http');
 
 /**
- * Get port from environment and store in Express.
+ * Get port and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
-app.set('port', port);
+app.set('port', PORT);
 
 /**
  * Create HTTP server.
@@ -103,29 +112,9 @@ var server = http.createServer(app);
  * Listen on provided port, on all network interfaces.
  */
 
-server.listen(port);
+server.listen(PORT);
 server.on('error', onError);
 server.on('listening', onListening);
-
-/**
- * Normalize a port into a number, string, or false.
- */
-
-function normalizePort(val) {
-  var port = parseInt(val, 10);
-
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
-
-  if (port >= 0) {
-    // port number
-    return port;
-  }
-
-  return false;
-}
 
 /**
  * Event listener for HTTP server "error" event.
@@ -136,9 +125,9 @@ function onError(error) {
     throw error;
   }
 
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
+  var bind = typeof PORT === 'string'
+    ? 'Pipe ' + PORT
+    : 'Port ' + PORT;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
@@ -163,6 +152,6 @@ function onListening() {
   var addr = server.address();
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr
-    : 'port ' + addr.port;
+    : 'port ' + addr.PORT;
   debug('Listening on ' + bind);
 }

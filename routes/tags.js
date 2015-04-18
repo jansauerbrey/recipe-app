@@ -4,8 +4,10 @@ var router = express.Router();
 var mongoose = require('mongoose');
 var Tag = require('../models/Tag.js');
 
+var auth = require('../auth/auth.js');
+
 /* GET /tags listing. */
-router.get('/', function(req, res, next) {
+router.get('/', auth.verify, function(req, res, next) {
   Tag.find(function (err, tags) {
     if (err) return next(err);
     res.json(tags);
@@ -13,7 +15,7 @@ router.get('/', function(req, res, next) {
 });
 
 /* POST /tags */
-router.post('/', function(req, res, next) {
+router.post('/', auth.verify, function(req, res, next) {
   Tag.create(req.body, function (err, post) {
     if (err) return next(err);
     res.json(post);
@@ -21,7 +23,7 @@ router.post('/', function(req, res, next) {
 });
 
 /* GET /tags/id */
-router.get('/:id', function(req, res, next) {
+router.get('/:id', auth.verify, function(req, res, next) {
   Tag.findById(req.params.id, function (err, post) {
     if (err) return next(err);
     res.json(post);
@@ -29,7 +31,7 @@ router.get('/:id', function(req, res, next) {
 });
 
 /* PUT /tags/:id */
-router.put('/:id', function(req, res, next) {
+router.put('/:id', auth.verify, function(req, res, next) {
   Tag.findByIdAndUpdate(req.params.id, req.body, function (err, post) {
     if (err) return next(err);
     res.json(post);
@@ -37,7 +39,7 @@ router.put('/:id', function(req, res, next) {
 });
 
 /* DELETE /tags/:id */
-router.delete('/:id', function(req, res, next) {
+router.delete('/:id', auth.verify, function(req, res, next) {
   Tag.findByIdAndRemove(req.params.id, req.body, function (err, post) {
     if (err) return next(err);
     res.json(post);

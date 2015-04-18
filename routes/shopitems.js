@@ -4,8 +4,10 @@ var router = express.Router();
 var mongoose = require('mongoose');
 var Shopitem = require('../models/Shopitem.js');
 
+var auth = require('../auth/auth.js');
+
 /* GET /shopitems listing. */
-router.get('/', function(req, res, next) {
+router.get('/', auth.verify, function(req, res, next) {
   Shopitem.find(function (err, shopitems) {
     if (err) return next(err);
     res.json(shopitems);
@@ -13,7 +15,7 @@ router.get('/', function(req, res, next) {
 });
 
 /* POST /shopitems */
-router.post('/', function(req, res, next) {
+router.post('/', auth.verify, function(req, res, next) {
   Shopitem.create(req.body, function (err, post) {
     if (err) return next(err);
     res.json(post);
@@ -21,7 +23,7 @@ router.post('/', function(req, res, next) {
 });
 
 /* GET /shopitems/id */
-router.get('/:id', function(req, res, next) {
+router.get('/:id', auth.verify, function(req, res, next) {
   Shopitem.findById(req.params.id, function (err, post) {
     if (err) return next(err);
     res.json(post);
@@ -29,7 +31,7 @@ router.get('/:id', function(req, res, next) {
 });
 
 /* PUT /shopitems/:id */
-router.put('/:id', function(req, res, next) {
+router.put('/:id', auth.verify, function(req, res, next) {
   Shopitem.findByIdAndUpdate(req.params.id, req.body, function (err, post) {
     if (err) return next(err);
     res.json(post);
@@ -37,7 +39,7 @@ router.put('/:id', function(req, res, next) {
 });
 
 /* DELETE /shopitems/:id */
-router.delete('/:id', function(req, res, next) {
+router.delete('/:id', auth.verify, function(req, res, next) {
   Shopitem.findByIdAndRemove(req.params.id, req.body, function (err, post) {
     if (err) return next(err);
     res.json(post);

@@ -4,8 +4,10 @@ var router = express.Router();
 var mongoose = require('mongoose');
 var Ingredient = require('../models/Ingredient.js');
 
+var auth = require('../auth/auth.js');
+
 /* GET /ingredients listing. */
-router.get('/', function(req, res, next) {
+router.get('/', auth.verify, function(req, res, next) {
   Ingredient.find(req.query, function (err, ingredients) {
     if (err) return next(err);
     res.json(ingredients);
@@ -13,7 +15,7 @@ router.get('/', function(req, res, next) {
 });
 
 /* POST /ingredients */
-router.post('/', function(req, res, next) {
+router.post('/', auth.verify, function(req, res, next) {
   Ingredient.create(req.body, function (err, post) {
     if (err) return next(err);
     res.json(post);
@@ -21,7 +23,7 @@ router.post('/', function(req, res, next) {
 });
 
 /* GET /ingredients/:id */
-router.get('/:id', function(req, res, next) {
+router.get('/:id', auth.verify, function(req, res, next) {
   Ingredient.findById(req.params.id, function (err, post) {
     if (err) return next(err);
     res.json(post);
@@ -29,7 +31,7 @@ router.get('/:id', function(req, res, next) {
 });
 
 /* PUT /ingredients/:id */
-router.put('/:id', function(req, res, next) {
+router.put('/:id', auth.verify, function(req, res, next) {
   Ingredient.findByIdAndUpdate(req.params.id, req.body, function (err, post) {
     if (err) return next(err);
     res.json(post);
@@ -37,7 +39,7 @@ router.put('/:id', function(req, res, next) {
 });
 
 /* DELETE /ingredients/:id */
-router.delete('/:id', function(req, res, next) {
+router.delete('/:id', auth.verify, function(req, res, next) {
   Ingredient.findByIdAndRemove(req.params.id, req.body, function (err, post) {
     if (err) return next(err);
     res.json(post);

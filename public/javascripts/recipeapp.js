@@ -4,23 +4,102 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
 // Services
 //---------------
 
-        .factory('routeNavigation', function($route, $location) {
-          var routes = [];
-          angular.forEach($route.routes, function (route, path) {
-            if (route.name) {
-              routes.push({
-                path: path,
-                name: route.name
-              });
+
+// Auth
+
+    .factory('AuthenticationService', function() {
+        var auth = {
+            isAuthenticated: false,
+            isAdmin: false
+        }
+        return auth;
+    })
+
+    .factory('UserService', function($http) {
+        return {
+            logIn: function(username, password) {
+                return $http.post('/api/user/login', {username: username, password: password});
+            },
+
+            logOut: function() {
+                return $http.get('/api/user/logout');
+            },
+
+            register: function(username, password, passwordConfirmation) {
+                return $http.post('/api/user/register', {username: username, password: password, passwordConfirmation: passwordConfirmation });
             }
-          });
-          return {
+
+        }
+    })
+
+
+    .factory('TokenInterceptor', function ($q, $window, $location, AuthenticationService) {
+        return {
+            request: function (config) {
+                config.headers = config.headers || {};
+                if ($window.sessionStorage.token) {
+                    config.headers.Authorization = 'AUTH ' + $window.sessionStorage.token;
+                }
+                return config;
+            },
+
+            requestError: function(rejection) {
+                return $q.reject(rejection);
+            },
+
+            /* Set Authentication.isAuthenticated to true if 200 received */
+            response: function (response) {
+                if (response != null && response.status == 200 && $window.sessionStorage.token && !AuthenticationService.isAuthenticated) {
+                    AuthenticationService.isAuthenticated = true;
+                }
+                return response || $q.when(response);
+            },
+
+            /* Revoke client authentication if 401 is received */
+            responseError: function(rejection) {
+                if (rejection != null && rejection.status === 401 && ($window.sessionStorage.token || AuthenticationService.isAuthenticated)) {
+                    delete $window.sessionStorage.token;
+                    AuthenticationService.isAuthenticated = false;
+                    AuthenticationService.isAdmin = false;
+                    $location.path("/user/login");
+                }
+
+                return $q.reject(rejection);
+            }
+        };
+    })
+
+// Navigation
+
+    .factory('routeNavigation', function($route, $location, AuthenticationService) {
+        var routes = [];
+        angular.forEach($route.routes, function (route, path) {
+            if (route.name) {
+		var requiredAdmin = (route.access.requiredAdmin === true) ? true : false;
+                routes.push({
+                    path: path,
+                    name: route.name,
+                    requiredAuthentication: route.access.requiredAuthentication,
+                    requiredAdmin: requiredAdmin
+                });
+            }
+        });
+        return {
             routes: routes,
             activeRoute: function (route) {
-              return route.path === $location.path();
+                return route.path === $location.path();
+            },
+            hiddenRoute: function (route) {
+		if (route.requiredAdmin === false) {
+                    return (AuthenticationService.isAuthenticated !== route.requiredAuthentication);
+                }
+                else if (route.requiredAdmin === true && AuthenticationService.isAdmin === true && AuthenticationService.isAuthenticated === true) {
+                    return false;
+                }
+                else return true;
             }
-          };
-        })
+        };
+    })
 
         .factory('Units', ['$resource', function($resource){
           return $resource('/api/units/:id', null, {
@@ -40,13 +119,100 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
           });
         }])
 
+        .factory('Users', ['$resource', function($resource){
+          return $resource('/api/admin/user/:id', null, {
+            'update': { method:'PUT' }
+          });
+        }])
+
 //---------------
 // Controllers
 //---------------
 
 
+// Auth
+
+    .controller('UserCtrl', ['$scope', '$location', '$window', 'UserService', 'AuthenticationService',
+        function UserCtrl($scope, $location, $window, UserService, AuthenticationService) {
+ 
+        //Admin User Controller (login, logout, register)
+        $scope.logIn = function logIn(username, password) {
+            if (username !== undefined && password !== undefined) {
+ 
+                UserService.logIn(username, password).success(function(data) {
+                    AuthenticationService.isAuthenticated = true;
+                    AuthenticationService.isAdmin = data.is_admin;
+                    $window.sessionStorage.token = data.token;
+                    $location.path("/");
+                }).error(function(status, data) {
+                    console.log(status);
+                    console.log(data);
+                    $location.path("/user/register");
+                });
+            }
+        }
+ 
+        $scope.register = function register(username, password, passwordConfirm) {
+            if (AuthenticationService.isAuthenticated) {
+                $location.path("/");
+            }
+            else {
+                UserService.register(username, password, passwordConfirm).success(function(data) {
+                    $location.path("/");
+                }).error(function(status, data) {
+                    console.log(status);
+                    console.log(data);
+                });
+            }
+        }
+
+    }])
+
+
+
+    .controller('UserLogout', ['$scope', '$location', '$window', 'UserService', 'AuthenticationService',
+        function UserLogout($scope, $location, $window, UserService, AuthenticationService) {
+ 
+        //Admin User Controller (logout)
+        if (AuthenticationService.isAuthenticated) {
+            UserService.logOut().success(function(data) {
+                AuthenticationService.isAuthenticated = false;
+                delete $window.sessionStorage.token;
+            }).error(function(status, data) {
+                console.log(status);
+                console.log(data);
+            });
+        }
+        else {
+            $location.path("/user/login");
+        }
+    }])
+
+
+// Start Page
+
+
     .controller('StartpageController', ['$scope', function ($scope) {
     }])
+
+
+// Admin
+
+    .controller('AdminUserCtrl', ['$scope', 'Users', function ($scope, Users) {
+      $scope.loading = true;
+      $scope.users = Users.query(function(response) {
+        $scope.loading = false;
+      });
+
+      $scope.remove = function(index){
+        var user = $scope.users[index];
+        Users.remove({id: user._id}, function(){
+          $scope.users.splice(index, 1);
+        });
+      }
+
+    }])
+
 
 // Units
 
@@ -303,11 +469,21 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
           $scope.hideMobileNav = true;
           $scope.routes = routeNavigation.routes;
           $scope.activeRoute = routeNavigation.activeRoute;
+          $scope.hiddenRoute = routeNavigation.hiddenRoute;
         }
       };
     })
 
   
+//---------------
+// Token Interceptor
+//---------------
+
+   .config(function ($httpProvider) {
+       $httpProvider.interceptors.push('TokenInterceptor');
+   })
+
+
 //---------------
 // Routes
 //---------------
@@ -317,56 +493,109 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
       .when('/', {
         templateUrl: 'startpage.tpl.html',
         controller: 'StartpageController',
+        access: { requiredAuthentication: true }
       })
 
       .when('/units/', {
         templateUrl: 'units.tpl.html',
         controller: 'UnitsController',
-        name: 'Units'
+        name: 'Units',
+        access: { requiredAuthentication: true }
       })
     
       .when('/units/:id', {
         templateUrl: 'unitdetails.tpl.html',
-        controller: 'UnitDetailCtrl'
+        controller: 'UnitDetailCtrl',
+        access: { requiredAuthentication: true }
      })
 
       .when('/unitadd', {
         templateUrl: 'unitadd.tpl.html',
-        controller: 'UnitAddCtrl'
+        controller: 'UnitAddCtrl',
+        access: { requiredAuthentication: true }
       })
 
 
       .when('/ingredients/', {
         templateUrl: 'ingredients.tpl.html',
         controller: 'IngredientsController',
-        name: 'Ingredients'
+        name: 'Ingredients',
+        access: { requiredAuthentication: true }
       })
     
       .when('/ingredients/:id', {
         templateUrl: 'ingredientdetails.tpl.html',
-        controller: 'IngredientDetailCtrl'
+        controller: 'IngredientDetailCtrl',
+        access: { requiredAuthentication: true }
      })
 
       .when('/ingredientadd', {
         templateUrl: 'ingredientadd.tpl.html',
-        controller: 'IngredientAddCtrl'
+        controller: 'IngredientAddCtrl',
+        access: { requiredAuthentication: true }
       })
 
 
       .when('/recipes/', {
         templateUrl: 'recipes.tpl.html',
         controller: 'RecipesController',
-        name: 'Recipes'
+        name: 'Recipes',
+        access: { requiredAuthentication: true }
       })
     
       .when('/recipes/:id', {
         templateUrl: 'recipedetails.tpl.html',
-        controller: 'RecipeDetailCtrl'
+        controller: 'RecipeDetailCtrl',
+        access: { requiredAuthentication: true }
      })
 
       .when('/recipeadd', {
         templateUrl: 'recipeadd.tpl.html',
-        controller: 'RecipeAddCtrl'
+        controller: 'RecipeAddCtrl',
+        access: { requiredAuthentication: true }
       })
+
+      .when('/admin/user', {
+        templateUrl: 'admin.user.tpl.html',
+        controller: 'AdminUserCtrl',
+        name: 'Admin',
+        access: { requiredAuthentication: true,
+                  requiredAdmin: true }
+      })
+
+      .when('/user/register', {
+        templateUrl: 'register.tpl.html',
+        controller: 'UserCtrl',
+        name: 'Register',
+        access: { requiredAuthentication: false }
+      })
+
+      .when('/user/login', {
+        templateUrl: 'login.tpl.html',
+        controller: 'UserCtrl',
+        name: 'Login',
+        access: { requiredAuthentication: false }
+      })
+
+      .when('/user/logout', {
+        templateUrl: 'logout.tpl.html',
+        controller: 'UserLogout',
+        name: 'Logout',
+        access: { requiredAuthentication: true }
+      })
+
     ;
-  }]);
+  }])
+
+    .run(function($rootScope, $location, $window, AuthenticationService) {
+        $rootScope.$on("$routeChangeStart", function(event, nextRoute, currentRoute) {
+            //redirect only if both isAuthenticated is false and no token is set
+            if (nextRoute != null && nextRoute.access != null && nextRoute.access.requiredAuthentication 
+                && !AuthenticationService.isAuthenticated && !$window.sessionStorage.token) {
+
+                $location.path("/user/login");
+            }
+        });
+    })
+
+;
