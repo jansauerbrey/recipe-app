@@ -7,7 +7,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
 
 // Auth
 
-    .factory('AuthenticationService', function() {
+    .factory('AuthenticationService', function($window) {
         var auth = {
             isAuthenticated: false,
             isAdmin: false
@@ -51,6 +51,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
             response: function (response) {
                 if (response != null && response.status == 200 && $window.sessionStorage.token && !AuthenticationService.isAuthenticated) {
                     AuthenticationService.isAuthenticated = true;
+                    $window.sessionStorage.isAuthenticated = true;
                 }
                 return response || $q.when(response);
             },
@@ -59,6 +60,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
             responseError: function(rejection) {
                 if (rejection != null && rejection.status === 401 && ($window.sessionStorage.token || AuthenticationService.isAuthenticated)) {
                     delete $window.sessionStorage.token;
+                    delete $window.sessionStorage.isAdmin;
+                    delete $window.sessionStorage.isAuthenticated;
                     AuthenticationService.isAuthenticated = false;
                     AuthenticationService.isAdmin = false;
                     $location.path("/user/login");
@@ -119,6 +122,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
           });
         }])
 
+        .factory('Schedules', ['$resource', function($resource){
+          return $resource('/api/schedules/:id', null, {
+            'update': { method:'PUT' }
+          });
+        }])
+
         .factory('Users', ['$resource', function($resource){
           return $resource('/api/admin/user/:id', null, {
             'update': { method:'PUT' }
@@ -142,6 +151,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
                 UserService.logIn(username, password).success(function(data) {
                     AuthenticationService.isAuthenticated = true;
                     AuthenticationService.isAdmin = data.is_admin;
+                    $window.sessionStorage.isAuthenticated = true;
+                    $window.sessionStorage.isAdmin = data.is_admin;
                     $window.sessionStorage.token = data.token;
                     $location.path("/");
                 }).error(function(status, data) {
@@ -198,16 +209,27 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
 
 // Admin
 
-    .controller('AdminUserCtrl', ['$scope', 'Users', function ($scope, Users) {
+    .controller('AdminUserCtrl', ['$scope', '$location', 'Users', function ($scope, $location, Users) {
       $scope.loading = true;
       $scope.users = Users.query(function(response) {
         $scope.loading = false;
       });
 
       $scope.remove = function(index){
-        var user = $scope.users[index];
-        Users.remove({id: user._id}, function(){
+        Users.remove({id: $scope.users[index]._id}, function(){
           $scope.users.splice(index, 1);
+        });
+      }
+
+      $scope.makeAdmin = function(index){
+        $scope.users[index].is_admin = true;
+        Users.update({id: $scope.users[index]._id}, {is_admin: true}, function(){
+        });
+      }
+
+      $scope.removeAdmin = function(index){
+        $scope.users[index].is_admin = false;
+        Users.update({id: $scope.users[index]._id}, {is_admin: false}, function(){
         });
       }
 
@@ -456,6 +478,42 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
     }])
 
 
+// Schedules
+
+    .controller('SchedulesController', ['$scope', 'Schedules', function ($scope, Schedules) {
+      $scope.editing = [];
+      $scope.loading = true;
+      $scope.schedules = Schedules.query(function(response) {
+        $scope.loading = false;
+      });
+
+      $scope.update = function(index){
+        var schedule = $scope.schedules[index];
+        Schedules.update({id: schedule._id}, schedule);
+        $scope.editing[index] = false;
+      }
+
+      $scope.edit = function(index){
+        $scope.editing[index] = angular.copy($scope.schedules[index]);
+      }
+
+      $scope.cancel = function(index){
+        $scope.schedules[index] = angular.copy($scope.editing[index]);
+        $scope.editing[index] = false;
+      }
+
+      $scope.remove = function(index){
+        var schedule = $scope.schedules[index];
+        Schedules.remove({id: schedule._id}, function(){
+          $scope.schedules.splice(index, 1);
+        });
+      }
+
+    }])
+
+
+
+
 //---------------
 // Directives
 //---------------
@@ -552,6 +610,19 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
       .when('/recipeadd', {
         templateUrl: 'recipeadd.tpl.html',
         controller: 'RecipeAddCtrl',
+        access: { requiredAuthentication: true }
+      })
+
+      .when('/schedules/', {
+        templateUrl: 'schedules.tpl.html',
+        controller: 'SchedulesController',
+        name: 'Schedules',
+        access: { requiredAuthentication: true }
+      })
+    
+      .when('/scheduleadd', {
+        templateUrl: 'scheduleadd.tpl.html',
+        controller: 'ScheduleAddCtrl',
         access: { requiredAuthentication: true }
       })
 

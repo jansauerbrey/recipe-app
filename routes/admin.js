@@ -15,25 +15,28 @@ router.get('/user', auth.verifyAdmin, function(req, res, next) {
 });
 
 /* GET /user/id */
-router.get('/user/:id', auth.verify, function(req, res, next) {
+router.get('/user/:id', auth.verifyAdmin, function(req, res, next) {
   User.findById(req.params.id, function (err, user) {
     if (err) return next(err);
+    user.password = null;
     res.json(user);
   });
 });
 
 /* PUT /user/:id */
-router.put('/user/:id', auth.verify, function(req, res, next) {
+router.put('/user/:id', auth.verifyAdmin, function(req, res, next) {
   User.findByIdAndUpdate(req.params.id, req.body, function (err, user) {
     if (err) return next(err);
+    user.password = null;
     res.json(user);
   });
 });
 
 /* DELETE /user/:id */
-router.delete('/user/:id', auth.verify, function(req, res, next) {
+router.delete('/user/:id', auth.verifyAdmin, function(req, res, next) {
   User.findByIdAndRemove(req.params.id, req.body, function (err, user) {
     if (err) return next(err);
+    user.password = null;
     res.json(user);
   });
 });

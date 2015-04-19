@@ -8,7 +8,7 @@ var auth = require('../auth/auth.js');
 
 /* GET /schedules listing. */
 router.get('/', auth.verify, function(req, res, next) {
-  Schedule.find(function (err, schedules) {
+  Schedule.find({author: req._user._id}, function (err, schedules) {
     if (err) return next(err);
     res.json(schedules);
   });
@@ -16,33 +16,33 @@ router.get('/', auth.verify, function(req, res, next) {
 
 /* POST /schedules */
 router.post('/', auth.verify, function(req, res, next) {
-  Schedule.create(req.body, function (err, post) {
+  Schedule.create(req.body, function (err, schedule) {
     if (err) return next(err);
-    res.json(post);
+    res.json(schedule);
   });
 });
 
 /* GET /schedules/id */
 router.get('/:id', auth.verify, function(req, res, next) {
-  Schedule.findById(req.params.id, function (err, post) {
+  Schedule.findById(req.params.id, function (err, schedule) {
     if (err) return next(err);
-    res.json(post);
+    res.json(schedule);
   });
 });
 
 /* PUT /schedules/:id */
 router.put('/:id', auth.verify, function(req, res, next) {
-  Schedule.findByIdAndUpdate(req.params.id, req.body, function (err, post) {
+  Schedule.findByIdAndUpdate(req.params.id, req.body, function (err, schedule) {
     if (err) return next(err);
-    res.json(post);
+    res.json(schedule);
   });
 });
 
 /* DELETE /schedules/:id */
 router.delete('/:id', auth.verify, function(req, res, next) {
-  Schedule.findByIdAndRemove(req.params.id, req.body, function (err, post) {
+  Schedule.findByIdAndRemove(req.params.id, req.body, function (err, schedule) {
     if (err) return next(err);
-    res.json(post);
+    res.json(schedule);
   });
 });
 
