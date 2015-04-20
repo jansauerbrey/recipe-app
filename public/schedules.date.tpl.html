@@ -3,14 +3,14 @@
       <div ng-repeat="schedule in schedules">
         <table class="table table-striped">
           <thead>
-            <th>#</th>
+            <th class="hidden-xs">#</th>
             <th>Person</th>
             <th>Recipe</th>
             <th>Actions</th>
           </thead>
           <tbody>
             <tr ng-repeat="recipe in schedule.recipes">
-              <th>
+              <th class="hidden-xs">
                 {{$index+1}}
               </th>
               <td>
