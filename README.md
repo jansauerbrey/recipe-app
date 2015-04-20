@@ -1,5 +1,7 @@
 # RecipeApp
 
+The intention of this app is to have a recipe database and a planning tool at the same time. A week in advance can be planned and a shopping list is created. Recipes show up on the corresponding days and number of persons are incorporated into the shopping list and recipes. In addition due to personal reasons the database supports three languages for the same ingredient (english, german and finnish).
+
 ## Features
 
 - [x] Create, Edit and Delete Units
