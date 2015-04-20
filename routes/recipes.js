@@ -8,7 +8,7 @@ var auth = require('../auth/auth.js');
 
 /* GET /recipes listing. */
 router.get('/', auth.verify, function(req, res, next) {
-  Recipe.find(function (err, recipes) {
+  Recipe.find(req.query, function (err, recipes) {
     if (err) return next(err);
     res.json(recipes);
   });

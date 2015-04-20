@@ -480,38 +480,63 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
 
 // Schedules
 
-    .controller('SchedulesController', ['$scope', 'Schedules', function ($scope, Schedules) {
-      $scope.editing = [];
+    .controller('SchedulesController', ['$scope', '$routeParams', 'Schedules', 'Recipes', function ($scope, $routeParams, Schedules, Recipes) {
+      if (!$routeParams.date) {
+        $scope.startDate = new Date();
+        $scope.endDate = new Date();
+        $scope.endDate.setDate($scope.startDate.getDate() + 7);
+      }
+      else {
+        $scope.startDate = new Date($routeParams.date);
+        $scope.endDate = new Date();
+        $scope.endDate.setDate($scope.startDate.getDate() + 1);
+      }
+      // remove hours
+      $scope.startDate.setHours(0, 0, 0, 0);
+      $scope.endDate.setHours(0, 0, 0, 0);
       $scope.loading = true;
-      $scope.schedules = Schedules.query(function(response) {
-        $scope.loading = false;
-      });
+      
 
-      $scope.update = function(index){
-        var schedule = $scope.schedules[index];
-        Schedules.update({id: schedule._id}, schedule);
-        $scope.editing[index] = false;
+      $scope.updateSchedules = function(startDate, endDate){
+        schedules = [];
+        while(startDate < endDate) {
+          var nextStartDate = new Date(startDate);
+          nextStartDate.setDate(nextStartDate.getDate() + 1);
+          schedules.push({date: startDate, recipes: Schedules.query({startDate: startDate, endDate: nextStartDate})});
+          startDate = nextStartDate;
+        }
+        return schedules;
+      }
+      
+      $scope.schedules = $scope.updateSchedules($scope.startDate, $scope.endDate);
+
+      $scope.GetRecipes = function($viewValue){
+        return Recipes.query({name: $viewValue})
+          .$promise.then(function(response) {
+            return response;
+          });
       }
 
-      $scope.edit = function(index){
-        $scope.editing[index] = angular.copy($scope.schedules[index]);
-      }
-
-      $scope.cancel = function(index){
-        $scope.schedules[index] = angular.copy($scope.editing[index]);
-        $scope.editing[index] = false;
-      }
-
-      $scope.remove = function(index){
-        var schedule = $scope.schedules[index];
-        Schedules.remove({id: schedule._id}, function(){
-          $scope.schedules.splice(index, 1);
+      $scope.addRecipe = function(){
+        if(!$scope.newrecipe || $scope.newrecipe.length < 1) return;
+        if(!$scope.newfactor || $scope.newfactor.length < 1){
+          $scope.newfactor = $scope.newrecipe.yield;
+        };
+        var addedRecipe = new Schedules({date: $scope.startDate.setHours(12), recipe_id: $scope.newrecipe.recipe_id, name: $scope.newrecipe.name, factor: $scope.newfactor});
+        addedRecipe.$save(function(response){
+          $scope.schedules[0].recipes.push(response);
+          $scope.newrecipe = null;
         });
       }
 
+      $scope.remove = function(index){
+        Schedules.remove({id: $scope.schedules[0].recipes[index]._id}, function(){
+          $scope.schedules[0].recipes.splice(index, 1);
+        });
+      }
+
+
     }])
-
-
 
 
 //---------------
@@ -617,6 +642,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
         templateUrl: 'schedules.tpl.html',
         controller: 'SchedulesController',
         name: 'Schedules',
+        access: { requiredAuthentication: true }
+      })
+
+      .when('/schedules/:date', {
+        templateUrl: 'schedules.date.tpl.html',
+        controller: 'SchedulesController',
         access: { requiredAuthentication: true }
       })
     

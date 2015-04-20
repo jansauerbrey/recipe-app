@@ -1,0 +1,41 @@
+  <div class="row">
+    <div class="list-group">
+      <div ng-repeat="schedule in schedules">
+        <table class="table table-striped">
+          <thead>
+            <th>#</th>
+            <th>Person</th>
+            <th>Recipe</th>
+            <th>Actions</th>
+          </thead>
+          <tbody>
+            <tr ng-repeat="recipe in schedule.recipes">
+              <th>
+                {{$index+1}}
+              </th>
+              <td>
+                {{recipe.factor}}
+              </td>
+              <td>
+                {{recipe.name}}
+              </td>
+              <td>
+                <a class="btn btn-primary btn-sm" ng-click="remove($index)" role="button"><i class="fa fa-trash-o"></i></a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="form-group">
+        <div class="col-xs-4 col-md-2" style="padding-left:0;">
+          <input type="number" ng-model="newfactor" class="form-control" placeholder="# Persons">
+        </div>
+        <div class="col-xs-6 col-md-7" style="padding-left:0;">
+          <input type="text" ng-model="newrecipe" typeahead="recipe as recipe.name for recipe in GetRecipes($viewValue)" typeahead-editable="false" class="form-control" placeholder="Add Recipe...">
+        </div>
+        <div class="col-xs-2 col-md-1" style="padding-left:0;">
+        <a class="btn btn-primary" ng-click="addRecipe()" role="button">add</a>
+        </div>
+      </div>
+    </div>
+  </div>
