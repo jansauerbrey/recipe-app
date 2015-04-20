@@ -484,12 +484,11 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
       if (!$routeParams.date) {
         $scope.startDate = new Date();
         $scope.endDate = new Date();
-        $scope.endDate.setDate($scope.startDate.getDate() + 7);
+        $scope.endDate.setDate($scope.startDate.getDate() + 6);
       }
       else {
         $scope.startDate = new Date($routeParams.date);
-        $scope.endDate = new Date();
-        $scope.endDate.setDate($scope.startDate.getDate() + 1);
+        $scope.endDate = new Date($routeParams.date);
       }
       // remove hours
       $scope.startDate.setHours(0, 0, 0, 0);
@@ -499,16 +498,15 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
 
       $scope.updateSchedules = function(startDate, endDate){
         schedules = [];
-        while(startDate < endDate) {
+        while(startDate <= endDate) {
           var nextStartDate = new Date(startDate);
           nextStartDate.setDate(nextStartDate.getDate() + 1);
           schedules.push({date: startDate, recipes: Schedules.query({startDate: startDate, endDate: nextStartDate})});
           startDate = nextStartDate;
         }
-        return schedules;
+        $scope.schedules = schedules;
       }
-      
-      $scope.schedules = $scope.updateSchedules($scope.startDate, $scope.endDate);
+      $scope.updateSchedules($scope.startDate, $scope.endDate);
 
       $scope.GetRecipes = function($viewValue){
         return Recipes.query({name: $viewValue})
@@ -535,6 +533,19 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
         });
       }
 
+      $scope.openStartDate = function($event) {
+        $event.preventDefault();
+        $event.stopPropagation();
+
+        $scope.startOpened = true;
+      };
+
+      $scope.openEndDate = function($event) {
+        $event.preventDefault();
+        $event.stopPropagation();
+
+        $scope.endOpened = true;
+      };
 
     }])
 
