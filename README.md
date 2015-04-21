@@ -8,7 +8,8 @@ The intention of this app is to have a recipe database and a planning tool at th
 - [x] Create, Edit and Delete Ingredients
 - [x] Create, Edit and Delete Recipes including linkage of Ingredients and Units
 - [ ] Fix TypeAHead function (only exact matches are found, no fuzzy search)
-- [ ] Fix mobile navigation autohide
+- [ ] Fix mobile navigation bar autohide
+- [ ] Fix ingredients in recipes (dispayed as Object at the moment)
 - [ ] Create, Edit and Delete Schedules
 - [ ] Autofill (random) recipes to schedules
 - [ ] Shopping list generation including checking if bought

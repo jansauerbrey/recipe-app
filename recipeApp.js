@@ -14,6 +14,7 @@ var recipes = require('./routes/recipes');
 var tags = require('./routes/tags');
 var schedules = require('./routes/schedules');
 var shopitems = require('./routes/shopitems');
+var typeahead = require('./routes/typeahead');
 
 var PORT = 3000;
 
@@ -54,6 +55,7 @@ app.use('/api/recipes', recipes);
 app.use('/api/tags', tags);
 app.use('/api/schedules', schedules);
 app.use('/api/shopitems', shopitems);
+app.use('/api/typeahead', typeahead);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

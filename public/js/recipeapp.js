@@ -116,6 +116,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
           });
         }])
 
+        .factory('TAIngredients', ['$resource', function($resource){
+          return $resource('/api/typeahead/ingredients/', null, {
+            'search': { method:'GET', isArray: true }
+          });
+        }])
+
         .factory('Recipes', ['$resource', function($resource){
           return $resource('/api/recipes/:id', null, {
             'update': { method:'PUT' }
@@ -423,6 +429,10 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
           });
       }
 
+      $scope.formatLabel = function($model) {
+        return $model ? ($model.name ? $model.name.de : '' ): '';
+      };
+
       $scope.update = function(){
         $scope.recipe.ingredients = $scope.recipe.ingredients.filter(function(n){ return n != ''});
         for(i=0;i<$scope.recipe.ingredients.length;i++){
@@ -442,7 +452,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
     }])
 
 
-    .controller('RecipeAddCtrl', ['$scope', '$routeParams', 'Recipes', 'Ingredients', 'Units', '$location', function ($scope, $routeParams, Recipes, Ingredients, Units, $location) {
+    .controller('RecipeAddCtrl', ['$scope', '$routeParams', 'Recipes', 'Ingredients', 'Units', '$location', 'TAIngredients', function ($scope, $routeParams, Recipes, Ingredients, Units, $location, TAIngredients) {
 
       $scope.units = Units.query();
 
@@ -457,7 +467,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
       };
 
       $scope.GetIngredients = function($viewValue){
-        return Ingredients.query({'name.de': $viewValue})
+        return TAIngredients.search({search: $viewValue})
         .$promise.then(function(response) {
           return response;
         });
@@ -558,7 +568,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
       return {
         restrict: "E",
         replace: true,
-        templateUrl: "navigation-directive.tpl.html",
+        templateUrl: "partials/navigation-directive.tpl.html",
         controller:  function ($scope) {
           $scope.hideMobileNav = true;
           $scope.routes = routeNavigation.routes;
@@ -568,7 +578,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
       };
     })
 
-  
 //---------------
 // Token Interceptor
 //---------------
@@ -585,91 +594,91 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
   .config(['$routeProvider', function ($routeProvider) {
     $routeProvider
       .when('/', {
-        templateUrl: 'startpage.tpl.html',
+        templateUrl: 'partials/startpage.tpl.html',
         controller: 'StartpageController',
         access: { requiredAuthentication: true }
       })
 
       .when('/units/', {
-        templateUrl: 'units.tpl.html',
+        templateUrl: 'partials/units.tpl.html',
         controller: 'UnitsController',
         name: 'Units',
         access: { requiredAuthentication: true }
       })
     
       .when('/units/:id', {
-        templateUrl: 'unitdetails.tpl.html',
+        templateUrl: 'partials/unitdetails.tpl.html',
         controller: 'UnitDetailCtrl',
         access: { requiredAuthentication: true }
      })
 
       .when('/unitadd', {
-        templateUrl: 'unitadd.tpl.html',
+        templateUrl: 'partials/unitadd.tpl.html',
         controller: 'UnitAddCtrl',
         access: { requiredAuthentication: true }
       })
 
 
       .when('/ingredients/', {
-        templateUrl: 'ingredients.tpl.html',
+        templateUrl: 'partials/ingredients.tpl.html',
         controller: 'IngredientsController',
         name: 'Ingredients',
         access: { requiredAuthentication: true }
       })
     
       .when('/ingredients/:id', {
-        templateUrl: 'ingredientdetails.tpl.html',
+        templateUrl: 'partials/ingredientdetails.tpl.html',
         controller: 'IngredientDetailCtrl',
         access: { requiredAuthentication: true }
      })
 
       .when('/ingredientadd', {
-        templateUrl: 'ingredientadd.tpl.html',
+        templateUrl: 'partials/ingredientadd.tpl.html',
         controller: 'IngredientAddCtrl',
         access: { requiredAuthentication: true }
       })
 
 
       .when('/recipes/', {
-        templateUrl: 'recipes.tpl.html',
+        templateUrl: 'partials/recipes.tpl.html',
         controller: 'RecipesController',
         name: 'Recipes',
         access: { requiredAuthentication: true }
       })
     
       .when('/recipes/:id', {
-        templateUrl: 'recipedetails.tpl.html',
+        templateUrl: 'partials/recipedetails.tpl.html',
         controller: 'RecipeDetailCtrl',
         access: { requiredAuthentication: true }
      })
 
       .when('/recipeadd', {
-        templateUrl: 'recipeadd.tpl.html',
+        templateUrl: 'partials/recipeadd.tpl.html',
         controller: 'RecipeAddCtrl',
         access: { requiredAuthentication: true }
       })
 
       .when('/schedules/', {
-        templateUrl: 'schedules.tpl.html',
+        templateUrl: 'partials/schedules.tpl.html',
         controller: 'SchedulesController',
         name: 'Schedules',
         access: { requiredAuthentication: true }
       })
 
       .when('/schedules/:date', {
-        templateUrl: 'schedules.date.tpl.html',
+        templateUrl: 'partials/schedules.date.tpl.html',
         controller: 'SchedulesController',
         access: { requiredAuthentication: true }
       })
     
       .when('/scheduleadd', {
-        templateUrl: 'scheduleadd.tpl.html',
+        templateUrl: 'partials/scheduleadd.tpl.html',
         controller: 'ScheduleAddCtrl',
         access: { requiredAuthentication: true }
       })
 
       .when('/admin/user', {
-        templateUrl: 'admin.user.tpl.html',
+        templateUrl: 'partials/admin.user.tpl.html',
         controller: 'AdminUserCtrl',
         name: 'Admin',
         access: { requiredAuthentication: true,
@@ -677,21 +686,21 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
       })
 
       .when('/user/register', {
-        templateUrl: 'register.tpl.html',
+        templateUrl: 'partials/register.tpl.html',
         controller: 'UserCtrl',
         name: 'Register',
         access: { requiredAuthentication: false }
       })
 
       .when('/user/login', {
-        templateUrl: 'login.tpl.html',
+        templateUrl: 'partials/login.tpl.html',
         controller: 'UserCtrl',
         name: 'Login',
         access: { requiredAuthentication: false }
       })
 
       .when('/user/logout', {
-        templateUrl: 'logout.tpl.html',
+        templateUrl: 'partials/logout.tpl.html',
         controller: 'UserLogout',
         name: 'Logout',
         access: { requiredAuthentication: true }
