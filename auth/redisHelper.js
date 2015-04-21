@@ -53,6 +53,21 @@ exports.getDataByToken = function(token, callback) {
 };
 
 /*
+* Renew a token by updating the entry in redis
+* callback(null, true) if successfuly updated
+*/
+exports.renewToken = function(token, ttl, callback) {
+	if (token == null) callback(new Error('Token is null'));
+
+	redisClient.expire(token, ttl, function(err, reply) {
+		if (err) callback(err);
+
+		if (reply) callback(null, true);
+		else callback(new Error('Token not found'));
+	});
+};
+
+/*
 * Expires a token by deleting the entry in redis
 * callback(null, true) if successfuly deleted
 */

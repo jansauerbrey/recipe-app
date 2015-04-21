@@ -1,6 +1,6 @@
 var redisHelper = require('./redisHelper');
 var tokenHelper = require('./tokenHelper');
-var TIME_TO_LIVE = 60*60*24; //24 hours
+var TIME_TO_LIVE = 60*60; //1 hour
 
 
 /*
@@ -21,9 +21,15 @@ exports.verify = function(req, res, next) {
 	//Verify it in redis, set data in req._user
 	redisHelper.getDataByToken(token, function(err, data) {
 		if (err) return res.sendStatus(401);
-
+                try {
+			redisHelper.renewToken(token, TIME_TO_LIVE, function(err, success){
+				return (err, success);
+			});
+		} catch (err) {
+			console.log(err);
+			return res.sendStatus(401);
+		}
 		req._user = data;
-
 		next();
 	});
 };
@@ -46,13 +52,22 @@ exports.verifyAdmin = function(req, res, next) {
 	//Verify it in redis, set data in req._user
 	redisHelper.getDataByToken(token, function(err, data) {
 		if (err) return res.sendStatus(401);
+
 		if (data.is_admin) {
+		        try {
+				redisHelper.renewToken(token, TIME_TO_LIVE, function(err, success){
+					return (err, success);
+				});
+			} catch (err) {
+				console.log(err);
+				return res.sendStatus(401);
+			}
 			req._user = data;
+			next();
 		}
 		else {
 			return res.sendStatus(401);
 		}
-		next();
 	});
 };
 
