@@ -1,14 +1,21 @@
-  <div class="row">
+<div class="row">
+  <div class="col-xs-12">
     <input type="text" ng-model="search.name" class="form-control" placeholder="Search...">
+    <div class="col-xs-12">
+      <h4 class="col-sm-12 hidden-xs">Recipes:</h4>     
+    </div>
     <div ng-show="loading" class="text-center"><i class="fa fa-spinner fa-spin fa-3x"></i></div>
     <div class="list-group">
       <div ng-repeat="recipe in recipes | filter: search">
-        <a class="list-group-item container" href="#/recipes/{{recipe._id}}">
-          <div class="col-sm-4 col-xs-12">{{recipe.name}}</div>
+        <a class="list-group-item col-xs-12" href="#/recipes/{{recipe._id}}">
+          <div class="col-xs-12">{{recipe.name}}</div>
         </a>
       </div>
     </div>
+  </div>
+  <div class="col-xs-12" style="margin-top:15px;">
     <div class="form-inline form-group">
       <a class="btn btn-primary" href="/#/recipeadd/" role="button">add</a>
     </div>
   </div>
+</div>

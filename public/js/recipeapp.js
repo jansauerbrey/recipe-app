@@ -128,6 +128,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
           });
         }])
 
+        .factory('TARecipes', ['$resource', function($resource){
+          return $resource('/api/typeahead/recipes/', null, {
+            'search': { method:'GET', isArray: true }
+          });
+        }])
+
         .factory('Schedules', ['$resource', function($resource){
           return $resource('/api/schedules/:id', null, {
             'update': { method:'PUT' }
@@ -276,7 +282,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
     }])
 
     .controller('UnitDetailCtrl', ['$scope', '$routeParams', 'Units', '$location', function ($scope, $routeParams, Units, $location) {
-      $scope.unit = Units.get({id: $routeParams.id });
+      if (!$routeParams.id) {}
+      else $scope.unit = Units.get({id: $routeParams.id });
 
       $scope.update = function(){
         Units.update({id: $scope.unit._id}, $scope.unit, function(){
@@ -290,11 +297,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
         });
       }
 
-    }])
-
-
-    .controller('UnitAddCtrl', ['$scope', '$routeParams', 'Units', '$location', function ($scope, $routeParams, Units, $location) {
-
       $scope.save = function(){
         if(!$scope.newunit || $scope.newunit.length < 1) return;
         var unit = new Units({ name: { en: $scope.newunit.name.en, de: $scope.newunit.name.de,  fi: $scope.newunit.name.fi} });
@@ -305,7 +307,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
       }
 
     }])
-
 
 // Ingredients
 
@@ -341,7 +342,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
     }])
 
     .controller('IngredientDetailCtrl', ['$scope', '$routeParams', 'Ingredients', '$location', function ($scope, $routeParams, Ingredients, $location) {
-      $scope.ingredient = Ingredients.get({id: $routeParams.id });
+      if (!$routeParams.id) {}
+      else $scope.ingredient = Ingredients.get({id: $routeParams.id });
 
       $scope.update = function(){
         Ingredients.update({id: $scope.ingredient._id}, $scope.ingredient, function(){
@@ -354,11 +356,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
           $location.url('/ingredients/');
         });
       }
-
-    }])
-
-
-    .controller('IngredientAddCtrl', ['$scope', '$routeParams', 'Ingredients', '$location', function ($scope, $routeParams, Ingredients, $location) {
 
       $scope.save = function(){
         if(!$scope.newingredient || $scope.newingredient.length < 1) return;
@@ -405,14 +402,22 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
 
     }])
 
-    .controller('RecipeDetailCtrl', ['$scope', '$routeParams', 'Recipes', 'Ingredients', 'Units', '$location', function ($scope, $routeParams, Recipes, Ingredients, Units, $location) {
-      $scope.recipe = Recipes.get({id: $routeParams.id }, function(response) {
-        for(i=0;i<$scope.recipe.ingredients.length;i++){
-          $scope.recipe.ingredients[i].ingredient = Ingredients.get({id: $scope.recipe.ingredients[i].ingredient });
-        };
+    .controller('RecipeDetailCtrl', ['$scope', '$routeParams', 'Recipes', 'Ingredients', 'Units', '$location', 'TAIngredients', function ($scope, $routeParams, Recipes, Ingredients, Units, $location, TAIngredients) {
+      if (!$routeParams.id) {
+        $scope.recipe = new Recipes();
+        $scope.recipe.ingredients = [];
         $scope.recipe.ingredients.push('');
-      });
-
+      } else {
+        $scope.recipe = Recipes.get({id: $routeParams.id }, function(response) {
+          for(i=0;i<$scope.recipe.ingredients.length;i++){
+            if (!$scope.recipe.ingredients[i].ingredient) {
+              
+            }
+            else $scope.recipe.ingredients[i].ingredient = Ingredients.get({id: $scope.recipe.ingredients[i].ingredient });
+          };
+          $scope.recipe.ingredients.push('');
+        });
+      }
 
       $scope.units = Units.query();
 
@@ -423,20 +428,19 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
       };
 
       $scope.GetIngredients = function($viewValue){
-        return Ingredients.query({'name.de': $viewValue})
-          .$promise.then(function(response) {
-            return response;
-          });
-      }
-
-      $scope.formatLabel = function($model) {
-        return $model ? ($model.name ? $model.name.de : '' ): '';
+        return TAIngredients.search({search: $viewValue, language: $scope.recipe.language})
+        .$promise.then(function(response) {
+          return response;
+        });
       };
 
       $scope.update = function(){
         $scope.recipe.ingredients = $scope.recipe.ingredients.filter(function(n){ return n != ''});
         for(i=0;i<$scope.recipe.ingredients.length;i++){
-          $scope.recipe.ingredients[i].ingredient = $scope.recipe.ingredients[i].ingredient._id;
+          if ($scope.recipe.ingredients[i].ingredient && $scope.recipe.ingredients[i].ingredient._id) {
+            $scope.recipe.ingredients[i].ingredient = $scope.recipe.ingredients[i].ingredient._id;
+          }
+          else $scope.recipe.ingredients.splice(i, 1);
         }
         Recipes.update({id: $scope.recipe._id}, $scope.recipe, function(){
           $location.url('/recipes/');
@@ -449,36 +453,14 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
         });
       }
 
-    }])
-
-
-    .controller('RecipeAddCtrl', ['$scope', '$routeParams', 'Recipes', 'Ingredients', 'Units', '$location', 'TAIngredients', function ($scope, $routeParams, Recipes, Ingredients, Units, $location, TAIngredients) {
-
-      $scope.units = Units.query();
-
-      $scope.recipe = new Recipes();
-      $scope.recipe.ingredients = [];
-      $scope.recipe.ingredients.push('');
-
-      $scope.onTypeaheadSelect = function ($item, $model, $label) {
-        if(!$scope.recipe.ingredients.filter(function(n){ return n == '' }).length) {
-          $scope.recipe.ingredients.push('');
-        }
-      };
-
-      $scope.GetIngredients = function($viewValue){
-        return TAIngredients.search({search: $viewValue})
-        .$promise.then(function(response) {
-          return response;
-        });
-      };
-
-
       $scope.save = function(){
         if(!$scope.recipe || $scope.recipe.length < 1) return;
         $scope.recipe.ingredients = $scope.recipe.ingredients.filter(function(n){ return n != ''});
         for(i=0;i<$scope.recipe.ingredients.length;i++){
-          $scope.recipe.ingredients[i].ingredient = $scope.recipe.ingredients[i].ingredient._id;
+          if ($scope.recipe.ingredients[i].ingredient && $scope.recipe.ingredients[i].ingredient._id) {
+            $scope.recipe.ingredients[i].ingredient = $scope.recipe.ingredients[i].ingredient._id;
+          }
+          else $scope.recipe.ingredients.splice(i, 1);
         }
         $scope.recipe.$save(function(){
           $location.url('/recipes/');
@@ -490,7 +472,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
 
 // Schedules
 
-    .controller('SchedulesController', ['$scope', '$routeParams', 'Schedules', 'Recipes', function ($scope, $routeParams, Schedules, Recipes) {
+    .controller('SchedulesController', ['$scope', '$routeParams', 'Schedules', 'Recipes', 'TARecipes', function ($scope, $routeParams, Schedules, Recipes, TARecipes) {
       if (!$routeParams.date) {
         $scope.startDate = new Date();
         $scope.endDate = new Date();
@@ -499,6 +481,10 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
       else {
         $scope.startDate = new Date($routeParams.date);
         $scope.endDate = new Date($routeParams.date);
+        $scope.prevDate = new Date();
+        $scope.nextDate = new Date();
+        $scope.prevDate.setDate($scope.startDate.getDate() - 1);
+        $scope.nextDate.setDate($scope.startDate.getDate() + 1);
       }
       // remove hours
       $scope.startDate.setHours(0, 0, 0, 0);
@@ -519,7 +505,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
       $scope.updateSchedules($scope.startDate, $scope.endDate);
 
       $scope.GetRecipes = function($viewValue){
-        return Recipes.query({name: $viewValue})
+        return TARecipes.search({search: $viewValue})
           .$promise.then(function(response) {
             return response;
           });
@@ -607,14 +593,14 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
       })
     
       .when('/units/:id', {
-        templateUrl: 'partials/unitdetails.tpl.html',
+        templateUrl: 'partials/units.details.tpl.html',
         controller: 'UnitDetailCtrl',
         access: { requiredAuthentication: true }
      })
 
       .when('/unitadd', {
-        templateUrl: 'partials/unitadd.tpl.html',
-        controller: 'UnitAddCtrl',
+        templateUrl: 'partials/units.add.tpl.html',
+        controller: 'UnitDetailCtrl',
         access: { requiredAuthentication: true }
       })
 
@@ -627,14 +613,14 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
       })
     
       .when('/ingredients/:id', {
-        templateUrl: 'partials/ingredientdetails.tpl.html',
+        templateUrl: 'partials/ingredients.details.tpl.html',
         controller: 'IngredientDetailCtrl',
         access: { requiredAuthentication: true }
      })
 
       .when('/ingredientadd', {
-        templateUrl: 'partials/ingredientadd.tpl.html',
-        controller: 'IngredientAddCtrl',
+        templateUrl: 'partials/ingredients.add.tpl.html',
+        controller: 'IngredientDetailCtrl',
         access: { requiredAuthentication: true }
       })
 
@@ -647,14 +633,14 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
       })
     
       .when('/recipes/:id', {
-        templateUrl: 'partials/recipedetails.tpl.html',
+        templateUrl: 'partials/recipes.details.tpl.html',
         controller: 'RecipeDetailCtrl',
         access: { requiredAuthentication: true }
      })
 
       .when('/recipeadd', {
-        templateUrl: 'partials/recipeadd.tpl.html',
-        controller: 'RecipeAddCtrl',
+        templateUrl: 'partials/recipes.add.tpl.html',
+        controller: 'RecipeDetailCtrl',
         access: { requiredAuthentication: true }
       })
 
@@ -671,12 +657,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
         access: { requiredAuthentication: true }
       })
     
-      .when('/scheduleadd', {
-        templateUrl: 'partials/scheduleadd.tpl.html',
-        controller: 'ScheduleAddCtrl',
-        access: { requiredAuthentication: true }
-      })
-
       .when('/admin/user', {
         templateUrl: 'partials/admin.user.tpl.html',
         controller: 'AdminUserCtrl',
