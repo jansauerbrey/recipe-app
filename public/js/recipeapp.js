@@ -548,7 +548,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
 
 // Shopitems
 
-    .controller('ShopitemsController', ['$scope', '$routeParams', 'Schedules', 'Recipes', 'Ingredients', 'Units', '$location', function ($scope, $routeParams, Schedules, Recipes, Ingredients, Units, $location) {
+    .controller('ShopitemsController', ['$scope', '$routeParams', 'Schedules', 'Recipes', 'Ingredients', 'Units', '$location', '$filter', function ($scope, $routeParams, Schedules, Recipes, Ingredients, Units, $location, $filter) {
       $scope.startDate = new Date();
       $scope.endDate = new Date();
       $scope.endDate.setDate($scope.startDate.getDate() + 6);
@@ -558,7 +558,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
 
       $scope.shopitems = [];
 
-       var dummy = Schedules.query({startDate: $scope.startDate, endDate: $scope.endDate}, function(response) {
+      var dummy = Schedules.query({startDate: $scope.startDate, endDate: $scope.endDate}, function(response) {
+
         for(i=0;i<response.length;i++){
           var factor = response[i].factor;
           response[i].recipe = Recipes.get({id: response[i].recipe_id }, function(response) {
@@ -566,14 +567,14 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
               var ingredient = Ingredients.get({id: response.ingredients[j].ingredient });
               var unit = Units.get({id: response.ingredients[j].unit });
               var amount = response.yield*response.ingredients[j].qty;
-              $scope.shopitems.push({ingredient: ingredient, unit:unit, amount: amount});
+              $scope.shopitems.push({ingredient: ingredient, unit:unit, amount: amount, recipe: {name: response.name, _id: response._id}});
+              
             }
           });
         }
       });
-
       //TODO: shoptiems aggregieren und sortieren
-
+      
     }])
 
 
@@ -612,7 +613,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
         return response;
       });
 
-
     }])
 
 
@@ -642,6 +642,32 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
        $httpProvider.interceptors.push('TokenInterceptor');
    })
 
+
+    .filter('sumFilter', function() {
+      return function(items, value) {
+        var summary = 0; 
+        for (var i in items) {
+          if (items[i].priority == value) {
+            summary++;
+          }
+        }
+        return summary;
+      }
+    })
+
+    .filter('unique', function() {
+      return function(items, key) {
+        var unique = {};
+        var uniqueList = [];
+        for(var i = 0; i < items.length; i++){
+          if(typeof unique[items[i][key]] == "undefined") {
+            unique[items[i][key]] = "";
+            uniqueList.push(items[i]);
+          }
+        }
+        return uniqueList;
+      };
+    })
 
 //---------------
 // Routes

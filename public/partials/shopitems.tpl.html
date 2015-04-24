@@ -4,12 +4,14 @@
           <th>Amount</th>
           <th>Unit</th>
           <th>Ingredient</th>
+          <th>Recipe</th>
         </thead>
         <tbody>
-          <tr ng-repeat="item in shopitems">
+          <tr ng-repeat="item in shopitems | orderBy:'ingredient.name.de'">
             <td>{{item.amount | number}}</td>
             <td>{{item.unit.name.de}}</td>
             <td>{{item.ingredient.name.de}}</td>
+            <td>{{item.recipe.name}}</td>
           </tr>
         </tbody>
       </table>
