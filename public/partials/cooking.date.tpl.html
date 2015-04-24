@@ -6,11 +6,11 @@
       </div>
     <accordion close-others="false" class="col-xs-12">
     <accordion-group ng-repeat="schedule in schedules" heading="{{schedule.recipe.name}}">
-      <div class="col-sm-8 col-xs-12">
+      <div class="col-sm-8 col-xs-12" style="padding: 0px;">
         <label class="control-label">Instructions:</label>
         <p>{{schedule.recipe.instructions}}</p>
       </div>
-      <div class="col-md-4 col-xs-12">
+      <div class="col-md-4 col-xs-12" style="padding: 0px;">
         <div class="form-group">
           <label class="control-label">Persons / portions:</label>
           <input type="number" ng-model="schedule.factor" ng-required="true" class="form-control">
