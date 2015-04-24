@@ -22,7 +22,7 @@ router.get('/ingredients/', auth.verify, function(req, res, next) {
     query = {'name.en': searchTerm};
   }
 
-  Ingredient.find(query, function (err, ingredients) {
+  Ingredient.find(query).limit(10).exec( function (err, ingredients) {
     if (err) return next(err);
     res.json(ingredients);
   });
@@ -32,7 +32,7 @@ router.get('/ingredients/', auth.verify, function(req, res, next) {
 router.get('/recipes/', auth.verify, function(req, res, next) {
   var searchTerm = new RegExp(req.query.search, 'i');
   var query = {'name': searchTerm};
-  Recipe.find(query, function (err, ingredients) {
+  Recipe.find(query).limit(10).exec( function (err, ingredients) {
     if (err) return next(err);
     res.json(ingredients);
   });

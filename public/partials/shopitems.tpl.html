@@ -1,0 +1,16 @@
+  <div class="row">
+      <table class="col-sm-12 table table-striped">
+        <thead>
+          <th>Amount</th>
+          <th>Unit</th>
+          <th>Ingredient</th>
+        </thead>
+        <tbody>
+          <tr ng-repeat="item in shopitems">
+            <td>{{item.amount | number}}</td>
+            <td>{{item.unit.name.de}}</td>
+            <td>{{item.ingredient.name.de}}</td>
+          </tr>
+        </tbody>
+      </table>
+  </div>

@@ -516,7 +516,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
         if(!$scope.newfactor || $scope.newfactor.length < 1){
           $scope.newfactor = $scope.newrecipe.yield;
         };
-        var addedRecipe = new Schedules({date: $scope.startDate.setHours(12), recipe_id: $scope.newrecipe.recipe_id, name: $scope.newrecipe.name, factor: $scope.newfactor});
+        var addedRecipe = new Schedules({date: $scope.startDate.setHours(12), recipe_id: $scope.newrecipe._id, name: $scope.newrecipe.name, factor: $scope.newfactor});
         addedRecipe.$save(function(response){
           $scope.schedules[0].recipes.push(response);
           $scope.newrecipe = null;
@@ -542,6 +542,76 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
 
         $scope.endOpened = true;
       };
+
+    }])
+
+
+// Shopitems
+
+    .controller('ShopitemsController', ['$scope', '$routeParams', 'Schedules', 'Recipes', 'Ingredients', 'Units', '$location', function ($scope, $routeParams, Schedules, Recipes, Ingredients, Units, $location) {
+      $scope.startDate = new Date();
+      $scope.endDate = new Date();
+      $scope.endDate.setDate($scope.startDate.getDate() + 6);
+      // remove hours
+      $scope.startDate.setHours(0, 0, 0, 0);
+      $scope.endDate.setHours(0, 0, 0, 0);
+
+      $scope.shopitems = [];
+
+       var dummy = Schedules.query({startDate: $scope.startDate, endDate: $scope.endDate}, function(response) {
+        for(i=0;i<response.length;i++){
+          var factor = response[i].factor;
+          response[i].recipe = Recipes.get({id: response[i].recipe_id }, function(response) {
+            for(j=0;j<response.ingredients.length;j++){
+              var ingredient = Ingredients.get({id: response.ingredients[j].ingredient });
+              var unit = Units.get({id: response.ingredients[j].unit });
+              var amount = response.yield*response.ingredients[j].qty;
+              $scope.shopitems.push({ingredient: ingredient, unit:unit, amount: amount});
+            }
+          });
+        }
+      });
+
+      //TODO: shoptiems aggregieren und sortieren
+
+    }])
+
+
+// Cooking
+
+    .controller('CookingController', ['$scope', '$routeParams', 'Schedules', 'Recipes', 'Ingredients', 'Units', '$location', function ($scope, $routeParams, Schedules, Recipes, Ingredients, Units, $location) {
+      if (!$routeParams.date) {
+        $scope.startDate = new Date();
+        $scope.endDate = new Date();
+        $scope.endDate.setDate($scope.startDate.getDate() + 1);
+      }
+      else {
+        $scope.startDate = new Date($routeParams.date);
+        $scope.endDate = new Date();
+        $scope.endDate.setDate($scope.startDate.getDate() + 1);
+      }
+
+      $scope.prevDate = new Date();
+      $scope.nextDate = new Date();
+      $scope.prevDate.setDate($scope.startDate.getDate() - 1);
+      $scope.nextDate.setDate($scope.startDate.getDate() + 1);
+
+      $scope.startDate.setHours(0, 0, 0, 0);
+      $scope.endDate.setHours(0, 0, 0, 0);
+
+      $scope.schedules = Schedules.query({startDate: $scope.startDate, endDate: $scope.endDate}, function(response) {
+        for(i=0;i<response.length;i++){
+          response[i].recipe = Recipes.get({id: response[i].recipe_id }, function(response) {
+            for(j=0;j<response.ingredients.length;j++){
+              response.ingredients[j].ingredient = Ingredients.get({id: response.ingredients[j].ingredient });
+              response.ingredients[j].unit = Units.get({id: response.ingredients[j].unit });
+            }
+            return response;
+          });
+        }
+        return response;
+      });
+
 
     }])
 
@@ -632,13 +702,19 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
         access: { requiredAuthentication: true }
       })
     
-      .when('/recipes/:id', {
-        templateUrl: 'partials/recipes.details.tpl.html',
+      .when('/recipes/edit/:id', {
+        templateUrl: 'partials/recipes.edit.tpl.html',
         controller: 'RecipeDetailCtrl',
         access: { requiredAuthentication: true }
      })
 
-      .when('/recipeadd', {
+      .when('/recipes/show/:id', {
+        templateUrl: 'partials/recipes.show.tpl.html',
+        controller: 'RecipeDetailCtrl',
+        access: { requiredAuthentication: true }
+     })
+
+      .when('/recipes/add/', {
         templateUrl: 'partials/recipes.add.tpl.html',
         controller: 'RecipeDetailCtrl',
         access: { requiredAuthentication: true }
@@ -656,8 +732,28 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
         controller: 'SchedulesController',
         access: { requiredAuthentication: true }
       })
+
+      .when('/shopitems/', {
+        templateUrl: 'partials/shopitems.tpl.html',
+        controller: 'ShopitemsController',
+        name: 'Shopping List',
+        access: { requiredAuthentication: true }
+      })
+
+      .when('/cooking/', {
+        templateUrl: 'partials/cooking.date.tpl.html',
+        controller: 'CookingController',
+        name: 'Cooking',
+        access: { requiredAuthentication: true }
+      })
+
+      .when('/cooking/:date', {
+        templateUrl: 'partials/cooking.date.tpl.html',
+        controller: 'CookingController',
+        access: { requiredAuthentication: true }
+      })
     
-      .when('/admin/user', {
+      .when('/admin/user/', {
         templateUrl: 'partials/admin.user.tpl.html',
         controller: 'AdminUserCtrl',
         name: 'Admin',
@@ -665,22 +761,22 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
                   requiredAdmin: true }
       })
 
-      .when('/user/register', {
-        templateUrl: 'partials/register.tpl.html',
+      .when('/user/register/', {
+        templateUrl: 'partials/user.register.tpl.html',
         controller: 'UserCtrl',
         name: 'Register',
         access: { requiredAuthentication: false }
       })
 
-      .when('/user/login', {
-        templateUrl: 'partials/login.tpl.html',
+      .when('/user/login/', {
+        templateUrl: 'partials/user.login.tpl.html',
         controller: 'UserCtrl',
         name: 'Login',
         access: { requiredAuthentication: false }
       })
 
-      .when('/user/logout', {
-        templateUrl: 'partials/logout.tpl.html',
+      .when('/user/logout/', {
+        templateUrl: 'partials/user.logout.tpl.html',
         controller: 'UserLogout',
         name: 'Logout',
         access: { requiredAuthentication: true }
