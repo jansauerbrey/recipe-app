@@ -566,7 +566,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
             for(j=0;j<response.ingredients.length;j++){
               var ingredient = Ingredients.get({id: response.ingredients[j].ingredient });
               var unit = Units.get({id: response.ingredients[j].unit });
-              var amount = response.yield*response.ingredients[j].qty;
+              var amount = factor/response.yield*response.ingredients[j].qty;
               $scope.shopitems.push({ingredient: ingredient, unit:unit, amount: amount, recipe: {name: response.name, _id: response._id}});
               
             }

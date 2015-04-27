@@ -1,0 +1,8 @@
+Open bugs and todos (unorderd):
+- User registration (with email validation, etc.)
+- predefine cousine
+- predefine cookin method
+- predefine tags
+- show ingredient name in recipes
+- primary language for units and ingredients
+- 
