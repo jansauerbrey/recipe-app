@@ -5,4 +5,6 @@ Open bugs and todos (unorderd):
 - predefine tags
 - show ingredient name in recipes
 - primary language for units and ingredients
-- 
+- check of input in any form (especially recipe)
+- date forward and date previous in schedules and cooking
+

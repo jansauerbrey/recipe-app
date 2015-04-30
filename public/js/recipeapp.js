@@ -140,6 +140,13 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
           });
         }])
 
+
+        .factory('Shopitems', ['$resource', function($resource){
+          return $resource('/api/shopitems/:id', null, {
+            'update': { method:'PUT' }
+          });
+        }])
+
         .factory('Users', ['$resource', function($resource){
           return $resource('/api/admin/user/:id', null, {
             'update': { method:'PUT' }
@@ -472,7 +479,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
 
 // Schedules
 
-    .controller('SchedulesController', ['$scope', '$routeParams', 'Schedules', 'Recipes', 'TARecipes', function ($scope, $routeParams, Schedules, Recipes, TARecipes) {
+    .controller('SchedulesController', ['$scope', '$routeParams', 'Schedules', 'TARecipes', function ($scope, $routeParams, Schedules, TARecipes) {
       if (!$routeParams.date) {
         $scope.startDate = new Date();
         $scope.endDate = new Date();
@@ -492,17 +499,17 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
       $scope.loading = true;
       
 
-      $scope.updateSchedules = function(startDate, endDate){
-        schedules = [];
+      $scope.updateSchedules = function(startDate, endDate, populate){
+        schedulesArray = [];
         while(startDate <= endDate) {
           var nextStartDate = new Date(startDate);
           nextStartDate.setDate(nextStartDate.getDate() + 1);
-          schedules.push({date: startDate, recipes: Schedules.query({startDate: startDate, endDate: nextStartDate})});
+          schedulesArray.push({date: startDate, schedule: Schedules.query({startDate: startDate, endDate: nextStartDate})});
           startDate = nextStartDate;
         }
-        $scope.schedules = schedules;
+        $scope.schedulesArray = schedulesArray;
       }
-      $scope.updateSchedules($scope.startDate, $scope.endDate);
+      $scope.updateSchedules($scope.startDate, $scope.endDate, $scope.populate);
 
       $scope.GetRecipes = function($viewValue){
         return TARecipes.search({search: $viewValue})
@@ -516,16 +523,16 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
         if(!$scope.newfactor || $scope.newfactor.length < 1){
           $scope.newfactor = $scope.newrecipe.yield;
         };
-        var addedRecipe = new Schedules({date: $scope.startDate.setHours(12), recipe_id: $scope.newrecipe._id, name: $scope.newrecipe.name, factor: $scope.newfactor});
-        addedRecipe.$save(function(response){
-          $scope.schedules[0].recipes.push(response);
+        var newSchedule = new Schedules({date: $scope.startDate.setHours(12), recipe: $scope.newrecipe, factor: $scope.newfactor});
+        newSchedule.$save(function(response){
+          $scope.schedulesArray[0].schedule.push(response);
           $scope.newrecipe = null;
-        });
+        });	
       }
 
       $scope.remove = function(index){
-        Schedules.remove({id: $scope.schedules[0].recipes[index]._id}, function(){
-          $scope.schedules[0].recipes.splice(index, 1);
+        Schedules.remove({id: $scope.schedulesArray[0].schedule[index]._id}, function(){
+          $scope.schedulesArray[0].schedule.splice(index, 1);
         });
       }
 
@@ -548,31 +555,18 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
 
 // Shopitems
 
-    .controller('ShopitemsController', ['$scope', '$routeParams', 'Schedules', 'Recipes', 'Ingredients', 'Units', '$location', '$filter', function ($scope, $routeParams, Schedules, Recipes, Ingredients, Units, $location, $filter) {
-      $scope.startDate = new Date();
-      $scope.endDate = new Date();
-      $scope.endDate.setDate($scope.startDate.getDate() + 6);
-      // remove hours
-      $scope.startDate.setHours(0, 0, 0, 0);
-      $scope.endDate.setHours(0, 0, 0, 0);
-
-      $scope.shopitems = [];
-
-      var dummy = Schedules.query({startDate: $scope.startDate, endDate: $scope.endDate}, function(response) {
-
-        for(i=0;i<response.length;i++){
-          var factor = response[i].factor;
-          response[i].recipe = Recipes.get({id: response[i].recipe_id }, function(response) {
-            for(j=0;j<response.ingredients.length;j++){
-              var ingredient = Ingredients.get({id: response.ingredients[j].ingredient });
-              var unit = Units.get({id: response.ingredients[j].unit });
-              var amount = factor/response.yield*response.ingredients[j].qty;
-              $scope.shopitems.push({ingredient: ingredient, unit:unit, amount: amount, recipe: {name: response.name, _id: response._id}});
-              
-            }
-          });
-        }
+    .controller('ShopitemsController', ['$scope', '$routeParams', 'Shopitems', '$location', '$filter', function ($scope, $routeParams, Shopitems, $location, $filter) {
+      $scope.loading = true;
+      $scope.shopitems = Shopitems.query(function(response) {
+        $scope.loading = false;
       });
+
+      $scope.remove = function(index){
+        Shopitems.remove({id: $scope.shopitems[index]._id}, function(){
+          $scope.shopitems.splice(index, 1);
+        });
+      }
+
       //TODO: shoptiems aggregieren und sortieren
       
     }])

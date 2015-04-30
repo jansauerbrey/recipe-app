@@ -4,7 +4,7 @@
         <div class="col-xs-8 text-center"><h4>{{startDate | date:'EEEE dd.MM.yyyy'}}</h4></div>
         <div class="col-xs-2"><a class="btn btn-primary pull-right" href="#/schedules/{{nextDate | date:'yyyy-MM-dd'}}">&gt;</a></div>
       </div>
-      <div ng-repeat="schedule in schedules">
+      <div ng-repeat="schedules in schedulesArray">
         <table class="table table-striped col-xs-12">
           <thead>
             <th class="hidden-xs">#</th>
@@ -13,15 +13,15 @@
             <th>Actions</th>
           </thead>
           <tbody>
-            <tr ng-repeat="recipe in schedule.recipes">
+            <tr ng-repeat="schedule in schedules.schedule">
               <th class="hidden-xs">
                 {{$index+1}}
               </th>
               <td>
-                {{recipe.factor}}
+                {{schedule.factor}}
               </td>
               <td>
-                {{recipe.name}}
+                {{schedule.recipe.name}}
               </td>
               <td>
                 <a class="btn btn-primary btn-sm" ng-click="remove($index)" role="button"><i class="fa fa-trash-o"></i></a>
@@ -37,7 +37,7 @@
         <div class="col-xs-6 col-md-7" style="padding-left:0;">
           <input type="text" ng-model="newrecipe" typeahead="recipe as recipe.name for recipe in GetRecipes($viewValue)" typeahead-editable="false" class="form-control" placeholder="Add Recipe...">
         </div>
-        <div class="col-xs-2 col-md-1" style="padding-left:0;">
+        <div class="col-xs-2 col-md-1" style="padding-left:0;">	
         <a class="btn btn-primary" ng-click="addRecipe()" role="button">add</a>
         </div>
       </div>

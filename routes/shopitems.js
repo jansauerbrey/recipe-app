@@ -8,7 +8,7 @@ var auth = require('../auth/auth.js');
 
 /* GET /shopitems listing. */
 router.get('/', auth.verify, function(req, res, next) {
-  Shopitem.find(function (err, shopitems) {
+  Shopitem.find().populate(['schedule', 'recipe', 'ingredient', 'unit']).exec( function (err, shopitems) {
     if (err) return next(err);
     res.json(shopitems);
   });
@@ -16,33 +16,33 @@ router.get('/', auth.verify, function(req, res, next) {
 
 /* POST /shopitems */
 router.post('/', auth.verify, function(req, res, next) {
-  Shopitem.create(req.body, function (err, post) {
+  Shopitem.create(req.body, function (err, shopitems) {
     if (err) return next(err);
-    res.json(post);
+    res.json(shopitems);
   });
 });
 
 /* GET /shopitems/id */
 router.get('/:id', auth.verify, function(req, res, next) {
-  Shopitem.findById(req.params.id, function (err, post) {
+  Shopitem.findById(req.params.id).populate().exec( function (err, shopitems) {
     if (err) return next(err);
-    res.json(post);
+    res.json(shopitems);
   });
 });
 
 /* PUT /shopitems/:id */
 router.put('/:id', auth.verify, function(req, res, next) {
-  Shopitem.findByIdAndUpdate(req.params.id, req.body, function (err, post) {
+  Shopitem.findByIdAndUpdate(req.params.id, req.body, function (err, shopitems) {
     if (err) return next(err);
-    res.json(post);
+    res.json(shopitems);
   });
 });
 
 /* DELETE /shopitems/:id */
 router.delete('/:id', auth.verify, function(req, res, next) {
-  Shopitem.findByIdAndRemove(req.params.id, req.body, function (err, post) {
+  Shopitem.findByIdAndRemove(req.params.id, req.body, function (err, shopitems) {
     if (err) return next(err);
-    res.json(post);
+    res.json(shopitems);
   });
 });
 

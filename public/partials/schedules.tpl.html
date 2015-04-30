@@ -18,11 +18,11 @@
   </div>
   <div class="row">
     <div class="list-group">
-      <div ng-repeat="schedule in schedules">
-        <a class="list-group-item" href="#/schedules/{{schedule.date | date:'yyyy-MM-dd'}}">
-          <div class="list-group-item-heading">{{schedule.date | date:'EEEE dd.MM.yyyy'}}</div>
+      <div ng-repeat="schedules in schedulesArray">
+        <a class="list-group-item" href="#/schedules/{{schedules.date | date:'yyyy-MM-dd'}}">
+          <div class="list-group-item-heading">{{schedules.date | date:'EEEE dd.MM.yyyy'}}</div>
           <div class="list-group-item-text">
-            <div ng-repeat="recipe in schedule.recipes">{{recipe.factor}} Persons: {{recipe.name}}</div>
+            <div ng-repeat="schedule in schedules.schedule">{{schedule.factor}} Persons: {{schedule.recipe.name}}</div>
           </div>
         </a>
       </div>

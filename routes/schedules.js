@@ -3,12 +3,13 @@ var router = express.Router();
 
 var mongoose = require('mongoose');
 var Schedule = require('../models/Schedule.js');
+var Shopitem = require('../models/Shopitem.js');
 
 var auth = require('../auth/auth.js');
 
 /* GET /schedules listing. */
 router.get('/', auth.verify, function(req, res, next) {
-  Schedule.find({author: req._user.id, date: {'$gte': req.query.startDate, '$lt': req.query.endDate}}, function (err, schedules) {
+  Schedule.find({author: req._user.id, date: {'$gte': req.query.startDate, '$lt': req.query.endDate}}).populate('recipe').exec( function (err, schedules) {
     if (err) return next(err);
     res.json(schedules);
   });
@@ -17,10 +18,16 @@ router.get('/', auth.verify, function(req, res, next) {
 /* POST /schedules */
 router.post('/', auth.verify, function(req, res, next) {
   req.body.author = req._user.id;
-  console.log(req.body.author);
+  console.log(req.body);
   Schedule.create(req.body, function (err, schedule) {
     if (err) return next(err);
-    res.json(schedule);
+    Schedule.findOne(schedule).populate('recipe').exec( function (err, schedulePop) {
+      for(i=0;i<schedulePop.recipe.ingredients.length;i++){
+        var amount = schedulePop.recipe.ingredients[i].qty/schedulePop.recipe.yield*schedulePop.factor;
+        Shopitem.create({author: req._user.id, schedule: schedulePop, recipe: schedulePop.recipe, ingredient: schedulePop.recipe.ingredients[i].ingredient, unit: schedulePop.recipe.ingredients[i].unit, amount: amount})
+      }
+      res.json(schedulePop);
+    });
   });
 });
 

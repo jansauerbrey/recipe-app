@@ -5,6 +5,8 @@
           <th>Unit</th>
           <th>Ingredient</th>
           <th>Recipe</th>
+          <th>Date</th>
+          <th>Action</th>
         </thead>
         <tbody>
           <tr ng-repeat="item in shopitems | orderBy:'ingredient.name.de'">
@@ -12,6 +14,8 @@
             <td>{{item.unit.name.de}}</td>
             <td>{{item.ingredient.name.de}}</td>
             <td>{{item.recipe.name}}</td>
+            <td>{{item.schedule.date | date:'dd.MM.yyyy'}}</td>
+            <td><a class="btn btn-primary" ng-click="remove($index)" role="button"><i class="fa fa-trash-o"></i></a></td>
           </tr>
         </tbody>
       </table>
