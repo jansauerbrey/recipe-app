@@ -556,9 +556,38 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
 // Shopitems
 
     .controller('ShopitemsController', ['$scope', '$routeParams', 'Shopitems', '$location', '$filter', function ($scope, $routeParams, Shopitems, $location, $filter) {
+
+      containsObj = function(array, obj) {
+        var i, l = array.length;
+        for (i=0;i<array.length;i++)
+        {
+          if (angular.equals(array[i], obj)) return i;
+        }
+        return false;
+      };
+
       $scope.loading = true;
-      $scope.shopitems = Shopitems.query(function(response) {
+
+      Shopitems.query(function(response) {
         $scope.loading = false;
+        
+        var uniqueIngredients = [];
+        var uniqueIngredientsTemp = [];
+        for(i=0;i<response.length;i++){
+          var index = containsObj(uniqueIngredientsTemp, {ingredient:response[i].ingredient, unit:response[i].unit});
+          if ( index === false) {
+            uniqueIngredientsTemp.push({ingredient:response[i].ingredient, unit:response[i].unit});
+            var obj = {ingredient:response[i].ingredient, unit:response[i].unit};
+            obj.details = [response[i]];
+            obj.amount = response[i].amount;
+            uniqueIngredients.push(obj);
+          }
+          else {
+            uniqueIngredients[index].details.push(response[i]);
+            uniqueIngredients[index].amount = response[i].amount + uniqueIngredients[index].amount;
+          }
+        }
+        $scope.shopitems = uniqueIngredients;
       });
 
       $scope.remove = function(index){
@@ -566,8 +595,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
           $scope.shopitems.splice(index, 1);
         });
       }
-
-      //TODO: shoptiems aggregieren und sortieren
       
     }])
 

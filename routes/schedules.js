@@ -18,7 +18,6 @@ router.get('/', auth.verify, function(req, res, next) {
 /* POST /schedules */
 router.post('/', auth.verify, function(req, res, next) {
   req.body.author = req._user.id;
-  console.log(req.body);
   Schedule.create(req.body, function (err, schedule) {
     if (err) return next(err);
     Schedule.findOne(schedule).populate('recipe').exec( function (err, schedulePop) {
@@ -52,7 +51,9 @@ router.put('/:id', auth.verify, function(req, res, next) {
 router.delete('/:id', auth.verify, function(req, res, next) {
   Schedule.findByIdAndRemove(req.params.id, req.body, function (err, schedule) {
     if (err) return next(err);
-    res.json(schedule);
+    Shopitem.remove({schedule: schedule._id}, function(shopitem) {
+      res.json(schedule);
+    });
   });
 });
 

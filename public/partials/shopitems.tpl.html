@@ -4,17 +4,17 @@
           <th>Amount</th>
           <th>Unit</th>
           <th>Ingredient</th>
-          <th>Recipe</th>
-          <th>Date</th>
+          <th>Category</th>
+          <th>Subcategory</th>
           <th>Action</th>
         </thead>
         <tbody>
-          <tr ng-repeat="item in shopitems | orderBy:'ingredient.name.de'">
+          <tr ng-repeat="item in shopitems | orderBy: ['ingredient.category.de','ingredient.subcategory.de','ingredient.name.de']">
             <td>{{item.amount | number}}</td>
             <td>{{item.unit.name.de}}</td>
             <td>{{item.ingredient.name.de}}</td>
-            <td>{{item.recipe.name}}</td>
-            <td>{{item.schedule.date | date:'dd.MM.yyyy'}}</td>
+            <td>{{item.ingredient.category.de}}</td>
+            <td>{{item.ingredient.subcategory.de}}</td>
             <td><a class="btn btn-primary" ng-click="remove($index)" role="button"><i class="fa fa-trash-o"></i></a></td>
           </tr>
         </tbody>
