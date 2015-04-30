@@ -577,22 +577,20 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
     .controller('CookingController', ['$scope', '$routeParams', 'Schedules', 'Recipes', 'Ingredients', 'Units', '$location', function ($scope, $routeParams, Schedules, Recipes, Ingredients, Units, $location) {
       if (!$routeParams.date) {
         $scope.startDate = new Date();
-        $scope.endDate = new Date();
-        $scope.endDate.setDate($scope.startDate.getDate() + 1);
       }
       else {
         $scope.startDate = new Date($routeParams.date);
-        $scope.endDate = new Date();
-        $scope.endDate.setDate($scope.startDate.getDate() + 1);
       }
-
-      $scope.prevDate = new Date();
-      $scope.nextDate = new Date();
-      $scope.prevDate.setDate($scope.startDate.getDate() - 1);
-      $scope.nextDate.setDate($scope.startDate.getDate() + 1);
 
       $scope.startDate.setHours(0, 0, 0, 0);
       $scope.endDate.setHours(0, 0, 0, 0);
+
+      $scope.endDate = $scope.startDate;
+      $scope.prevDate = $scope.startDate;
+      $scope.nextDate = $scope.startDate;
+      $scope.endDate.setDate($scope.endDate.getDate() + 1);
+      $scope.prevDate.setDate($scope.prevDate.getDate() - 1);
+      $scope.nextDate.setDate($scope.nextDate.getDate() + 1);
 
       $scope.schedules = Schedules.query({startDate: $scope.startDate, endDate: $scope.endDate}, function(response) {
         for(i=0;i<response.length;i++){
