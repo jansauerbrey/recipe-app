@@ -473,7 +473,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
 // Schedules
 
     .controller('SchedulesController', ['$scope', '$routeParams', 'Schedules', 'Recipes', 'TARecipes', function ($scope, $routeParams, Schedules, Recipes, TARecipes) {
-      if (!$routeParams.date) {
+      $scope.params = $routeParams.date;
+	  if (!$routeParams.date) {
         $scope.startDate = new Date();
         $scope.endDate = new Date();
         $scope.endDate.setDate($scope.startDate.getDate() + 6);
@@ -481,12 +482,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
       else {
         $scope.startDate = new Date($routeParams.date);
         $scope.endDate = new Date($routeParams.date);
-        $scope.prevDate = new Date();
-        $scope.nextDate = new Date();
-        $scope.prevDate.setDate($scope.startDate.getDate() - 1);
-        $scope.nextDate.setDate($scope.startDate.getDate() + 1);
+        $scope.prevDate = new Date($routeParams.date);
+        $scope.nextDate = new Date($routeParams.date);
+        $scope.prevDate.setDate($scope.prevDate.getDate() - 1);
+        $scope.nextDate.setDate($scope.nextDate.getDate() + 1);
       }
-      // remove hours
+	  // remove hours
       $scope.startDate.setHours(0, 0, 0, 0);
       $scope.endDate.setHours(0, 0, 0, 0);
       $scope.loading = true;
