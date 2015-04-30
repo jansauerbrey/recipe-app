@@ -593,7 +593,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
 
 
       $scope.schedules = Schedules.query({startDate: $scope.startDate, endDate: $scope.endDate}, function(response){
-        for(i=0;i<response[i].length;i++){
+        for(i=0;i<response.length;i++){
           for(j=0;j<response[i].recipe.ingredients.length;j++){
             response[i].recipe.ingredients[j].ingredient = Ingredients.get({id: response[i].recipe.ingredients[j].ingredient });
             response[i].recipe.ingredients[j].unit = Units.get({id: response[i].recipe.ingredients[j].unit });
