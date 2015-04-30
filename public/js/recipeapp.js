@@ -583,7 +583,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
       }
 
       $scope.startDate.setHours(0, 0, 0, 0);
-      $scope.endDate.setHours(0, 0, 0, 0);
 
       $scope.endDate = $scope.startDate;
       $scope.prevDate = $scope.startDate;
