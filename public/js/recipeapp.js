@@ -584,22 +584,20 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
 
       $scope.startDate.setHours(0, 0, 0, 0);
 
-      $scope.endDate = $scope.startDate;
-      $scope.prevDate = $scope.startDate;
-      $scope.nextDate = $scope.startDate;
+      $scope.endDate = new Date($scope.startDate);
+      $scope.prevDate = new Date($scope.startDate);
+      $scope.nextDate = new Date($scope.startDate);
       $scope.endDate.setDate($scope.endDate.getDate() + 1);
       $scope.prevDate.setDate($scope.prevDate.getDate() - 1);
       $scope.nextDate.setDate($scope.nextDate.getDate() + 1);
 
-      $scope.schedules = Schedules.query({startDate: $scope.startDate, endDate: $scope.endDate}, function(response) {
-        for(i=0;i<response.length;i++){
-          response[i].recipe = Recipes.get({id: response[i].recipe_id }, function(response) {
-            for(j=0;j<response.ingredients.length;j++){
-              response.ingredients[j].ingredient = Ingredients.get({id: response.ingredients[j].ingredient });
-              response.ingredients[j].unit = Units.get({id: response.ingredients[j].unit });
-            }
-            return response;
-          });
+
+      $scope.schedules = Schedules.query({startDate: $scope.startDate, endDate: $scope.endDate}, function(response){
+        for(i=0;i<response[i].length;i++){
+          for(j=0;j<response[i].recipe.ingredients.length;j++){
+            response[i].recipe.ingredients[j].ingredient = Ingredients.get({id: response[i].recipe.ingredients[j].ingredient });
+            response[i].recipe.ingredients[j].unit = Units.get({id: response[i].recipe.ingredients[j].unit });
+          }
         }
         return response;
       });
