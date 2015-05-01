@@ -3,7 +3,10 @@
     <table class="table table-striped">
       <thead>
         <th>#</th>
+        <th>Fullname</th>
         <th>Username</th>
+        <th>Email</th>
+        <th>Created</th>
         <th>Level</th>
         <th>Actions</th>
       </thead>
@@ -13,7 +16,16 @@
             {{$index+1}}
           </th>
           <td>
+            {{user.fullname}}
+          </td>
+          <td>
             {{user.username}}
+          </td>
+          <td>
+            {{user.email}}
+          </td>
+          <td>
+            {{user.created | date:'dd.MM.yyyy'}}
           </td>
           <td>
             <i ng-hide="user.is_admin" class="glyphicon glyphicon-user" title="User"></i>

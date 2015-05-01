@@ -8,7 +8,7 @@ var auth = require('../auth/auth.js');
 
 /* GET /user listing. */
 router.get('/user', auth.verifyAdmin, function(req, res, next) {
-  User.find({}, '_id username is_admin created', function (err, users) {
+  User.find({}, '_id username fullname email is_admin created', function (err, users) {
     if (err) return next(err);
     res.json(users);
   });

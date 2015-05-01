@@ -27,7 +27,7 @@ The intention of this app is to have a recipe database and a planning tool at th
 Get the newest NVM (Node Version Manager), see also https://github.com/creationix/nvm :
 
 ```bash
-wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.24.1/install.sh | bash
+wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.25.0/install.sh | bash
 ```
 
 Install and activate latest NodeJS version:

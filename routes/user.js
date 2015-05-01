@@ -61,13 +61,16 @@ router.post('/register', function(req, res) {
     var username = req.body.username || '';
     var password = req.body.password || '';
     var passwordConfirmation = req.body.passwordConfirmation || '';
+    var email = req.body.email || '';
+    var emailConfirmation = req.body.emailConfirmation || '';
+    var fullname = req.body.fullname || '';
 
-    if (username == '' || password == '' || password != passwordConfirmation) {
+    if (username == '' || password == '' || password != passwordConfirmation || email == '' || fullname == '' || email != emailConfirmation) {
         return res.sendStatus(400);
     }
 
 
-    var userData = {username: username, password: password};
+    var userData = {username: username, password: password, email:email, fullname:fullname};
 
     User.create(userData, function(err) {
         if (err) {

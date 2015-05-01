@@ -15,24 +15,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
         return auth;
     })
 
-    .factory('UserService', function($http) {
-        return {
-            logIn: function(username, password) {
-                return $http.post('/api/user/login', {username: username, password: password});
-            },
-
-            logOut: function() {
-                return $http.get('/api/user/logout');
-            },
-
-            register: function(username, password, passwordConfirmation) {
-                return $http.post('/api/user/register', {username: username, password: password, passwordConfirmation: passwordConfirmation });
-            }
-
-        }
-    })
-
-
     .factory('TokenInterceptor', function ($q, $window, $location, AuthenticationService) {
         return {
             request: function (config) {
@@ -104,6 +86,24 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
         };
     })
 
+
+    .factory('UserService', function($http) {
+        return {
+            logIn: function(username, password) {
+                return $http.post('/api/user/login', {username: username, password: password});
+            },
+
+            logOut: function() {
+                return $http.get('/api/user/logout');
+            },
+
+            register: function(user) {
+                return $http.post('/api/user/register', user);
+            }
+
+        }
+    })
+
         .factory('Units', ['$resource', function($resource){
           return $resource('/api/units/:id', null, {
             'update': { method:'PUT' }
@@ -160,10 +160,9 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
 
 // Auth
 
-    .controller('UserCtrl', ['$scope', '$location', '$window', 'UserService', 'AuthenticationService',
-        function UserCtrl($scope, $location, $window, UserService, AuthenticationService) {
+    .controller('UserCtrl', ['$scope', '$location', '$window', 'Users', 'UserService', 'AuthenticationService',
+        function UserCtrl($scope, $location, $window, Users, UserService, AuthenticationService) {
  
-        //Admin User Controller (login, logout, register)
         $scope.logIn = function logIn(username, password) {
             if (username !== undefined && password !== undefined) {
  
@@ -182,12 +181,14 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
             }
         }
  
-        $scope.register = function register(username, password, passwordConfirm) {
+        $scope.user = new Users();
+
+        $scope.register = function register() {
             if (AuthenticationService.isAuthenticated) {
                 $location.path("/");
             }
             else {
-                UserService.register(username, password, passwordConfirm).success(function(data) {
+                UserService.register($scope.user).success(function(data) {
                     $location.path("/");
                 }).error(function(status, data) {
                     console.log(status);
