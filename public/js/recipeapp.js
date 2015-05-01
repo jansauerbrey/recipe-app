@@ -416,12 +416,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
         $scope.recipe.ingredients.push('');
       } else {
         $scope.recipe = Recipes.get({id: $routeParams.id }, function(response) {
-          for(i=0;i<$scope.recipe.ingredients.length;i++){
-            if (!$scope.recipe.ingredients[i].ingredient) {
-              
-            }
-            else $scope.recipe.ingredients[i].ingredient = Ingredients.get({id: $scope.recipe.ingredients[i].ingredient });
-          };
           $scope.recipe.ingredients.push('');
         });
       }
@@ -444,10 +438,9 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
       $scope.update = function(){
         $scope.recipe.ingredients = $scope.recipe.ingredients.filter(function(n){ return n != ''});
         for(i=0;i<$scope.recipe.ingredients.length;i++){
-          if ($scope.recipe.ingredients[i].ingredient && $scope.recipe.ingredients[i].ingredient._id) {
-            $scope.recipe.ingredients[i].ingredient = $scope.recipe.ingredients[i].ingredient._id;
+          if (!($scope.recipe.ingredients[i].ingredient && $scope.recipe.ingredients[i].ingredient._id)) {
+            $scope.recipe.ingredients.splice(i, 1);
           }
-          else $scope.recipe.ingredients.splice(i, 1);
         }
         Recipes.update({id: $scope.recipe._id}, $scope.recipe, function(){
           $location.url('/recipes/');
@@ -464,10 +457,9 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
         if(!$scope.recipe || $scope.recipe.length < 1) return;
         $scope.recipe.ingredients = $scope.recipe.ingredients.filter(function(n){ return n != ''});
         for(i=0;i<$scope.recipe.ingredients.length;i++){
-          if ($scope.recipe.ingredients[i].ingredient && $scope.recipe.ingredients[i].ingredient._id) {
-            $scope.recipe.ingredients[i].ingredient = $scope.recipe.ingredients[i].ingredient._id;
+          if (!($scope.recipe.ingredients[i].ingredient && $scope.recipe.ingredients[i].ingredient._id)) {
+            $scope.recipe.ingredients.splice(i, 1);
           }
-          else $scope.recipe.ingredients.splice(i, 1);
         }
         $scope.recipe.$save(function(){
           $location.url('/recipes/');

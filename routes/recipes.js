@@ -24,7 +24,7 @@ router.post('/', auth.verify, function(req, res, next) {
 
 /* GET /recpes/id */
 router.get('/:id', auth.verify, function(req, res, next) {
-  Recipe.findById(req.params.id, function (err, post) {
+  Recipe.findById(req.params.id).populate(['ingredients.ingredient', 'ingredients.unit']).exec( function (err, post) {
     if (err) return next(err);
     res.json(post);
   });
