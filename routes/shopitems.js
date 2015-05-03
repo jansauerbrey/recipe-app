@@ -8,7 +8,7 @@ var auth = require('../auth/auth.js');
 
 /* GET /shopitems listing. */
 router.get('/', auth.verify, function(req, res, next) {
-  Shopitem.find({author: req._user.id}).populate(['schedule', 'recipe', 'ingredient', 'unit']).exec( function (err, shopitems) {
+  Shopitem.find({author: req._user.id, expire_date: {'$gte': new Date()}}).populate(['schedule', 'recipe', 'ingredient', 'unit']).exec( function (err, shopitems) {
     if (err) return next(err);
     res.json(shopitems);
   });

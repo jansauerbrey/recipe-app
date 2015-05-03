@@ -15,16 +15,16 @@
         </span>
       </p>
     </div>
-  </div>
-  <div class="row">
-    <div class="list-group">
-      <div ng-repeat="schedules in schedulesArray">
-        <a class="list-group-item" href="#/schedules/{{schedules.date | date:'yyyy-MM-dd'}}">
-          <div class="list-group-item-heading">{{schedules.date | date:'EEEE dd.MM.yyyy'}}</div>
-          <div class="list-group-item-text">
-            <div ng-repeat="schedule in schedules.schedule">{{schedule.factor}} Persons: {{schedule.recipe.name}}</div>
-          </div>
-        </a>
+    <div class="col-xs-12">
+      <div class="list-group">
+        <div ng-repeat="schedules in schedulesArray">
+          <a class="list-group-item" href="#/schedules/{{schedules.date | date:'yyyy-MM-dd'}}">
+            <div class="list-group-item-heading">{{schedules.date | date:'EEEE dd.MM.yyyy'}}</div>
+            <div class="list-group-item-text">
+              <div ng-repeat="schedule in schedules.schedule">{{schedule.factor}} Persons: {{schedule.recipe.name}}</div>
+            </div>
+          </a>
+        </div>
       </div>
     </div>
   </div>

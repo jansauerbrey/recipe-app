@@ -18,14 +18,6 @@
         <table class="table table-striped">
           <tbody>
             <tr>
-              <th>Cousine:</th>
-              <td>{{schedule.recipe.cousine}}</td>
-            </tr>
-            <tr>
-              <th>Cooking method:</th>
-              <td>{{schedule.recipe.cookingMethod}}</td>
-            </tr>
-            <tr>
               <th>Preparation time:</th>
               <td>{{schedule.recipe.prepTime}} min</td>
             </tr>
@@ -39,7 +31,7 @@
             </tr>
             <tr>
               <th>Tags:</th>
-              <td>{{schedule.recipe.tags}}</td>
+              <td><font size="3"><span ng-repeat="tag in schedule.recipe.tags" class="label label-primary" style="margin: 2px; display: inline-block;">{{tag.text}}</span></font></td>
             </tr>
           </tbody>
         </table>

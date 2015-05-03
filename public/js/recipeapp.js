@@ -1,4 +1,4 @@
-angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
+angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', 'ngTagsInput'])
 
 //---------------
 // Services
@@ -118,6 +118,18 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
 
         .factory('TAIngredients', ['$resource', function($resource){
           return $resource('/api/typeahead/ingredients/', null, {
+            'search': { method:'GET', isArray: true }
+          });
+        }])
+
+        .factory('Tags', ['$resource', function($resource){
+          return $resource('/api/tags/:id', null, {
+            'update': { method:'PUT' }
+          });
+        }])
+
+        .factory('TATags', ['$resource', function($resource){
+          return $resource('/api/typeahead/tags/', null, {
             'search': { method:'GET', isArray: true }
           });
         }])
@@ -410,7 +422,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
 
     }])
 
-    .controller('RecipeDetailCtrl', ['$scope', '$routeParams', 'Recipes', 'Ingredients', 'Units', '$location', 'TAIngredients', function ($scope, $routeParams, Recipes, Ingredients, Units, $location, TAIngredients) {
+    .controller('RecipeDetailCtrl', ['$scope', '$routeParams', 'Recipes', 'Tags', 'Ingredients', 'Units', '$location', 'TAIngredients', 'TATags', function ($scope, $routeParams, Recipes, Tags, Ingredients, Units, $location, TAIngredients, TATags) {
       if (!$routeParams.id) {
         $scope.recipe = new Recipes();
         $scope.recipe.ingredients = [];
@@ -429,15 +441,34 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
         }
       };
 
-      $scope.GetIngredients = function($viewValue){
-        return TAIngredients.search({search: $viewValue, language: $scope.recipe.language})
+      $scope.GetIngredients = function(viewValue){
+        return TAIngredients.search({search: viewValue, language: $scope.recipe.language})
         .$promise.then(function(response) {
           return response;
         });
       };
 
+      $scope.addTag = function(tag){
+        if (!tag._id){
+          var newtag = new Tags(tag)
+          newtag.$save( function(response){
+            var l = $scope.recipe.tags.length;
+            $scope.recipe.tags[l-1] = response;
+          });
+        }
+      };
+
+
+
       $scope.update = function(){
         $scope.recipe.ingredients = $scope.recipe.ingredients.filter(function(n){ return n != ''});
+        for(i=0;i<$scope.recipe.tags.length;i++){
+          if (!$scope.recipe.tags[i]._id){
+            var tag = new Tags($scope.recipe.tags[i]);
+            tag.$save();
+            $scope.recipe.tags[i] = tag._id;
+          }
+        }
         for(i=0;i<$scope.recipe.ingredients.length;i++){
           if (!($scope.recipe.ingredients[i].ingredient && $scope.recipe.ingredients[i].ingredient._id)) {
             $scope.recipe.ingredients.splice(i, 1);
@@ -457,6 +488,13 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
       $scope.save = function(){
         if(!$scope.recipe || $scope.recipe.length < 1) return;
         $scope.recipe.ingredients = $scope.recipe.ingredients.filter(function(n){ return n != ''});
+        for(i=0;i<$scope.recipe.tags.length;i++){
+          if (!$scope.recipe.tags[i]._id){
+            var tag = new Tags($scope.recipe.tags[i]);
+            tag.$save();
+            $scope.recipe.tags[i] = tag._id;
+          }
+        }
         for(i=0;i<$scope.recipe.ingredients.length;i++){
           if (!($scope.recipe.ingredients[i].ingredient && $scope.recipe.ingredients[i].ingredient._id)) {
             $scope.recipe.ingredients.splice(i, 1);
@@ -464,6 +502,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
         }
         $scope.recipe.$save(function(){
           $location.url('/recipes/');
+        });
+      }
+
+      $scope.loadTags = function(viewValue) {
+        return TATags.search({search: viewValue}).$promise.then(function(response) {
+          return response;
         });
       }
 
@@ -548,7 +592,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
 
 // Shopitems
 
-    .controller('ShopitemsController', ['$scope', '$routeParams', 'Shopitems', '$location', '$filter', function ($scope, $routeParams, Shopitems, $location, $filter) {
+    .controller('ShopitemsController', ['$scope', '$routeParams', 'Shopitems', 'TAIngredients', 'Units', '$location', '$filter', function ($scope, $routeParams, Shopitems, TAIngredients, Units, $location, $filter) {
 
       containsObj = function(array, obj) {
         var i, l = array.length;
@@ -567,10 +611,10 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
         var uniqueIngredients = [];
         var uniqueIngredientsTemp = [];
         for(i=0;i<response.length;i++){
-          var index = containsObj(uniqueIngredientsTemp, {ingredient:response[i].ingredient, unit:response[i].unit});
+          var index = containsObj(uniqueIngredientsTemp, {ingredient:response[i].ingredient, unit:response[i].unit, completed: response[i].completed});
           if ( index === false) {
-            uniqueIngredientsTemp.push({ingredient:response[i].ingredient, unit:response[i].unit});
-            var obj = {ingredient:response[i].ingredient, unit:response[i].unit};
+            uniqueIngredientsTemp.push({ingredient:response[i].ingredient, unit:response[i].unit, completed: response[i].completed});
+            var obj = {ingredient:response[i].ingredient, unit:response[i].unit, completed: response[i].completed};
             obj.details = [response[i]];
             obj.amount = response[i].amount;
             uniqueIngredients.push(obj);
@@ -583,10 +627,47 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
         $scope.shopitems = uniqueIngredients;
       });
 
-      $scope.remove = function(index){
-        Shopitems.remove({id: $scope.shopitems[index]._id}, function(){
-          $scope.shopitems.splice(index, 1);
+      $scope.units = Units.query();
+
+      $scope.GetIngredients = function(viewValue){
+        return TAIngredients.search({search: viewValue, language: 'de'})
+        .$promise.then(function(response) {
+          return response;
         });
+      };
+
+      $scope.addShopitem = function(){
+        var expDate = new Date();
+        expDate.setDate(expDate.getDate() + 14);
+        expDate.setHours(0, 0, 0, 0);
+        for(i=0;i<$scope.units.length;i++){
+          if($scope.units[i]._id === $scope.newunit) {
+            $scope.newunitobject = $scope.units[i];
+          }
+        }
+        var newshopitem = new Shopitems({ingredient: $scope.newingredient, unit: $scope.newunitobject, amount: $scope.newamount, completed: false , expire_date: expDate });
+        newshopitem.$save();
+        obj = {ingredient: newshopitem.ingredient, unit: newshopitem.unit, completed: newshopitem.completed};
+        obj.details = [newshopitem];
+        obj.amount = newshopitem.amount;
+        $scope.shopitems.push(obj);
+        $scope.newingredient = "";
+        $scope.newunit = "";
+        $scope.newamount = "";
+      }
+
+      $scope.remove = function(index){
+        for(i=0;i<$scope.shopitems[index].details.length;i++){
+          Shopitems.remove({id: $scope.shopitems[index].details[i]._id});
+        }
+        $scope.shopitems.splice(index, 1);
+      }
+
+      $scope.complete = function(index){
+        for(i=0;i<$scope.shopitems[index].details.length;i++){
+          $scope.shopitems[index].details[i].completed = $scope.shopitems[index].completed;
+          Shopitems.update({id: $scope.shopitems[index].details[i]._id}, $scope.shopitems[index].details[i]);
+        }
       }
       
     }])
@@ -594,7 +675,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
 
 // Cooking
 
-    .controller('CookingController', ['$scope', '$routeParams', 'Schedules', 'Recipes', 'Ingredients', 'Units', '$location', function ($scope, $routeParams, Schedules, Recipes, Ingredients, Units, $location) {
+    .controller('CookingController', ['$scope', '$routeParams', 'Schedules', 'Recipes', 'Ingredients', 'Units', 'Tags', '$location', function ($scope, $routeParams, Schedules, Recipes, Ingredients, Units, Tags, $location) {
       if (!$routeParams.date) {
         $scope.startDate = new Date();
       }
@@ -614,6 +695,9 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox'])
 
       $scope.schedules = Schedules.query({startDate: $scope.startDate, endDate: $scope.endDate}, function(response){
         for(i=0;i<response.length;i++){
+          for(j=0;j<response[i].recipe.tags.length;j++){
+            response[i].recipe.tags[j] = Tags.get({id: response[i].recipe.tags[j] });
+          }
           for(j=0;j<response[i].recipe.ingredients.length;j++){
             response[i].recipe.ingredients[j].ingredient = Ingredients.get({id: response[i].recipe.ingredients[j].ingredient });
             response[i].recipe.ingredients[j].unit = Units.get({id: response[i].recipe.ingredients[j].unit });

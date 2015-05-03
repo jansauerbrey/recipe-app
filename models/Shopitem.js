@@ -6,9 +6,10 @@ var ShopitemSchema = new mongoose.Schema({
   ingredient: {type: mongoose.Schema.Types.ObjectId, ref: 'Ingredient'},
   unit: {type: mongoose.Schema.Types.ObjectId, ref: 'Unit'},
   amount: Number,
-  active: { type: Boolean, default: true },
+  completed: { type: Boolean, default: false },
   author: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
   updated_at: { type: Date, default: Date.now },
+  expire_date: { type: Date, default: Date.now },
 });
 
 module.exports = mongoose.model('Shopitem', ShopitemSchema);

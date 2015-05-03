@@ -23,7 +23,7 @@ router.post('/', auth.verify, function(req, res, next) {
     Schedule.findOne(schedule).populate('recipe').exec( function (err, schedulePop) {
       for(i=0;i<schedulePop.recipe.ingredients.length;i++){
         var amount = schedulePop.recipe.ingredients[i].qty/schedulePop.recipe.yield*schedulePop.factor;
-        Shopitem.create({author: req._user.id, schedule: schedulePop, recipe: schedulePop.recipe, ingredient: schedulePop.recipe.ingredients[i].ingredient, unit: schedulePop.recipe.ingredients[i].unit, amount: amount})
+        Shopitem.create({author: req._user.id, expire_date: schedulePop.date.setDate(schedulePop.date.getDate() + 1), schedule: schedulePop, recipe: schedulePop.recipe, ingredient: schedulePop.recipe.ingredients[i].ingredient, unit: schedulePop.recipe.ingredients[i].unit, amount: amount})
       }
       res.json(schedulePop);
     });

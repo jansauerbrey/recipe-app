@@ -8,7 +8,7 @@ var auth = require('../auth/auth.js');
 
 /* GET /units listing. */
 router.get('/', auth.verify, function(req, res, next) {
-  Unit.find(function (err, units) {
+  Unit.find( null, null, {sort:{'name.de': 1 }},function (err, units) {
     if (err) return next(err);
     res.json(units);
   });
