@@ -25,3 +25,8 @@
 }
 
 body { padding-top: 60px; }
+
+.done-true {
+  text-decoration: line-through;
+  color: grey;
+}

@@ -11,7 +11,7 @@
           <th>Action</th>
         </thead>
         <tbody>
-          <tr ng-repeat="item in shopitems | orderBy: ['ingredient.category.de','ingredient.subcategory.de','ingredient.name.de']">
+          <tr ng-repeat="item in shopitems | orderBy: ['ingredient.category.de','ingredient.subcategory.de','ingredient.name.de']" class="done-{{item.completed}}">
             <td><checkbox ng-model="item.completed" ng-change="complete($index)"></checkbox></td>
             <td>{{item.amount | number}}</td>
             <td>{{item.unit.name.de}}</td>
@@ -27,7 +27,7 @@
             <input type="number" ng-model="newamount" class="form-control" placeholder="Amount">
           </div>
           <div class="col-xs-3 col-md-2" style="padding-left:0;">
-            <select ng-options="unit._id as unit.name.de for unit in units" ng-model="newunit" class="form-control" placeholder="Unit"></select>
+            <select ng-options="unit._id as unit.name.de for unit in units" ng-model="newunit" class="form-control" placeholder="Unit..."></select>
           </div>
           <div class="col-xs-4 col-md-7" style="padding-left:0;">
             <input type="text" ng-model="newingredient" typeahead="ingredient as ingredient.name.de for ingredient in GetIngredients($viewValue)" typeahead-editable="false" class="form-control" placeholder="Shopitem...">
