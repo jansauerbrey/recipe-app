@@ -6,6 +6,16 @@ var User = require('../models/User.js');
 
 var auth = require('../auth/auth.js');
 
+/* GET /user info. */
+router.get('/', auth.verify, function(req, res, next) {
+  User.findById( req._user.id, 'username fullname email is_admin', function (err, user) {
+    if (err) return next(err);
+    res.json(user);
+  });
+});
+
+
+
 /* LOGIN */
 router.post('/login', function(req, res) {
 
@@ -43,7 +53,7 @@ router.post('/login', function(req, res) {
                 }
 
                 //Send back token
-                return res.json({token: token, is_admin: user.is_admin});
+                return res.json({token: token, is_admin: user.is_admin, fullname: user.fullname});
             });
         });
     });

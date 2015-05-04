@@ -10,7 +10,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
     .factory('AuthenticationService', function($window) {
         var auth = {
             isAuthenticated: false,
-            isAdmin: false
+            isAdmin: false,
+            fullname: ''
         }
         return auth;
     })
@@ -99,6 +100,10 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
 
             register: function(user) {
                 return $http.post('/api/user/register', user);
+            },
+
+            info: function() {
+                return $http.get('/api/user');
             }
 
         }
@@ -713,19 +718,20 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
 // Directives
 //---------------
 
-    .directive('navigation', function (routeNavigation) {
+    .directive('navigation', ['routeNavigation', 'UserService', function (routeNavigation, UserService) {
       return {
         restrict: "E",
         replace: true,
         templateUrl: "partials/navigation-directive.tpl.html",
         controller:  function ($scope) {
           $scope.hideMobileNav = true;
+          UserService.info().success(function(data){$scope.user = data;})
           $scope.routes = routeNavigation.routes;
           $scope.activeRoute = routeNavigation.activeRoute;
-          $scope.hiddenRoute = routeNavigation.hiddenRoute;
+          $scope.hiddenRoute = routeNavigation.hiddenRoute;;
         }
       };
-    })
+    }])
 
 //---------------
 // Token Interceptor
