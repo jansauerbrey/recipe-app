@@ -11,7 +11,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
         var auth = {
             isAuthenticated: false,
             isAdmin: false,
-            fullname: ''
+            user: {}
         }
         return auth;
     })
@@ -45,8 +45,10 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
                     delete $window.sessionStorage.token;
                     delete $window.sessionStorage.isAdmin;
                     delete $window.sessionStorage.isAuthenticated;
+                    delete $window.sessionStorage.user;
                     AuthenticationService.isAuthenticated = false;
                     AuthenticationService.isAdmin = false;
+                    AuthenticationService.user = null;
                     $location.path("/user/login");
                 }
 
@@ -86,7 +88,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
             }
         };
     })
-
 
     .factory('UserService', function($http) {
         return {
@@ -189,6 +190,10 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
                     $window.sessionStorage.isAuthenticated = true;
                     $window.sessionStorage.isAdmin = data.is_admin;
                     $window.sessionStorage.token = data.token;
+                    UserService.info().success(function(user) {
+                      AuthenticationService.user = user;
+                      $window.sessionStorage.user = user;
+                    });
                     $location.path("/");
                 }).error(function(status, data) {
                     console.log(status);
@@ -224,8 +229,13 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
         //Admin User Controller (logout)
         if (AuthenticationService.isAuthenticated) {
             UserService.logOut().success(function(data) {
-                AuthenticationService.isAuthenticated = false;
-                delete $window.sessionStorage.token;
+                    delete $window.sessionStorage.token;
+                    delete $window.sessionStorage.isAdmin;
+                    delete $window.sessionStorage.isAuthenticated;
+                    delete $window.sessionStorage.user;
+                    AuthenticationService.isAuthenticated = false;
+                    AuthenticationService.isAdmin = false;
+                    AuthenticationService.user = null;
             }).error(function(status, data) {
                 console.log(status);
                 console.log(data);
@@ -255,6 +265,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
       $scope.remove = function(index){
         Users.remove({id: $scope.users[index]._id}, function(){
           $scope.users.splice(index, 1);
+        });
+      }
+
+      $scope.activate = function(index){
+        $scope.users[index].is_activated = true;
+        Users.update({id: $scope.users[index]._id}, {is_activated: true}, function(){
         });
       }
 
@@ -718,14 +734,14 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
 // Directives
 //---------------
 
-    .directive('navigation', ['routeNavigation', 'UserService', function (routeNavigation, UserService) {
+    .directive('navigation', ['routeNavigation', 'AuthenticationService', function (routeNavigation, AuthenticationService) {
       return {
         restrict: "E",
         replace: true,
         templateUrl: "partials/navigation-directive.tpl.html",
         controller:  function ($scope) {
           $scope.hideMobileNav = true;
-          UserService.info().success(function(data){$scope.user = data;})
+          $scope.user = AuthenticationService.user;
           $scope.routes = routeNavigation.routes;
           $scope.activeRoute = routeNavigation.activeRoute;
           $scope.hiddenRoute = routeNavigation.hiddenRoute;;

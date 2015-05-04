@@ -38,6 +38,11 @@ router.post('/login', function(req, res) {
             return res.sendStatus(401);
         }
  
+        if (user.is_activated === false) {
+            console.log("User not activated");
+            return res.sendStatus(401);
+        }
+
         user.comparePassword(password, function(isMatch) {
             if (!isMatch) {
                 console.log("Attempt failed to login with " + user.username);
@@ -95,7 +100,7 @@ router.post('/register', function(req, res) {
             }
 
             if (counter == 1) {
-                User.update({username: username}, {is_admin:true}, function(err, nbRow) {
+                User.update({username: username}, {is_admin:true, is_activated: true}, function(err, nbRow) {
                     if (err) {
                         console.log(err);
                         return res.sendStatus(500);
