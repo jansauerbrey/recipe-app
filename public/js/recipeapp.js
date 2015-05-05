@@ -676,18 +676,22 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
         $scope.newunit = "";
         $scope.newamount = "";
       }
+$scope.removeItem = function(item){
+   $scope.items.splice($scope.items.indexOf(item),1);
+}
 
-      $scope.remove = function(index){
-        for(i=0;i<$scope.shopitems[index].details.length;i++){
-          Shopitems.remove({id: $scope.shopitems[index].details[i]._id});
+
+      $scope.remove = function(item){
+        for(i=0;i<item.details.length;i++){
+          Shopitems.remove({id: item.details[i]._id});
         }
-        $scope.shopitems.splice(index, 1);
+        $scope.shopitems.splice($scope.shopitems.indexOf(item), 1);
       }
 
-      $scope.complete = function(index){
-        for(i=0;i<$scope.shopitems[index].details.length;i++){
-          $scope.shopitems[index].details[i].completed = $scope.shopitems[index].completed;
-          Shopitems.update({id: $scope.shopitems[index].details[i]._id}, $scope.shopitems[index].details[i]);
+      $scope.complete = function(item){
+        for(i=0;i<item.details.length;i++){
+          $scope.shopitems[$scope.shopitems.indexOf(item)].details[i].completed = item.completed;
+          Shopitems.update({id: item.details[i]._id}, item.details[i]);
         }
       }
       
