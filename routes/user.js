@@ -14,6 +14,13 @@ router.get('/', auth.verify, function(req, res, next) {
   });
 });
 
+/* GET /user/id */
+router.get('/:id', auth.verify, function(req, res, next) {
+  User.findById(req.params.id, 'fullname', function (err, user) {
+    if (err) return next(err);
+    res.json(user);
+  });
+});
 
 
 /* LOGIN */

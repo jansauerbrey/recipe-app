@@ -105,6 +105,10 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
 
             info: function() {
                 return $http.get('/api/user');
+            },
+
+            fullname: function(id) {
+                return $http.get('/api/user/'+id);
             }
 
         }
@@ -700,7 +704,7 @@ $scope.removeItem = function(item){
 
 // Cooking
 
-    .controller('CookingController', ['$scope', '$routeParams', 'Schedules', 'Recipes', 'Ingredients', 'Units', 'Tags', '$location', function ($scope, $routeParams, Schedules, Recipes, Ingredients, Units, Tags, $location) {
+    .controller('CookingController', ['$scope', '$routeParams', 'Schedules', 'Recipes', 'Ingredients', 'Units', 'Tags', 'UserService', '$location', function ($scope, $routeParams, Schedules, Recipes, Ingredients, Units, Tags, UserService, $location) {
       if (!$routeParams.date) {
         $scope.startDate = new Date();
       }
@@ -727,6 +731,10 @@ $scope.removeItem = function(item){
             response[i].recipe.ingredients[j].ingredient = Ingredients.get({id: response[i].recipe.ingredients[j].ingredient });
             response[i].recipe.ingredients[j].unit = Units.get({id: response[i].recipe.ingredients[j].unit });
           }
+          // does not work yet
+          response[i].recipe.author = UserService.fullname(response[i].recipe.author).then(function(data) {
+            return data;
+          });
         }
         return response;
       });

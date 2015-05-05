@@ -16,6 +16,7 @@ router.get('/', auth.verify, function(req, res, next) {
 
 /* POST /recipes */
 router.post('/', auth.verify, function(req, res, next) {
+  req.body.author = req._user.id;
   Recipe.create(req.body, function (err, post) {
     if (err) return next(err);
     res.json(post);
