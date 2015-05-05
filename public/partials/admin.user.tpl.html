@@ -4,10 +4,10 @@
     <table class="col-xs-12 table table-striped">
       <thead>
         <th>#</th>
-        <th>Fullname</th>
+        <th class="hidden-xs">Fullname</th>
         <th>Username</th>
-        <th>Email</th>
-        <th>Created</th>
+        <th class="hidden-xs">Email</th>
+        <th class="hidden-xs hidden-sm">Created</th>
         <th>Level</th>
         <th>Actions</th>
       </thead>
@@ -16,16 +16,16 @@
           <th>
             {{$index+1}}
           </th>
-          <td>
+          <td class="hidden-xs">
             {{user.fullname}}
           </td>
           <td>
             {{user.username}}
           </td>
-          <td>
+          <td class="hidden-xs">
             {{user.email}}
           </td>
-          <td>
+          <td class="hidden-xs hidden-sm">
             {{user.created | date:'dd.MM.yyyy'}}
           </td>
           <td>
