@@ -1,0 +1,40 @@
+  <div class="row">
+    <div class="col-xs-12">
+      <table class="col-xs-12 table table-striped">
+        <thead>
+          <th></th>
+          <th>Amount</th>
+          <th>Unit</th>
+          <th>Ingredient</th>
+          <th class="hidden-sm hidden-xs">Category</th>
+          <th class="hidden-sm hidden-xs">Subcategory</th>
+          <th>Action</th>
+        </thead>
+        <tbody>
+          <tr ng-repeat="item in shopitems | orderBy: ['ingredient.category.de','ingredient.subcategory.de','ingredient.name.de']" class="done-{{item.completed}}">
+            <td><checkbox ng-model="item.completed" ng-change="complete(item)"></checkbox></td>
+            <td>{{item.amount | number}}</td>
+            <td>{{item.unit.name.de}}</td>
+            <td>{{item.ingredient.name.de}}</td>
+            <td class="hidden-sm hidden-xs">{{item.ingredient.category.de}}</td>
+            <td class="hidden-sm hidden-xs">{{item.ingredient.subcategory.de}}</td>
+            <td><a class="btn btn-primary" ng-click="remove(item)" role="button"><i class="fa fa-trash-o"></i></a></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="form-group">
+          <div class="col-xs-3 col-md-2" style="padding-left:0;">
+            <input type="number" ng-model="newamount" class="form-control" placeholder="Amount">
+          </div>
+          <div class="col-xs-3 col-md-2" style="padding-left:0;">
+            <select ng-options="unit._id as unit.name.de for unit in units" ng-model="newunit" class="form-control" placeholder="Unit..."></select>
+          </div>
+          <div class="col-xs-4 col-md-7" style="padding-left:0;">
+            <input type="text" ng-model="newingredient" typeahead="ingredient as ingredient.name.de for ingredient in GetIngredients($viewValue)" typeahead-editable="false" class="form-control" placeholder="Shopitem...">
+          </div>
+          <div class="col-xs-2 col-md-1" style="padding-left:0;">	
+            <a class="btn btn-primary" ng-click="addShopitem()" role="button">add</a>
+          </div>
+      </div>
+    </div>
+  </div>

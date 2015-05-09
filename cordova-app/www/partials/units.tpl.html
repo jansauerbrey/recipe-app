@@ -1,0 +1,26 @@
+<div class="row">
+  <div class="col-xs-12">
+    <input type="text" ng-model="search.name.de" class="form-control visible-xs-block" placeholder="Search...">
+    <input type="text" ng-model="search.name.$" class="form-control hidden-xs" placeholder="Search...">
+    <div class="col-xs-12">
+      <h4 class="col-sm-4 hidden-xs">English:</h4>
+      <h4 class="col-sm-4 hidden-xs">German:</h4>
+      <h4 class="col-sm-4 hidden-xs">Finnish:</h4>      
+    </div>
+    <div ng-show="loading" class="text-center"><i class="fa fa-spinner fa-spin fa-3x"></i></div>
+    <div class="list-group">
+      <div ng-repeat="unit in units | filter: search">
+        <a class="list-group-item col-xs-12" href="#/units/{{unit._id}}">
+          <div class="col-sm-4 hidden-xs">{{unit.name.en}}</div>
+          <div class="col-xs-12 col-sm-4">{{unit.name.de}}</div>
+          <div class="col-sm-3 hidden-xs">{{unit.name.fi}}</div>
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="col-xs-12" style="margin-top:15px;">
+    <div class="form-inline form-group">
+      <a class="btn btn-primary" href="/#/unitadd/" role="button">add</a>
+    </div>
+  </div>
+</div>

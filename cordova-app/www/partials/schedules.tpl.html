@@ -1,0 +1,30 @@
+  <div class="row">
+    <div class="col-md-4 col-xs-12">
+      <p class="input-group">
+        <input type="text" class="form-control" ng-change="updateSchedules(startDate, endDate)" ng-model="startDate" datepicker-popup="dd.MM.yyyy" is-open="startOpened" starting-day="1" ng-required="true" />
+        <span class="input-group-btn">
+          <button type="button" class="btn btn-default" ng-click="openStartDate($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+        </span>
+      </p>
+    </div>
+    <div class="col-md-4 col-md-offset-4 col-xs-12">
+      <p class="input-group">
+        <input type="text" class="form-control" ng-change="updateSchedules(startDate, endDate)" ng-model="endDate" datepicker-popup="dd.MM.yyyy" is-open="endOpened" starting-day="1" ng-required="true" />
+        <span class="input-group-btn">
+          <button type="button" class="btn btn-default" ng-click="openEndDate($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+        </span>
+      </p>
+    </div>
+    <div class="col-xs-12">
+      <div class="list-group">
+        <div ng-repeat="schedules in schedulesArray">
+          <a class="list-group-item" href="#/schedules/{{schedules.date | date:'yyyy-MM-dd'}}">
+            <div class="list-group-item-heading">{{schedules.date | date:'EEEE dd.MM.yyyy'}}</div>
+            <div class="list-group-item-text">
+              <div ng-repeat="schedule in schedules.schedule">{{schedule.factor}} Persons: {{schedule.recipe.name}}</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>

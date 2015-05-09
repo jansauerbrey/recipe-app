@@ -1,0 +1,45 @@
+  <div class="row">
+  <div class="col-xs-12">
+    <div ng-show="loading" class="text-center"><i class="fa fa-spinner fa-spin fa-3x"></i></div>
+    <table class="col-xs-12 table table-striped">
+      <thead>
+        <th>#</th>
+        <th class="hidden-xs">Fullname</th>
+        <th>Username</th>
+        <th class="hidden-xs">Email</th>
+        <th class="hidden-xs hidden-sm">Created</th>
+        <th>Level</th>
+        <th>Actions</th>
+      </thead>
+      <tbody>
+        <tr ng-repeat="user in users">
+          <th>
+            {{$index+1}}
+          </th>
+          <td class="hidden-xs">
+            {{user.fullname}}
+          </td>
+          <td>
+            {{user.username}}
+          </td>
+          <td class="hidden-xs">
+            {{user.email}}
+          </td>
+          <td class="hidden-xs hidden-sm">
+            {{user.created | date:'dd.MM.yyyy'}}
+          </td>
+          <td>
+            <i ng-hide="user.is_admin" class="glyphicon glyphicon-user" title="User"></i>
+            <i ng-show="user.is_admin" class="glyphicon glyphicon-certificate" title="Admin"></i>
+          </td>
+          <td>
+            <a ng-hide="user.is_admin" class="btn btn-primary btn-sm" ng-click="makeAdmin($index)" role="button"><i class="fa fa-level-up"></i></a>
+            <a ng-show="user.is_admin" class="btn btn-primary btn-sm" ng-click="removeAdmin($index)" role="button"><i class="fa fa-level-down"></i></a>
+            <a class="btn btn-primary btn-sm" ng-class="{disabled: user.is_activated}" ng-click="activate($index)" role="button"><i class="fa fa-check"></i></a>
+            <a class="btn btn-primary btn-sm" ng-click="remove($index)" role="button"><i class="fa fa-trash-o"></i></a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  </div>
