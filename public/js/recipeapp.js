@@ -104,11 +104,11 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
             },
 
             info: function() {
-                return $http.get('/api/user');
+                return $http.get('/api/user/info');
             },
 
             fullname: function(id) {
-                return $http.get('/api/user/'+id);
+                return $http.get('/api/user/info/'+id);
             }
 
         }

@@ -6,16 +6,16 @@ var User = require('../models/User.js');
 
 var auth = require('../auth/auth.js');
 
-/* GET /user info. */
-router.get('/', auth.verify, function(req, res, next) {
+/* GET /user/info. */
+router.get('/info', auth.verify, function(req, res, next) {
   User.findById( req._user.id, 'username fullname email is_admin', function (err, user) {
     if (err) return next(err);
     res.json(user);
   });
 });
 
-/* GET /user/id */
-router.get('/:id', auth.verify, function(req, res, next) {
+/* GET /user/info/id */
+router.get('/info/:id', auth.verify, function(req, res, next) {
   User.findById(req.params.id, 'fullname', function (err, user) {
     if (err) return next(err);
     res.json(user);
@@ -73,6 +73,7 @@ router.post('/login', function(req, res) {
 
 /* LOGOUT */
 router.get('/logout', auth.verify, function(req, res) {
+    console.log(req.headers);
     auth.expireToken(req.headers);
     return res.sendStatus(200);
 });
