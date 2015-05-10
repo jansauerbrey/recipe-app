@@ -92,85 +92,85 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
     .factory('UserService', function($http) {
         return {
             logIn: function(username, password) {
-                return $http.post('/api/user/login', {username: username, password: password});
+                return $http.post('http://rezept-planer.de/api/user/login', {username: username, password: password});
             },
 
             logOut: function() {
-                return $http.get('/api/user/logout');
+                return $http.get('http://rezept-planer.de/api/user/logout');
             },
 
             register: function(user) {
-                return $http.post('/api/user/register', user);
+                return $http.post('http://rezept-planer.de/api/user/register', user);
             },
 
             info: function() {
-                return $http.get('/api/user');
+                return $http.get('http://rezept-planer.de/api/user');
             },
 
             fullname: function(id) {
-                return $http.get('/api/user/'+id);
+                return $http.get('http://rezept-planer.de/api/user/'+id);
             }
 
         }
     })
 
         .factory('Units', ['$resource', function($resource){
-          return $resource('/api/units/:id', null, {
+          return $resource('http://rezept-planer.de/api/units/:id', null, {
             'update': { method:'PUT' }
           });
         }])
 
         .factory('Ingredients', ['$resource', function($resource){
-          return $resource('/api/ingredients/:id', null, {
+          return $resource('http://rezept-planer.de/api/ingredients/:id', null, {
             'update': { method:'PUT' }
           });
         }])
 
         .factory('TAIngredients', ['$resource', function($resource){
-          return $resource('/api/typeahead/ingredients/', null, {
+          return $resource('http://rezept-planer.de/api/typeahead/ingredients/', null, {
             'search': { method:'GET', isArray: true }
           });
         }])
 
         .factory('Tags', ['$resource', function($resource){
-          return $resource('/api/tags/:id', null, {
+          return $resource('http://rezept-planer.de/api/tags/:id', null, {
             'update': { method:'PUT' }
           });
         }])
 
         .factory('TATags', ['$resource', function($resource){
-          return $resource('/api/typeahead/tags/', null, {
+          return $resource('http://rezept-planer.de/api/typeahead/tags/', null, {
             'search': { method:'GET', isArray: true }
           });
         }])
 
         .factory('Recipes', ['$resource', function($resource){
-          return $resource('/api/recipes/:id', null, {
+          return $resource('http://rezept-planer.de/api/recipes/:id', null, {
             'update': { method:'PUT' }
           });
         }])
 
         .factory('TARecipes', ['$resource', function($resource){
-          return $resource('/api/typeahead/recipes/', null, {
+          return $resource('http://rezept-planer.de/api/typeahead/recipes/', null, {
             'search': { method:'GET', isArray: true }
           });
         }])
 
         .factory('Schedules', ['$resource', function($resource){
-          return $resource('/api/schedules/:id', null, {
+          return $resource('http://rezept-planer.de/api/schedules/:id', null, {
             'update': { method:'PUT' }
           });
         }])
 
 
         .factory('Shopitems', ['$resource', function($resource){
-          return $resource('/api/shopitems/:id', null, {
+          return $resource('http://rezept-planer.de/api/shopitems/:id', null, {
             'update': { method:'PUT' }
           });
         }])
 
         .factory('Users', ['$resource', function($resource){
-          return $resource('/api/admin/user/:id', null, {
+          return $resource('http://rezept-planer.de/api/admin/user/:id', null, {
             'update': { method:'PUT' }
           });
         }])
@@ -947,9 +947,6 @@ $scope.removeItem = function(item){
                 $location.path("/user/login");
             }
         });
-        $timeout(function(){
-            $state.go('/');
-        }, 5000);
     })
 
 ;
