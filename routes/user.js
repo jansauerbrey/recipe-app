@@ -29,6 +29,7 @@ router.post('/login', function(req, res) {
     //verify credential (use POST)
     var username = req.body.username || '';
     var password = req.body.password || '';
+    var autologin = req.body.autologin || false;
  
     if (username == '' || password == '') {
         return res.send(401);
@@ -57,8 +58,12 @@ router.post('/login', function(req, res) {
             }
  
             var userData = {id: user._id, username: user.username, is_admin: user.is_admin};
+            var expiration = 300; // 5 minutes
+            if (autologin === true) {
+              expiration = 60*60*24*30; //30 days
+            }
 
-            auth.createAndStoreToken(userData, 60*60, function(err, token) {
+            auth.createAndStoreToken(userData, expiration, function(err, token) {
                 if (err) {
                     console.log(err);
                     return res.sendStatus(400);
