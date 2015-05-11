@@ -91,8 +91,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
 
     .factory('UserService', function($http) {
         return {
-            logIn: function(username, password) {
-                return $http.post('/api/user/login', {username: username, password: password});
+            logIn: function(username, password, autologin = false) {
+                return $http.post('/api/user/login', {username: username, password: password, autologin: autologin});
             },
 
             logOut: function() {
