@@ -11,9 +11,14 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  
+  <div class="container">
+    <navigation></navigation>
+    <ng-view></ng-view>
+  </div>
+
 
 <!-- Libraries -->
-<script src="cordova.js"></script>
 <script src="lib/angular/angular.min.js"></script>
 <script src="lib/angular/angular-route.min.js"></script>
 <script src="lib/angular/angular-resource.min.js"></script>
@@ -21,11 +26,6 @@
 <script src="dist/js/angular-bootstrap-checkbox.js"></script>
 <script src="dist/js/ng-tags-input.min.js"></script>
 <script src="js/recipeapp.js"></script>
-  
-  <div class="container">
-    <navigation></navigation>
-    <ng-view></ng-view>
-  </div>
 
 </body>
 </html>

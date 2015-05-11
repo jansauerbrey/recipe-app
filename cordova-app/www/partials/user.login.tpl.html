@@ -14,8 +14,17 @@
         </div>
     </div>
     <div class="form-group">
+        <div class="col-sm-offset-4 col-sm-4">
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" ng-model="login.autologin"> Autologin
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
         <div class="col-sm-offset-4 col-sm-10">
-            <button type="submit" class="btn btn-default" ng-click="logIn(login.username, login.password)">Log In</button>
+            <button type="submit" class="btn btn-default" ng-click="logIn(login.username, login.password, login.autologin)">Log In</button>
         </div>
     </div>
 </form>

@@ -1,5 +1,7 @@
 angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', 'ngTagsInput'])
 
+
+
 //---------------
 // Services
 //---------------
@@ -20,8 +22,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
         return {
             request: function (config) {
                 config.headers = config.headers || {};
-                if ($window.sessionStorage.token) {
-                    config.headers.Authorization = 'AUTH ' + $window.sessionStorage.token;
+                if ($window.localStorage.token) {
+                    config.headers.Authorization = 'AUTH ' + $window.localStorage.token;
                 }
                 return config;
             },
@@ -32,20 +34,20 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
 
             /* Set Authentication.isAuthenticated to true if 200 received */
             response: function (response) {
-                if (response != null && response.status == 200 && $window.sessionStorage.token && !AuthenticationService.isAuthenticated) {
+                if (response != null && response.status == 200 && $window.localStorage.token && !AuthenticationService.isAuthenticated) {
                     AuthenticationService.isAuthenticated = true;
-                    $window.sessionStorage.isAuthenticated = true;
+                    $window.localStorage.isAuthenticated = true;
                 }
                 return response || $q.when(response);
             },
 
             /* Revoke client authentication if 401 is received */
             responseError: function(rejection) {
-                if (rejection != null && rejection.status === 401 && ($window.sessionStorage.token || AuthenticationService.isAuthenticated)) {
-                    delete $window.sessionStorage.token;
-                    delete $window.sessionStorage.isAdmin;
-                    delete $window.sessionStorage.isAuthenticated;
-                    delete $window.sessionStorage.user;
+                if (rejection != null && rejection.status === 401 && ($window.localStorage.token || AuthenticationService.isAuthenticated)) {
+                    delete $window.localStorage.token;
+                    delete $window.localStorage.isAdmin;
+                    delete $window.localStorage.isAuthenticated;
+                    delete $window.localStorage.user;
                     AuthenticationService.isAuthenticated = false;
                     AuthenticationService.isAdmin = false;
                     AuthenticationService.user = null;
@@ -89,7 +91,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
         };
     })
 
-    .factory('UserService', function($http) {
+    .factory('UserService', [ '$http', function($http) {
         return {
             logIn: function(username, password) {
                 return $http.post('http://rezept-planer.de/api/user/login', {username: username, password: password});
@@ -112,7 +114,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
             }
 
         }
-    })
+    }])
 
         .factory('Units', ['$resource', function($resource){
           return $resource('http://rezept-planer.de/api/units/:id', null, {
@@ -191,12 +193,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
                 UserService.logIn(username, password).success(function(data) {
                     AuthenticationService.isAuthenticated = true;
                     AuthenticationService.isAdmin = data.is_admin;
-                    $window.sessionStorage.isAuthenticated = true;
-                    $window.sessionStorage.isAdmin = data.is_admin;
-                    $window.sessionStorage.token = data.token;
+                    $window.localStorage.isAuthenticated = true;
+                    $window.localStorage.isAdmin = data.is_admin;
+                    $window.localStorage.token = data.token;
                     UserService.info().success(function(user) {
                       AuthenticationService.user = user;
-                      $window.sessionStorage.user = user;
+                      $window.localStorage.user = user;
                     });
                     $location.path("/");
                 }).error(function(status, data) {
@@ -233,10 +235,10 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
         //Admin User Controller (logout)
         if (AuthenticationService.isAuthenticated) {
             UserService.logOut().success(function(data) {
-                    delete $window.sessionStorage.token;
-                    delete $window.sessionStorage.isAdmin;
-                    delete $window.sessionStorage.isAuthenticated;
-                    delete $window.sessionStorage.user;
+                    delete $window.localStorage.token;
+                    delete $window.localStorage.isAdmin;
+                    delete $window.localStorage.isAuthenticated;
+                    delete $window.localStorage.user;
                     AuthenticationService.isAuthenticated = false;
                     AuthenticationService.isAdmin = false;
                     AuthenticationService.user = null;
@@ -942,7 +944,7 @@ $scope.removeItem = function(item){
         $rootScope.$on("$routeChangeStart", function(event, nextRoute, currentRoute) {
             //redirect only if both isAuthenticated is false and no token is set
             if (nextRoute != null && nextRoute.access != null && nextRoute.access.requiredAuthentication 
-                && !AuthenticationService.isAuthenticated && !$window.sessionStorage.token) {
+                && !AuthenticationService.isAuthenticated && !$window.localStorage.token) {
 
                 $location.path("/user/login");
             }
