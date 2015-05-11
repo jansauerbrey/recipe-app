@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="de.sby.recipeapp" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="de.sby.recipeapp" version="0.0.2" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Rezept Planer</name>
     <description>
         A recipe planner for storing and planning recipes including shopping list, etc.
@@ -8,6 +8,16 @@
         Jan Sauerbrey
     </author>
     <content src="index.html" />
+    <!-- Default application icon -->
+    <icon src="www/res/img/icon.png" />
+    <!--
+    Default icon should work, but cordova don't overwrite
+    the default on all densities
+    -->
+    <icon src="www/res/img/icon.png" platform="android" density="ldpi" />
+    <icon src="www/res/img/icon.png" platform="android" density="mdpi" />
+    <icon src="www/res/img/icon.png" platform="android" density="hdpi" />
+    <icon src="www/res/img/icon.png" platform="android" density="xhdpi" />
     <plugin name="cordova-plugin-whitelist" version="1" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
