@@ -57,18 +57,11 @@ router.post('/login', function(req, res) {
                 return res.sendStatus(401);
             }
  
-            var userData = {id: user._id, username: user.username, is_admin: user.is_admin};
+            var userData = {id: user._id, username: user.username, is_admin: user.is_admin, autologin: autologin};
             var expiration = 300; // 5 minutes
+console.log(req);
             if (autologin === true) {
-              User.findByIdAndUpdate(user._id, {autologin: true}, function (err, post) {
-                 if (err) return next(err);
-              });
               expiration = 60*60*24*30; //30 days
-            }
-            else {
-              User.findByIdAndUpdate(user._id, {autologin: false}, function (err, post) {
-                 if (err) return next(err);
-              });
             }
 
             auth.createAndStoreToken(userData, expiration, function(err, token) {
@@ -86,10 +79,6 @@ router.post('/login', function(req, res) {
 
 /* LOGOUT */
 router.get('/logout', auth.verify, function(req, res) {
-    console.log(req.headers);
-    //User.findByIdAndUpdate(user._id, {autologin: false}, function (err, post) {
-    //  if (err) return next(err);
-    //});
     auth.expireToken(req.headers);
     return res.sendStatus(200);
 });

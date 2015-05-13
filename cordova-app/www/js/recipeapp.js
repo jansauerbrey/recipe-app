@@ -93,8 +93,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
 
     .factory('UserService', [ '$http', function($http) {
         return {
-            logIn: function(username, password) {
-                return $http.post('http://rezept-planer.de/api/user/login', {username: username, password: password});
+            logIn: function(username, password, autologin) {
+                return $http.post('http://rezept-planer.de/api/user/login', {username: username, password: password, autologin: autologin});
             },
 
             logOut: function() {
@@ -187,10 +187,10 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
     .controller('UserCtrl', ['$scope', '$location', '$window', 'Users', 'UserService', 'AuthenticationService',
         function UserCtrl($scope, $location, $window, Users, UserService, AuthenticationService) {
  
-        $scope.logIn = function logIn(username, password) {
+        $scope.logIn = function logIn(username, password, autologin) {
             if (username !== undefined && password !== undefined) {
  
-                UserService.logIn(username, password).success(function(data) {
+                UserService.logIn(username, password, autologin).success(function(data) {
                     AuthenticationService.isAuthenticated = true;
                     AuthenticationService.isAdmin = data.is_admin;
                     $window.localStorage.isAuthenticated = true;

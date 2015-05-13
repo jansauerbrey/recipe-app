@@ -1,6 +1,6 @@
 var redisHelper = require('./redisHelper');
 var tokenHelper = require('./tokenHelper');
-var TIME_TO_LIVE = 60*60; //1 hour
+var TIME_TO_LIVE = 300; //5 minutes
 
 
 /*
@@ -58,6 +58,9 @@ exports.verifyAdmin = function(req, res, next) {
 		if (err) return res.sendStatus(401);
 
 		if (data.is_admin) {
+			if (data.autologin === true){
+				TIME_TO_LIVE = 60*60*24*30;
+			}
 		        try {
 				redisHelper.renewToken(token, TIME_TO_LIVE, function(err, success){
 					return (err, success);
