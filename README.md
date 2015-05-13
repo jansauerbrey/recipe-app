@@ -7,13 +7,10 @@ The intention of this app is to have a recipe database and a planning tool at th
 - [x] Create, Edit and Delete Units
 - [x] Create, Edit and Delete Ingredients
 - [x] Create, Edit and Delete Recipes including linkage of Ingredients and Units
-- [x] Fix TypeAHead function (only exact matches are found, no fuzzy search)
-- [ ] Fix mobile navigation bar autohide
-- [x] Fix ingredients in recipes (dispayed as Object at the moment)
-- [ ] Create, Edit and Delete Schedules
+- [x] Create, Edit and Delete Schedules
 - [ ] Autofill (random) recipes to schedules
-- [ ] Shopping list generation including checking if bought
-- [ ] Add possibility to add items to shopping list (besides recipe ingredients)
+- [x] Shopping list generation including checking if bought
+- [x] Possibility to add items to shopping list (besides recipe ingredients)
 - [x] Add cocking overview for each planned day
 - [x] User Authentication via token in redis database including login and logout
 - [x] User management (admin level)
