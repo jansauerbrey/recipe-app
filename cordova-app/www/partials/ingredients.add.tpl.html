@@ -1,65 +1,68 @@
 <div class="row">
   <div class="col-xs-12">
     <div class="form-horizontal">
-      <h4 class="col-sm-11 col-sm-offset-1">Name:</h4>
       <div class="form-group">
-        <label class="control-label col-sm-1">English:</label>
-        <div class="col-sm-11">
+        <label class="control-label col-sm-3">Name (English):</label>
+        <div class="col-sm-9">
           <input type="text" ng-model="newingredient.name.en" class="form-control">
         </div>
       </div>
       <div class="form-group">
-        <label class="control-label col-sm-1">German:</label>
-        <div class="col-sm-11">
+        <label class="control-label col-sm-3">Name (German):</label>
+        <div class="col-sm-9">
           <input type="text" ng-model="newingredient.name.de" class="form-control">
         </div>
       </div>
       <div class="form-group">
-        <label class="control-label col-sm-1">Finnish:</label>
-        <div class="col-sm-11">
+        <label class="control-label col-sm-3">Name (Finnish):</label>
+        <div class="col-sm-9">
           <input type="text" ng-model="newingredient.name.fi" class="form-control">
         </div>
       </div>
-      <h4 class="col-sm-11 col-sm-offset-1">Category:</h4>
       <div class="form-group">
-        <label class="control-label col-sm-1">English:</label>
-        <div class="col-sm-11">
-          <input type="text" ng-model="newingredient.category.en" class="form-control">
+        <label class="control-label col-sm-3">Category:</label>
+        <div class="col-sm-9">
+          <p class="form-control-static">{{selectedcategory.category}}</p>
         </div>
       </div>
       <div class="form-group">
-        <label class="control-label col-sm-1">German:</label>
-        <div class="col-sm-11">
-          <input type="text" ng-model="newingredient.category.de" class="form-control">
+        <label class="control-label col-sm-3">Sub-Category:</label>
+        <div class="col-sm-9">
+          <p class="form-control-static">{{selectedcategory.subcategory}}</p>
         </div>
       </div>
       <div class="form-group">
-        <label class="control-label col-sm-1">Finnish:</label>
-        <div class="col-sm-11">
-          <input type="text" ng-model="newingredient.category.fi" class="form-control">
-        </div>
-      </div>
-      <h4 class="col-sm-11 col-sm-offset-1">Sub-Category:</h4>
-      <div class="form-group">
-        <label class="control-label col-sm-1">English:</label>
-        <div class="col-sm-11">
-          <input type="text" ng-model="newingredient.subcategory.en" class="form-control">
+        <label class="control-label col-sm-3">Sub-Sub-Category:</label>
+        <div class="col-sm-9">
+          <select ng-options="category as category.subsubcategory group by category.subcategory for category in categories" ng-model="selectedcategory" class="form-control"></select>
         </div>
       </div>
       <div class="form-group">
-        <label class="control-label col-sm-1">German:</label>
-        <div class="col-sm-11">
-          <input type="text" ng-model="newingredient.subcategory.de" class="form-control">
+        <label class="control-label col-sm-3">REWE Category ID:</label>
+        <div class="col-sm-9">
+          <p class="form-control-static">{{selectedcategory.rewe_cat_id}}</p>
         </div>
       </div>
       <div class="form-group">
-        <label class="control-label col-sm-1">Finnish:</label>
-        <div class="col-sm-11">
-          <input type="text" ng-model="newingredient.subcategory.fi" class="form-control">
+        <label class="control-label col-sm-3">REWE Article No:</label>
+        <div class="col-sm-9">
+          <input type="number" ng-model="newingredient.rewe_art_no" class="form-control">
         </div>
       </div>
       <div class="form-group">
-        <div class="col-sm-11 col-sm-offset-1">
+        <label class="control-label col-sm-3">Image Link (small):</label>
+        <div class="col-sm-9">
+          <input type="text" ng-model="newingredient.rewe_img_link_sm" class="form-control">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-sm-3">Image Link (medium):</label>
+        <div class="col-sm-9">
+          <input type="text" ng-model="newingredient.rewe_img_link_md" class="form-control">
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-9 col-sm-offset-3">
           <button ng-click="save()" class="btn btn-primary">create</button>
           <a class="btn btn-default" href="/#/ingredients/" role="button">cancel</a>
         </div>

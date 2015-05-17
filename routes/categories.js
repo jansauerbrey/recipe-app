@@ -2,51 +2,50 @@ var express = require('express');
 var router = express.Router();
 
 var mongoose = require('mongoose');
-var Ingredient = require('../models/Ingredient.js');
+var Category = require('../models/Category.js');
 
 var auth = require('../auth/auth.js');
 
-/* GET /ingredients listing. */
+/* GET /categories listing. */
 router.get('/', auth.verify, function(req, res, next) {
-  Ingredient.find(req.query, null, {sort:{'name.de': 1 }}, function (err, ingredients) {
+  Category.find( function (err, categories) {
     if (err) return next(err);
-    res.json(ingredients);
+    res.json(categories);
   });
 });
 
-/* POST /ingredients */
+/* POST /units */
 router.post('/', auth.verify, function(req, res, next) {
   req.body.author = req._user.id;
-  Ingredient.create(req.body, function (err, post) {
+  Category.create(req.body, function (err, category) {
     if (err) return next(err);
-    res.json(post);
+    res.json(category);
   });
 });
 
-/* GET /ingredients/:id */
+/* GET /units/id */
 router.get('/:id', auth.verify, function(req, res, next) {
-  Ingredient.findById(req.params.id, function (err, post) {
+  Category.findById(req.params.id, function (err, category) {
     if (err) return next(err);
-    res.json(post);
+    res.json(category);
   });
 });
 
-/* PUT /ingredients/:id */
+/* PUT /units/:id */
 router.put('/:id', auth.verify, function(req, res, next) {
   req.body.author = req._user.id;
-  Ingredient.findByIdAndUpdate(req.params.id, req.body, function (err, post) {
+  Category.findByIdAndUpdate(req.params.id, req.body, function (err, category) {
     if (err) return next(err);
-    res.json(post);
+    res.json(category);
   });
 });
 
-/* DELETE /ingredients/:id */
+/* DELETE /units/:id */
 router.delete('/:id', auth.verify, function(req, res, next) {
-  Ingredient.findByIdAndRemove(req.params.id, req.body, function (err, post) {
+  Category.findByIdAndRemove(req.params.id, req.body, function (err, category) {
     if (err) return next(err);
-    res.json(post);
+    res.json(category);
   });
 });
-
 
 module.exports = router;

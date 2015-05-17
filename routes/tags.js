@@ -16,6 +16,7 @@ router.get('/', auth.verify, function(req, res, next) {
 
 /* POST /tags */
 router.post('/', auth.verify, function(req, res, next) {
+  req.body.author = req._user.id;
   Tag.create(req.body, function (err, post) {
     if (err) return next(err);
     res.json(post);
@@ -32,6 +33,7 @@ router.get('/:id', auth.verify, function(req, res, next) {
 
 /* PUT /tags/:id */
 router.put('/:id', auth.verify, function(req, res, next) {
+  req.body.author = req._user.id;
   Tag.findByIdAndUpdate(req.params.id, req.body, function (err, post) {
     if (err) return next(err);
     res.json(post);

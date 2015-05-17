@@ -128,6 +128,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
           });
         }])
 
+        .factory('Categories', ['$resource', function($resource){
+          return $resource('http://rezept-planer.de/api/categories/:id', null, {
+            'update': { method:'PUT' }
+          });
+        }])
+
         .factory('TAIngredients', ['$resource', function($resource){
           return $resource('http://rezept-planer.de/api/typeahead/ingredients/', null, {
             'search': { method:'GET', isArray: true }
@@ -388,11 +394,24 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
 
     }])
 
-    .controller('IngredientDetailCtrl', ['$scope', '$routeParams', 'Ingredients', '$location', function ($scope, $routeParams, Ingredients, $location) {
+    .controller('IngredientDetailCtrl', ['$scope', '$routeParams', 'Ingredients', 'Categories', '$location', function ($scope, $routeParams, Ingredients, Categories, $location) {
+      $scope.categories = Categories.query();
+      $scope.selectedcategory = {};
+
       if (!$routeParams.id) {}
-      else $scope.ingredient = Ingredients.get({id: $routeParams.id });
+      else $scope.ingredient = Ingredients.get({id: $routeParams.id }, function(response){
+        $scope.selectedcategory.category = response.category;
+        $scope.selectedcategory.subcategory = response.subcategory;
+        $scope.selectedcategory.subsubcategory = response.subsubcategory;
+        $scope.selectedcategory.rewe_cat_id = response.rewe_cat_id;
+      });
+
 
       $scope.update = function(){
+        $scope.ingredient.category = $scope.selectedcategory.category;
+        $scope.ingredient.subcategory = $scope.selectedcategory.subcategory;
+        $scope.ingredient.subsubcategory = $scope.selectedcategory.subsubcategory;
+        $scope.ingredient.rewe_cat_id = $scope.selectedcategory.rewe_cat_id;
         Ingredients.update({id: $scope.ingredient._id}, $scope.ingredient, function(){
           $location.url('/ingredients/');
         });
@@ -406,7 +425,11 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
 
       $scope.save = function(){
         if(!$scope.newingredient || $scope.newingredient.length < 1) return;
-        var ingredient = new Ingredients({ name: { en: $scope.newingredient.name.en, de: $scope.newingredient.name.de,  fi: $scope.newingredient.name.fi}, category: { en: $scope.newingredient.category.en, de: $scope.newingredient.category.de,  fi: $scope.newingredient.category.fi}, subcategory: { en: $scope.newingredient.subcategory.en, de: $scope.newingredient.subcategory.de,  fi: $scope.newingredient.subcategory.fi} });
+        $scope.newingredient.category = $scope.selectedcategory.category;
+        $scope.newingredient.subcategory = $scope.selectedcategory.subcategory;
+        $scope.newingredient.subsubcategory = $scope.selectedcategory.subsubcategory;
+        $scope.newingredient.rewe_cat_id = $scope.selectedcategory.rewe_cat_id;
+        var ingredient = new Ingredients( $scope.newingredient );
 
         ingredient.$save(function(){
           $location.url('/ingredients/');

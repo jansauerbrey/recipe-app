@@ -42,7 +42,7 @@
             <select ng-options="unit._id as unit.name.de for unit in units" ng-model="recipe.ingredients[$index].unit._id" class="form-control" placeholder="Einheit"></select>
           </div>
           <div class="col-xs-5 col-lg-9" style="padding:0;">
-            <input type="text" ng-model="recipe.ingredients[$index].ingredient" typeahead="ingredient as ingredient.name.de for ingredient in GetIngredients($viewValue)" typeahead-editable="false" typeahead-on-select="onTypeaheadSelect($item, $model, $label)" class="form-control" placeholder="Ingredient...">
+            <input type="text" ng-model="recipe.ingredients[$index].ingredient" typeahead="ingredient as ingredient.name.de for ingredient in GetIngredients($viewValue)" typeahead-editable="false" typeahead-on-select="onTypeaheadSelect($item, $model, $label)" typeahead-template-url="partials/ingredients.typeahead.tpl.html" class="form-control" placeholder="Ingredient...">
           </div>
         </div>
       </div>
