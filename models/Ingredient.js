@@ -11,6 +11,7 @@ var IngredientSchema = new mongoose.Schema({
   subsubcategory: String,
   rewe_art_no: Number,
   rewe_cat_id: Number,
+  rewe_img_link_xs: String,
   rewe_img_link_sm: String,
   rewe_img_link_md: String,
   author: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},

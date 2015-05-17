@@ -11,7 +11,7 @@
     <div class="list-group">
       <div ng-repeat="ingredient in ingredients | filter: search">
         <a class="list-group-item col-xs-12" href="#/ingredients/{{ingredient._id}}">
-          <div class="col-xs-3 col-sm-1"><img ng-src="{{ingredient.rewe_img_link_sm}}" width="48"></div>
+          <div class="col-xs-3 col-sm-1"><img ng-src="{{ingredient.rewe_img_link_xs}}"></div>
           <div class="col-sm-3 hidden-xs">{{ingredient.name.en}}</div>
           <div class="col-xs-9 col-sm-3">{{ingredient.name.de}}</div>
           <div class="col-sm-5 hidden-xs">{{ingredient.name.fi}}</div>
