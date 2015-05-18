@@ -30,3 +30,7 @@ body { padding-top: 60px; }
   text-decoration: line-through;
   color: grey;
 }
+
+.navbar-fixed-top .navbar-collapse {
+    max-height: 440px;
+}

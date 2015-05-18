@@ -13,7 +13,9 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
         var auth = {
             isAuthenticated: false,
             isAdmin: false,
-            user: {}
+        }
+        if ($window.localStorage.isAdmin) {
+          auth.isAdmin = true;
         }
         return auth;
     })
@@ -37,6 +39,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
                 if (response != null && response.status == 200 && $window.localStorage.token && !AuthenticationService.isAuthenticated) {
                     AuthenticationService.isAuthenticated = true;
                     $window.localStorage.isAuthenticated = true;
+                    AuthenticationService.isAdmin = $window.localStorage.isAdmin;
                 }
                 return response || $q.when(response);
             },
@@ -61,7 +64,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
 
 // Navigation
 
-    .factory('routeNavigation', function($route, $location, AuthenticationService) {
+    .factory('routeNavigation', function($route, $location, $window, AuthenticationService) {
         var routes = [];
         angular.forEach($route.routes, function (route, path) {
             if (route.name) {
@@ -105,6 +108,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
             routes: routes,
             subroutes: subroutes,
             userroutes: userroutes,
+            user: $window.localStorage.user,
             activeRoute: function (route) {
                 return route.path === $location.path();
             },
@@ -136,14 +140,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
             register: function(user) {
                 return $http.post('http://rezept-planer.de/api/user/register', user);
             },
-
-            info: function() {
-                return $http.get('http://rezept-planer.de/api/user');
-            },
-
-            fullname: function(id) {
-                return $http.get('http://rezept-planer.de/api/user/'+id);
-            }
 
         }
     }])
@@ -234,10 +230,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
                     $window.localStorage.isAuthenticated = true;
                     $window.localStorage.isAdmin = data.is_admin;
                     $window.localStorage.token = data.token;
-                    UserService.info().success(function(user) {
-                      AuthenticationService.user = user;
-                      $window.localStorage.user = user;
-                    });
+                    $window.localStorage.user = data.fullname;
                     $location.path("/");
                 }).error(function(status, data) {
                     console.log(status);
@@ -279,7 +272,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
                     delete $window.localStorage.user;
                     AuthenticationService.isAuthenticated = false;
                     AuthenticationService.isAdmin = false;
-                    AuthenticationService.user = null;
             }).error(function(status, data) {
                 console.log(status);
                 console.log(data);
@@ -810,14 +802,14 @@ $scope.removeItem = function(item){
 // Directives
 //---------------
 
-    .directive('navigation', ['routeNavigation', 'AuthenticationService', function (routeNavigation, AuthenticationService) {
+    .directive('navigation', ['routeNavigation', function (routeNavigation) {
       return {
         restrict: "E",
         replace: true,
         templateUrl: "partials/navigation-directive.tpl.html",
         controller:  function ($scope) {
           $scope.hideMobileNav = true;
-          $scope.user = AuthenticationService.user;
+          $scope.user = routeNavigation.user;
           $scope.routes = routeNavigation.routes;
           $scope.subroutes = routeNavigation.subroutes;
           $scope.userroutes = routeNavigation.userroutes;
@@ -984,7 +976,7 @@ $scope.removeItem = function(item){
         templateUrl: 'partials/impressum.tpl.html',
         controller: 'ImpressumController',
         subname: 'Impressum',
-        access: { requiredAuthentication: false }
+        access: { requiredAuthentication: true }
       })
 
       .when('/user/register/', {
