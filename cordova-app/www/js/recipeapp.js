@@ -74,13 +74,45 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
                 });
             }
         });
+
+        var subroutes = [];
+        angular.forEach($route.routes, function (route, path) {
+            if (route.subname) {
+		var requiredAdmin = (route.access.requiredAdmin === true) ? true : false;
+                subroutes.push({
+                    path: path,
+                    name: route.subname,
+                    requiredAuthentication: route.access.requiredAuthentication,
+                    requiredAdmin: requiredAdmin
+                });
+            }
+        });
+
+        var userroutes = [];
+        angular.forEach($route.routes, function (route, path) {
+            if (route.username) {
+		var requiredAdmin = (route.access.requiredAdmin === true) ? true : false;
+                userroutes.push({
+                    path: path,
+                    name: route.username,
+                    requiredAuthentication: route.access.requiredAuthentication,
+                    requiredAdmin: requiredAdmin
+                });
+            }
+        });
+
         return {
             routes: routes,
+            subroutes: subroutes,
+            userroutes: userroutes,
             activeRoute: function (route) {
                 return route.path === $location.path();
             },
             hiddenRoute: function (route) {
-		if (route.requiredAdmin === false) {
+		if (!route){
+                    return (!AuthenticationService.isAuthenticated);
+                }
+                else if (route.requiredAdmin === false) {
                     return (AuthenticationService.isAuthenticated !== route.requiredAuthentication);
                 }
                 else if (route.requiredAdmin === true && AuthenticationService.isAdmin === true && AuthenticationService.isAuthenticated === true) {
@@ -263,6 +295,13 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
 
 
     .controller('StartpageController', ['$scope', function ($scope) {
+    }])
+
+
+// Impressum
+
+
+    .controller('ImpressumController', ['$scope', function ($scope) {
     }])
 
 
@@ -780,6 +819,8 @@ $scope.removeItem = function(item){
           $scope.hideMobileNav = true;
           $scope.user = AuthenticationService.user;
           $scope.routes = routeNavigation.routes;
+          $scope.subroutes = routeNavigation.subroutes;
+          $scope.userroutes = routeNavigation.userroutes;
           $scope.activeRoute = routeNavigation.activeRoute;
           $scope.hiddenRoute = routeNavigation.hiddenRoute;;
         }
@@ -836,7 +877,7 @@ $scope.removeItem = function(item){
       .when('/units/', {
         templateUrl: 'partials/units.tpl.html',
         controller: 'UnitsController',
-        name: 'Units',
+        subname: 'Units',
         access: { requiredAuthentication: true }
       })
     
@@ -856,7 +897,7 @@ $scope.removeItem = function(item){
       .when('/ingredients/', {
         templateUrl: 'partials/ingredients.tpl.html',
         controller: 'IngredientsController',
-        name: 'Ingredients',
+        subname: 'Ingredients',
         access: { requiredAuthentication: true }
       })
     
@@ -876,7 +917,7 @@ $scope.removeItem = function(item){
       .when('/recipes/', {
         templateUrl: 'partials/recipes.tpl.html',
         controller: 'RecipesController',
-        name: 'Recipes',
+        subname: 'Recipes',
         access: { requiredAuthentication: true }
       })
     
@@ -934,29 +975,36 @@ $scope.removeItem = function(item){
       .when('/admin/user/', {
         templateUrl: 'partials/admin.user.tpl.html',
         controller: 'AdminUserCtrl',
-        name: 'Admin',
+        subname: 'Admin',
         access: { requiredAuthentication: true,
                   requiredAdmin: true }
+      })
+
+      .when('/impressum/', {
+        templateUrl: 'partials/impressum.tpl.html',
+        controller: 'ImpressumController',
+        subname: 'Impressum',
+        access: { requiredAuthentication: false }
       })
 
       .when('/user/register/', {
         templateUrl: 'partials/user.register.tpl.html',
         controller: 'UserCtrl',
-        name: 'Register',
+        username: 'Register',
         access: { requiredAuthentication: false }
       })
 
       .when('/user/login/', {
         templateUrl: 'partials/user.login.tpl.html',
         controller: 'UserCtrl',
-        name: 'Login',
+        username: 'Login',
         access: { requiredAuthentication: false }
       })
 
       .when('/user/logout/', {
         templateUrl: 'partials/user.logout.tpl.html',
         controller: 'UserLogout',
-        name: 'Logout',
+        username: 'Logout',
         access: { requiredAuthentication: true }
       })
 
