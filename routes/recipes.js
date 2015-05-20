@@ -8,7 +8,7 @@ var auth = require('../auth/auth.js');
 
 /* GET /recipes listing. */
 router.get('/', auth.verify, function(req, res, next) {
-  Recipe.find(req.query, function (err, recipes) {
+  Recipe.find(req.query).populate(['tags']).exec( function (err, recipes) {
     if (err) return next(err);
     res.json(recipes);
   });
@@ -25,7 +25,7 @@ router.post('/', auth.verify, function(req, res, next) {
 
 /* GET /recpes/id */
 router.get('/:id', auth.verify, function(req, res, next) {
-  Recipe.findById(req.params.id).populate(['tags', 'ingredients.ingredient', 'ingredients.unit']).exec( function (err, post) {
+  Recipe.findById(req.params.id).populate(['tags', 'ingredients.ingredient', 'ingredients.unit']).populate('author', 'fullname').exec( function (err, post) {
     if (err) return next(err);
     res.json(post);
   });

@@ -1,5 +1,58 @@
   <div class="row">
-    <div class="form">
+    <div ng-hide="recipeedit">
+      <h3 style="margin-bottom: 30px;">{{recipe.name}}
+        <button ng-click="recipeedit=true" class="btn btn-primary pull-right"><i class="glyphicon glyphicon-pencil"></i></button>
+      </h3>
+      <div class="col-sm-8 col-xs-12" style="padding: 0px;">
+        <label class="control-label">Instructions:</label>
+        <p>{{recipe.instructions}}</p>
+      </div>
+      <div class="col-md-4 col-xs-12" style="padding: 0px;">
+        <table class="table table-striped">
+          <tbody>
+            <tr>
+              <th>Author:</th>
+              <td>{{recipe.author.fullname}}</td>
+            </tr>
+            <tr>
+              <th>Persons / portions:</th>
+              <td>{{recipe.yield}} min</td>
+            </tr>
+            <tr>
+              <th>Preparation time:</th>
+              <td>{{recipe.prepTime}} min</td>
+            </tr>
+            <tr>
+              <th>Cooking time:</th>
+              <td>{{recipe.cookTime}} min</td>
+            </tr>
+            <tr>
+              <th>Total time:</th>
+              <td>{{recipe.totalTime}} min</td>
+            </tr>
+            <tr>
+              <th>Tags:</th>
+              <td><font size="3"><span ng-repeat="tag in recipe.tags" class="label label-primary" style="margin: 2px; display: inline-block;">{{tag.text}}</span></font></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <table class="col-sm-12 table table-striped">
+        <thead>
+          <th>Amount</th>
+          <th>Unit</th>
+          <th>Ingredient</th>
+        </thead>
+        <tbody>
+          <tr ng-repeat="ingredient in recipe.ingredients">
+            <td>{{ingredient.qty | number}}</td>
+            <td>{{ingredient.unit.name.de}}</td>
+            <td>{{ingredient.ingredient.name.de}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="form" ng-show="recipeedit">
       <div class="form-group col-xs-12 col-sm-6 col-lg-9">
         <label class="control-label">Name:</label>
         <input type="text" ng-model="recipe.name" ng-required="true" class="form-control" placeholder="Name...">
@@ -52,7 +105,7 @@
       </div>
       <div class="form-group col-xs-12">
         <button ng-click="update()" class="btn btn-primary">update</button>
-        <a class="btn btn-default" href="#/recipes/" role="button">cancel</a>
+        <button ng-click="cancel()" class="btn btn-default">cancel</button>
         <button ng-click="remove()" class="btn btn-default pull-right">remove</button>
       </div>
     </div>

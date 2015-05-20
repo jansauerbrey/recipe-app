@@ -139,10 +139,14 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
 
             register: function(user) {
                 return $http.post('http://rezept-planer.de/api/user/register', user);
-            },
+            }
 
         }
     }])
+
+        .factory('User', ['$resource', function($resource){
+          return $resource('http://rezept-planer.de/api/user/info/:id');
+        }])
 
         .factory('Units', ['$resource', function($resource){
           return $resource('http://rezept-planer.de/api/units/:id', null, {
@@ -472,33 +476,35 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
 
 // Recipes
 
-    .controller('RecipesController', ['$scope', 'Recipes', function ($scope, Recipes) {
+    .controller('RecipesController', ['$scope', 'Recipes', 'Tags', function ($scope, Recipes, Tags) {
       $scope.editing = [];
+      $scope.tagfilter = {};
       $scope.loading = true;
+      $scope.hideAdvSearch = true;
+      $scope.status = {};
+      $scope.status.tags = true;
+
+      $scope.tags = Tags.query();
+
       $scope.recipes = Recipes.query(function(response) {
         $scope.loading = false;
       });
 
-      $scope.update = function(index){
-        var recipe = $scope.recipes[index];
-        Recipes.update({id: recipe._id}, recipe);
-        $scope.editing[index] = false;
-      }
-
-      $scope.edit = function(index){
-        $scope.editing[index] = angular.copy($scope.recipes[index]);
-      }
-
-      $scope.cancel = function(index){
-        $scope.recipes[index] = angular.copy($scope.editing[index]);
-        $scope.editing[index] = false;
-      }
-
-      $scope.remove = function(index){
-        var recipe = $scope.recipes[index];
-        Recipes.remove({id: recipe._id}, function(){
-          $scope.recipes.splice(index, 1);
+      $scope.filterByTags = function(recipe) {
+        var match = true;
+        angular.forEach($scope.tagfilter, function(value, key) {
+          if (value === true){
+            var subMatch = false;
+            for(i=0;i<recipe.tags.length;i++){
+              if(key ===recipe.tags[i].text){
+                subMatch =true;
+                break;
+              }
+            }
+            match = match && subMatch;
+          }
         });
+        return match;
       }
 
     }])
@@ -558,6 +564,14 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
         Recipes.update({id: $scope.recipe._id}, $scope.recipe, function(){
           $location.url('/recipes/');
         });
+      }
+
+      $scope.cancel = function(){
+        $scope.recipe = Recipes.get({id: $routeParams.id }, function(response) {
+          $scope.recipe.ingredients.push('');
+          $scope.recipeedit = false;
+        });
+        
       }
 
       $scope.remove = function(){
@@ -760,7 +774,7 @@ $scope.removeItem = function(item){
 
 // Cooking
 
-    .controller('CookingController', ['$scope', '$routeParams', 'Schedules', 'Recipes', 'Ingredients', 'Units', 'Tags', 'UserService', '$location', function ($scope, $routeParams, Schedules, Recipes, Ingredients, Units, Tags, UserService, $location) {
+    .controller('CookingController', ['$scope', '$routeParams', 'Schedules', 'Recipes', 'Ingredients', 'Units', 'Tags', 'User', '$location', function ($scope, $routeParams, Schedules, Recipes, Ingredients, Units, Tags, User, $location) {
       if (!$routeParams.date) {
         $scope.startDate = new Date();
       }
@@ -788,9 +802,7 @@ $scope.removeItem = function(item){
             response[i].recipe.ingredients[j].unit = Units.get({id: response[i].recipe.ingredients[j].unit });
           }
           // does not work yet
-          response[i].recipe.author = UserService.fullname(response[i].recipe.author).then(function(data) {
-            return data;
-          });
+          $scope.schedules[i].recipe.author = User.get({id: response[i].recipe.author});
         }
         return response;
       });
