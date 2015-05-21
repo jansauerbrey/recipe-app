@@ -1,0 +1,20 @@
+  <div class="modal-header">
+    <h4 class="modal-title"><strong>Scheduling:</strong> {{recipe.name}}</h4>
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+      <label class="control-label">Persons / portions:</label>
+      <input type="number" ng-model="factor" ng-required="true" class="form-control">
+    </div>
+      <label class="control-label">Schedule date:</label>
+      <p class="input-group">
+        <input type="text" class="form-control" ng-model="date" datepicker-popup="dd.MM.yyyy" is-open="calendarIsOpen" starting-day="1" ng-required="true" />
+        <span class="input-group-btn">
+          <button type="button" class="btn btn-default" ng-click="openDate($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+        </span>
+      </p>
+  </div>
+  <div class="modal-footer">
+    <button ng-click="ok()" class="btn btn-primary">OK</button>
+    <button ng-click="cancel()" class="btn btn-default">cancel</button>
+  </div>

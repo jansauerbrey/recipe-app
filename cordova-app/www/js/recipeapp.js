@@ -509,7 +509,10 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
 
     }])
 
-    .controller('RecipeDetailCtrl', ['$scope', '$routeParams', 'Recipes', 'Tags', 'Ingredients', 'Units', '$location', 'TAIngredients', 'TATags', function ($scope, $routeParams, Recipes, Tags, Ingredients, Units, $location, TAIngredients, TATags) {
+    .controller('RecipeDetailCtrl', ['$scope', '$routeParams', '$modal', 'Recipes', 'Tags', 'Ingredients', 'Units', '$location', 'TAIngredients', 'TATags', function ($scope, $routeParams, $modal, Recipes, Tags, Ingredients, Units, $location, TAIngredients, TATags) {
+      $scope.alerts = [];
+      $scope.submitted = false;
+
       if (!$routeParams.id) {
         $scope.recipe = new Recipes();
         $scope.recipe.ingredients = [];
@@ -580,7 +583,11 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
         });
       }
 
-      $scope.save = function(){
+      $scope.save = function(validForm){
+        if(!validForm){
+          $scope.submitted = true;
+          return;
+        }
         if(!$scope.recipe || $scope.recipe.length < 1) return;
         $scope.recipe.ingredients = $scope.recipe.ingredients.filter(function(n){ return n != ''});
         for(i=0;i<$scope.recipe.tags.length;i++){
@@ -606,7 +613,61 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
         });
       }
 
+      $scope.scheduleAdd = function() {
+        var modalAddSchedule = $modal.open({
+          animation: true,
+          templateUrl: 'partials/recipes.scheduleadd.tpl.html',
+          controller: 'ModalScheduleAddController',
+          size: 'xs',
+          resolve: {
+            recipe: function(){
+              return $scope.recipe;
+            }
+          }
+        });
+
+        modalAddSchedule.result.then(function(successMsg){
+          $scope.alerts.push(successMsg);
+        });
+
+      }
+
+      $scope.closeAlert = function(index){
+        $scope.alerts.splice(index, 1);
+      }
+
+
     }])
+
+
+    .controller('ModalScheduleAddController', ['$scope', '$routeParams', '$modalInstance', '$filter', 'Schedules', 'recipe', function ($scope, $routeParams, $modalInstance, $filter, Schedules, recipe) {
+      $scope.recipe = recipe;
+      $scope.date = new Date();
+      $scope.factor = $scope.recipe.yield;
+     
+      $scope.ok = function(){
+        var newSchedule = new Schedules({date: $scope.date.setHours(12), recipe: $scope.recipe, factor: $scope.factor});
+        newSchedule.$save(function(response){
+          var message = 'The recipe '+$scope.recipe.name+' was successfully scheduled for the '+$filter('date')($scope.date, 'dd.MM.yyyy')+' with '+$scope.factor+' persons.';
+          $modalInstance.close({type: 'success', msg: message});
+        });
+      }
+
+      $scope.cancel = function(){
+        $modalInstance.dismiss('cancel');
+      }
+
+
+      $scope.openDate = function($event) {
+        $event.preventDefault();
+        $event.stopPropagation();
+
+        $scope.calendarIsOpen = true;
+      };
+
+
+    }])
+
 
 
 // Schedules
@@ -885,13 +946,13 @@ $scope.removeItem = function(item){
         access: { requiredAuthentication: true }
       })
     
-      .when('/units/:id', {
+      .when('/units/edit/:id', {
         templateUrl: 'partials/units.details.tpl.html',
         controller: 'UnitDetailCtrl',
         access: { requiredAuthentication: true }
      })
 
-      .when('/unitadd', {
+      .when('/units/add/', {
         templateUrl: 'partials/units.add.tpl.html',
         controller: 'UnitDetailCtrl',
         access: { requiredAuthentication: true }
@@ -905,13 +966,13 @@ $scope.removeItem = function(item){
         access: { requiredAuthentication: true }
       })
     
-      .when('/ingredients/:id', {
+      .when('/ingredients/edit/:id', {
         templateUrl: 'partials/ingredients.details.tpl.html',
         controller: 'IngredientDetailCtrl',
         access: { requiredAuthentication: true }
      })
 
-      .when('/ingredientadd', {
+      .when('/ingredients/add/', {
         templateUrl: 'partials/ingredients.add.tpl.html',
         controller: 'IngredientDetailCtrl',
         access: { requiredAuthentication: true }
@@ -927,12 +988,6 @@ $scope.removeItem = function(item){
     
       .when('/recipes/edit/:id', {
         templateUrl: 'partials/recipes.edit.tpl.html',
-        controller: 'RecipeDetailCtrl',
-        access: { requiredAuthentication: true }
-     })
-
-      .when('/recipes/show/:id', {
-        templateUrl: 'partials/recipes.show.tpl.html',
         controller: 'RecipeDetailCtrl',
         access: { requiredAuthentication: true }
      })
