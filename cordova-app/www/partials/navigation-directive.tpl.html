@@ -12,7 +12,7 @@
   <div class="collapse navbar-collapse" collapse="hideMobileNav" ng-click="hideMobileNav=true">
     <ul class="nav navbar-nav">
       <li ng-repeat="route in routes" ng-class="{active: activeRoute(route)}" ng-hide="hiddenRoute(route)">
-        <a ng-href="#{{route.path}}">{{ route.name }}</a>
+        <a ng-href="/#{{route.path}}">{{ route.name }}</a>
       </li>
       <li class="hidden-xs" dropdown is-open="othersIsOpen" ng-hide="hiddenRoute()">
       <a class="dropdown-toggle" href="#" dropdown-toggle>Others <span class="caret"></span></a>
