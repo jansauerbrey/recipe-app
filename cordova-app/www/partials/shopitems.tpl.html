@@ -3,8 +3,7 @@
       <table class="col-xs-12 table table-striped">
         <thead>
           <th></th>
-          <th>Amount</th>
-          <th>Unit</th>
+          <th>#</th>
           <th>Ingredient</th>
           <th class="hidden-sm hidden-xs">Category</th>
           <th class="hidden-sm hidden-xs">Subcategory</th>
@@ -14,8 +13,7 @@
         <tbody>
           <tr ng-repeat="item in shopitems | orderBy: ['ingredient.category','ingredient.subcategory','ingredient.subsubcategory','ingredient.name.de']" class="done-{{item.completed}}">
             <td><checkbox ng-model="item.completed" ng-change="complete(item)"></checkbox></td>
-            <td>{{item.amount | number}}</td>
-            <td>{{item.unit.name.de}}</td>
+            <td>{{item.amount | number}} {{item.unit.name.de}}</td>
             <td>{{item.ingredient.name.de}}</td>
             <td class="hidden-sm hidden-xs">{{item.ingredient.category}}</td>
             <td class="hidden-sm hidden-xs">{{item.ingredient.subcategory}}</td>
