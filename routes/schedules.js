@@ -48,7 +48,20 @@ router.put('/:id', auth.verify, function(req, res, next) {
   req.body.author = req._user.id;
   Schedule.findByIdAndUpdate(req.params.id, req.body, function (err, schedule) {
     if (err) return next(err);
-    res.json(schedule);
+    Shopitem.remove({schedule: schedule._id}, function(shopitem) {
+    });
+    Schedule.findOne(schedule._id).populate('recipe').exec( function (err, schedulePop) {
+      for(i=0;i<schedulePop.recipe.ingredients.length;i++){
+        var amount = 1;
+        if(!schedulePop.recipe.ingredients[i].qty) {
+          amount = 1/schedulePop.recipe.yield*schedulePop.factor;
+        } else {
+          amount = schedulePop.recipe.ingredients[i].qty/schedulePop.recipe.yield*schedulePop.factor;
+        }
+        Shopitem.create({author: req._user.id, expire_date: schedulePop.date.setDate(schedulePop.date.getDate() + 1), schedule: schedulePop, recipe: schedulePop.recipe, ingredient: schedulePop.recipe.ingredients[i].ingredient, unit: schedulePop.recipe.ingredients[i].unit, amount: amount})
+      }
+      res.json(schedulePop);
+    });
   });
 });
 

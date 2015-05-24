@@ -1,8 +1,12 @@
   <div class="row">
     <form name="recipeForm">
-      <div class="form-group col-xs-12 col-sm-6 col-lg-9" ng-class="{ 'has-error': recipeForm.name.$invalid && submitted }">
+      <div class="form-group col-xs-12 col-sm-6 col-lg-6" ng-class="{ 'has-error': recipeForm.name.$invalid && submitted }">
         <label class="control-label">Name:</label>
         <input type="text" name="name" ng-model="recipe.name" ng-required="true" class="form-control" placeholder="Name...">
+      </div>
+      <div class="form-group col-xs-12 col-sm-6 col-lg-3" ng-class="{ 'has-error': recipeForm.yield.$invalid && submitted }">
+        <label class="control-label">Persons / portions:</label>
+        <input type="number" name="yield" ng-model="recipe.yield" ng-required="true" class="form-control">
       </div>
       <div class="form-group col-xs-12 col-sm-6 col-lg-3" >
         <label class="control-label">Recipe Language:</label><br />
@@ -11,10 +15,6 @@
           <label class="btn btn-primary" ng-model="recipe.language" ng-required="!recipe.language" btn-radio="'de'">German</label>
           <label class="btn btn-primary" ng-model="recipe.language" ng-required="!recipe.language" btn-radio="'fi'">Finnish</label>
         </div>
-      </div>
-      <div class="form-group col-xs-12 col-sm-6 col-lg-3" ng-class="{ 'has-error': recipeForm.yield.$invalid && submitted }">
-        <label class="control-label">Persons / portions:</label>
-        <input type="number" name="yield" ng-model="recipe.yield" ng-required="true" class="form-control">
       </div>
       <div class="form-group col-xs-12 col-sm-6 col-lg-3" ng-class="{ 'has-error': recipeForm.prepTime.$invalid && submitted }">
         <label class="control-label">Preparation time (minutes):</label>
@@ -28,48 +28,32 @@
         <label class="control-label">Total time (minutes):</label>
         <input type="number" name="totalTime" ng-model="recipe.totalTime" ng-required="true" class="form-control">
       </div>
+      <div class="form-group col-xs-12 col-sm-6 col-lg-3" ng-class="{ 'has-error': recipeForm.kilocalories.$invalid && submitted }">
+        <label class="control-label">Kcal:</label>
+        <input type="text" name="kilocalories" ng-model="recipe.kilocalories" ng-required="false" class="form-control" placeholder="Kcal...">
+      </div>
       <div class="form-group col-xs-12" ng-class="{ 'has-error': recipeForm.tagField.$invalid && submitted }">
         <label class="control-label">Tags:</label>
         <tags-input type="text" name="tagField" ng-model="recipe.tags" key-property="_id" display-property="text" on-tag-adding="addTag($tag)" placeholder="Tags..."><auto-complete source="loadTags($query)"></auto-complete></tags-input>
       </div>
       <label class="control-label col-xs-12">Ingredients:</label>
-      <div class="col-xs-12"><alert class="col-xs-12" ng-hide="recipe.language==='en' || recipe.language==='de' || recipe.language==='fi'">Please select the recipe language first.</alert></div>
-      <div ng-repeat="ingredient in recipe.ingredients" ng-show="recipe.language==='en'">
+      <div class="col-xs-12"><alert class="col-xs-12" ng-show="recipe.language=== undefined">Please select the recipe language first.</alert></div>
+      <div ng-repeat="ingredient in recipe.ingredients">
         <div class="form-group col-xs-12">
-          <div class="col-xs-3 col-sm-2 col-md-1" style="padding:0;">
-            <input type="number" ng-model="recipe.ingredients[$index].qty" ng-required="recipe.ingredients[$index].ingredient && recipe.ingredients[$index].unit !== '5511d2fd4194de051c7efd60'" class="form-control" placeholder="Amount">
+          <div class="col-xs-3 col-sm-2 col-md-1" style="padding:0;" ng-class="{ 'has-error': submitted && !(ingredient.qty > 0) && ingredient.ingredient && ingredient.unit !== '5511d2fd4194de051c7efd60' && ingredient.unit !== undefined }">
+            <input ng-show="recipe.language==='en'" type="number" ng-model="ingredient.qty" ng-required="ingredient.ingredient && ingredient.unit !== '5511d2fd4194de051c7efd60'" class="form-control" placeholder="Amount">
+            <input ng-show="recipe.language==='de'" type="number" ng-model="ingredient.qty" ng-required="ingredient.ingredient && ingredient.unit !== '5511d2fd4194de051c7efd60'" class="form-control" placeholder="Amount">
+            <input ng-show="recipe.language==='fi'" type="number" ng-model="ingredient.qty" ng-required="ingredient.ingredient && ingredient.unit !== '5511d2fd4194de051c7efd60'" class="form-control" placeholder="Amount">
           </div>
-          <div class="col-xs-4 col-sm-3 col-md-2" style="padding:0;">
-            <select ng-options="unit._id as unit.name.en for unit in units" ng-model="recipe.ingredients[$index].unit" ng-required="recipe.ingredients[$index].ingredient" class="form-control" placeholder="Unit"></select>
+          <div class="col-xs-4 col-sm-3 col-md-2" style="padding:0;" ng-class="{ 'has-error': submitted && ingredient.ingredient && ingredient.unit === undefined }">
+            <select ng-show="recipe.language==='en'" ng-options="unit._id as unit.name.en for unit in units" ng-model="ingredient.unit" ng-required="ingredient.ingredient" class="form-control" placeholder="Unit"></select>
+            <select ng-show="recipe.language==='de'" ng-options="unit._id as unit.name.de for unit in units" ng-model="ingredient.unit" ng-required="ingredient.ingredient" class="form-control" placeholder="Unit"></select>
+            <select ng-show="recipe.language==='fi'" ng-options="unit._id as unit.name.fi for unit in units" ng-model="ingredient.unit" ng-required="ingredient.ingredient" class="form-control" placeholder="Unit"></select>
           </div>
-          <div class="col-xs-5 col-sm-7 col-md-9" style="padding:0;">
-            <input type="text" ng-model="recipe.ingredients[$index].ingredient" typeahead="ingredient as ingredient.name.en for ingredient in GetIngredients($viewValue)" typeahead-editable="false" typeahead-on-select="onTypeaheadSelect($item, $model, $label)" typeahead-template-url="partials/ingredients.typeahead.tpl.html" class="form-control" placeholder="Ingredient...">
-          </div>
-        </div>
-      </div>
-      <div ng-repeat="ingredient in recipe.ingredients" ng-show="recipe.language==='de'">
-        <div class="form-group col-xs-12">
-          <div class="col-xs-3 col-sm-2 col-md-1" style="padding:0;">
-            <input type="number" ng-model="recipe.ingredients[$index].qty" ng-required="recipe.ingredients[$index].ingredient && recipe.ingredients[$index].unit !== '5511d2fd4194de051c7efd60'" class="form-control" placeholder="Amount">
-          </div>
-          <div class="col-xs-4 col-sm-3 col-md-2" style="padding:0;">
-            <select ng-options="unit._id as unit.name.de for unit in units" ng-model="recipe.ingredients[$index].unit" ng-model="recipe.ingredients[$index].unit" class="form-control" placeholder="Unit"></select>
-          </div>
-          <div class="col-xs-5 col-sm-7 col-md-9" style="padding:0;">
-            <input type="text" ng-model="recipe.ingredients[$index].ingredient" typeahead="ingredient as ingredient.name.de for ingredient in GetIngredients($viewValue)" typeahead-editable="false" typeahead-on-select="onTypeaheadSelect($item, $model, $label)" typeahead-template-url="partials/ingredients.typeahead.tpl.html" class="form-control" placeholder="Ingredient...">
-          </div>
-        </div>
-      </div>
-      <div ng-repeat="ingredient in recipe.ingredients" ng-show="recipe.language==='fi'">
-        <div class="form-group col-xs-12">
-          <div class="col-xs-3 col-sm-2 col-md-1" style="padding:0;">
-            <input type="number" ng-model="recipe.ingredients[$index].qty" ng-required="recipe.ingredients[$index].ingredient && recipe.ingredients[$index].unit !== '5511d2fd4194de051c7efd60'" class="form-control" placeholder="Amount">
-          </div>
-          <div class="col-xs-4 col-sm-3 col-md-2" style="padding:0;">
-            <select ng-options="unit._id as unit.name.fi for unit in units" ng-model="recipe.ingredients[$index].unit" ng-model="recipe.ingredients[$index].unit" class="form-control" placeholder="Unit"></select>
-          </div>
-          <div class="col-xs-5 col-sm-7 col-md-9" style="padding:0;">
-            <input type="text" ng-model="recipe.ingredients[$index].ingredient" typeahead="ingredient as ingredient.name.fi for ingredient in GetIngredients($viewValue)" typeahead-editable="false" typeahead-on-select="onTypeaheadSelect($item, $model, $label)" typeahead-template-url="partials/ingredients.typeahead.tpl.html" class="form-control" placeholder="Ingredient...">
+          <div class="col-xs-5 col-sm-7 col-md-9" style="padding:0;" ng-class="{ 'has-error': submitted && ingredient.ingredient === undefined }">
+            <input ng-show="recipe.language==='en'" type="text" ng-model="ingredient.ingredient" typeahead="taingredient as taingredient.name.en for taingredient in GetIngredients($viewValue)" typeahead-editable="false" typeahead-on-select="onTypeaheadSelect($item, $model, $label)" typeahead-template-url="partials/ingredients.typeahead.tpl.html" class="form-control" placeholder="Ingredient...">
+            <input ng-show="recipe.language==='de'" type="text" ng-model="ingredient.ingredient" typeahead="taingredient as taingredient.name.de for taingredient in GetIngredients($viewValue)" typeahead-editable="false" typeahead-on-select="onTypeaheadSelect($item, $model, $label)" typeahead-template-url="partials/ingredients.typeahead.tpl.html" class="form-control" placeholder="Ingredient...">
+            <input ng-show="recipe.language==='fi'" type="text" ng-model="ingredient.ingredient" typeahead="taingredient as taingredient.name.fi for taingredient in GetIngredients($viewValue)" typeahead-editable="false" typeahead-on-select="onTypeaheadSelect($item, $model, $label)" typeahead-template-url="partials/ingredients.typeahead.tpl.html" class="form-control" placeholder="Ingredient...">
           </div>
         </div>
       </div>

@@ -3,6 +3,7 @@ var mongoose = require('mongoose');
 var RecipeSchema = new mongoose.Schema({
   name: String,
   language: String,
+  kilocalories: Number,
   cookTime: Number,
   prepTime: Number,
   totalTime: Number,

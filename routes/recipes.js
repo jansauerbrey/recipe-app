@@ -17,33 +17,47 @@ router.get('/', auth.verify, function(req, res, next) {
 /* POST /recipes */
 router.post('/', auth.verify, function(req, res, next) {
   req.body.author = req._user.id;
-  Recipe.create(req.body, function (err, post) {
+  Recipe.create(req.body, function (err, recipe) {
     if (err) return next(err);
-    res.json(post);
+    res.json(recipe);
   });
 });
 
 /* GET /recpes/id */
 router.get('/:id', auth.verify, function(req, res, next) {
-  Recipe.findById(req.params.id).populate(['tags', 'ingredients.ingredient', 'ingredients.unit']).populate('author', 'fullname').exec( function (err, post) {
+  Recipe.findById(req.params.id).populate(['tags', 'ingredients.ingredient', 'ingredients.unit']).populate('author', 'fullname').exec( function (err, recipe) {
     if (err) return next(err);
-    res.json(post);
+    res.json(recipe);
   });
 });
 
 /* PUT /recipes/:id */
 router.put('/:id', auth.verify, function(req, res, next) {
-  Recipe.findByIdAndUpdate(req.params.id, req.body, function (err, post) {
+  Recipe.findById(req.params.id).populate('author', 'fullname').exec( function (err, recipe) {
     if (err) return next(err);
-    res.json(post);
+    if (req._user.id == recipe.author._id || req._user.is_admin === true) {
+      Recipe.findByIdAndUpdate(req.params.id, req.body, function (err, recipe) {
+        if (err) return next(err);
+        res.json(recipe);
+      });
+    } else {
+      res.sendStatus(401);
+    }
   });
 });
 
 /* DELETE /recipes/:id */
 router.delete('/:id', auth.verify, function(req, res, next) {
-  Recipe.findByIdAndRemove(req.params.id, req.body, function (err, post) {
+  Recipe.findById(req.params.id).populate('author', 'fullname').exec( function (err, recipe) {
     if (err) return next(err);
-    res.json(post);
+    if (req._user.id == recipe.author._id || req._user.is_admin === true) {
+      Recipe.findByIdAndRemove(req.params.id, req.body, function (err, recipe) {
+        if (err) return next(err);
+        res.json(recipe);
+      });
+    } else {
+      res.sendStatus(401);
+    }
   });
 });
 
