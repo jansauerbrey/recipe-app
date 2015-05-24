@@ -34,6 +34,7 @@ router.get('/:id', auth.verify, function(req, res, next) {
 /* PUT /shopitems/:id */
 router.put('/:id', auth.verify, function(req, res, next) {
   req.body.author = req._user.id;
+  req.body.updated_at = new Date();
   Shopitem.findByIdAndUpdate(req.params.id, req.body, function (err, shopitems) {
     if (err) return next(err);
     res.json(shopitems);

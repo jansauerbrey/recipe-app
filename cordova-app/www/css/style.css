@@ -34,3 +34,16 @@ body { padding-top: 60px; }
 .navbar-fixed-top .navbar-collapse {
     max-height: 440px;
 }
+
+
+.beta-tag {
+  -webkit-transform:rotate(345deg);
+  -moz-transform:rotate(345deg);
+  -o-transform:rotate(345deg);
+  -ms-transform:rotate(345deg);
+  color: red;
+  position: absolute;
+  border-style: solid;
+  border-color: red;
+  font-size: 70%;
+}

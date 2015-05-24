@@ -7,7 +7,7 @@
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
     </button>
-    <a class="navbar-brand" href="#/">rezept-planer.de</a>
+    <div class="beta-tag">&nbsp;BETA&nbsp;</div><a class="navbar-brand" href="#/">rezept-planer.de</a>
   </div>
   <div class="collapse navbar-collapse" collapse="hideMobileNav" ng-click="hideMobileNav=true">
     <ul class="nav navbar-nav">
@@ -36,7 +36,7 @@
         <a ng-href="#{{userroute.path}}">{{ userroute.name }}</a>
       </li>
     </ul>
-    <p class="navbar-text navbar-right visible-md-block visible-lg-block" ng-hide="hiddenRoute()"><a href="#/user/details" class="navbar-link">{{user}}</a></p>
+    <p class="navbar-text navbar-right visible-md-block visible-lg-block" ng-hide="hiddenRoute()"><a href="#/user/details" class="navbar-link">{{user.fullname}}</a></p>
 
   </div>
 </div>

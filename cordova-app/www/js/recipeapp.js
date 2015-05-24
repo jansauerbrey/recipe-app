@@ -1,4 +1,4 @@
-angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', 'ngTagsInput'])
+angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui.checkbox', 'ngTagsInput'])
 
 
 
@@ -13,9 +13,13 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
         var auth = {
             isAuthenticated: false,
             isAdmin: false,
+            user: '',
         }
         if ($window.localStorage.isAdmin) {
           auth.isAdmin = true;
+        }
+        if ($window.localStorage.user) {
+          auth.user = $window.localStorage.user;
         }
         return auth;
     })
@@ -231,10 +235,11 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
                 UserService.logIn(username, password, autologin).success(function(data) {
                     AuthenticationService.isAuthenticated = true;
                     AuthenticationService.isAdmin = data.is_admin;
+                    AuthenticationService.user = data;
                     $window.localStorage.isAuthenticated = true;
                     $window.localStorage.isAdmin = data.is_admin;
                     $window.localStorage.token = data.token;
-                    $window.localStorage.user = data.fullname;
+                    $window.localStorage.user = data;
                     $location.path("/");
                 }).error(function(status, data) {
                     console.log(status);
@@ -276,6 +281,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
                     delete $window.localStorage.user;
                     AuthenticationService.isAuthenticated = false;
                     AuthenticationService.isAdmin = false;
+                    AuthenticationService.user = '';
             }).error(function(status, data) {
                 console.log(status);
                 console.log(data);
@@ -509,17 +515,21 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
 
     }])
 
-    .controller('RecipeDetailCtrl', ['$scope', '$routeParams', '$modal', 'Recipes', 'Tags', 'Ingredients', 'Units', '$location', 'TAIngredients', 'TATags', function ($scope, $routeParams, $modal, Recipes, Tags, Ingredients, Units, $location, TAIngredients, TATags) {
+    .controller('RecipeDetailCtrl', ['$scope', '$routeParams', '$modal', 'AuthenticationService', 'Recipes', 'Tags', 'Ingredients', 'Units', '$location', 'TAIngredients', 'TATags', function ($scope, $routeParams, $modal, AuthenticationService, Recipes, Tags, Ingredients, Units, $location, TAIngredients, TATags) {
+      $scope.allowEdit = false;
       $scope.alerts = [];
       $scope.submitted = false;
 
       if (!$routeParams.id) {
         $scope.recipe = new Recipes();
         $scope.recipe.ingredients = [];
-        $scope.recipe.ingredients.push('');
+        $scope.recipe.ingredients.push({qty: '', unit: '', ingredient: ''});
       } else {
         $scope.recipe = Recipes.get({id: $routeParams.id }, function(response) {
-          $scope.recipe.ingredients.push('');
+          $scope.recipe.ingredients.push({qty: '', unit: '', ingredient: ''});
+          if (AuthenticationService.user._id == response.author._id || AuthenticationService.user.is_admin === true) {
+            $scope.allowEdit = true;
+          }
         });
       }
 
@@ -527,7 +537,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
 
       $scope.onTypeaheadSelect = function ($item, $model, $label) {
         if(!$scope.recipe.ingredients.filter(function(n){ return n == '' }).length) {
-          $scope.recipe.ingredients.push('');
+          $scope.recipe.ingredients.push({qty: '', unit: '', ingredient: ''});
         }
       };
 
@@ -673,6 +683,9 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
 // Schedules
 
     .controller('SchedulesController', ['$scope', '$routeParams', 'Schedules', 'TARecipes', function ($scope, $routeParams, Schedules, TARecipes) {
+
+      $scope.edit = [];
+
       if (!$routeParams.date) {
         $scope.startDate = new Date();
         $scope.endDate = new Date();
@@ -729,6 +742,14 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
         });
       }
 
+
+      $scope.update = function(index){
+        Schedules.update({id: $scope.schedulesArray[0].schedule[index]._id}, $scope.schedulesArray[0].schedule[index], function(){
+          $scope.edit[index] = false;
+        });
+      }
+
+
       $scope.openStartDate = function($event) {
         $event.preventDefault();
         $event.stopPropagation();
@@ -748,7 +769,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
 
 // Shopitems
 
-    .controller('ShopitemsController', ['$scope', '$routeParams', 'Shopitems', 'TAIngredients', 'Units', '$location', '$filter', function ($scope, $routeParams, Shopitems, TAIngredients, Units, $location, $filter) {
+    .controller('ShopitemsController', ['$scope', '$routeParams', '$modal', 'Shopitems', 'TAIngredients', 'Units', '$location', '$filter', function ($scope, $routeParams, $modal, Shopitems, TAIngredients, Units, $location, $filter) {
 
       containsObj = function(array, obj) {
         var i, l = array.length;
@@ -811,9 +832,10 @@ angular.module('app', ['ngRoute', 'ngResource', 'ui.bootstrap', 'ui.checkbox', '
         $scope.newunit = "";
         $scope.newamount = "";
       }
-$scope.removeItem = function(item){
-   $scope.items.splice($scope.items.indexOf(item),1);
-}
+
+      $scope.removeItem = function(item){
+        $scope.items.splice($scope.items.indexOf(item),1);
+      }
 
 
       $scope.remove = function(item){
@@ -829,8 +851,55 @@ $scope.removeItem = function(item){
           Shopitems.update({id: item.details[i]._id}, item.details[i]);
         }
       }
-      
+
+
+      $scope.modalShopitemAdd = function() {
+        var modalAddShopitem = $modal.open({
+          animation: true,
+          templateUrl: 'partials/shopitems.modal.add.tpl.html',
+          controller: 'ModalShopitemAddController',
+          size: 'xs',
+          resolve: {
+            units: function(){
+              return $scope.units;
+            }
+          }
+        });
+
+        modalAddShopitem.result.then(function(response){
+          $scope.newamount = response.amount;
+          $scope.newunit = response.unit;
+          $scope.newingredient = response.ingredient;
+          $scope.addShopitem();
+        });
+
+      }
+
     }])
+
+
+    .controller('ModalShopitemAddController', ['$scope', '$routeParams', '$modalInstance', 'TAIngredients', 'units', function ($scope, $routeParams, $modalInstance, TAIngredients, units) {
+     
+      $scope.units = units;
+
+      $scope.GetIngredients = function(viewValue){
+        return TAIngredients.search({search: viewValue, language: 'de'})
+        .$promise.then(function(response) {
+          return response;
+        });
+      };
+
+      $scope.ok = function(){
+        $modalInstance.close({amount: $scope.newamount, unit: $scope.newunit, ingredient: $scope.newingredient});
+      }
+
+      $scope.cancel = function(){
+        $modalInstance.dismiss('cancel');
+      }
+
+
+    }])
+
 
 
 // Cooking
@@ -891,6 +960,22 @@ $scope.removeItem = function(item){
         }
       };
     }])
+
+
+    .directive('ngReallyClick', [function() {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+            element.bind('click', function() {
+                var message = attrs.ngReallyMessage;
+                if (message && confirm(message)) {
+                    scope.$apply(attrs.ngReallyClick);
+                }
+            });
+        }
+    }
+    }])
+
 
 //---------------
 // Token Interceptor
