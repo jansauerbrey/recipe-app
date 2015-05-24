@@ -1,9 +1,10 @@
   <div class="row">
-    <div ng-hide="recipeedit">
+    <div ng-hide="recipeedit || recipecopy">
     <div class="col-xs-12">
       <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert> 
       <h3 style="margin-bottom: 30px;">{{recipe.name}}
-        <button ng-click="recipeedit=true" class="btn btn-primary pull-right"><i class="glyphicon glyphicon-pencil"></i></button>
+        <button ng-click="recipeedit=true" ng-show="allowEdit" class="btn btn-primary pull-right"><i class="glyphicon glyphicon-pencil"></i></button>
+        <button ng-click="recipecopy=true" class="btn btn-primary pull-right" style="margin-right: 10px;"><i class="glyphicon glyphicon-duplicate"></i></button>
         <button ng-click="scheduleAdd()" class="btn btn-primary pull-right" style="margin-right: 10px;"><i class="glyphicon glyphicon-calendar"></i></button>
       </h3>
       <div class="col-md-8 col-sm-6 col-xs-12" style="padding: 0px; padding-right: 20px;">
@@ -51,7 +52,7 @@
           <th>Ingredient</th>
         </thead>
         <tbody>
-          <tr ng-repeat="ingredient in recipe.ingredients">
+          <tr ng-repeat="ingredient in recipe.ingredients" ng-hide="$last">
             <td>{{ingredient.qty | number}}</td>
             <td>
               <span ng-show="recipe.language==='en'">{{ingredient.unit.name.en}}</span>
@@ -68,7 +69,7 @@
       </table>
     </div>
     </div>
-    <div class="form" ng-show="recipeedit">
+    <div class="form" ng-show="recipeedit || recipecopy">
       <div class="form-group col-xs-12 col-sm-6 col-md-8">
         <label class="control-label">Name:</label>
         <input type="text" ng-model="recipe.name" ng-required="true" class="form-control" placeholder="Name...">
@@ -131,9 +132,10 @@
         </div>
       </div>
       <div class="form-group col-xs-12">
-        <button ng-click="update()" class="btn btn-primary">update</button>
+        <button ng-click="update()" ng-show="recipeedit" class="btn btn-primary">update</button>
+        <button ng-click="save(true)" ng-show="recipecopy" class="btn btn-primary">create copy</button>
         <button ng-click="cancel()" class="btn btn-default">cancel</button>
-        <button ng-click="remove()" class="btn btn-default pull-right">remove</button>
+        <button ng-click="remove()" ng-show="recipeedit" class="btn btn-default pull-right">remove</button>
       </div>
     </div>
   </div>

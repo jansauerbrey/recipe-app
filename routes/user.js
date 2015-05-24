@@ -71,7 +71,7 @@ console.log(req);
                 }
 
                 //Send back token
-                return res.json({token: token, is_admin: user.is_admin, fullname: user.fullname});
+                return res.json({token: token, is_admin: user.is_admin, fullname: user.fullname, _id: user._id, username: user.username});
             });
         });
     });

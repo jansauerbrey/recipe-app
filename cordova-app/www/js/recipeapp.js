@@ -9,27 +9,23 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
 // Auth
 
-    .factory('AuthenticationService', function($window) {
+    .factory('AuthenticationService', function($localStorage) {
         var auth = {
             isAuthenticated: false,
-            isAdmin: false,
             user: '',
         }
-        if ($window.localStorage.isAdmin) {
-          auth.isAdmin = true;
-        }
-        if ($window.localStorage.user) {
-          auth.user = $window.localStorage.user;
+        if ($localStorage.user) {
+          auth.user = $localStorage.user;
         }
         return auth;
     })
 
-    .factory('TokenInterceptor', function ($q, $window, $location, AuthenticationService) {
+    .factory('TokenInterceptor', function ($q, $localStorage, $location, AuthenticationService) {
         return {
             request: function (config) {
                 config.headers = config.headers || {};
-                if ($window.localStorage.token) {
-                    config.headers.Authorization = 'AUTH ' + $window.localStorage.token;
+                if ($localStorage.user && $localStorage.user.token) {
+                    config.headers.Authorization = 'AUTH ' + $localStorage.user.token;
                 }
                 return config;
             },
@@ -40,23 +36,20 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
             /* Set Authentication.isAuthenticated to true if 200 received */
             response: function (response) {
-                if (response != null && response.status == 200 && $window.localStorage.token && !AuthenticationService.isAuthenticated) {
+                if (response != null && response.status == 200 && $localStorage.user && $localStorage.user.token && !AuthenticationService.isAuthenticated) {
                     AuthenticationService.isAuthenticated = true;
-                    $window.localStorage.isAuthenticated = true;
-                    AuthenticationService.isAdmin = $window.localStorage.isAdmin;
+                    $localStorage.isAuthenticated = true;
+                    AuthenticationService.user = $localStorage.user;
                 }
                 return response || $q.when(response);
             },
 
             /* Revoke client authentication if 401 is received */
             responseError: function(rejection) {
-                if (rejection != null && rejection.status === 401 && ($window.localStorage.token || AuthenticationService.isAuthenticated)) {
-                    delete $window.localStorage.token;
-                    delete $window.localStorage.isAdmin;
-                    delete $window.localStorage.isAuthenticated;
-                    delete $window.localStorage.user;
+                if (rejection != null && rejection.status === 401 && ( ( $localStorage.user && $localStorage.user.token ) || AuthenticationService.isAuthenticated)) {
+                    delete $localStorage.isAuthenticated;
+                    delete $localStorage.user;
                     AuthenticationService.isAuthenticated = false;
-                    AuthenticationService.isAdmin = false;
                     AuthenticationService.user = null;
                     $location.path("/user/login");
                 }
@@ -68,7 +61,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
 // Navigation
 
-    .factory('routeNavigation', function($route, $location, $window, AuthenticationService) {
+    .factory('routeNavigation', function($route, $location, $localStorage, AuthenticationService) {
         var routes = [];
         angular.forEach($route.routes, function (route, path) {
             if (route.name) {
@@ -112,7 +105,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
             routes: routes,
             subroutes: subroutes,
             userroutes: userroutes,
-            user: $window.localStorage.user,
+            user: $localStorage.user,
             activeRoute: function (route) {
                 return route.path === $location.path();
             },
@@ -123,7 +116,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
                 else if (route.requiredAdmin === false) {
                     return (AuthenticationService.isAuthenticated !== route.requiredAuthentication);
                 }
-                else if (route.requiredAdmin === true && AuthenticationService.isAdmin === true && AuthenticationService.isAuthenticated === true) {
+                else if (route.requiredAdmin === true && AuthenticationService.user && AuthenticationService.user.is_admin === true && AuthenticationService.isAuthenticated === true) {
                     return false;
                 }
                 else return true;
@@ -226,20 +219,17 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
 // Auth
 
-    .controller('UserCtrl', ['$scope', '$location', '$window', 'Users', 'UserService', 'AuthenticationService',
-        function UserCtrl($scope, $location, $window, Users, UserService, AuthenticationService) {
+    .controller('UserCtrl', ['$scope', '$location', '$localStorage', 'Users', 'UserService', 'AuthenticationService',
+        function UserCtrl($scope, $location, $localStorage, Users, UserService, AuthenticationService) {
  
         $scope.logIn = function logIn(username, password, autologin) {
             if (username !== undefined && password !== undefined) {
  
                 UserService.logIn(username, password, autologin).success(function(data) {
                     AuthenticationService.isAuthenticated = true;
-                    AuthenticationService.isAdmin = data.is_admin;
                     AuthenticationService.user = data;
-                    $window.localStorage.isAuthenticated = true;
-                    $window.localStorage.isAdmin = data.is_admin;
-                    $window.localStorage.token = data.token;
-                    $window.localStorage.user = data;
+                    $localStorage.isAuthenticated = true;
+                    $localStorage.user = data;
                     $location.path("/");
                 }).error(function(status, data) {
                     console.log(status);
@@ -269,18 +259,15 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
 
 
-    .controller('UserLogout', ['$scope', '$location', '$window', 'UserService', 'AuthenticationService',
-        function UserLogout($scope, $location, $window, UserService, AuthenticationService) {
+    .controller('UserLogout', ['$scope', '$location', '$localStorage', 'UserService', 'AuthenticationService',
+        function UserLogout($scope, $location, $localStorage, UserService, AuthenticationService) {
  
         //Admin User Controller (logout)
         if (AuthenticationService.isAuthenticated) {
             UserService.logOut().success(function(data) {
-                    delete $window.localStorage.token;
-                    delete $window.localStorage.isAdmin;
-                    delete $window.localStorage.isAuthenticated;
-                    delete $window.localStorage.user;
+                    delete $localStorage.isAuthenticated;
+                    delete $localStorage.user;
                     AuthenticationService.isAuthenticated = false;
-                    AuthenticationService.isAdmin = false;
                     AuthenticationService.user = '';
             }).error(function(status, data) {
                 console.log(status);
@@ -581,8 +568,9 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
       $scope.cancel = function(){
         $scope.recipe = Recipes.get({id: $routeParams.id }, function(response) {
-          $scope.recipe.ingredients.push('');
+          $scope.recipe.ingredients.push({qty: '', unit: '', ingredient: ''});
           $scope.recipeedit = false;
+          $scope.recipecopy = false;
         });
         
       }
@@ -612,6 +600,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
             $scope.recipe.ingredients.splice(i, 1);
           }
         }
+        $scope.recipe._id = null;
         $scope.recipe.$save(function(){
           $location.url('/recipes/');
         });
@@ -1155,11 +1144,11 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
     ;
   }])
 
-    .run(function($rootScope, $location, $window, AuthenticationService) {
+    .run(function($rootScope, $location, $localStorage, AuthenticationService) {
         $rootScope.$on("$routeChangeStart", function(event, nextRoute, currentRoute) {
             //redirect only if both isAuthenticated is false and no token is set
             if (nextRoute != null && nextRoute.access != null && nextRoute.access.requiredAuthentication 
-                && !AuthenticationService.isAuthenticated && !$window.localStorage.token) {
+                && !AuthenticationService.isAuthenticated && !$localStorage.user.token) {
 
                 $location.path("/user/login");
             }
