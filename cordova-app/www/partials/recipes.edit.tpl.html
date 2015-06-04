@@ -9,7 +9,7 @@
       </h3>
       <div class="col-md-8 col-sm-6 col-xs-12" style="padding: 0px; padding-right: 20px;">
         <label class="control-label">Instructions:</label>
-        <p>{{recipe.instructions}}</p>
+        <p style="white-space: pre-line;">{{recipe.instructions}}</p>
       </div>
       <div class="col-md-4 col-sm-6 col-xs-12" style="padding: 0px;">
         <table class="table table-striped">
@@ -175,8 +175,7 @@
       <div class="form-group col-xs-12">
         <button ng-click="update()" ng-show="recipeedit" class="btn btn-primary">update</button>
         <button ng-click="save(true)" ng-show="recipecopy" class="btn btn-primary">create copy</button>
-        <button ng-click="cancel()" class="btn btn-default">cancel</button>
-        <button ng-click="remove()" ng-show="recipeedit" class="btn btn-default pull-right">remove</button>
+        <button ng-click="remove()" ng-show="recipeedit" class="btn btn-danger pull-right">remove</button>
       </div>
     </form>
   </div>

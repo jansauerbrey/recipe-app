@@ -25,7 +25,6 @@ router.get('/info/:id', auth.verify, function(req, res, next) {
 
 /* LOGIN */
 router.post('/login', function(req, res) {
-
     //verify credential (use POST)
     var username = req.body.username || '';
     var password = req.body.password || '';
@@ -59,7 +58,7 @@ router.post('/login', function(req, res) {
  
             var userData = {id: user._id, username: user.username, is_admin: user.is_admin, autologin: autologin};
             var expiration = 300; // 5 minutes
-console.log(req);
+
             if (autologin === true) {
               expiration = 60*60*24*30; //30 days
             }

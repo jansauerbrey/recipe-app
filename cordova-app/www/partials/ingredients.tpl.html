@@ -8,7 +8,7 @@
     <div class="list-group" style="margin-top: 20px;">
       <div ng-repeat="ingredient in ingredients | filter: search">
         <a class="list-group-item col-xs-12" href="#/ingredients/edit/{{ingredient._id}}">
-          <div class="col-xs-3 col-sm-2"><img ng-src="{{ingredient.rewe_img_link_xs}}"></div>
+          <div class="col-xs-3 col-sm-2"><img style="width: 60px; height: 60px;" ng-src="{{ingredient.rewe_img_link_xs}}"></img></div>
           <div class="col-xs-9 col-sm-10">{{ingredient.name.en}}</div>
           <div class="col-xs-9 col-sm-10">{{ingredient.name.de}}</div>
           <div class="col-xs-9 col-sm-10">{{ingredient.name.fi}}</div>
