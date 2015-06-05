@@ -1,0 +1,21 @@
+  <div class="modal-header">
+    <h4 class="modal-title"><strong>Add new ingredient:</strong></h4>
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+      <label class="control-label">Ingredient:</label>
+      <input type="text" ng-model="newingredient" typeahead="ingredient as ingredient.name.de for ingredient in GetIngredients($viewValue)" typeahead-editable="false" typeahead-template-url="partials/ingredients.typeahead.tpl.html" class="form-control" placeholder="Shopitem..."></td>
+    </div>
+    <div class="form-group">
+      <label class="control-label">Amount:</label>
+      <input type="number" ng-model="newamount" ng-required="true" class="form-control">
+    </div>
+    <div class="form-group">
+      <label class="control-label">Unit:</label>
+      <select ng-options="unit._id as unit.name.de for unit in units" ng-model="newunit" class="form-control" placeholder="Unit..."></select></td>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button ng-click="ok()" class="btn btn-primary">add</button>
+    <button ng-click="cancel()" class="btn btn-default">cancel</button>
+  </div>
