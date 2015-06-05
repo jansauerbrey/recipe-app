@@ -15,7 +15,7 @@ router.get('/', auth.verify, function(req, res, next) {
 });
 
 /* POST /units */
-router.post('/', auth.verify, function(req, res, next) {
+router.post('/', auth.verifyAdmin, function(req, res, next) {
   req.body.author = req._user.id;
   Unit.create(req.body, function (err, post) {
     if (err) return next(err);
@@ -32,7 +32,7 @@ router.get('/:id', auth.verify, function(req, res, next) {
 });
 
 /* PUT /units/:id */
-router.put('/:id', auth.verify, function(req, res, next) {
+router.put('/:id', auth.verifyAdmin, function(req, res, next) {
   req.body.author = req._user.id;
   Unit.findByIdAndUpdate(req.params.id, req.body, function (err, post) {
     if (err) return next(err);
@@ -41,7 +41,7 @@ router.put('/:id', auth.verify, function(req, res, next) {
 });
 
 /* DELETE /units/:id */
-router.delete('/:id', auth.verify, function(req, res, next) {
+router.delete('/:id', auth.verifyAdmin, function(req, res, next) {
   Unit.findByIdAndRemove(req.params.id, req.body, function (err, post) {
     if (err) return next(err);
     res.json(post);

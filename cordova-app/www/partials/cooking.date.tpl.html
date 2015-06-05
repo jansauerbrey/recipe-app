@@ -8,17 +8,17 @@
         </h3>
       </div>
     <accordion close-others="false" class="col-xs-12">
-    <accordion-group ng-repeat="schedule in schedules" heading="{{schedule.recipe.name}}">
+    <accordion-group ng-repeat="schedule in schedules" ng-init="recipe=schedule.recipe" heading="{{schedule.recipe.name}}">
       <div class="col-md-8 col-sm-6 col-xs-12" style="padding: 0px; padding-right: 20px;">
         <label class="control-label">Instructions:</label>
-        <p style="white-space:pre-wrap;">{{schedule.recipe.instructions}}</p>
+        <p style="white-space: pre-line;">{{recipe.instructions}}</p>
       </div>
       <div class="col-md-4 col-sm-6 col-xs-12" style="padding: 0px;">
         <table class="table table-striped">
           <tbody>
             <tr>
               <th>Author:</th>
-              <td>{{schedule.recipe.author.fullname}}</td>
+              <td>{{recipe.author.fullname}}</td>
             </tr>
             <tr>
               <th>Persons / portions:</th>
@@ -26,23 +26,39 @@
             </tr>
             <tr>
               <th>Preparation time:</th>
-              <td>{{schedule.recipe.prepTime}} min</td>
+              <td>{{recipe.prepTime}} min</td>
             </tr>
             <tr>
               <th>Cooking time:</th>
-              <td>{{schedule.recipe.cookTime}} min</td>
+              <td>{{recipe.cookTime}} min</td>
+            </tr>
+            <tr>
+              <th>Waiting time:</th>
+              <td>{{recipe.waitTime}} min</td>
             </tr>
             <tr>
               <th>Total time:</th>
-              <td>{{schedule.recipe.totalTime}} min</td>
+              <td>{{recipe.totalTime}} min</td>
             </tr>
             <tr>
-              <th>Kcal:</th>
-              <td>{{schedule.recipe.kilocalories}}</td>
+              <th>Kcal / person:</th>
+              <td>{{recipe.kilocalories}}</td>
+            </tr>
+            <tr>
+              <th>Carb / person:</th>
+              <td>{{recipe.carb}}</td>
+            </tr>
+            <tr>
+              <th>Fat / person:</th>
+              <td>{{recipe.fat}}</td>
+            </tr>
+            <tr>
+              <th>Protein / person:</th>
+              <td>{{recipe.protein}}</td>
             </tr>
             <tr>
               <th>Tags:</th>
-              <td><font size="3"><span ng-repeat="tag in schedule.recipe.tags" class="label label-primary" style="margin: 2px; display: inline-block;">{{tag.text}}</span></font></td>
+              <td><font size="3"><span ng-repeat="tag in recipe.tags" class="label label-primary" style="margin: 2px; display: inline-block;">{{tag.text}}</span></font></td>
             </tr>
           </tbody>
         </table>
@@ -54,19 +70,17 @@
           <th>Ingredient</th>
         </thead>
         <tbody>
-          <tr ng-repeat="ingredient in schedule.recipe.ingredients">
+          <tr ng-repeat="ingredient in recipe.ingredients" ng-hide="$last">
+            <td>{{schedule.factor/recipe.yield*ingredient.qty | number}}</td>
             <td>
-              {{schedule.factor/schedule.recipe.yield*ingredient.qty | number}}
+              <span ng-show="recipe.language==='en'">{{ingredient.unit.name.en}}</span>
+              <span ng-show="recipe.language==='de'">{{ingredient.unit.name.de}}</span>
+              <span ng-show="recipe.language==='fi'">{{ingredient.unit.name.fi}}</span>
             </td>
             <td>
-              <span ng-show="schedule.recipe.language==='en'">{{ingredient.unit.name.en}}</span>
-              <span ng-show="schedule.recipe.language==='de'">{{ingredient.unit.name.de}}</span>
-              <span ng-show="schedule.recipe.language==='fi'">{{ingredient.unit.name.fi}}</span>
-            </td>
-            <td>
-              <span ng-show="schedule.recipe.language==='en'">{{ingredient.ingredient.name.en}}</span>
-              <span ng-show="schedule.recipe.language==='de'">{{ingredient.ingredient.name.de}}</span>
-              <span ng-show="schedule.recipe.language==='fi'">{{ingredient.ingredient.name.fi}}</span>
+              <span ng-show="recipe.language==='en'">{{ingredient.ingredient.name.en}}</span>
+              <span ng-show="recipe.language==='de'">{{ingredient.ingredient.name.de}}</span>
+              <span ng-show="recipe.language==='fi'">{{ingredient.ingredient.name.fi}}</span>
             </td>
           </tr>
         </tbody>

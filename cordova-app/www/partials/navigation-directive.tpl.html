@@ -11,29 +11,21 @@
   </div>
   <div class="collapse navbar-collapse" collapse="hideMobileNav" ng-click="hideMobileNav=true">
     <ul class="nav navbar-nav">
-      <li ng-repeat="route in routes" ng-class="{active: activeRoute(route)}" ng-hide="hiddenRoute(route)">
+      <li ng-repeat="route in routes | filter: {requiredPermissions: 'User', panelright: false}" ng-class="{active: activeRoute(route)}" ng-show="determineVisibility(route.requiredPermissions)">
         <a ng-href="#{{route.path}}">{{ route.name }}</a>
       </li>
-      <li class="hidden-xs" dropdown is-open="othersIsOpen" ng-hide="hiddenRoute()">
-      <a class="dropdown-toggle" href="#" dropdown-toggle>Others <span class="caret"></span></a>
+      <li class="hidden-xs" dropdown is-open="othersIsOpen">
+      <a class="dropdown-toggle" href="#" dropdown-toggle ng-show="determineVisibility('Admin')">Admin <span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">
-          <li ng-repeat="subroute in subroutes" ng-class="{active: activeRoute(subroute)}" ng-hide="hiddenRoute(subroute)">
-            <a ng-href="#{{subroute.path}}">{{ subroute.name }}</a>
+          <li ng-repeat="route in routes | filter: {requiredPermissions: 'Admin', panelright: false}" ng-class="{active: activeRoute(route)}" ng-show="determineVisibility(route.requiredPermissions)">
+            <a ng-href="#{{route.path}}">{{ route.name }}</a>
           </li>
         </ul>
       </li>
     </ul>
-    <ul class="nav navbar-nav">
-      <li class="hidden-sm hidden-md hidden-lg" ng-repeat="subroute in subroutes" ng-class="{active: activeRoute(subroute)}" ng-hide="hiddenRoute(subroute)">
-        <a ng-href="#{{subroute.path}}">{{ subroute.name }}</a>
-      </li>
-      <li ng-hide="!hiddenRoute()">
-        <a ng-href="#/impressum/">Impressum</a>
-      </li>
-    </ul>
     <ul class="nav navbar-nav navbar-right">
-      <li ng-repeat="userroute in userroutes" ng-class="{active: activeRoute(userroute)}" ng-hide="hiddenRoute(userroute)">
-        <a ng-href="#{{userroute.path}}">{{ userroute.name }}</a>
+      <li ng-repeat="route in routes | filter: {panelright: true}" ng-class="{active: activeRoute(route)}" ng-show="determineVisibility(route.requiredPermissions)">
+        <a ng-href="#{{route.path}}">{{ route.name }}</a>
       </li>
     </ul>
     <p class="navbar-text navbar-right visible-md-block visible-lg-block" ng-hide="hiddenRoute()"><a href="#/user/details" class="navbar-link">{{user.fullname}}</a></p>

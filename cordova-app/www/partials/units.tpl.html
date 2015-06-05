@@ -6,7 +6,7 @@
     <input type="text" ng-model="search.name.$" class="form-control" placeholder="Search...">
     <div ng-show="loading" class="text-center"><i class="fa fa-spinner fa-spin fa-3x"></i></div>
     <div class="list-group" style="margin-top: 20px;">
-      <div ng-repeat="unit in units | filter: search">
+      <div ng-repeat="unit in units | filter: search | orderBy: 'name.de'">
         <a class="list-group-item col-xs-12" href="#/units/edit/{{unit._id}}">
           <div class="col-xs-4">{{unit.name.en}}</div>
           <div class="col-xs-4">{{unit.name.de}}</div>

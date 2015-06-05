@@ -15,7 +15,7 @@ router.get('/', auth.verify, function(req, res, next) {
 });
 
 /* POST /ingredients */
-router.post('/', auth.verify, function(req, res, next) {
+router.post('/', auth.verifyAdmin, function(req, res, next) {
   req.body.author = req._user.id;
   Ingredient.create(req.body, function (err, post) {
     if (err) return next(err);
@@ -32,7 +32,7 @@ router.get('/:id', auth.verify, function(req, res, next) {
 });
 
 /* PUT /ingredients/:id */
-router.put('/:id', auth.verify, function(req, res, next) {
+router.put('/:id', auth.verifyAdmin, function(req, res, next) {
   req.body.author = req._user.id;
   Ingredient.findByIdAndUpdate(req.params.id, req.body, function (err, post) {
     if (err) return next(err);
@@ -41,7 +41,7 @@ router.put('/:id', auth.verify, function(req, res, next) {
 });
 
 /* DELETE /ingredients/:id */
-router.delete('/:id', auth.verify, function(req, res, next) {
+router.delete('/:id', auth.verifyAdmin, function(req, res, next) {
   Ingredient.findByIdAndRemove(req.params.id, req.body, function (err, post) {
     if (err) return next(err);
     res.json(post);

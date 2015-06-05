@@ -35,6 +35,15 @@ router.get('/:id', auth.verify, function(req, res, next) {
 router.put('/:id', auth.verify, function(req, res, next) {
   req.body.author = req._user.id;
   req.body.updated_at = new Date();
+  req.body.expire_date = new Date();
+  if (req.body.completed === true) {
+    req.body.expire_date.setHours(req.body.expire_date.getHours() + 1);
+  }
+  else if (req.body.schedule && req.body.schedule.date) {
+    req.body.expire_date.setDate(req.body.schedule.date.getDate() + 1);
+  } else {
+    req.body.expire_date.setDate(req.body.expire_date.getDate() + 14);
+  }
   Shopitem.findByIdAndUpdate(req.params.id, req.body, function (err, shopitems) {
     if (err) return next(err);
     res.json(shopitems);

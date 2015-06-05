@@ -9,18 +9,111 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
 // Auth
 
-    .factory('AuthenticationService', function($localStorage) {
-        var auth = {
-            isAuthenticated: false,
-            user: '',
-        }
-        if ($localStorage.user) {
-          auth.user = $localStorage.user;
-        }
-        return auth;
-    })
+    .factory('AuthenticationService', [ '$http', '$localStorage', function($http, $localStorage) {
+        var currentUser,
+            createUser = function(data){
+                currentUser = data;
+                $localStorage.user = data;
+            },
+            getCurrentLoginUser = function(){
+                return currentUser;
+            },
+            deleteCurrentUser = function(){
+                currentUser = undefined;
+                delete $localStorage.user;
+            },
+            isAuthenticated = function() {
+                return (currentUser !== undefined);
+            },
+            logIn = function(username, password, autologin) {
+                return $http.post('http://rezept-planer.de/api/user/login', {username: username, password: password, autologin: autologin}).success(function(data) {
+                    data.permissions = ["User"];
+                    if (data.is_admin) {
+                        data.permissions.push("Admin");
+                    }
+                    createUser(data);
+                    return true;
+                });
+            },
+            logOut = function() {
+                $http.get('http://rezept-planer.de/api/user/logout').success(function(){
+                     deleteCurrentUser();
+                     return true;
+                });
+            },
+            register = function(user) {
+                return $http.post('http://rezept-planer.de/api/user/register', user);
+            };
 
-    .factory('TokenInterceptor', function ($q, $localStorage, $location, AuthenticationService) {
+            if ($localStorage.user){
+                createUser($localStorage.user);
+            }
+
+        return {
+            logIn: logIn,
+            logOut: logOut,
+            register: register,
+            isAuthenticated: isAuthenticated,
+            getCurrentLoginUser: getCurrentLoginUser
+        }
+    }])
+
+    .factory('AuthorisationService', ['AuthenticationService', function(AuthenticationService) {
+	var authorize = function (requiresLogin, requiredPermissions, permissionType, requiresLogout) {
+	    var result = 0,
+		user = AuthenticationService.getCurrentLoginUser(),
+		loweredPermissions = [],
+		hasPermission = true,
+		permission, i;
+
+	    permissionType = permissionType || 0;
+	    if (requiresLogin === true && user === undefined) {
+		result = 1;
+	    } else if ((requiresLogin === true && user !== undefined) &&
+		(requiredPermissions === undefined || requiredPermissions.length === 0)) {
+		// Login is required but no specific permissions are specified.
+		result = 0;
+	    } else if (requiredPermissions) {
+                // fill NoUser info to user in case there is no user
+                if (user === undefined){
+                  user = {permissions: ['NoUser']};
+                }
+		loweredPermissions = [];
+		angular.forEach(user.permissions, function (permission) {
+		    loweredPermissions.push(permission.toLowerCase());
+		});
+
+		for (i = 0; i < requiredPermissions.length; i += 1) {
+		    permission = requiredPermissions[i].toLowerCase();
+
+		    if (permissionType === 1) {
+		        hasPermission = hasPermission && loweredPermissions.indexOf(permission) > -1;
+		        // if all the permissions are required and hasPermission is false there is no point carrying on
+		        if (hasPermission === false) {
+		            break;
+		        }
+		    } else if (permissionType === 0) {
+		        hasPermission = loweredPermissions.indexOf(permission) > -1;
+		        // if we only need one of the permissions and we have it there is no point carrying on
+		        if (hasPermission) {
+		            break;
+		        }
+		    }
+		}
+
+		result = hasPermission ? 0 : 2;
+	    }
+
+	    return result;
+	};
+
+	return {
+	  authorize: authorize
+	};
+    }])
+
+
+    .factory('TokenInterceptor', ['$q', '$localStorage', '$location', function ($q, $localStorage, $location) {
         return {
             request: function (config) {
                 config.headers = config.headers || {};
@@ -36,110 +129,46 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
             /* Set Authentication.isAuthenticated to true if 200 received */
             response: function (response) {
-                if (response != null && response.status == 200 && $localStorage.user && $localStorage.user.token && !AuthenticationService.isAuthenticated) {
-                    AuthenticationService.isAuthenticated = true;
-                    $localStorage.isAuthenticated = true;
-                    AuthenticationService.user = $localStorage.user;
+                if (response != null && response.status == 200 && $localStorage.user && $localStorage.user.token) {
+
                 }
                 return response || $q.when(response);
             },
 
             /* Revoke client authentication if 401 is received */
             responseError: function(rejection) {
-                if (rejection != null && rejection.status === 401 && ( ( $localStorage.user && $localStorage.user.token ) || AuthenticationService.isAuthenticated)) {
-                    delete $localStorage.isAuthenticated;
-                    delete $localStorage.user;
-                    AuthenticationService.isAuthenticated = false;
-                    AuthenticationService.user = null;
-                    $location.path("/user/login");
+                if (rejection != null && rejection.status === 401) {
+                    $location.path("/user/login/").replace();
                 }
 
                 return $q.reject(rejection);
             }
         };
-    })
+    }])
 
 // Navigation
 
-    .factory('routeNavigation', function($route, $location, $localStorage, AuthenticationService) {
+    .factory('routeNavigation', function($route, $location) {
         var routes = [];
         angular.forEach($route.routes, function (route, path) {
             if (route.name) {
-		var requiredAdmin = (route.access.requiredAdmin === true) ? true : false;
                 routes.push({
                     path: path,
                     name: route.name,
-                    requiredAuthentication: route.access.requiredAuthentication,
-                    requiredAdmin: requiredAdmin
-                });
-            }
-        });
-
-        var subroutes = [];
-        angular.forEach($route.routes, function (route, path) {
-            if (route.subname) {
-		var requiredAdmin = (route.access.requiredAdmin === true) ? true : false;
-                subroutes.push({
-                    path: path,
-                    name: route.subname,
-                    requiredAuthentication: route.access.requiredAuthentication,
-                    requiredAdmin: requiredAdmin
-                });
-            }
-        });
-
-        var userroutes = [];
-        angular.forEach($route.routes, function (route, path) {
-            if (route.username) {
-		var requiredAdmin = (route.access.requiredAdmin === true) ? true : false;
-                userroutes.push({
-                    path: path,
-                    name: route.username,
-                    requiredAuthentication: route.access.requiredAuthentication,
-                    requiredAdmin: requiredAdmin
+                    panelright: route.access.panelright ? route.access.panelright : false,
+                    requiresLogin: route.access.requiresLogin,
+                    requiredPermissions: route.access.requiredPermissions ? route.access.requiredPermissions.join() : undefined
                 });
             }
         });
 
         return {
             routes: routes,
-            subroutes: subroutes,
-            userroutes: userroutes,
-            user: $localStorage.user,
             activeRoute: function (route) {
                 return route.path === $location.path();
-            },
-            hiddenRoute: function (route) {
-		if (!route){
-                    return (!AuthenticationService.isAuthenticated);
-                }
-                else if (route.requiredAdmin === false) {
-                    return (AuthenticationService.isAuthenticated !== route.requiredAuthentication);
-                }
-                else if (route.requiredAdmin === true && AuthenticationService.user && AuthenticationService.user.is_admin === true && AuthenticationService.isAuthenticated === true) {
-                    return false;
-                }
-                else return true;
             }
         };
     })
-
-    .factory('UserService', [ '$http', function($http) {
-        return {
-            logIn: function(username, password, autologin) {
-                return $http.post('http://rezept-planer.de/api/user/login', {username: username, password: password, autologin: autologin});
-            },
-
-            logOut: function() {
-                return $http.get('http://rezept-planer.de/api/user/logout');
-            },
-
-            register: function(user) {
-                return $http.post('http://rezept-planer.de/api/user/register', user);
-            }
-
-        }
-    }])
 
         .factory('User', ['$resource', function($resource){
           return $resource('http://rezept-planer.de/api/user/info/:id');
@@ -219,64 +248,30 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
 // Auth
 
-    .controller('UserCtrl', ['$scope', '$location', '$localStorage', 'Users', 'UserService', 'AuthenticationService',
-        function UserCtrl($scope, $location, $localStorage, Users, UserService, AuthenticationService) {
+    .controller('UserCtrl', ['$scope', '$location', 'Users', 'AuthenticationService',
+        function UserCtrl($scope, $location, Users, AuthenticationService) {
  
         $scope.logIn = function logIn(username, password, autologin) {
-            if (username !== undefined && password !== undefined) {
- 
-                UserService.logIn(username, password, autologin).success(function(data) {
-                    AuthenticationService.isAuthenticated = true;
-                    AuthenticationService.user = data;
-                    $localStorage.isAuthenticated = true;
-                    $localStorage.user = data;
-                    $location.path("/");
-                }).error(function(status, data) {
-                    console.log(status);
-                    console.log(data);
-                    $location.path("/user/register");
-                });
+            if (username !== undefined && password !== undefined) { 
+                AuthenticationService.logIn(username, password, autologin);
+	        $location.path("/");
             }
         }
  
         $scope.user = new Users();
 
         $scope.register = function register() {
-            if (AuthenticationService.isAuthenticated) {
-                $location.path("/");
-            }
-            else {
-                UserService.register($scope.user).success(function(data) {
-                    $location.path("/");
-                }).error(function(status, data) {
-                    console.log(status);
-                    console.log(data);
-                });
-            }
-        }
-
+	    AuthenticationService.register($scope.user).success(function(data) {
+	        $location.path("/");
+	    });
+	}
     }])
 
 
 
-    .controller('UserLogout', ['$scope', '$location', '$localStorage', 'UserService', 'AuthenticationService',
-        function UserLogout($scope, $location, $localStorage, UserService, AuthenticationService) {
- 
-        //Admin User Controller (logout)
-        if (AuthenticationService.isAuthenticated) {
-            UserService.logOut().success(function(data) {
-                    delete $localStorage.isAuthenticated;
-                    delete $localStorage.user;
-                    AuthenticationService.isAuthenticated = false;
-                    AuthenticationService.user = '';
-            }).error(function(status, data) {
-                console.log(status);
-                console.log(data);
-            });
-        }
-        else {
-            $location.path("/user/login");
-        }
+    .controller('UserLogout', ['$scope', '$location', '$localStorage', 'AuthenticationService',
+        function UserLogout($scope, $location, $localStorage, AuthenticationService) {
+        AuthenticationService.logOut();
     }])
 
 
@@ -933,22 +928,66 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 // Directives
 //---------------
 
-    .directive('navigation', ['routeNavigation', function (routeNavigation) {
+    .directive('navigation', ['routeNavigation', 'AuthenticationService', 'AuthorisationService', function (routeNavigation, AuthenticationService, AuthorisationService) {
       return {
         restrict: "E",
         replace: true,
         templateUrl: "partials/navigation-directive.tpl.html",
         controller:  function ($scope) {
           $scope.hideMobileNav = true;
-          $scope.user = routeNavigation.user;
+          $scope.user = AuthenticationService.getCurrentLoginUser();
           $scope.routes = routeNavigation.routes;
-          $scope.subroutes = routeNavigation.subroutes;
-          $scope.userroutes = routeNavigation.userroutes;
           $scope.activeRoute = routeNavigation.activeRoute;
-          $scope.hiddenRoute = routeNavigation.hiddenRoute;;
+
+          $scope.$watch(AuthenticationService.isAuthenticated, function () {
+              $scope.user = AuthenticationService.getCurrentLoginUser();
+          }, true)
+
+          $scope.determineVisibility = function(roles){
+            if (roles === undefined) return true;
+            roleArray = roles.split(',');
+            var auhtorisation = AuthorisationService.authorize(undefined, roleArray);
+            return (auhtorisation === 0);
+          };
+
         }
       };
     }])
+
+    .directive('access', [  
+        'AuthorisationService',
+        function (AuthorisationService) {
+            return {
+              restrict: 'A',
+              link: function (scope, element, attrs) {
+                  var makeVisible = function () {
+                          element.removeClass('hidden');
+                      },
+                      makeHidden = function () {
+                          element.addClass('hidden');
+                      },
+                      determineVisibility = function (resetFirst) {
+                          var result;
+                          if (resetFirst) {
+                              makeVisible();
+                          }
+
+                          result = AuthorisationService.authorize(undefined, roles);
+                          if (result === 0) {
+                              makeVisible();
+                          } else {
+                              makeHidden();
+                          }
+                      },
+                      roles = attrs.access.split(',');
+
+
+                  if (roles.length > 0) {
+                      determineVisibility(true);
+                  }
+              }
+            };
+        }])
 
 
     .directive('ngReallyClick', [function() {
@@ -974,33 +1013,6 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
        $httpProvider.interceptors.push('TokenInterceptor');
    })
 
-
-    .filter('sumFilter', function() {
-      return function(items, value) {
-        var summary = 0; 
-        for (var i in items) {
-          if (items[i].priority == value) {
-            summary++;
-          }
-        }
-        return summary;
-      }
-    })
-
-    .filter('unique', function() {
-      return function(items, key) {
-        var unique = {};
-        var uniqueList = [];
-        for(var i = 0; i < items.length; i++){
-          if(typeof unique[items[i][key]] == "undefined") {
-            unique[items[i][key]] = "";
-            uniqueList.push(items[i]);
-          }
-        }
-        return uniqueList;
-      };
-    })
-
 //---------------
 // Routes
 //---------------
@@ -1010,150 +1022,181 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
       .when('/', {
         templateUrl: 'partials/startpage.tpl.html',
         controller: 'StartpageController',
-        access: { requiredAuthentication: true }
+        access: { requiresLogin: false }
       })
 
       .when('/units/', {
         templateUrl: 'partials/units.tpl.html',
         controller: 'UnitsController',
-        subname: 'Units',
-        access: { requiredAuthentication: true }
+        name: 'Units',
+        access: { requiresLogin: true,
+                  requiredPermissions: ['Admin']}
       })
     
       .when('/units/edit/:id', {
         templateUrl: 'partials/units.details.tpl.html',
         controller: 'UnitDetailCtrl',
-        access: { requiredAuthentication: true }
+        access: { requiresLogin: true,
+                  requiredPermissions: ['Admin']}
      })
 
       .when('/units/add/', {
         templateUrl: 'partials/units.add.tpl.html',
         controller: 'UnitDetailCtrl',
-        access: { requiredAuthentication: true }
+        access: { requiresLogin: true,
+                  requiredPermissions: ['Admin']}
       })
 
 
       .when('/ingredients/', {
         templateUrl: 'partials/ingredients.tpl.html',
         controller: 'IngredientsController',
-        subname: 'Ingredients',
-        access: { requiredAuthentication: true }
+        name: 'Ingredients',
+        access: { requiresLogin: true,
+                  requiredPermissions: ['Admin']}
       })
     
       .when('/ingredients/edit/:id', {
         templateUrl: 'partials/ingredients.details.tpl.html',
         controller: 'IngredientDetailCtrl',
-        access: { requiredAuthentication: true }
+        access: { requiresLogin: true,
+                  requiredPermissions: ['Admin']}
      })
 
       .when('/ingredients/add/', {
         templateUrl: 'partials/ingredients.add.tpl.html',
         controller: 'IngredientDetailCtrl',
-        access: { requiredAuthentication: true }
+        access: { requiresLogin: true,
+                  requiredPermissions: ['Admin']}
       })
 
 
       .when('/recipes/', {
         templateUrl: 'partials/recipes.tpl.html',
         controller: 'RecipesController',
-        subname: 'Recipes',
-        access: { requiredAuthentication: true }
+        name: 'Recipes',
+        access: { requiresLogin: true, 
+                  requiredPermissions: ['User']}
       })
     
       .when('/recipes/edit/:id', {
         templateUrl: 'partials/recipes.edit.tpl.html',
         controller: 'RecipeDetailCtrl',
-        access: { requiredAuthentication: true }
+        access: { requiresLogin: true,
+                  requiredPermissions: ['User']}
      })
 
       .when('/recipes/add/', {
         templateUrl: 'partials/recipes.add.tpl.html',
         controller: 'RecipeDetailCtrl',
-        access: { requiredAuthentication: true }
+        access: { requiresLogin: true, 
+                  requiredPermissions: ['User']}
       })
 
       .when('/schedules/', {
         templateUrl: 'partials/schedules.tpl.html',
         controller: 'SchedulesController',
         name: 'Schedules',
-        access: { requiredAuthentication: true }
+        access: { requiresLogin: true, 
+                  requiredPermissions: ['User']}
       })
 
       .when('/schedules/:date', {
         templateUrl: 'partials/schedules.date.tpl.html',
         controller: 'SchedulesController',
-        access: { requiredAuthentication: true }
+        access: { requiresLogin: true, 
+                  requiredPermissions: ['User']}
       })
 
       .when('/shopitems/', {
         templateUrl: 'partials/shopitems.tpl.html',
         controller: 'ShopitemsController',
         name: 'Shopping List',
-        access: { requiredAuthentication: true }
+        access: { requiresLogin: true, 
+                  requiredPermissions: ['User']}
       })
 
       .when('/cooking/', {
         templateUrl: 'partials/cooking.date.tpl.html',
         controller: 'CookingController',
         name: 'Cooking',
-        access: { requiredAuthentication: true }
+        access: { requiresLogin: true, 
+                  requiredPermissions: ['User']}
       })
 
       .when('/cooking/:date', {
         templateUrl: 'partials/cooking.date.tpl.html',
         controller: 'CookingController',
-        access: { requiredAuthentication: true }
+        access: { requiresLogin: true, 
+                  requiredPermissions: ['User']}
       })
     
       .when('/admin/user/', {
         templateUrl: 'partials/admin.user.tpl.html',
         controller: 'AdminUserCtrl',
-        subname: 'Admin',
-        access: { requiredAuthentication: true,
-                  requiredAdmin: true }
+        name: 'Users',
+        access: { requiresLogin: true,
+                  requiredPermissions: ['Admin']}
       })
 
       .when('/impressum/', {
         templateUrl: 'partials/impressum.tpl.html',
         controller: 'ImpressumController',
-        subname: 'Impressum',
-        access: { requiredAuthentication: true }
+        name: 'Impressum',
+        access: { requiresLogin: false }
       })
 
       .when('/user/register/', {
         templateUrl: 'partials/user.register.tpl.html',
         controller: 'UserCtrl',
-        username: 'Register',
-        access: { requiredAuthentication: false }
+        name: 'Register',
+        access: { panelright: true,
+                  requiredPermissions: ['NoUser'] }
       })
 
       .when('/user/login/', {
         templateUrl: 'partials/user.login.tpl.html',
         controller: 'UserCtrl',
-        username: 'Login',
-        access: { requiredAuthentication: false }
+        name: 'Login',
+        access: { panelright: true,
+                  requiredPermissions: ['NoUser'] }
       })
 
       .when('/user/logout/', {
         templateUrl: 'partials/user.logout.tpl.html',
         controller: 'UserLogout',
-        username: 'Logout',
-        access: { requiredAuthentication: true }
+        name: 'Logout',
+        access: { panelright: true,
+                  requiresLogin: true, 
+                  requiredPermissions: ['User']}
       })
 
     ;
   }])
 
-    .run(function($rootScope, $location, $localStorage, AuthenticationService) {
+    .run(['$rootScope', '$location', '$localStorage', 'AuthorisationService', function($rootScope, $location, $localStorage, AuthorisationService) {
+	var routeChangeRequiredAfterLogin = false,
+	    loginRedirectUrl;
         $rootScope.$on("$routeChangeStart", function(event, nextRoute, currentRoute) {
-            //redirect only if both isAuthenticated is false and no token is set
-            if (nextRoute != null && nextRoute.access != null && nextRoute.access.requiredAuthentication 
-                && !AuthenticationService.isAuthenticated && !$localStorage.user.token) {
-
-                $location.path("/user/login");
+            var authorised;
+            if (routeChangeRequiredAfterLogin && nextRoute.originalPath !== "/user/login/") {
+                routeChangeRequiredAfterLogin = false;
+                $location.path(loginRedirectUrl).replace();
+            } else if (nextRoute.access !== undefined) {
+                authorised = AuthorisationService.authorize(nextRoute.access.requiresLogin,
+                                                     nextRoute.access.requiredPermissions,
+                                                     nextRoute.access.permissionType,
+                                                     nextRoute.access.requiresLogout);
+                if (authorised === 1) {
+                    routeChangeRequiredAfterLogin = true;
+                    loginRedirectUrl = (nextRoute.originalPath !== "/user/login/") ? nextRoute.originalPath : "/" ;
+                    $location.path("/user/login/");
+                } else if (authorised === 2) {
+                    $location.path("/user/login/").replace();
+                }
             }
         });
-    })
+    }])
 
 ;
 

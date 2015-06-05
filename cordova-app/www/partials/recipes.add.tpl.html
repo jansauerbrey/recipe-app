@@ -62,9 +62,9 @@
             <input ng-show="recipe.language==='fi'" type="number" ng-model="ingredient.qty" ng-required="ingredient.ingredient && ingredient.unit !== '5511d2fd4194de051c7efd60'" class="form-control" placeholder="Amount">
           </div>
           <div class="col-xs-4 col-sm-3 col-md-2" style="padding:0;" ng-class="{ 'has-error': submitted && ingredient.ingredient && ingredient.unit === undefined }">
-            <select ng-show="recipe.language==='en'" ng-options="unit._id as unit.name.en for unit in units" ng-model="ingredient.unit" ng-required="ingredient.ingredient" class="form-control" placeholder="Unit"></select>
-            <select ng-show="recipe.language==='de'" ng-options="unit._id as unit.name.de for unit in units" ng-model="ingredient.unit" ng-required="ingredient.ingredient" class="form-control" placeholder="Unit"></select>
-            <select ng-show="recipe.language==='fi'" ng-options="unit._id as unit.name.fi for unit in units" ng-model="ingredient.unit" ng-required="ingredient.ingredient" class="form-control" placeholder="Unit"></select>
+            <select ng-show="recipe.language==='en'" ng-options="unit._id as unit.name.en for unit in units | orderBy: 'name.en'" ng-model="ingredient.unit" ng-required="ingredient.ingredient" class="form-control" placeholder="Unit"></select>
+            <select ng-show="recipe.language==='de'" ng-options="unit._id as unit.name.de for unit in units | orderBy: 'name.de'" ng-model="ingredient.unit" ng-required="ingredient.ingredient" class="form-control" placeholder="Unit"></select>
+            <select ng-show="recipe.language==='fi'" ng-options="unit._id as unit.name.fi for unit in units | orderBy: 'name.fi'" ng-model="ingredient.unit" ng-required="ingredient.ingredient" class="form-control" placeholder="Unit"></select>
           </div>
 	  <div class="col-xs-5 col-sm-7 col-md-9" style="padding:0;" ng-class="{ 'has-error': submitted && ingredient.ingredient === undefined }">
             <div ng-class="{ 'input-group': ingredient.ingredient}" ng-show="recipe.language==='en'">
