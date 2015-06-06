@@ -1197,11 +1197,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
     ;
   }])
 
-    .run(['$rootScope', '$location', '$localStorage', 'AuthorisationService', function($rootScope, $location, $localStorage, AuthorisationService) {
+    .run(['$rootScope', '$location', '$localStorage', '$http', 'AuthorisationService', 'UserService', function($rootScope, $location, $localStorage, $http, AuthorisationService, UserService) {
 	var routeChangeRequiredAfterLogin = false,
 	    loginRedirectUrl;
         $rootScope.$on("$routeChangeStart", function(event, nextRoute, currentRoute) {
             var authorised;
+            if (UserService.getCurrentLoginUser() !== undefined) $http.get('http://rezept-planer.de/api/user/check');
             if (routeChangeRequiredAfterLogin && nextRoute.originalPath !== "/user/login/") {
                 routeChangeRequiredAfterLogin = false;
                 $location.path(loginRedirectUrl).replace();

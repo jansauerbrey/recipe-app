@@ -23,6 +23,11 @@ router.get('/info/:id', auth.verify, function(req, res, next) {
 });
 
 
+/* GET /user/check */
+router.get('/check', auth.verify, function(req, res, next) {
+    return res.sendStatus(200);
+});
+
 /* LOGIN */
 router.post('/login', function(req, res) {
     //verify credential (use POST)
