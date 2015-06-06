@@ -14,13 +14,19 @@
       <li ng-repeat="route in routes | filter: {requiredPermissions: 'User', panelright: false}" ng-class="{active: activeRoute(route)}" ng-show="determineVisibility(route.requiredPermissions)">
         <a ng-href="#{{route.path}}">{{ route.name }}</a>
       </li>
-      <li class="hidden-xs" dropdown is-open="othersIsOpen">
+      <li ng-repeat="route in routes | filter: {requiresLogin: false, panelright: false}" ng-class="{active: activeRoute(route)}" ng-show="determineVisibility(route.requiredPermissions)">
+        <a ng-href="#{{route.path}}">{{ route.name }}</a>
+      </li>
+      <li class="hidden-xs hidden-sm" dropdown is-open="othersIsOpen">
       <a class="dropdown-toggle" href="#" dropdown-toggle ng-show="determineVisibility('Admin')">Admin <span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">
           <li ng-repeat="route in routes | filter: {requiredPermissions: 'Admin', panelright: false}" ng-class="{active: activeRoute(route)}" ng-show="determineVisibility(route.requiredPermissions)">
             <a ng-href="#{{route.path}}">{{ route.name }}</a>
           </li>
         </ul>
+      </li>
+      <li class="hidden-sm hidden-md hidden-lg" ng-repeat="route in routes | filter: {requiredPermissions: 'Admin', panelright: false}" ng-class="{active: activeRoute(route)}" ng-show="determineVisibility(route.requiredPermissions)">
+        <a ng-href="#{{route.path}}">{{ route.name }}</a>
       </li>
     </ul>
     <ul class="nav navbar-nav navbar-right">

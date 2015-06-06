@@ -9,7 +9,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
 // Auth
 
-    .factory('AuthenticationService', [ '$http', '$localStorage', function($http, $localStorage) {
+    .factory('UserService', [ '$localStorage', function($localStorage){
         var currentUser,
             createUser = function(data){
                 currentUser = data;
@@ -25,24 +25,10 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
             isAuthenticated = function() {
                 return (currentUser !== undefined);
             },
-            logIn = function(username, password, autologin) {
-                return $http.post('http://rezept-planer.de/api/user/login', {username: username, password: password, autologin: autologin}).success(function(data) {
-                    data.permissions = ["User"];
-                    if (data.is_admin) {
-                        data.permissions.push("Admin");
-                    }
-                    createUser(data);
-                    return true;
-                });
-            },
-            logOut = function() {
-                $http.get('http://rezept-planer.de/api/user/logout').success(function(){
-                     deleteCurrentUser();
-                     return true;
-                });
-            },
-            register = function(user) {
-                return $http.post('http://rezept-planer.de/api/user/register', user);
+            getToken = function() {
+                if (currentUser !== undefined){
+                    return currentUser.token;
+                }
             };
 
             if ($localStorage.user){
@@ -50,18 +36,48 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
             }
 
         return {
+            createUser: createUser,
+            getCurrentLoginUser: getCurrentLoginUser,
+            deleteCurrentUser: deleteCurrentUser,
+            isAuthenticated: isAuthenticated,
+            getToken: getToken
+        }
+
+    }])
+
+
+    .factory('AuthenticationService', [ '$http', '$localStorage', 'UserService', function($http, $localStorage, UserService) {
+        var logIn = function(username, password, autologin) {
+                return $http.post('http://rezept-planer.de/api/user/login', {username: username, password: password, autologin: autologin}).success(function(data) {
+                    data.permissions = ["User"];
+                    if (data.is_admin) {
+                        data.permissions.push("Admin");
+                    }
+                    UserService.createUser(data);
+                    return true;
+                });
+            },
+            logOut = function() {
+                $http.get('http://rezept-planer.de/api/user/logout').success(function(){
+                     UserService.deleteCurrentUser();
+                     return true;
+                });
+            },
+            register = function(user) {
+                return $http.post('http://rezept-planer.de/api/user/register', user);
+            };
+
+        return {
             logIn: logIn,
             logOut: logOut,
-            register: register,
-            isAuthenticated: isAuthenticated,
-            getCurrentLoginUser: getCurrentLoginUser
+            register: register
         }
     }])
 
-    .factory('AuthorisationService', ['AuthenticationService', function(AuthenticationService) {
+    .factory('AuthorisationService', ['UserService', function(UserService) {
 	var authorize = function (requiresLogin, requiredPermissions, permissionType, requiresLogout) {
 	    var result = 0,
-		user = AuthenticationService.getCurrentLoginUser(),
+		user = UserService.getCurrentLoginUser(),
 		loweredPermissions = [],
 		hasPermission = true,
 		permission, i;
@@ -113,12 +129,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
     }])
 
 
-    .factory('TokenInterceptor', ['$q', '$localStorage', '$location', function ($q, $localStorage, $location) {
+    .factory('TokenInterceptor', ['$q', 'UserService', '$location', function ($q, UserService, $location) {
         return {
             request: function (config) {
                 config.headers = config.headers || {};
-                if ($localStorage.user && $localStorage.user.token) {
-                    config.headers.Authorization = 'AUTH ' + $localStorage.user.token;
+                if (UserService.isAuthenticated() === true) {
+                    config.headers.Authorization = 'AUTH ' + UserService.getToken();
                 }
                 return config;
             },
@@ -129,7 +145,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
             /* Set Authentication.isAuthenticated to true if 200 received */
             response: function (response) {
-                if (response != null && response.status == 200 && $localStorage.user && $localStorage.user.token) {
+                if (response != null && response.status == 200) {
 
                 }
                 return response || $q.when(response);
@@ -138,6 +154,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
             /* Revoke client authentication if 401 is received */
             responseError: function(rejection) {
                 if (rejection != null && rejection.status === 401) {
+                    UserService.deleteCurrentUser();
                     $location.path("/user/login/").replace();
                 }
 
@@ -497,7 +514,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
     }])
 
-    .controller('RecipeDetailCtrl', ['$scope', '$routeParams', '$modal', 'AuthenticationService', 'Recipes', 'Tags', 'Ingredients', 'Units', '$location', 'TAIngredients', 'TATags', function ($scope, $routeParams, $modal, AuthenticationService, Recipes, Tags, Ingredients, Units, $location, TAIngredients, TATags) {
+    .controller('RecipeDetailCtrl', ['$scope', '$routeParams', '$modal', 'UserService', 'Recipes', 'Tags', 'Ingredients', 'Units', '$location', 'TAIngredients', 'TATags', function ($scope, $routeParams, $modal, UserService, Recipes, Tags, Ingredients, Units, $location, TAIngredients, TATags) {
       $scope.allowEdit = false;
       $scope.alerts = [];
       $scope.submitted = false;
@@ -509,7 +526,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
       } else {
         $scope.recipe = Recipes.get({id: $routeParams.id }, function(response) {
           $scope.recipe.ingredients.push({qty: '', unit: '', ingredient: ''});
-          if (AuthenticationService.user._id == response.author._id || AuthenticationService.user.is_admin === true) {
+          var user = UserService.getCurrentLoginUser();
+          if (user._id == response.author._id || user.is_admin === true) {
             $scope.allowEdit = true;
           }
         });
@@ -928,19 +946,19 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 // Directives
 //---------------
 
-    .directive('navigation', ['routeNavigation', 'AuthenticationService', 'AuthorisationService', function (routeNavigation, AuthenticationService, AuthorisationService) {
+    .directive('navigation', ['routeNavigation', 'UserService', 'AuthorisationService', function (routeNavigation, UserService, AuthorisationService) {
       return {
         restrict: "E",
         replace: true,
         templateUrl: "partials/navigation-directive.tpl.html",
         controller:  function ($scope) {
           $scope.hideMobileNav = true;
-          $scope.user = AuthenticationService.getCurrentLoginUser();
+          $scope.user = UserService.getCurrentLoginUser();
           $scope.routes = routeNavigation.routes;
           $scope.activeRoute = routeNavigation.activeRoute;
 
-          $scope.$watch(AuthenticationService.isAuthenticated, function () {
-              $scope.user = AuthenticationService.getCurrentLoginUser();
+          $scope.$watch(UserService.isAuthenticated, function () {
+              $scope.user = UserService.getCurrentLoginUser();
           }, true)
 
           $scope.determineVisibility = function(roles){
@@ -1171,6 +1189,11 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
                   requiredPermissions: ['User']}
       })
 
+      .when('/access/denied/', {
+        templateUrl: 'partials/access.denied.tpl.html',
+        access: { requiresLogin: false }
+      })
+
     ;
   }])
 
@@ -1192,7 +1215,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
                     loginRedirectUrl = (nextRoute.originalPath !== "/user/login/") ? nextRoute.originalPath : "/" ;
                     $location.path("/user/login/");
                 } else if (authorised === 2) {
-                    $location.path("/user/login/").replace();
+                    $location.path("/access/denied/").replace();
                 }
             }
         });
