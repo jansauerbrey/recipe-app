@@ -270,8 +270,9 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
  
         $scope.logIn = function logIn(username, password, autologin) {
             if (username !== undefined && password !== undefined) { 
-                AuthenticationService.logIn(username, password, autologin);
-	        $location.path("/");
+                AuthenticationService.logIn(username, password, autologin).then(function(){
+	          $location.path("/home/");
+                });
             }
         }
  
@@ -296,6 +297,13 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
 
     .controller('StartpageController', ['$scope', function ($scope) {
+    }])
+
+
+// Home Page
+
+
+    .controller('HomeController', ['$scope', function ($scope) {
     }])
 
 
@@ -493,6 +501,11 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
       $scope.recipes = Recipes.query(function(response) {
         $scope.loading = false;
+        for(i=0;i<response.length;i++){
+          var delta = Math.abs(new Date() - new Date(response[i].updated_at));
+          response[i].new_recipe = (delta < 864000000) ? true : false;
+        }
+        return response;
       });
 
       $scope.filterByTags = function(recipe) {
@@ -1041,6 +1054,13 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
         templateUrl: 'partials/startpage.tpl.html',
         controller: 'StartpageController',
         access: { requiresLogin: false }
+      })
+
+      .when('/home/', {
+        templateUrl: 'partials/home.tpl.html',
+        controller: 'HomeController',
+        access: { requiresLogin: true, 
+                  requiredPermissions: ['User'] }
       })
 
       .when('/units/', {

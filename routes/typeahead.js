@@ -33,7 +33,7 @@ router.get('/ingredients/', auth.verify, function(req, res, next) {
 router.get('/recipes/', auth.verify, function(req, res, next) {
   var searchTerm = new RegExp(req.query.search, 'i');
   var query = {'name': searchTerm};
-  Recipe.find(query).limit(10).exec( function (err, recipes) {
+  Recipe.find(query).populate('author', 'fullname').limit(10).exec( function (err, recipes) {
     if (err) return next(err);
     res.json(recipes);
   });

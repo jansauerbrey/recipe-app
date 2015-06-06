@@ -12,10 +12,50 @@
       <div class="panel panel-default form-group" ng-hide="hideAdvSearch">
         <div class="panel-body">
               <div class="page-header col-xs-12" style="margin-top: 0px;">
-                <h5>Tags</h5>
+                <h5><strong>Language and new recipes</strong></h5>
               </div>
               <div class="panel-body">
-                <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2" ng-repeat="tag in tags">
+                <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2">
+                  <div class="radio">
+                    <label>
+                      <input type="radio" value="en" ng-model="search.language">English
+                    </label>
+                  </div>
+                </div>
+                <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2">
+                  <div class="radio">
+                    <label>
+                      <input type="radio" value="de" ng-model="search.language">German
+                    </label>
+                  </div>
+                </div>
+                <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2">
+                  <div class="radio">
+                    <label>
+                      <input type="radio" value="fi" ng-model="search.language">Finnish
+                    </label>
+                  </div>
+                </div>
+                <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2">
+                  <div class="radio">
+                    <label>
+                      <input type="radio" value="" ng-model="search.language">All languages
+                    </label>
+                  </div>
+                </div>
+                <div class="col-xs-6 col-sm-4 col-md-3 col-lg-4">
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" ng-model="search.new_recipe" ng-false-value="undefined">Show only new recipes
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div class="page-header col-xs-12" style="margin-top: 0px;">
+                <h5><strong>Tags</strong></h5>
+              </div>
+              <div class="panel-body">
+                <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2" ng-repeat="tag in tags | orderBy: 'text'">
                   <div class="checkbox">
                     <label>
                       <input type="checkbox" ng-model="tagfilter[tag.text]">{{tag.text}}
@@ -29,7 +69,10 @@
     <div class="list-group" style="margin-top: 20px;">
       <div ng-repeat="recipe in filtered=(recipes | filter: search | filter: filterByTags) | orderBy: 'name'">
         <a class="list-group-item col-xs-12" href="#/recipes/edit/{{recipe._id}}">
-          <div class="list-group-item-heading">{{recipe.name}}</div>
+          <div class="list-group-item-heading">
+            {{recipe.name}} <span class="text-muted"> ({{recipe.author.fullname}})</span>
+            <div class="label label-danger" ng-show="recipe.new_recipe">New</div>
+          </div>
           <div class="list-group-item-text">
              <span ng-repeat="tag in recipe.tags" class="label label-primary" style="margin: 2px; display: inline-block;">{{tag.text}}</span>
           </div>
