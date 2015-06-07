@@ -1,6 +1,11 @@
 <div class="container visible-xs-block" style="width: 300px;">
   <div>
     <ul class="nav navbar-nav" ng-click="cancel()">
+      <li>
+        <a ng-href="#/home/" ng-show="determineVisibility('User')"><span class="glyphicon glyphicon-home" style="padding-right: 10px;"></span>rezept-planer.de</a>
+        <a ng-href="#/" ng-show="determineVisibility('NoUser')"><span class="glyphicon glyphicon-home" style="padding-right: 10px;"></span>rezept-planer.de</a>
+      </li>
+      <li class="divider" style="border-bottom: 1px solid #eee;"></li>
       <li ng-repeat="route in routes | filter: {requiredPermissions: 'User', panelright: false}" ng-class="{active: activeRoute(route)}" ng-show="determineVisibility(route.requiredPermissions)">
         <a ng-href="#{{route.path}}"><span class="glyphicon glyphicon-th-large" style="padding-right: 10px;"></span>{{ route.name }}</a>
       </li>
