@@ -31,6 +31,7 @@ mongoose.set('debug', true)
 
 
 var app = express();
+app.disable("X-powered-by")
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

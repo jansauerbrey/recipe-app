@@ -55,10 +55,15 @@
                 <h5><strong>Author</strong></h5>
               </div>
               <div class="panel-body">
-                <div class="col-xs-6 col-sm-4 col-md-3 col-lg-4">
+                <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                  <div class="form-group">
+                    <input type="text" class="form-control" ng-model="search.author.fullname" ng-disabled="search.author._id" placeholder="Author...">
+                  </div>
+                </div>
+                <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
                   <div class="checkbox">
                     <label>
-                      <input type="text" ng-model="search.author.fullname" class="form-control" placeholder="Author...">
+                      <input type="checkbox" ng-model="search.author._id" ng-true-value="'{{user._id}}'" ng-false-value="undefined" ng-change="disableAndClearAuthor()">Show only my own recipes
                     </label>
                   </div>
                 </div>
@@ -82,8 +87,9 @@
       <div ng-repeat="recipe in filtered=(recipes | filter: search | filter: filterByTags) | orderBy: 'name'">
         <a class="list-group-item col-xs-12" href="#/recipes/edit/{{recipe._id}}">
           <div class="list-group-item-heading">
-            {{recipe.name}} <span class="text-muted"> ({{recipe.author.fullname}})</span>
-            <div class="label label-danger" ng-show="recipe.new_recipe">New</div>
+            <big>{{recipe.name}}</big>
+            <div class="label label-danger" ng-show="recipe.new_recipe">New</div><br />
+            <span class="text-muted">Author: {{recipe.author.fullname}}</span>
           </div>
           <div class="list-group-item-text">
              <span ng-repeat="tag in recipe.tags" class="label label-primary" style="margin: 2px; display: inline-block;">{{tag.text}}</span>

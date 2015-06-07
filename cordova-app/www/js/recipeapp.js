@@ -1,4 +1,4 @@
-angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui.checkbox', 'ngTagsInput'])
+angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui.checkbox', 'ngTagsInput', 'ngAside'])
 
 
 
@@ -489,13 +489,16 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
 // Recipes
 
-    .controller('RecipesController', ['$scope', 'Recipes', 'Tags', function ($scope, Recipes, Tags) {
+    .controller('RecipesController', ['$scope', 'Recipes', 'Tags', 'UserService', function ($scope, Recipes, Tags, UserService) {
+      $scope.search = {};
       $scope.editing = [];
       $scope.tagfilter = {};
       $scope.loading = true;
       $scope.hideAdvSearch = true;
       $scope.status = {};
       $scope.status.tags = true;
+
+      $scope.user = UserService.getCurrentLoginUser();
 
       $scope.tags = Tags.query();
 
@@ -507,6 +510,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
         }
         return response;
       });
+
+      $scope.disableAndClearAuthor = function() {
+        if ($scope.search.author._id !== undefined) {
+          $scope.search.author.fullname = undefined;
+        }
+      }
 
       $scope.filterByTags = function(recipe) {
         var match = true;
@@ -955,11 +964,22 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
     }])
 
 
+// Sidebar
+
+    .controller('NavSidebarController', ['$scope', '$modalInstance', function ($scope, $modalInstance) {
+     
+      $scope.cancel = function(){
+        $modalInstance.dismiss('cancel');
+      }
+
+    }])
+
+
 //---------------
 // Directives
 //---------------
 
-    .directive('navigation', ['routeNavigation', 'UserService', 'AuthorisationService', function (routeNavigation, UserService, AuthorisationService) {
+    .directive('navigation', ['$aside', 'routeNavigation', 'UserService', 'AuthorisationService', function ($aside, routeNavigation, UserService, AuthorisationService) {
       return {
         restrict: "E",
         replace: true,
@@ -980,6 +1000,14 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
             var auhtorisation = AuthorisationService.authorize(undefined, roleArray);
             return (auhtorisation === 0);
           };
+          $scope.navSidebar = function() {
+            var asideInstance = $aside.open({
+              templateUrl: 'partials/navigation.sidebar.tpl.html',
+              controller: 'NavSidebarController',
+              placement: 'left',
+              size: 'lg'
+            });
+          }
 
         }
       };

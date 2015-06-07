@@ -2,14 +2,14 @@
 <nav class="navbar navbar-default navbar-fixed-top" style="padding:0;" role="navigation">
 <div class="container">
   <div class="navbar-header">
-    <button type="button" class="navbar-toggle" ng-click="hideMobileNav = !hideMobileNav">
+    <button type="button" class="navbar-toggle" style="float: left; margin-left: 15px;" ng-click="navSidebar()">
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
       <span class="icon-bar"></span>
     </button>
-    <div class="beta-tag">&nbsp;BETA&nbsp;</div><a class="navbar-brand" href="#/"  ng-show="determineVisibility('NoUser')">rezept-planer.de</a><a class="navbar-brand" href="#/home/" ng-show="determineVisibility('User')">rezept-planer.de</a>
+    <div class="beta-tag">&nbsp;BETA&nbsp;</div><a class="hidden-xs navbar-brand" href="#/"  ng-show="determineVisibility('NoUser')">rezept-planer.de</a><a class="hidden-xs navbar-brand" href="#/home/" ng-show="determineVisibility('User')">rezept-planer.de</a>
   </div>
-  <div class="collapse navbar-collapse" collapse="hideMobileNav" ng-click="hideMobileNav=true">
+  <div class="collapse navbar-collapse">
     <ul class="nav navbar-nav">
       <li ng-repeat="route in routes | filter: {requiredPermissions: 'User', panelright: false}" ng-class="{active: activeRoute(route)}" ng-show="determineVisibility(route.requiredPermissions)">
         <a ng-href="#{{route.path}}">{{ route.name }}</a>
