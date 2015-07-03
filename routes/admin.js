@@ -6,7 +6,7 @@ var User = require('../models/User.js');
 
 var auth = require('../auth/auth.js');
 
-/* GET /user listing. */
+/* GET /admin listing. */
 router.get('/user', auth.verifyAdmin, function(req, res, next) {
   User.find({}, '_id username fullname email is_admin created is_activated', function (err, users) {
     if (err) return next(err);
@@ -14,7 +14,7 @@ router.get('/user', auth.verifyAdmin, function(req, res, next) {
   });
 });
 
-/* GET /user/id */
+/* GET /admin/id */
 router.get('/user/:id', auth.verifyAdmin, function(req, res, next) {
   User.findById(req.params.id, function (err, user) {
     if (err) return next(err);
@@ -23,7 +23,7 @@ router.get('/user/:id', auth.verifyAdmin, function(req, res, next) {
   });
 });
 
-/* PUT /user/:id */
+/* PUT /admin/:id */
 router.put('/user/:id', auth.verifyAdmin, function(req, res, next) {
   User.findByIdAndUpdate(req.params.id, req.body, function (err, user) {
     if (err) return next(err);
@@ -32,7 +32,7 @@ router.put('/user/:id', auth.verifyAdmin, function(req, res, next) {
   });
 });
 
-/* DELETE /user/:id */
+/* DELETE /admin/:id */
 router.delete('/user/:id', auth.verifyAdmin, function(req, res, next) {
   User.findByIdAndRemove(req.params.id, req.body, function (err, user) {
     if (err) return next(err);

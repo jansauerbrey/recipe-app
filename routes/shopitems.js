@@ -40,7 +40,8 @@ router.put('/:id', auth.verify, function(req, res, next) {
     req.body.expire_date.setHours(req.body.expire_date.getHours() + 1);
   }
   else if (req.body.schedule && req.body.schedule.date) {
-    req.body.expire_date.setDate(req.body.schedule.date.getDate() + 1);
+    req.body.expire_date = new Date(req.body.schedule.date);
+    req.body.expire_date.setHours(req.body.expire_date.getHours() + 12);
   } else {
     req.body.expire_date.setDate(req.body.expire_date.getDate() + 14);
   }

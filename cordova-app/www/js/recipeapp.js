@@ -1,5 +1,11 @@
 angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui.checkbox', 'ngTagsInput', 'ngAside'])
 
+//---------------
+// Constants
+//---------------
+
+
+    .constant('BASE_URI', '/')
 
 
 //---------------
@@ -46,9 +52,9 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
     }])
 
 
-    .factory('AuthenticationService', [ '$http', '$localStorage', 'UserService', function($http, $localStorage, UserService) {
+    .factory('AuthenticationService', [ '$http', '$localStorage', 'UserService', 'BASE_URI', function($http, $localStorage, UserService, BASE_URI) {
         var logIn = function(username, password, autologin) {
-                return $http.post('http://rezept-planer.de/api/user/login', {username: username, password: password, autologin: autologin}).success(function(data) {
+                return $http.post(BASE_URI+'api/user/login', {username: username, password: password, autologin: autologin}).success(function(data) {
                     data.permissions = ["User"];
                     if (data.is_admin) {
                         data.permissions.push("Admin");
@@ -58,13 +64,13 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
                 });
             },
             logOut = function() {
-                $http.get('http://rezept-planer.de/api/user/logout').success(function(){
+                $http.get(BASE_URI+'api/user/logout').success(function(){
                      UserService.deleteCurrentUser();
                      return true;
                 });
             },
             register = function(user) {
-                return $http.post('http://rezept-planer.de/api/user/register', user);
+                return $http.post(BASE_URI+'/api/user/register', user);
             };
 
         return {
@@ -172,6 +178,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
                 routes.push({
                     path: path,
                     name: route.name,
+                    icon: route.icon,
                     panelright: route.access.panelright ? route.access.panelright : false,
                     requiresLogin: route.access.requiresLogin,
                     requiredPermissions: route.access.requiredPermissions ? route.access.requiredPermissions.join() : undefined
@@ -187,73 +194,73 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
         };
     })
 
-        .factory('User', ['$resource', function($resource){
-          return $resource('http://rezept-planer.de/api/user/info/:id');
+        .factory('User', ['$resource', 'BASE_URI', function($resource, BASE_URI){
+          return $resource(BASE_URI+'api/user/info/:id');
         }])
 
-        .factory('Units', ['$resource', function($resource){
-          return $resource('http://rezept-planer.de/api/units/:id', null, {
+        .factory('Units', ['$resource', 'BASE_URI', function($resource, BASE_URI){
+          return $resource(BASE_URI+'api/units/:id', null, {
             'update': { method:'PUT' }
           });
         }])
 
-        .factory('Ingredients', ['$resource', function($resource){
-          return $resource('http://rezept-planer.de/api/ingredients/:id', null, {
+        .factory('Ingredients', ['$resource', 'BASE_URI', function($resource, BASE_URI){
+          return $resource(BASE_URI+'api/ingredients/:id', null, {
             'update': { method:'PUT' }
           });
         }])
 
-        .factory('Categories', ['$resource', function($resource){
-          return $resource('http://rezept-planer.de/api/categories/:id', null, {
+        .factory('Categories', ['$resource', 'BASE_URI', function($resource, BASE_URI){
+          return $resource(BASE_URI+'api/categories/:id', null, {
             'update': { method:'PUT' }
           });
         }])
 
-        .factory('TAIngredients', ['$resource', function($resource){
-          return $resource('http://rezept-planer.de/api/typeahead/ingredients/', null, {
+        .factory('TAIngredients', ['$resource', 'BASE_URI', function($resource, BASE_URI){
+          return $resource(BASE_URI+'api/typeahead/ingredients/', null, {
             'search': { method:'GET', isArray: true }
           });
         }])
 
-        .factory('Tags', ['$resource', function($resource){
-          return $resource('http://rezept-planer.de/api/tags/:id', null, {
+        .factory('Tags', ['$resource', 'BASE_URI', function($resource, BASE_URI){
+          return $resource(BASE_URI+'api/tags/:id', null, {
             'update': { method:'PUT' }
           });
         }])
 
-        .factory('TATags', ['$resource', function($resource){
-          return $resource('http://rezept-planer.de/api/typeahead/tags/', null, {
+        .factory('TATags', ['$resource', 'BASE_URI', function($resource, BASE_URI){
+          return $resource(BASE_URI+'api/typeahead/tags/', null, {
             'search': { method:'GET', isArray: true }
           });
         }])
 
-        .factory('Recipes', ['$resource', function($resource){
-          return $resource('http://rezept-planer.de/api/recipes/:id', null, {
+        .factory('Recipes', ['$resource', 'BASE_URI', function($resource, BASE_URI){
+          return $resource(BASE_URI+'api/recipes/:id', null, {
             'update': { method:'PUT' }
           });
         }])
 
-        .factory('TARecipes', ['$resource', function($resource){
-          return $resource('http://rezept-planer.de/api/typeahead/recipes/', null, {
+        .factory('TARecipes', ['$resource', 'BASE_URI', function($resource, BASE_URI){
+          return $resource(BASE_URI+'api/typeahead/recipes/', null, {
             'search': { method:'GET', isArray: true }
           });
         }])
 
-        .factory('Schedules', ['$resource', function($resource){
-          return $resource('http://rezept-planer.de/api/schedules/:id', null, {
+        .factory('Schedules', ['$resource', 'BASE_URI', function($resource, BASE_URI){
+          return $resource(BASE_URI+'api/schedules/:id', null, {
             'update': { method:'PUT' }
           });
         }])
 
 
-        .factory('Shopitems', ['$resource', function($resource){
-          return $resource('http://rezept-planer.de/api/shopitems/:id', null, {
+        .factory('Shopitems', ['$resource', 'BASE_URI', function($resource, BASE_URI){
+          return $resource(BASE_URI+'api/shopitems/:id', null, {
             'update': { method:'PUT' }
           });
         }])
 
-        .factory('Users', ['$resource', function($resource){
-          return $resource('http://rezept-planer.de/api/admin/user/:id', null, {
+        .factory('Users', ['$resource', 'BASE_URI', function($resource, BASE_URI){
+          return $resource(BASE_URI+'api/admin/user/:id', null, {
             'update': { method:'PUT' }
           });
         }])
@@ -793,8 +800,9 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
 // Shopitems
 
-    .controller('ShopitemsController', ['$scope', '$routeParams', '$modal', 'Shopitems', 'TAIngredients', 'Units', '$location', '$filter', function ($scope, $routeParams, $modal, Shopitems, TAIngredients, Units, $location, $filter) {
+    .controller('ShopitemsController', ['$scope', '$routeParams', '$modal', 'UserService', 'Shopitems', 'TAIngredients', 'Units', '$location', '$filter', function ($scope, $routeParams, $modal, UserService, Shopitems, TAIngredients, Units, $location, $filter) {
 
+      $scope.user = UserService.getCurrentLoginUser();
       containsObj = function(array, obj) {
         var i, l = array.length;
         for (i=0;i<array.length;i++)
@@ -812,10 +820,11 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
         var uniqueIngredients = [];
         var uniqueIngredientsTemp = [];
         for(i=0;i<response.length;i++){
-          var index = containsObj(uniqueIngredientsTemp, {ingredient:response[i].ingredient, unit:response[i].unit, completed: response[i].completed});
+          var order = $scope.user.settings.categoryOrder.indexOf(response[i].ingredient.category) >= 0 ? $scope.user.settings.categoryOrder.indexOf(response[i].ingredient.category) : 99999;
+          var index = containsObj(uniqueIngredientsTemp, {ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed});
           if ( index === false) {
-            uniqueIngredientsTemp.push({ingredient:response[i].ingredient, unit:response[i].unit, completed: response[i].completed});
-            var obj = {ingredient:response[i].ingredient, unit:response[i].unit, completed: response[i].completed};
+            uniqueIngredientsTemp.push({ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed});
+            var obj = {ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed};
             obj.details = [response[i]];
             obj.amount = response[i].amount;
             uniqueIngredients.push(obj);
@@ -1095,6 +1104,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
         templateUrl: 'partials/units.tpl.html',
         controller: 'UnitsController',
         name: 'Units',
+        icon: 'glyphicon glyphicon-scale',
         access: { requiresLogin: true,
                   requiredPermissions: ['Admin']}
       })
@@ -1118,6 +1128,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
         templateUrl: 'partials/ingredients.tpl.html',
         controller: 'IngredientsController',
         name: 'Ingredients',
+        icon: 'glyphicon glyphicon-apple',
         access: { requiresLogin: true,
                   requiredPermissions: ['Admin']}
       })
@@ -1141,6 +1152,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
         templateUrl: 'partials/recipes.tpl.html',
         controller: 'RecipesController',
         name: 'Recipes',
+        icon: 'glyphicon glyphicon-cutlery',
         access: { requiresLogin: true, 
                   requiredPermissions: ['User']}
       })
@@ -1163,6 +1175,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
         templateUrl: 'partials/schedules.tpl.html',
         controller: 'SchedulesController',
         name: 'Schedules',
+        icon: 'glyphicon glyphicon-calendar',
         access: { requiresLogin: true, 
                   requiredPermissions: ['User']}
       })
@@ -1178,6 +1191,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
         templateUrl: 'partials/shopitems.tpl.html',
         controller: 'ShopitemsController',
         name: 'Shopping List',
+        icon: 'glyphicon glyphicon-shopping-cart',
         access: { requiresLogin: true, 
                   requiredPermissions: ['User']}
       })
@@ -1186,6 +1200,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
         templateUrl: 'partials/cooking.date.tpl.html',
         controller: 'CookingController',
         name: 'Cooking',
+        icon: 'glyphicon glyphicon-fire',
         access: { requiresLogin: true, 
                   requiredPermissions: ['User']}
       })
@@ -1201,6 +1216,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
         templateUrl: 'partials/admin.user.tpl.html',
         controller: 'AdminUserCtrl',
         name: 'Users',
+        icon: 'glyphicon glyphicon-user',
         access: { requiresLogin: true,
                   requiredPermissions: ['Admin']}
       })
@@ -1209,6 +1225,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
         templateUrl: 'partials/impressum.tpl.html',
         controller: 'ImpressumController',
         name: 'Impressum',
+        icon: 'glyphicon glyphicon-info-sign',
         access: { requiresLogin: false }
       })
 
@@ -1216,6 +1233,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
         templateUrl: 'partials/user.register.tpl.html',
         controller: 'UserCtrl',
         name: 'Register',
+        icon: 'glyphicon glyphicon-edit',
         access: { panelright: true,
                   requiredPermissions: ['NoUser'] }
       })
@@ -1224,6 +1242,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
         templateUrl: 'partials/user.login.tpl.html',
         controller: 'UserCtrl',
         name: 'Login',
+        icon: 'glyphicon glyphicon-log-in',
         access: { panelright: true,
                   requiredPermissions: ['NoUser'] }
       })
@@ -1232,6 +1251,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
         templateUrl: 'partials/user.logout.tpl.html',
         controller: 'UserLogout',
         name: 'Logout',
+        icon: 'glyphicon glyphicon-log-out',
         access: { panelright: true,
                   requiresLogin: true, 
                   requiredPermissions: ['User']}
@@ -1245,12 +1265,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
     ;
   }])
 
-    .run(['$rootScope', '$location', '$localStorage', '$http', 'AuthorisationService', 'UserService', function($rootScope, $location, $localStorage, $http, AuthorisationService, UserService) {
+    .run(['$rootScope', '$location', '$localStorage', '$http', 'AuthorisationService', 'UserService', 'BASE_URI', function($rootScope, $location, $localStorage, $http, AuthorisationService, UserService, BASE_URI) {
 	var routeChangeRequiredAfterLogin = false,
 	    loginRedirectUrl;
         $rootScope.$on("$routeChangeStart", function(event, nextRoute, currentRoute) {
             var authorised;
-            if (UserService.getCurrentLoginUser() !== undefined) $http.get('http://rezept-planer.de/api/user/check');
+            if (UserService.getCurrentLoginUser() !== undefined) $http.get(BASE_URI+'api/user/check');
             if (routeChangeRequiredAfterLogin && nextRoute.originalPath !== "/user/login/") {
                 routeChangeRequiredAfterLogin = false;
                 $location.path(loginRedirectUrl).replace();

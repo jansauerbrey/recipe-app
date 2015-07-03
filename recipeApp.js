@@ -48,6 +48,13 @@ app.get('/', function(req, res, next) {
   res.render('index', { title: 'Recipe App' });
 });
 
+app.all('/api/*', function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
+  return next();
+});
+
 app.use('/api/admin', admin);
 app.use('/api/user', user);
 app.use('/api/units', units);
@@ -58,6 +65,7 @@ app.use('/api/tags', tags);
 app.use('/api/schedules', schedules);
 app.use('/api/shopitems', shopitems);
 app.use('/api/typeahead', typeahead);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

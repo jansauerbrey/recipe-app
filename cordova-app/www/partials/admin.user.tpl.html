@@ -12,7 +12,7 @@
         <th>Actions</th>
       </thead>
       <tbody>
-        <tr ng-repeat="user in users">
+        <tr ng-repeat="user in users | orderBy: 'created'">
           <th>
             {{$index+1}}
           </th>
