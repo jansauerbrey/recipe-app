@@ -71,7 +71,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
                 });
             },
             register = function(user) {
-                return $http.post(BASE_URI+'/api/user/register', user);
+                return $http.post(BASE_URI+'api/user/register', user);
             };
 
         return {
