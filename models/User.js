@@ -10,6 +10,9 @@ var UserSchema = new mongoose.Schema({
   email: String,
   is_admin: { type: Boolean, default: false },
   is_activated: { type: Boolean, default: false },
+  settings: {
+    categoryOrder: [String]
+  },
   autologin: { type: Boolean, default: false },
   created: { type: Date, default: Date.now }
 });

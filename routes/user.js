@@ -8,7 +8,7 @@ var auth = require('../auth/auth.js');
 
 /* GET /user/info. */
 router.get('/info', auth.verify, function(req, res, next) {
-  User.findById( req._user.id, 'username fullname email is_admin', function (err, user) {
+  User.findById( req._user.id, 'username fullname email is_admin settings', function (err, user) {
     if (err) return next(err);
     res.json(user);
   });
@@ -75,7 +75,7 @@ router.post('/login', function(req, res) {
                 }
 
                 //Send back token
-                return res.json({token: token, is_admin: user.is_admin, fullname: user.fullname, _id: user._id, username: user.username});
+                return res.json({token: token, is_admin: user.is_admin, fullname: user.fullname, _id: user._id, username: user.username, settings: user.settings});
             });
         });
     });
