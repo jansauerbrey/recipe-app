@@ -5,7 +5,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 //---------------
 
 
-    .constant('BASE_URI', '/')
+//    .constant('BASE_URI', '/')
+    .constant('BASE_URI', 'http://rezept-planer.de/')
 
 
 //---------------
