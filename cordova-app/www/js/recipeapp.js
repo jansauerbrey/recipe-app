@@ -565,7 +565,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
       $scope.units = Units.query();
 
       $scope.onTypeaheadSelect = function ($item, $model, $label) {
-        if(!$scope.recipe.ingredients.filter(function(n){ return n == '' }).length) {
+        if(!$scope.recipe.ingredients.filter(function(n){ return n.ingredient == '' }).length) {
           $scope.recipe.ingredients.push({qty: '', unit: '', ingredient: ''});
         }
       };

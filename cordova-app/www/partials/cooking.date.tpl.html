@@ -70,7 +70,7 @@
           <th>Ingredient</th>
         </thead>
         <tbody>
-          <tr ng-repeat="ingredient in recipe.ingredients" ng-hide="$last">
+          <tr ng-repeat="ingredient in recipe.ingredients">
             <td>{{schedule.factor/recipe.yield*ingredient.qty | number}}</td>
             <td>
               <span ng-show="recipe.language==='en'">{{ingredient.unit.name.en}}</span>
