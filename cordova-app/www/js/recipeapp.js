@@ -330,27 +330,27 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
         $scope.loading = false;
       });
 
-      $scope.remove = function(index){
-        Users.remove({id: $scope.users[index]._id}, function(){
-          $scope.users.splice(index, 1);
+      $scope.remove = function(user){
+        Users.remove({id: user._id}, function(){
+          $scope.users.splice($scope.users.indexOf(user), 1);
         });
       }
 
-      $scope.activate = function(index){
-        $scope.users[index].is_activated = true;
-        Users.update({id: $scope.users[index]._id}, {is_activated: true}, function(){
+      $scope.activate = function(user){
+        $scope.users[$scope.users.indexOf(user)].is_activated = true;
+        Users.update({id: user._id}, {is_activated: true}, function(){
         });
       }
 
-      $scope.makeAdmin = function(index){
-        $scope.users[index].is_admin = true;
-        Users.update({id: $scope.users[index]._id}, {is_admin: true}, function(){
+      $scope.makeAdmin = function(user){
+        $scope.users[$scope.users.indexOf(user)].is_admin = true;
+        Users.update({id: user._id}, {is_admin: true}, function(){
         });
       }
 
-      $scope.removeAdmin = function(index){
-        $scope.users[index].is_admin = false;
-        Users.update({id: $scope.users[index]._id}, {is_admin: false}, function(){
+      $scope.removeAdmin = function(user){
+        $scope.users[$scope.users.indexOf(user)].is_admin = false;
+        Users.update({id: user._id}, {is_admin: false}, function(){
         });
       }
 

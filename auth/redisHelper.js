@@ -76,8 +76,8 @@ exports.expireToken = function(token, callback) {
 
 	redisClient.del(token, function(err, reply) {
 		if (err) callback(err);
-
-		if (reply) callback(null, true);
-		else callback(new Error('Token not found'));
+		/*if (reply) console.log(err);
+		if (reply) callback(null, true);*/
+		if (!reply) callback(new Error('Token not found'));
 	});
 };

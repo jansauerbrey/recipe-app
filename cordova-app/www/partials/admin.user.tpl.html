@@ -33,10 +33,10 @@
             <i ng-show="user.is_admin" class="glyphicon glyphicon-certificate" title="Admin"></i>
           </td>
           <td>
-            <a ng-hide="user.is_admin" class="btn btn-primary btn-sm" ng-click="makeAdmin($index)" role="button"><i class="fa fa-level-up"></i></a>
-            <a ng-show="user.is_admin" class="btn btn-primary btn-sm" ng-click="removeAdmin($index)" role="button"><i class="fa fa-level-down"></i></a>
-            <a class="btn btn-primary btn-sm" ng-class="{disabled: user.is_activated}" ng-click="activate($index)" role="button"><i class="fa fa-check"></i></a>
-            <a class="btn btn-primary btn-sm" ng-click="remove($index)" role="button"><i class="fa fa-trash-o"></i></a>
+            <a ng-hide="user.is_admin" class="btn btn-primary btn-sm" ng-click="makeAdmin(user)" role="button"><i class="fa fa-level-up"></i></a>
+            <a ng-show="user.is_admin" class="btn btn-primary btn-sm" ng-click="removeAdmin(user)" role="button"><i class="fa fa-level-down"></i></a>
+            <a class="btn btn-primary btn-sm" ng-class="{disabled: user.is_activated}" ng-click="activate(user)" role="button"><i class="fa fa-check"></i></a>
+            <a class="btn btn-primary btn-sm" ng-click="remove(user)" role="button"><i class="fa fa-trash-o"></i></a>
           </td>
         </tr>
       </tbody>

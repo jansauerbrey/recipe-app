@@ -23,7 +23,7 @@ router.get('/user/:id', auth.verifyAdmin, function(req, res, next) {
   });
 });
 
-/* PUT /admin/:id */
+/* PUT /admin/user/:id */
 router.put('/user/:id', auth.verifyAdmin, function(req, res, next) {
   User.findByIdAndUpdate(req.params.id, req.body, function (err, user) {
     if (err) return next(err);
