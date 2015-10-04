@@ -34,10 +34,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
         });
 
         return {
-            states: states,
-            activeState: function (state) {
-                return $state.is(state.name);
-            }
+            states: states
         };
     })
 
@@ -70,7 +67,6 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
           $scope.hideMobileNav = true;
           $scope.user = UserService.getCurrentLoginUser();
           $scope.states = navigationMenu.states;
-          //$scope.activeState= navigationMenu.activeState;
 
           $scope.$watch(UserService.isAuthenticated, function () {
               $scope.user = UserService.getCurrentLoginUser();
