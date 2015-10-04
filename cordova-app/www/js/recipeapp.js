@@ -1,4 +1,4 @@
-angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui.checkbox', 'ngTagsInput', 'ngAside'])
+angular.module('app', ['ui.router', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui.checkbox', 'ngTagsInput', 'ngAside'])
 
 //---------------
 // Constants
@@ -82,7 +82,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
     }])
 
     .factory('AuthorisationService', ['UserService', function(UserService) {
-	var authorize = function (requiresLogin, requiredPermissions, permissionType, requiresLogout) {
+	var authorize = function (requiresLogin, requiredPermissions, permissionType) {
 	    var result = 0,
 		user = UserService.getCurrentLoginUser(),
 		loweredPermissions = [],
@@ -136,11 +136,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
     }])
 
 
-    .factory('TokenInterceptor', ['$q', 'UserService', '$location', function ($q, UserService, $location) {
+    .factory('TokenInterceptor', ['$q', 'UserService', '$injector', function ($q, UserService, $injector) {
         return {
             request: function (config) {
                 config.headers = config.headers || {};
                 if (UserService.isAuthenticated() === true) {
+
                     config.headers.Authorization = 'AUTH ' + UserService.getToken();
                 }
                 return config;
@@ -162,7 +163,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
             responseError: function(rejection) {
                 if (rejection != null && rejection.status === 401) {
                     UserService.deleteCurrentUser();
-                    $location.path("/user/login/").replace();
+		    var stateService = $injector.get('$state');
+                    stateService.go('accessdenied');
                 }
 
                 return $q.reject(rejection);
@@ -172,25 +174,27 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
 // Navigation
 
-    .factory('routeNavigation', function($route, $location) {
-        var routes = [];
-        angular.forEach($route.routes, function (route, path) {
-            if (route.name) {
-                routes.push({
-                    path: path,
-                    name: route.name,
-                    icon: route.icon,
-                    panelright: route.access.panelright ? route.access.panelright : false,
-                    requiresLogin: route.access.requiresLogin,
-                    requiredPermissions: route.access.requiredPermissions ? route.access.requiredPermissions.join() : undefined
+    .factory('routeNavigation', function($state) {
+	var states = [];        
+	var stateslist = $state.get();
+        angular.forEach(stateslist, function (state) {
+            if (state.data && state.data.name) {
+                states.push({
+                    path: state.url,
+		    name: state.name,
+                    label: state.data.name,
+                    icon: state.data.icon ? state.data.icon : null,
+                    panelright: state.data.panelright ? state.data.panelright : false,
+                    requiresLogin: state.data.requiresLogin ? state.data.requiresLogin : false,
+                    requiredPermissions: state.data.requiredPermissions ? state.data.requiredPermissions.join() : undefined
                 });
             }
         });
 
         return {
-            routes: routes,
-            activeRoute: function (route) {
-                return route.path === $location.path();
+            states: states,
+            activeState: function (state) {
+                return $state.is(state.name);
             }
         };
     })
@@ -273,13 +277,13 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
 // Auth
 
-    .controller('UserCtrl', ['$scope', '$location', 'Users', 'AuthenticationService',
-        function UserCtrl($scope, $location, Users, AuthenticationService) {
+    .controller('UserCtrl', ['$scope', '$state', 'Users', 'AuthenticationService',
+        function UserCtrl($scope, $state, Users, AuthenticationService) {
  
         $scope.logIn = function logIn(username, password, autologin) {
             if (username !== undefined && password !== undefined) { 
                 AuthenticationService.logIn(username, password, autologin).then(function(){
-	          $location.path("/home/");
+	          $state.go("user.home");
                 });
             }
         }
@@ -288,15 +292,15 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
         $scope.register = function register() {
 	    AuthenticationService.register($scope.user).success(function(data) {
-	        $location.path("/");
+	        $state.go("anon.login");
 	    });
 	}
     }])
 
 
 
-    .controller('UserLogout', ['$scope', '$location', '$localStorage', 'AuthenticationService',
-        function UserLogout($scope, $location, $localStorage, AuthenticationService) {
+    .controller('UserLogout', ['$scope', '$state', '$localStorage', 'AuthenticationService',
+        function UserLogout($scope, $state, $localStorage, AuthenticationService) {
         AuthenticationService.logOut();
     }])
 
@@ -324,7 +328,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
 // Admin
 
-    .controller('AdminUserCtrl', ['$scope', '$location', 'Users', function ($scope, $location, Users) {
+    .controller('AdminUserCtrl', ['$scope', '$state', 'Users', function ($scope, $state, Users) {
       $scope.loading = true;
       $scope.users = Users.query(function(response) {
         $scope.loading = false;
@@ -390,19 +394,19 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
     }])
 
-    .controller('UnitDetailCtrl', ['$scope', '$routeParams', 'Units', '$location', function ($scope, $routeParams, Units, $location) {
-      if (!$routeParams.id) {}
-      else $scope.unit = Units.get({id: $routeParams.id });
+    .controller('UnitDetailCtrl', ['$scope', '$stateParams', 'Units', '$state', function ($scope, $stateParams, Units, $state) {
+      if (!$stateParams.id) {}
+      else $scope.unit = Units.get({id: $stateParams.id });
 
       $scope.update = function(){
         Units.update({id: $scope.unit._id}, $scope.unit, function(){
-          $location.url('/units/');
+          $state.go('admin.units');
         });
       }
 
       $scope.remove = function(){
         Units.remove({id: $scope.unit._id}, function(){
-          $location.url('/units/');
+          $state.go('admin.units');
         });
       }
 
@@ -411,7 +415,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
         var unit = new Units({ name: { en: $scope.newunit.name.en, de: $scope.newunit.name.de,  fi: $scope.newunit.name.fi} });
 
         unit.$save(function(){
-          $location.url('/units/');
+          $state.go('admin.units');
         });
       }
 
@@ -450,12 +454,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
     }])
 
-    .controller('IngredientDetailCtrl', ['$scope', '$routeParams', 'Ingredients', 'Categories', '$location', function ($scope, $routeParams, Ingredients, Categories, $location) {
+    .controller('IngredientDetailCtrl', ['$scope', '$stateParams', 'Ingredients', 'Categories', '$state', function ($scope, $stateParams, Ingredients, Categories, $state) {
       $scope.categories = Categories.query();
       $scope.selectedcategory = {};
 
-      if (!$routeParams.id) {}
-      else $scope.ingredient = Ingredients.get({id: $routeParams.id }, function(response){
+      if (!$stateParams.id) {}
+      else $scope.ingredient = Ingredients.get({id: $stateParams.id }, function(response){
         $scope.selectedcategory.category = response.category;
         $scope.selectedcategory.subcategory = response.subcategory;
         $scope.selectedcategory.subsubcategory = response.subsubcategory;
@@ -469,13 +473,13 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
         $scope.ingredient.subsubcategory = $scope.selectedcategory.subsubcategory;
         $scope.ingredient.rewe_cat_id = $scope.selectedcategory.rewe_cat_id;
         Ingredients.update({id: $scope.ingredient._id}, $scope.ingredient, function(){
-          $location.url('/ingredients/');
+          $state.go('admin.ingredients.list');
         });
       }
 
       $scope.remove = function(){
         Ingredients.remove({id: $scope.ingredient._id}, function(){
-          $location.url('/ingredients/');
+          $state.go('admin.ingredients.list');
         });
       }
 
@@ -488,7 +492,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
         var ingredient = new Ingredients( $scope.newingredient );
 
         ingredient.$save(function(){
-          $location.url('/ingredients/');
+          $state.go('admin.ingredients.list');
         });
       }
 
@@ -544,17 +548,17 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
     }])
 
-    .controller('RecipeDetailCtrl', ['$scope', '$routeParams', '$modal', 'UserService', 'Recipes', 'Tags', 'Ingredients', 'Units', '$location', 'TAIngredients', 'TATags', function ($scope, $routeParams, $modal, UserService, Recipes, Tags, Ingredients, Units, $location, TAIngredients, TATags) {
+    .controller('RecipeDetailCtrl', ['$scope', '$stateParams', '$modal', 'UserService', 'Recipes', 'Tags', 'Ingredients', 'Units', '$state', 'TAIngredients', 'TATags', function ($scope, $stateParams, $modal, UserService, Recipes, Tags, Ingredients, Units, $state, TAIngredients, TATags) {
       $scope.allowEdit = false;
       $scope.alerts = [];
       $scope.submitted = false;
 
-      if (!$routeParams.id) {
+      if (!$stateParams.id) {
         $scope.recipe = new Recipes();
         $scope.recipe.ingredients = [];
         $scope.recipe.ingredients.push({qty: '', unit: '', ingredient: ''});
       } else {
-        $scope.recipe = Recipes.get({id: $routeParams.id }, function(response) {
+        $scope.recipe = Recipes.get({id: $stateParams.id }, function(response) {
           $scope.recipe.ingredients.push({qty: '', unit: '', ingredient: ''});
           var user = UserService.getCurrentLoginUser();
           if (user._id == response.author._id || user.is_admin === true) {
@@ -605,12 +609,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
           }
         }
         Recipes.update({id: $scope.recipe._id}, $scope.recipe, function(){
-          $location.url('/recipes/');
+          $state.go('user.recipes.list');
         });
       }
 
       $scope.cancel = function(){
-        $scope.recipe = Recipes.get({id: $routeParams.id }, function(response) {
+        $scope.recipe = Recipes.get({id: $stateParams.id }, function(response) {
           $scope.recipe.ingredients.push({qty: '', unit: '', ingredient: ''});
           $scope.recipeedit = false;
           $scope.recipecopy = false;
@@ -620,7 +624,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
       $scope.remove = function(){
         Recipes.remove({id: $scope.recipe._id}, function(){
-          $location.url('/recipes/');
+          $state.go('user.recipes.list');
         });
       }
 
@@ -645,7 +649,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
         }
         $scope.recipe._id = null;
         $scope.recipe.$save(function(){
-          $location.url('/recipes/');
+          $state.go('user.recipes.list');
         });
       }
 
@@ -682,7 +686,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
     }])
 
 
-    .controller('ModalScheduleAddController', ['$scope', '$routeParams', '$modalInstance', '$filter', 'Schedules', 'recipe', function ($scope, $routeParams, $modalInstance, $filter, Schedules, recipe) {
+    .controller('ModalScheduleAddController', ['$scope', '$stateParams', '$modalInstance', '$filter', 'Schedules', 'recipe', function ($scope, $stateParams, $modalInstance, $filter, Schedules, recipe) {
       $scope.recipe = recipe;
       $scope.date = new Date();
       $scope.factor = $scope.recipe.yield;
@@ -714,20 +718,20 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
 // Schedules
 
-    .controller('SchedulesController', ['$scope', '$routeParams', 'Schedules', 'TARecipes', function ($scope, $routeParams, Schedules, TARecipes) {
+    .controller('SchedulesController', ['$scope', '$stateParams', 'Schedules', 'TARecipes', function ($scope, $stateParams, Schedules, TARecipes) {
 
       $scope.edit = [];
 
-      if (!$routeParams.date) {
+      if (!$stateParams.date) {
         $scope.startDate = new Date();
         $scope.endDate = new Date();
         $scope.endDate.setDate($scope.startDate.getDate() + 6);
       }
       else {
-        $scope.startDate = new Date($routeParams.date);
-        $scope.endDate = new Date($routeParams.date);
-        $scope.prevDate = new Date($routeParams.date);
-        $scope.nextDate = new Date($routeParams.date);
+        $scope.startDate = new Date($stateParams.date);
+        $scope.endDate = new Date($stateParams.date);
+        $scope.prevDate = new Date($stateParams.date);
+        $scope.nextDate = new Date($stateParams.date);
         $scope.prevDate.setDate($scope.prevDate.getDate() - 1);
         $scope.nextDate.setDate($scope.nextDate.getDate() + 1);
       }
@@ -801,7 +805,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
 // Shopitems
 
-    .controller('ShopitemsController', ['$scope', '$routeParams', '$modal', 'UserService', 'Shopitems', 'TAIngredients', 'Units', '$location', '$filter', function ($scope, $routeParams, $modal, UserService, Shopitems, TAIngredients, Units, $location, $filter) {
+    .controller('ShopitemsController', ['$scope', '$stateParams', '$modal', 'UserService', 'Shopitems', 'TAIngredients', 'Units', '$state', '$filter', function ($scope, $stateParams, $modal, UserService, Shopitems, TAIngredients, Units, $state, $filter) {
 
       $scope.user = UserService.getCurrentLoginUser();
       containsObj = function(array, obj) {
@@ -916,7 +920,7 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
     }])
 
 
-    .controller('ModalShopitemAddController', ['$scope', '$routeParams', '$modalInstance', 'TAIngredients', 'units', function ($scope, $routeParams, $modalInstance, TAIngredients, units) {
+    .controller('ModalShopitemAddController', ['$scope', '$stateParams', '$modalInstance', 'TAIngredients', 'units', function ($scope, $stateParams, $modalInstance, TAIngredients, units) {
      
       $scope.units = units;
 
@@ -942,12 +946,12 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 
 // Cooking
 
-    .controller('CookingController', ['$scope', '$routeParams', 'Schedules', 'Recipes', 'Ingredients', 'Units', 'Tags', 'User', '$location', function ($scope, $routeParams, Schedules, Recipes, Ingredients, Units, Tags, User, $location) {
-      if (!$routeParams.date) {
+    .controller('CookingController', ['$scope', '$stateParams', 'Schedules', 'Recipes', 'Ingredients', 'Units', 'Tags', 'User', '$state', function ($scope, $stateParams, Schedules, Recipes, Ingredients, Units, Tags, User, $state) {
+      if (!$stateParams.date) {
         $scope.startDate = new Date();
       }
       else {
-        $scope.startDate = new Date($routeParams.date);
+        $scope.startDate = new Date($stateParams.date);
       }
 
       $scope.startDate.setHours(0, 0, 0, 0);
@@ -1001,8 +1005,8 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
         controller:  function ($scope) {
           $scope.hideMobileNav = true;
           $scope.user = UserService.getCurrentLoginUser();
-          $scope.routes = routeNavigation.routes;
-          $scope.activeRoute = routeNavigation.activeRoute;
+          $scope.routes = routeNavigation.states;
+          $scope.activeRoute = routeNavigation.activeState;
 
           $scope.$watch(UserService.isAuthenticated, function () {
               $scope.user = UserService.getCurrentLoginUser();
@@ -1090,208 +1094,237 @@ angular.module('app', ['ngRoute', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui
 // Routes
 //---------------
 
-  .config(['$routeProvider', function ($routeProvider) {
-    $routeProvider
-      .when('/', {
-        templateUrl: 'partials/startpage.tpl.html',
-        controller: 'StartpageController',
-        access: { requiresLogin: false }
-      })
+  .config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
 
-      .when('/home/', {
-        templateUrl: 'partials/home.tpl.html',
-        controller: 'HomeController',
-        access: { requiresLogin: true, 
-                  requiredPermissions: ['User'] }
-      })
+    $urlRouterProvider.otherwise('anon.startpage');
 
-      .when('/units/', {
-        templateUrl: 'partials/units.tpl.html',
-        controller: 'UnitsController',
-        name: 'Units',
-        icon: 'glyphicon glyphicon-scale',
-        access: { requiresLogin: true,
-                  requiredPermissions: ['Admin']}
-      })
-    
-      .when('/units/edit/:id', {
-        templateUrl: 'partials/units.details.tpl.html',
-        controller: 'UnitDetailCtrl',
-        access: { requiresLogin: true,
-                  requiredPermissions: ['Admin']}
-     })
+    $stateProvider
+		.state('anon', {
+			abstract: true,
+			template: "<ui-view />",
+			data	: {
+				requiresLogin: false,
+                 		requiredPermissions: ['NoUser']
+			}
+		})
+		.state('anon.startpage', {
+			url: '/',
+			templateUrl: 'partials/startpage.tpl.html',
+			controller: 'StartpageController'
+		})
+		.state('anon.user', {
+			url: '/user',
+			abstract: true,
+			template: "<ui-view />",
+		})
+		.state('anon.user.register', {
+			url: '/register',
+        		templateUrl: 'partials/user.register.tpl.html',
+        		controller: 'UserCtrl',
+			data: {
+	        		name: 'Register',
+        			icon: 'glyphicon glyphicon-edit',
+				panelright: true
+			}
+      		})
+      		.state('anon.user.login', {
+			url: '/login',
+        		templateUrl: 'partials/user.login.tpl.html',
+        		controller: 'UserCtrl',
+			data: {
+	        		name: 'Login',
+        			icon: 'glyphicon glyphicon-log-in',
+				panelright: true
+			}
+      		})
+      		.state('accessdenied', {
+			url: '/access/denied',
+        		templateUrl: 'partials/access.denied.tpl.html'
+      		})
 
-      .when('/units/add/', {
-        templateUrl: 'partials/units.add.tpl.html',
-        controller: 'UnitDetailCtrl',
-        access: { requiresLogin: true,
-                  requiredPermissions: ['Admin']}
-      })
+		.state('admin', {
+			abstract: true,
+			template: "<ui-view />",
+			data: {
+				requiresLogin: true,
+                 		requiredPermissions: ['Admin']
+			}
+		})	
+		.state('admin.units', {
+			abstract: true,
+			url: '/units',
+			template: "<ui-view />",
+		})
+		.state('admin.units.list', {
+			url: '/list',
+        		templateUrl: 'partials/units.tpl.html',
+        		controller: 'UnitsController',
+			data: {
+        			name: 'Units',
+        			icon: 'glyphicon glyphicon-scale'
+			}
+      		})
+      		.state('admin.units.edit', {
+			url: '/edit/:id',
+        		templateUrl: 'partials/units.details.tpl.html',
+        		controller: 'UnitDetailCtrl'
+     		})
+      		.state('admin.units.add', {
+			url: '/add',
+        		templateUrl: 'partials/units.add.tpl.html',
+        		controller: 'UnitDetailCtrl'
+      		})	
+		.state('admin.ingredients', {
+			abstract: true,
+			url: '/ingredients',
+			template: "<ui-view />",
+		})
+      		.state('admin.ingredients.list', {
+			url: '/list',
+        		templateUrl: 'partials/ingredients.tpl.html',
+        		controller: 'IngredientsController',
+			data: {
+        			name: 'Ingredients',
+        			icon: 'glyphicon glyphicon-apple'
+			}
+      		})
+      		.state('admin.ingredients.edit', {
+			url: '/edit/:id',
+        		templateUrl: 'partials/ingredients.details.tpl.html',
+        		controller: 'IngredientDetailCtrl'
+     		})
+      		.state('admin.ingredients.add', {
+			url: '/add',
+        		templateUrl: 'partials/ingredients.add.tpl.html',
+        		controller: 'IngredientDetailCtrl'
+      		})
+      		.state('admin.user', {
+			url: '/admin/user',
+        		templateUrl: 'partials/admin.user.tpl.html',
+        		controller: 'AdminUserCtrl',
+			data: {
+	        		name: 'Users',
+        			icon: 'glyphicon glyphicon-user'
+			}
+      		})
 
-
-      .when('/ingredients/', {
-        templateUrl: 'partials/ingredients.tpl.html',
-        controller: 'IngredientsController',
-        name: 'Ingredients',
-        icon: 'glyphicon glyphicon-apple',
-        access: { requiresLogin: true,
-                  requiredPermissions: ['Admin']}
-      })
-    
-      .when('/ingredients/edit/:id', {
-        templateUrl: 'partials/ingredients.details.tpl.html',
-        controller: 'IngredientDetailCtrl',
-        access: { requiresLogin: true,
-                  requiredPermissions: ['Admin']}
-     })
-
-      .when('/ingredients/add/', {
-        templateUrl: 'partials/ingredients.add.tpl.html',
-        controller: 'IngredientDetailCtrl',
-        access: { requiresLogin: true,
-                  requiredPermissions: ['Admin']}
-      })
-
-
-      .when('/recipes/', {
-        templateUrl: 'partials/recipes.tpl.html',
-        controller: 'RecipesController',
-        name: 'Recipes',
-        icon: 'glyphicon glyphicon-cutlery',
-        access: { requiresLogin: true, 
-                  requiredPermissions: ['User']}
-      })
-    
-      .when('/recipes/edit/:id', {
-        templateUrl: 'partials/recipes.edit.tpl.html',
-        controller: 'RecipeDetailCtrl',
-        access: { requiresLogin: true,
-                  requiredPermissions: ['User']}
-     })
-
-      .when('/recipes/add/', {
-        templateUrl: 'partials/recipes.add.tpl.html',
-        controller: 'RecipeDetailCtrl',
-        access: { requiresLogin: true, 
-                  requiredPermissions: ['User']}
-      })
-
-      .when('/schedules/', {
-        templateUrl: 'partials/schedules.tpl.html',
-        controller: 'SchedulesController',
-        name: 'Schedules',
-        icon: 'glyphicon glyphicon-calendar',
-        access: { requiresLogin: true, 
-                  requiredPermissions: ['User']}
-      })
-
-      .when('/schedules/:date', {
-        templateUrl: 'partials/schedules.date.tpl.html',
-        controller: 'SchedulesController',
-        access: { requiresLogin: true, 
-                  requiredPermissions: ['User']}
-      })
-
-      .when('/shopitems/', {
-        templateUrl: 'partials/shopitems.tpl.html',
-        controller: 'ShopitemsController',
-        name: 'Shopping List',
-        icon: 'glyphicon glyphicon-shopping-cart',
-        access: { requiresLogin: true, 
-                  requiredPermissions: ['User']}
-      })
-
-      .when('/cooking/', {
-        templateUrl: 'partials/cooking.date.tpl.html',
-        controller: 'CookingController',
-        name: 'Cooking',
-        icon: 'glyphicon glyphicon-fire',
-        access: { requiresLogin: true, 
-                  requiredPermissions: ['User']}
-      })
-
-      .when('/cooking/:date', {
-        templateUrl: 'partials/cooking.date.tpl.html',
-        controller: 'CookingController',
-        access: { requiresLogin: true, 
-                  requiredPermissions: ['User']}
-      })
-    
-      .when('/admin/user/', {
-        templateUrl: 'partials/admin.user.tpl.html',
-        controller: 'AdminUserCtrl',
-        name: 'Users',
-        icon: 'glyphicon glyphicon-user',
-        access: { requiresLogin: true,
-                  requiredPermissions: ['Admin']}
-      })
-
-      .when('/impressum/', {
-        templateUrl: 'partials/impressum.tpl.html',
-        controller: 'ImpressumController',
-        name: 'Impressum',
-        icon: 'glyphicon glyphicon-info-sign',
-        access: { requiresLogin: false }
-      })
-
-      .when('/user/register/', {
-        templateUrl: 'partials/user.register.tpl.html',
-        controller: 'UserCtrl',
-        name: 'Register',
-        icon: 'glyphicon glyphicon-edit',
-        access: { panelright: true,
-                  requiredPermissions: ['NoUser'] }
-      })
-
-      .when('/user/login/', {
-        templateUrl: 'partials/user.login.tpl.html',
-        controller: 'UserCtrl',
-        name: 'Login',
-        icon: 'glyphicon glyphicon-log-in',
-        access: { panelright: true,
-                  requiredPermissions: ['NoUser'] }
-      })
-
-      .when('/user/logout/', {
-        templateUrl: 'partials/user.logout.tpl.html',
-        controller: 'UserLogout',
-        name: 'Logout',
-        icon: 'glyphicon glyphicon-log-out',
-        access: { panelright: true,
-                  requiresLogin: true, 
-                  requiredPermissions: ['User']}
-      })
-
-      .when('/access/denied/', {
-        templateUrl: 'partials/access.denied.tpl.html',
-        access: { requiresLogin: false }
-      })
+		.state('user', {
+			abstract: true,
+			template: "<ui-view />",
+			data: {
+				requiresLogin: true,
+                 		requiredPermissions: ['User']
+			}
+		})
+      		.state('user.home', {
+			url: '/home',
+        		templateUrl: 'partials/home.tpl.html',
+        		controller: 'HomeController'
+      		})
+		.state('user.recipes', {
+			abstract: true,
+			url: "/recipes",
+			template: "<ui-view />",
+		})
+      		.state('user.recipes.list', {
+			url: '/list',
+        		templateUrl: 'partials/recipes.tpl.html',
+        		controller: 'RecipesController',
+			data: {
+	        		name: 'Recipes',
+        			icon: 'glyphicon glyphicon-cutlery'
+			}
+      		})
+      		.state('user.recipes.edit', {
+			url: '/edit/:id',
+        		templateUrl: 'partials/recipes.edit.tpl.html',
+        		controller: 'RecipeDetailCtrl'
+     		})
+      		.state('user.recipes.add', {
+			url: '/add',
+        		templateUrl: 'partials/recipes.add.tpl.html',
+        		controller: 'RecipeDetailCtrl'
+      		})	
+		.state('user.schedules', {
+			abstract: true,
+			url: '/schedules',
+			template: "<ui-view />",
+		})
+      		.state('user.schedules.list', {
+			url: '/list',
+        		templateUrl: 'partials/schedules.tpl.html',
+        		controller: 'SchedulesController',
+			data: {
+	        		name: 'Schedules',
+        			icon: 'glyphicon glyphicon-calendar'
+			}
+      		})
+      		.state('user.schedules.add', {
+			url: '/add/:date',
+        		templateUrl: 'partials/schedules.date.tpl.html',
+        		controller: 'SchedulesController',
+      		})
+      		.state('user.shopitems', {
+			url: '/shopitems',
+        		templateUrl: 'partials/shopitems.tpl.html',
+        		controller: 'ShopitemsController',
+			data: {
+	        		name: 'Shopping List',
+        			icon: 'glyphicon glyphicon-shopping-cart'
+			}
+      		})
+      		.state('user.cooking', {
+			url: '/cooking/:date',
+        		templateUrl: 'partials/cooking.date.tpl.html',
+        		controller: 'CookingController',
+			data: {
+				name: 'Cooking',
+				icon: 'glyphicon glyphicon-fire'
+			}
+      		})
+      		.state('user.logout', {
+			url: '/user/logout',
+        		templateUrl: 'partials/user.logout.tpl.html',
+        		controller: 'UserLogout',
+			data: {
+				name: 'Logout',
+				icon: 'glyphicon glyphicon-log-out',
+				panelright: true
+			}
+      		})
+      		.state('impressum', {
+			url: '/impressum',
+        		templateUrl: 'partials/impressum.tpl.html',
+        		controller: 'ImpressumController',
+			data: {
+	        		name: 'Impressum',
+        			icon: 'glyphicon glyphicon-info-sign'
+			}
+      		})
 
     ;
   }])
 
-    .run(['$rootScope', '$location', '$localStorage', '$http', 'AuthorisationService', 'UserService', 'BASE_URI', function($rootScope, $location, $localStorage, $http, AuthorisationService, UserService, BASE_URI) {
-	var routeChangeRequiredAfterLogin = false,
-	    loginRedirectUrl;
-        $rootScope.$on("$routeChangeStart", function(event, nextRoute, currentRoute) {
+    .run(['$rootScope', '$state', '$localStorage', '$http', 'AuthorisationService', 'UserService', 'BASE_URI', function($rootScope, $state, $localStorage, $http, AuthorisationService, UserService, BASE_URI) {
+        $rootScope.$on("$stateChangeStart", function(event, toState, toStateParams, fromState, fromStateParams) {
             var authorised;
             if (UserService.getCurrentLoginUser() !== undefined) $http.get(BASE_URI+'api/user/check');
-            if (routeChangeRequiredAfterLogin && nextRoute.originalPath !== "/user/login/") {
-                routeChangeRequiredAfterLogin = false;
-                $location.path(loginRedirectUrl).replace();
-            } else if (nextRoute.access !== undefined) {
-                authorised = AuthorisationService.authorize(nextRoute.access.requiresLogin,
-                                                     nextRoute.access.requiredPermissions,
-                                                     nextRoute.access.permissionType,
-                                                     nextRoute.access.requiresLogout);
+            /*if (fromState.name === "anon.user.login" && toState.name !== "anon.user.login") {
+		loginRedirectUrl = loginRedirectUrl ? loginRedirectUrl : "user.home";
+                //$state.go(loginRedirectUrl, {}, {location: replace});
+            } /*else if (toState.data !== undefined) {
+                authorised = AuthorisationService.authorize(toState.data.requiresLogin,
+                                                     toState.data.requiredPermissions);
                 if (authorised === 1) {
-                    routeChangeRequiredAfterLogin = true;
-                    loginRedirectUrl = (nextRoute.originalPath !== "/user/login/") ? nextRoute.originalPath : "/" ;
-                    $location.path("/user/login/");
+                    //routeChangeRequiredAfterLogin = true;
+                    loginRedirectUrl = (toState.name !== "anon.user.login") ? toState.name : "user.home" ;
+                    $state.go("anon.user.login");
                 } else if (authorised === 2) {
-                    $location.path("/access/denied/").replace();
+                    $state.go("accessdenied", {location: replace});
                 }
-            }
+            } else {
+		$state.go("anon.startpage");
+	    }*/
         });
     }])
 

@@ -1,7 +1,7 @@
 <div class="row">
   <div class="col-xs-12" style="margin-bottom: 20px;">
     <h3 style="margin-bottom: 30px;">Recipes
-      <a class="btn btn-primary pull-right" href="#/recipes/add/" role="button"><i class="glyphicon glyphicon-plus"></i></a>
+      <a class="btn btn-primary pull-right" ui-sref="user.recipes.add" role="button"><i class="glyphicon glyphicon-plus"></i></a>
     </h3> 
     <div class="input-group">
       <input type="text" ng-model="search.name" class="form-control" placeholder="Search...">
@@ -85,7 +85,7 @@
     <div ng-show="loading" class="text-center"><i class="fa fa-spinner fa-spin fa-3x"></i></div>
     <div class="list-group" style="margin-top: 20px;">
       <div ng-repeat="recipe in filtered=(recipes | filter: search | filter: filterByTags) | orderBy: 'name'">
-        <a class="list-group-item col-xs-12 col-md-6 col-lg-6" href="#/recipes/edit/{{recipe._id}}">
+        <a class="list-group-item col-xs-12 col-md-6 col-lg-6" ui-sref="user.recipes.edit({id: recipe._id})">
           <div class="list-group-item-heading">
             <big>{{recipe.name}}</big>
             <div class="label label-danger" ng-show="recipe.new_recipe">New</div><br />

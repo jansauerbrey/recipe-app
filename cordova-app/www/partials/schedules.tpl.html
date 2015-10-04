@@ -22,7 +22,7 @@
     <div class="col-xs-12">
       <div class="list-group">
         <div ng-repeat="schedules in schedulesArray">
-          <a class="list-group-item" href="#/schedules/{{schedules.date | date:'yyyy-MM-dd'}}">
+          <a class="list-group-item" ui-sref="user.schedules.add({date: schedules.date})">
             <div class="list-group-item-heading">{{schedules.date | date:'EEEE dd.MM.yyyy'}}</div>
             <div class="list-group-item-text">
               <div ng-repeat="schedule in schedules.schedule">{{schedule.factor}} Persons: {{schedule.recipe.name}}</div>

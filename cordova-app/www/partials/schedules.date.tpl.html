@@ -1,9 +1,9 @@
   <div class="row">
       <div class="col-xs-12 text-center">
         <h3 style="margin-bottom: 30px;">
-          <a class="btn btn-primary pull-left" href="#/schedules/{{prevDate | date:'yyyy-MM-dd'}}"><span class="glyphicon glyphicon-chevron-left"></a>
+          <a class="btn btn-primary pull-left" ui-sref="user.schedules.add({date: prevDate})"><span class="glyphicon glyphicon-chevron-left"></a>
           {{startDate | date:'EEEE dd.MM.yyyy'}}
-          <a class="btn btn-primary pull-right" href="#/schedules/{{nextDate | date:'yyyy-MM-dd'}}"><span class="glyphicon glyphicon-chevron-right"></a>
+          <a class="btn btn-primary pull-right" ui-sref="user.schedules.add({date: nextDate})"><span class="glyphicon glyphicon-chevron-right"></a>
         </h3>
       </div>
       <div class="col-xs-12">
