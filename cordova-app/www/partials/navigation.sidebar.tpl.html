@@ -7,20 +7,20 @@
         <a ui-sref="anon.startpage" ng-show="determineVisibility('NoUser')"><span class="glyphicon glyphicon-home" style="padding-right: 10px;"></span>rezept-planer.de</a>
       </li>
       <li class="divider" style="border-bottom: 1px solid #eee;"></li>
-      <li ng-repeat="route in routes | filter: {requiredPermissions: 'User', panelright: false}" ng-class="{active: activeRoute(route)}" ng-show="determineVisibility(route.requiredPermissions)">
-        <a ui-sref="{{route.name}}"><span class="{{route.icon}}" style="padding-right: 10px;"></span>{{ route.label }}</a>
+      <li ng-repeat="state in states | filter: {requiredPermissions: 'User', panelright: false}" ng-class="{active: activeState(state)}" ng-show="determineVisibility(state.requiredPermissions)">
+        <a ui-sref="{{state.name}}"><span class="{{state.icon}}" style="padding-right: 10px;"></span>{{ state.label }}</a>
       </li>
       <li class="divider" style="border-bottom: 1px solid #eee;" ng-show="determineVisibility('User')"></li>
-      <li ng-repeat="route in routes | filter: {requiredPermissions: 'Admin', panelright: false}" ng-class="{active: activeRoute(route)}" ng-show="determineVisibility(route.requiredPermissions)">
-        <a ui-sref="{{route.name}}"><span class="{{route.icon}}" style="padding-right: 10px;"></span>{{ route.label }}</a>
+      <li ng-repeat="state in states | filter: {requiredPermissions: 'Admin', panelright: false}" ng-class="{active: activeState(state)}" ng-show="determineVisibility(state.requiredPermissions)">
+        <a ui-sref="{{state.name}}"><span class="{{state.icon}}" style="padding-right: 10px;"></span>{{ state.label }}</a>
       </li>
       <li class="divider" style="border-bottom: 1px solid #eee;" ng-show="determineVisibility('Admin')"></li>
-      <li ng-repeat="route in routes | filter: {panelright: true}" ng-class="{active: activeRoute(route)}" ng-show="determineVisibility(route.requiredPermissions)">
-        <a ui-sref="{{route.name}}"><span class="{{route.icon}}" style="padding-right: 10px;"></span>{{ route.label }}</a>
+      <li ng-repeat="state in states | filter: {panelright: true}" ng-class="{active: activeState(state)}" ng-show="determineVisibility(state.requiredPermissions)">
+        <a ui-sref="{{state.name}}"><span class="{{state.icon}}" style="padding-right: 10px;"></span>{{ state.label }}</a>
       </li>
       <li class="divider" style="border-bottom: 1px solid #eee;"></li>
-      <li ng-repeat="route in routes | filter: {requiresLogin: false, panelright: false}" ng-class="{active: activeRoute(route)}" ng-show="determineVisibility(route.requiredPermissions)">
-        <a ui-sref="{{route.name}}"><span class="{{route.icon}}" style="padding-right: 10px;"></span>{{ route.label }}</a>
+      <li ng-repeat="state in states | filter: {requiresLogin: false, panelright: false}" ng-class="{active: activeState(state)}" ng-show="determineVisibility(state.requiredPermissions)">
+        <a ui-sref="{{state.name}}"><span class="{{state.icon}}" style="padding-right: 10px;"></span>{{ state.label }}</a>
       </li>
     </ul>
   <div>

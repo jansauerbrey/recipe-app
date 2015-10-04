@@ -36,28 +36,6 @@ angular.module('app.ingredients', ['ui.router'])
         $scope.loading = false;
       });
 
-      $scope.update = function(index){
-        var ingredient = $scope.ingredients[index];
-        Ingredients.update({id: ingredient._id}, ingredient);
-        $scope.editing[index] = false;
-      }
-
-      $scope.edit = function(index){
-        $scope.editing[index] = angular.copy($scope.ingredients[index]);
-      }
-
-      $scope.cancel = function(index){
-        $scope.ingredients[index] = angular.copy($scope.editing[index]);
-        $scope.editing[index] = false;
-      }
-
-      $scope.remove = function(index){
-        var ingredient = $scope.ingredients[index];
-        Ingredients.remove({id: ingredient._id}, function(){
-          $scope.ingredients.splice(index, 1);
-        });
-      }
-
     }])
 
     .controller('IngredientDetailCtrl', ['$scope', '$stateParams', 'Ingredients', 'Categories', '$state', function ($scope, $stateParams, Ingredients, Categories, $state) {

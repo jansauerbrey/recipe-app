@@ -26,28 +26,6 @@ angular.module('app.units', ['ui.router'])
         $scope.loading = false;
       });
 
-      $scope.update = function(index){
-        var unit = $scope.units[index];
-        Units.update({id: unit._id}, unit);
-        $scope.editing[index] = false;
-      }
-
-      $scope.edit = function(index){
-        $scope.editing[index] = angular.copy($scope.units[index]);
-      }
-
-      $scope.cancel = function(index){
-        $scope.units[index] = angular.copy($scope.editing[index]);
-        $scope.editing[index] = false;
-      }
-
-      $scope.remove = function(index){
-        var unit = $scope.units[index];
-        Units.remove({id: unit._id}, function(){
-          $scope.units.splice(index, 1);
-        });
-      }
-
     }])
 
     .controller('UnitDetailCtrl', ['$scope', '$stateParams', 'Units', '$state', function ($scope, $stateParams, Units, $state) {
@@ -56,13 +34,13 @@ angular.module('app.units', ['ui.router'])
 
       $scope.update = function(){
         Units.update({id: $scope.unit._id}, $scope.unit, function(){
-          $state.go('admin.units');
+          $state.go('admin.units.list');
         });
       }
 
       $scope.remove = function(){
         Units.remove({id: $scope.unit._id}, function(){
-          $state.go('admin.units');
+          $state.go('admin.units.list');
         });
       }
 
@@ -71,7 +49,7 @@ angular.module('app.units', ['ui.router'])
         var unit = new Units({ name: { en: $scope.newunit.name.en, de: $scope.newunit.name.de,  fi: $scope.newunit.name.fi} });
 
         unit.$save(function(){
-          $state.go('admin.units');
+          $state.go('admin.units.list');
         });
       }
 
