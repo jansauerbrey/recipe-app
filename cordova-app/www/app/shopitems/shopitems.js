@@ -67,16 +67,19 @@ angular.module('app.shopitems', ['ui.router'])
         });
       };
 
-      $scope.addShopitem = function(){
+      $scope.addShopitem = function(newshopitem){
         var expDate = new Date();
         expDate.setDate(expDate.getDate() + 14);
         expDate.setHours(0, 0, 0, 0);
-        for(i=0;i<$scope.units.length;i++){
-          if($scope.units[i]._id === $scope.newunit) {
-            $scope.newunitobject = $scope.units[i];
+	if (!newshopitem) {
+          for(i=0;i<$scope.units.length;i++){
+            if($scope.units[i]._id === $scope.newunit) {
+              $scope.newunitobject = $scope.units[i];
+            }
           }
-        }
-        var newshopitem = new Shopitems({ingredient: $scope.newingredient, unit: $scope.newunitobject, amount: $scope.newamount, completed: false , expire_date: expDate });
+	  newshopitem = {ingredient: $scope.newingredient, unit: $scope.newunitobject, amount: $scope.newamount};
+	}
+        var newshopitem = new Shopitems({ingredient: newshopitem.ingredient, unit: newshopitem.unit, amount: newshopitem.amount, completed: false , expire_date: expDate });
         newshopitem.$save();
         obj = {ingredient: newshopitem.ingredient, unit: newshopitem.unit, completed: newshopitem.completed};
         obj.details = [newshopitem];
@@ -112,7 +115,7 @@ angular.module('app.shopitems', ['ui.router'])
           animation: true,
           templateUrl: 'partials/shopitems.modal.add.tpl.html',
           controller: 'ModalShopitemAddController',
-          size: 'xs',
+          size: 'lg',
           resolve: {
             units: function(){
               return $scope.units;
@@ -121,10 +124,7 @@ angular.module('app.shopitems', ['ui.router'])
         });
 
         modalAddShopitem.result.then(function(response){
-          $scope.newamount = response.amount;
-          $scope.newunit = response.unit;
-          $scope.newingredient = response.ingredient;
-          $scope.addShopitem();
+          $scope.addShopitem(response);
         });
 
       }
@@ -144,7 +144,12 @@ angular.module('app.shopitems', ['ui.router'])
       };
 
       $scope.ok = function(){
-        $modalInstance.close({amount: $scope.newamount, unit: $scope.newunit, ingredient: $scope.newingredient});
+        for(i=0;i<$scope.units.length;i++){
+          if($scope.units[i]._id === $scope.newunit) {
+            $scope.newunitobject = $scope.units[i];
+          }
+        }
+        $modalInstance.close({amount: $scope.newamount, unit: $scope.newunitobject, ingredient: $scope.newingredient});
       }
 
       $scope.cancel = function(){
@@ -166,7 +171,7 @@ angular.module('app.shopitems', ['ui.router'])
         		templateUrl: 'partials/shopitems.tpl.html',
         		controller: 'ShopitemsController',
 			data: {
-	        		name: 'Shopping List',
+	        		name: 'Shopping',
         			icon: 'glyphicon glyphicon-shopping-cart'
 			}
       		})

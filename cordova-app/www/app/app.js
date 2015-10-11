@@ -1,4 +1,4 @@
-angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitems', 'app.cooking', 'app.units', 'app.ingredients', 'app.admin', 'ui.router', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui.checkbox', 'ngTagsInput', 'ngAside'])
+angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequentshopitems', 'app.shopitems', 'app.cooking', 'app.units', 'app.ingredients', 'app.admin', 'ui.router', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui.checkbox', 'ngTagsInput', 'ngAside'])
 
 //---------------
 // Constants
@@ -158,19 +158,11 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
                  		requiredPermissions: ['NoUser']
 			}
 		})
-		.state('anon.startpage', {
-			url: '/',
-			templateUrl: 'partials/startpage.tpl.html'
-		})
 		.state('anon.user', {
 			url: '/user',
 			abstract: true,
 			template: "<ui-view />",
 		})
-      		.state('accessdenied', {
-			url: '/access/denied',
-        		templateUrl: 'partials/access.denied.tpl.html'
-      		})
 		.state('user', {
 			abstract: true,
 			template: "<ui-view />",
@@ -179,10 +171,10 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
                  		requiredPermissions: ['User']
 			}
 		})
-      		.state('user.home', {
-			url: '/home',
-        		templateUrl: 'partials/home.tpl.html'
-      		})
+		.state('anon.startpage', {
+			url: '/',
+			templateUrl: 'partials/startpage.tpl.html'
+		})
       		.state('impressum', {
 			url: '/impressum',
         		templateUrl: 'partials/impressum.tpl.html',
@@ -190,6 +182,14 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 	        		name: 'Impressum',
         			icon: 'glyphicon glyphicon-info-sign'
 			}
+      		})
+      		.state('accessdenied', {
+			url: '/access/denied',
+        		templateUrl: 'partials/access.denied.tpl.html'
+      		})
+      		.state('user.home', {
+			url: '/home',
+        		templateUrl: 'partials/home.tpl.html'
       		})
 
     ;
