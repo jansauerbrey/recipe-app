@@ -5,7 +5,7 @@ angular.module('app.frequentshopitems', ['ui.router'])
 //---------------
 
         .factory('Frequentshopitems', ['$resource', 'BASE_URI', function($resource, BASE_URI){
-          return $resource(BASE_URI+'api/shopitems/frequent');
+          return $resource(BASE_URI+'api/frequentshopitems/');
         }])
 
 //---------------

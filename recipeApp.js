@@ -15,6 +15,7 @@ var recipes = require('./routes/recipes');
 var tags = require('./routes/tags');
 var schedules = require('./routes/schedules');
 var shopitems = require('./routes/shopitems');
+var frequentshopitems = require('./routes/frequentshopitems');
 var typeahead = require('./routes/typeahead');
 
 var PORT = 3000;
@@ -64,6 +65,7 @@ app.use('/api/recipes', recipes);
 app.use('/api/tags', tags);
 app.use('/api/schedules', schedules);
 app.use('/api/shopitems', shopitems);
+app.use('/api/frequentshopitems', frequentshopitems);
 app.use('/api/typeahead', typeahead);
 
 

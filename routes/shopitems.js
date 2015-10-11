@@ -24,34 +24,6 @@ router.post('/', auth.verify, function(req, res, next) {
   });
 });
 
-/* GET /shopitems/frequent most common manual added ingredients */
-router.get('/frequent/', auth.verify, function(req, res, next) {
-  Shopitem.aggregate([
-        { $match: {
-            $and: [
-		{recipe: null},
-	    	{ingredient: { $exists:true }},
-	    	{ingredient: { $ne: null }},
-		{author: mongoose.Types.ObjectId(req._user.id)}
-	    ]
-        }},
-        { $group: {
-            _id: "$ingredient",
-            count: { $sum: 1  }
-        }},
-	{ $sort : { count : -1 } },
-	{ $limit: 36 }
-    ], function (err, result) {
-        if (err) {
-            console.log(err);
-            return;
-        }
-	Ingredient.populate(result, {path: "_id"}, function(err, ingredients){
-		res.json(ingredients);
-	});
-    });
-});
-
 /* GET /shopitems/id */
 router.get('/:id', auth.verify, function(req, res, next) {
   Shopitem.findById(req.params.id).populate(['schedule', 'recipe', 'ingredient', 'unit']).exec( function (err, shopitems) {
