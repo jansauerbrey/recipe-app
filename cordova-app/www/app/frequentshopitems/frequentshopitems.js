@@ -33,6 +33,8 @@ angular.module('app.frequentshopitems', ['ui.router'])
         expDate.setHours(0, 0, 0, 0);
         var newshopitem = new Shopitems({ingredient: newshopitem.ingredient, unit: newshopitem.unit, amount: newshopitem.amount, completed: false , expire_date: expDate });
         newshopitem.$save();
+        var message = 'The ingredient '+newshopitem.ingredient.name.de+' ('+newshopitem.amount+' '+newshopitem.unit.name.de+') was successfully added to the shopping list.';
+        $scope.alerts.push({type: 'success', msg: message});
       }
 
       $scope.modalFrequentshopitemAdd = function(ingredient) {
@@ -73,10 +75,12 @@ angular.module('app.frequentshopitems', ['ui.router'])
 
         modalAddShopitem.result.then(function(response){
           $scope.addShopitem(response);
-          var message = 'The ingredient '+response.ingredient.name.de+' was successfully added '+response.amount+' times to the shopping list.';
-          $scope.alerts.push({type: 'success', msg: message});
         });
 
+      }
+
+      $scope.closeAlert = function(index){
+        $scope.alerts.splice(index, 1);
       }
 
     }])

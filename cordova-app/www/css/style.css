@@ -14,7 +14,7 @@
 .move.ng-leave {
     opacity: 1;
     top: 0;
-    height: 30px;
+    height: 50px;
 }
      
 .move.ng-leave.ng-leave-active,
@@ -47,3 +47,28 @@ body { padding-top: 60px; }
   border-color: red;
   font-size: 70%;
 }
+
+
+
+.animate-alert.ng-enter {
+  transition: height 1s;
+  height: 0px;
+  overflow: hidden;
+}
+.animate-alert.ng-enter-active {
+  height: 50px;
+}
+
+.animate-alert.ng-leave {
+  transition: height 2s;
+  height: 50px;
+  overflow: hidden;
+}
+.animate-alert.ng-leave-active {
+  height: 0px;
+}
+
+
+
+
+   

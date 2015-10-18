@@ -5,6 +5,15 @@ var mongoose = require('mongoose');
 var User = require('../models/User.js');
 
 var auth = require('../auth/auth.js');
+var tokenHelper = require('../auth/tokenHelper.js');
+
+var nodemailer = require('nodemailer');
+// create reusable transporter object using SMTP transport
+var transporter = nodemailer.createTransport({
+    host: '10.10.10.231',
+    port: 25,
+    tls:{rejectUnauthorized: false}
+});
 
 /* GET /user/info. */
 router.get('/info', auth.verify, function(req, res, next) {
@@ -134,6 +143,94 @@ router.post('/register', function(req, res) {
     });
 });
 
+
+
+/* RESET PASSWORD */
+router.post('/forgot', function(req, res) {
+    //verify credential (use POST)
+    var username = req.body.username || '';
+ 
+    User.findOne({username: username}, function (err, user) {
+        if (err) {
+            console.log(err);
+            return res.sendStatus(401);
+        }
+
+        if (user == undefined) {
+            console.log("User undefined");
+            return res.sendStatus(401);
+        }
+ 
+        if (user.is_activated === false) {
+            console.log("User not activated");
+            return res.sendStatus(401);
+        }
+
+	tokenHelper.createToken(function(err, token) {
+		if (err) callback(err);
+		resetPasswordExpires = Date.now() + 3600000;
+		User.findByIdAndUpdate(user.id, {resetPasswordToken: token, resetPasswordExpires: resetPasswordExpires}, { 'new': true}, function (err, user) {
+	    		if (err) return next(err);
+			var mailOptions = {
+	    			from: 'rezept-planer.de <admin@rezept-planer.de>', // sender address
+	    			to: user.email, // list of receivers
+	    			subject: 'Reset Password', // Subject line
+	    			text: 'Please, use the following link to reset your password:\n\nhttp://rezept-planer.de/#/user/reset/'+user.resetPasswordToken+'\n\nYour rezept-planer.de Team', // plaintext body
+			};
+	    		transporter.sendMail(mailOptions, function(error, info){
+	    			if(error){
+					return console.log(error);
+	    			}
+	    			console.log('Message sent: ' + info.response);
+				return res.sendStatus(200);
+			});
+	  	});
+	});
+    });
+});
+
+
+/* RESET PASSWORD FINAL */
+router.put('/reset/:token', function(req, res, next) {
+
+    var password = req.body.password || '';
+    var passwordConfirmation = req.body.passwordConfirmation || '';
+
+    if (password == '' || password != passwordConfirmation) {
+        return res.sendStatus(400);
+    }
+
+	// { resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() }
+    User.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() }}, function (err, user) {
+	//return res.json(user);
+
+	if (err) {
+            console.log(err);
+            return res.sendStatus(401);
+        }
+
+        if (user == undefined) {
+            console.log("User undefined");
+            return res.sendStatus(401);
+        }
+ 
+        if (user.is_activated === false) {
+            console.log("User not activated");
+            return res.sendStatus(401);
+        }
+
+	user.password = req.body.password;
+	user.resetPasswordToken = undefined;
+	user.resetPasswordExpires = Date.now();
+	var userToUpdate = new User(user);
+	userToUpdate.isNew = false;
+	
+	userToUpdate.save(user, function (err, user) {
+    		if (err) return next(err);
+		return res.sendStatus(200);
+	});
+    });
+});
 
 
 

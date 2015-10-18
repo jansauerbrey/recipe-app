@@ -168,6 +168,7 @@ angular.module('app.auth', ['ui.router'])
         }])
 
 
+
 //---------------
 // Controllers
 //---------------
@@ -201,6 +202,29 @@ angular.module('app.auth', ['ui.router'])
         function UserLogout($scope, $state, $localStorage, AuthenticationService) {
         AuthenticationService.logOut();
     }])
+
+
+    .controller('UserForgotCtrl', ['$scope', '$state', '$stateParams', '$http', 'BASE_URI',
+        function UserForgotCtrl($scope, $state, $stateParams, $http, BASE_URI) {
+ 
+        $scope.requestNewPassword = function requestNewPassword(username) {
+            if (username !== undefined ) { 
+		return $http.post(BASE_URI+'api/user/forgot', {username: username}).success(function(data) {
+                    $state.go("anon.user.login");
+                });
+            }
+        }
+
+        $scope.resetPassword = function resetPassword(password, passwordConfirmation) {
+            if (password !== undefined && password === passwordConfirmation ) { 
+		return $http.put(BASE_URI+'api/user/reset/'+$stateParams.token, {password: password, passwordConfirmation: passwordConfirmation}).success(function(data) {
+                    $state.go("anon.user.login");
+                });
+            }
+	}
+    }])
+
+
 
 //---------------
 // Token Interceptor
@@ -246,6 +270,16 @@ angular.module('app.auth', ['ui.router'])
 				icon: 'glyphicon glyphicon-log-out',
 				panelright: true
 			}
+      		})
+      		.state('anon.forgot', {
+			url: '/user/forgot',
+        		templateUrl: 'partials/user.forgot.tpl.html',
+        		controller: 'UserForgotCtrl'
+      		})
+      		.state('anon.reset', {
+			url: '/user/reset/:token',
+        		templateUrl: 'partials/user.reset.tpl.html',
+        		controller: 'UserForgotCtrl'
       		})
     ;
   }])

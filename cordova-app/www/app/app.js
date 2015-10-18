@@ -1,4 +1,4 @@
-angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequentshopitems', 'app.shopitems', 'app.cooking', 'app.units', 'app.ingredients', 'app.admin', 'ui.router', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui.checkbox', 'ngTagsInput', 'ngAside'])
+angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequentshopitems', 'app.shopitems', 'app.cooking', 'app.units', 'app.ingredients', 'app.admin', 'ui.router', 'ngAnimate', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui.checkbox', 'ngTagsInput', 'ngAside'])
 
 //---------------
 // Constants
@@ -147,7 +147,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequent
 
   .config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
 
-    $urlRouterProvider.otherwise('anon.startpage');
+    $urlRouterProvider.otherwise('/');
 
     $stateProvider
 		.state('anon', {
@@ -157,6 +157,10 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequent
 				requiresLogin: false,
                  		requiredPermissions: ['NoUser']
 			}
+		})
+		.state('anon.startpage', {
+			url: '/',
+			templateUrl: 'partials/startpage.tpl.html'
 		})
 		.state('anon.user', {
 			url: '/user',
@@ -170,10 +174,6 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequent
 				requiresLogin: true,
                  		requiredPermissions: ['User']
 			}
-		})
-		.state('anon.startpage', {
-			url: '/',
-			templateUrl: 'partials/startpage.tpl.html'
 		})
       		.state('impressum', {
 			url: '/impressum',
@@ -201,7 +201,13 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequent
 
 	$rootScope.$on("$stateChangeStart", function(event, toState, toStateParams, fromState, fromStateParams) {
             var authorised;
-            if (UserService.getCurrentLoginUser() !== undefined) $http.get(BASE_URI+'api/user/check');
+            if (UserService.getCurrentLoginUser() !== undefined) {
+		$http.get(BASE_URI+'api/user/check');
+		if (toState.name == 'anon.startpage') {
+			event.preventDefault(); 
+			$state.go('user.home');
+		};
+	    };
         });
     }])
 
