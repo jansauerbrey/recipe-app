@@ -1,7 +1,7 @@
   <div class="row">
     <div ng-hide="recipeedit || recipecopy">
     <div class="col-xs-12">
-      <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert> 
+      <alert ng-repeat="alert in alerts" type="{{alert.type}}" dismiss-on-timeout="5000" close="closeAlert($index)">{{alert.msg}}</alert> 
       <h3 style="margin-bottom: 30px;">{{recipe.name}}
         <button ng-click="recipeedit=true" ng-show="allowEdit" class="btn btn-primary pull-right"><i class="glyphicon glyphicon-pencil"></i></button>
         <button ng-click="recipecopy=true" class="btn btn-primary pull-right" style="margin-right: 10px;"><i class="glyphicon glyphicon-duplicate"></i></button>

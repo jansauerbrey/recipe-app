@@ -22,6 +22,8 @@
     opacity: 0;
     top: -50px;
     height: 0px;
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 body { padding-top: 60px; }
@@ -50,25 +52,34 @@ body { padding-top: 60px; }
 
 
 
-.animate-alert.ng-enter {
-  transition: height 1s;
-  height: 0px;
-  overflow: hidden;
+.alert.ng-enter,
+.alert.ng-leave {
+    -webkit-transition: 450ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
+    -moz-transition: 450ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
+    -ms-transition: 450ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
+    -o-transition: 450ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
+    transition: 450ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
+    position: relative;
+    display: block;
 }
-.animate-alert.ng-enter-active {
-  height: 50px;
+.alert.ng-enter {
+    opacity: 0;
+    height: 52px;
+    top: 0;
 }
-
-.animate-alert.ng-leave {
-  transition: height 2s;
-  height: 50px;
-  overflow: hidden;
+.alert.ng-enter.ng-enter-active,
+.alert.ng-leave {
+    opacity: 1;
+    height: 52px;
+    top: 0;
 }
-.animate-alert.ng-leave-active {
-  height: 0px;
+.alert.ng-leave.ng-leave-active {
+    opacity: 0;
+    top: -50px;
+    height: 0px;
+    padding-top: 0;
+    padding-bottom: 0;
 }
-
-
 
 
    
