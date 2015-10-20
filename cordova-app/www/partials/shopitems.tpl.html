@@ -1,7 +1,10 @@
   <div class="row">
     <div class="col-xs-12" style="margin-bottom: 100px;">
+    <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" dismiss-on-timeout="5000" close="closeAlert($index)">{{alert.msg}}</uib-alert> 
     <h3 style="margin-bottom: 30px;">Shopitems
       <button ng-click="modalShopitemAdd()" class="btn btn-primary pull-right visible-xs-block"><span class="glyphicon glyphicon-plus"></span></a>
+      <button ng-show="autoupdate" ng-click="stopAutoupdate()" class="btn btn-success pull-right active" style="margin-right: 10px;"><span class="glyphicon glyphicon-refresh"></span></a>
+      <button ng-show="!autoupdate" ng-click="startAutoupdate()" class="btn btn-default pull-right" style="margin-right: 10px;"><span class="glyphicon glyphicon-refresh"></span></a>
     </h3>
       <table class="col-xs-12 table table-striped">
         <thead class="hidden-xs">
@@ -18,7 +21,7 @@
         <tbody>
           <tr class="hidden-xs">
             <td class="text-center" style="vertical-align:middle;"><span class="glyphicon glyphicon-asterisk"></span></td>
-            <td><input type="text" ng-model="newingredient" typeahead="ingredient as ingredient.name.de for ingredient in GetIngredients($viewValue)" typeahead-editable="false" typeahead-template-url="partials/ingredients.typeahead.tpl.html" class="form-control" placeholder="Shopitem..."></td>
+            <td><input type="text" ng-model="newingredient" uib-typeahead="ingredient as ingredient.name.de for ingredient in GetIngredients($viewValue)" typeahead-editable="false" typeahead-template-url="partials/ingredients.typeahead.tpl.html" class="form-control" placeholder="Shopitem..."></td>
             <td class="hidden-xs"><input type="number" ng-model="newamount" class="form-control" style="width: 70px;"></td>
             <td class="hidden-xs"><select ng-options="unit._id as unit.name.de for unit in units" ng-model="newunit" class="form-control" placeholder="Unit..."></select></td>
             <td class="hidden-sm hidden-md hidden-lg"></td>

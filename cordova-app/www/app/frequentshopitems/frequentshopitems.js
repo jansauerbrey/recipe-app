@@ -15,7 +15,7 @@ angular.module('app.frequentshopitems', ['ui.router'])
 
 // Frequentshopitems
 
-    .controller('FrequentshopitemsController', ['$scope', '$stateParams', '$modal', 'Frequentshopitems', 'Shopitems', 'Units', '$state', '$filter', function ($scope, $stateParams, $modal, Frequentshopitems, Shopitems, Units, $state, $filter) {
+    .controller('FrequentshopitemsController', ['$scope', '$stateParams', '$uibModal', 'Frequentshopitems', 'Shopitems', 'Units', '$state', '$filter', function ($scope, $stateParams, $uibModal, Frequentshopitems, Shopitems, Units, $state, $filter) {
 
       $scope.alerts = [];
       $scope.loading = true;
@@ -38,7 +38,7 @@ angular.module('app.frequentshopitems', ['ui.router'])
       }
 
       $scope.modalFrequentshopitemAdd = function(ingredient) {
-        var modalAddFrequentshopitem = $modal.open({
+        var modalAddFrequentshopitem = $uibModal.open({
           animation: true,
           templateUrl: 'partials/frequentshopitems.modal.add.tpl.html',
           controller: 'ModalFrequentshopitemAddController',
@@ -61,7 +61,7 @@ angular.module('app.frequentshopitems', ['ui.router'])
 
 
       $scope.modalShopitemAdd = function() {
-        var modalAddShopitem = $modal.open({
+        var modalAddShopitem = $uibModal.open({
           animation: true,
           templateUrl: 'partials/shopitems.modal.add.tpl.html',
           controller: 'ModalShopitemAddController',

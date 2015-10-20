@@ -21,7 +21,7 @@
                 <input type="number" ng-model="newfactor" class="form-control" placeholder="# Persons" style="max-width: 120px;">
               </td>
               <td>
-                <input type="text" ng-model="newrecipe" typeahead="recipe as recipe.name for recipe in GetRecipes($viewValue)" typeahead-template-url="partials/recipes.typeahead.tpl.html" typeahead-editable="false" class="form-control" placeholder="Add Recipe...">
+                <input type="text" ng-model="newrecipe" uib-typeahead="recipe as recipe.name for recipe in GetRecipes($viewValue)" typeahead-template-url="partials/recipes.typeahead.tpl.html" typeahead-editable="false" class="form-control" placeholder="Add Recipe...">
               </td>
               <td>
                 <a class="btn btn-primary pull-right" ng-click="addRecipe()" role="button">add</a>

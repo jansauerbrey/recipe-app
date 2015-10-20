@@ -20,8 +20,8 @@
       <li ng-repeat="state in states | filter: {requiresLogin: false, panelright: false}" ng-class="{active: $state.is(state.name)}" ng-show="determineVisibility(state.requiredPermissions)">
         <a ui-sref="{{state.name}}">{{ state.label }}</a>
       </li>
-      <li class="hidden-xs hidden-sm" dropdown is-open="othersIsOpen">
-      <a class="dropdown-toggle" ui-sref="/" dropdown-toggle ng-show="determineVisibility('Admin')">Admin <span class="caret"></span></a>
+      <li class="hidden-xs hidden-sm" uib-dropdown is-open="othersIsOpen">
+      <a class="dropdown-toggle" ui-sref="/" uib-dropdown-toggle ng-show="determineVisibility('Admin')">Admin <span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">
           <li ng-repeat="state in states | filter: {requiredPermissions: 'Admin', panelright: false}" ng-class="{active: $state.is(state.name)}" ng-show="determineVisibility(state.requiredPermissions)">
             <a ui-sref="{{state.name}}">{{ state.label }}</a>

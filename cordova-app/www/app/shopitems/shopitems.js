@@ -6,8 +6,8 @@ angular.module('app.shopitems', ['ui.router'])
 
         .factory('Shopitems', ['$resource', 'BASE_URI', function($resource, BASE_URI){
           return $resource(BASE_URI+'api/shopitems/:id', null, {
-            'update': { method:'PUT' }
-          });
+	    'update': { method:'PUT' }
+	  });
         }])
 
 //---------------
@@ -17,7 +17,10 @@ angular.module('app.shopitems', ['ui.router'])
 
 // Shopitems
 
-    .controller('ShopitemsController', ['$scope', '$stateParams', '$modal', 'UserService', 'Shopitems', 'TAIngredients', 'Units', '$state', '$filter', function ($scope, $stateParams, $modal, UserService, Shopitems, TAIngredients, Units, $state, $filter) {
+    .controller('ShopitemsController', ['$scope', '$stateParams', '$uibModal', 'UserService', 'Shopitems', 'TAIngredients', 'Units', '$state', '$filter', '$timeout', function ($scope, $stateParams, $uibModal, UserService, Shopitems, TAIngredients, Units, $state, $filter, $timeout) {
+
+      $scope.autoupdate = true;
+      $scope.alerts = [];
 
       $scope.user = UserService.getCurrentLoginUser();
       containsObj = function(array, obj) {
@@ -31,32 +34,61 @@ angular.module('app.shopitems', ['ui.router'])
 
       $scope.loading = true;
 
-      Shopitems.query(function(response) {
+
+      $scope.retrieveShopitems = function(){
+	Shopitems.query(function(response) {
         $scope.loading = false;
         
-        var uniqueIngredients = [];
-        var uniqueIngredientsTemp = [];
-        for(i=0;i<response.length;i++){
-          if ( response[i].ingredient ) {
-            var order = $scope.user.settings.categoryOrder.indexOf(response[i].ingredient.category) >= 0 ? $scope.user.settings.categoryOrder.indexOf(response[i].ingredient.category) : 99999;
-          } else {
-            var order = 99999;
-          }
-          var index = containsObj(uniqueIngredientsTemp, {ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed});
-          if ( index === false) {
-            uniqueIngredientsTemp.push({ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed});
-            var obj = {ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed};
-            obj.details = [response[i]];
-            obj.amount = response[i].amount;
-            uniqueIngredients.push(obj);
-          }
-          else {
-            uniqueIngredients[index].details.push(response[i]);
-            uniqueIngredients[index].amount = response[i].amount + uniqueIngredients[index].amount;
-          }
-        }
-        $scope.shopitems = uniqueIngredients;
-      });
+	  var uniqueIngredients = [];
+	  var uniqueIngredientsTemp = [];
+	  for(i=0;i<response.length;i++){
+	    if ( response[i].ingredient ) {
+	      var order = $scope.user.settings.categoryOrder.indexOf(response[i].ingredient.category) >= 0 ? $scope.user.settings.categoryOrder.indexOf(response[i].ingredient.category) : 99999;
+	    } else {
+	      var order = 99999;
+	    }
+	    var index = containsObj(uniqueIngredientsTemp, {ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed});
+	    if ( index === false) {
+	      uniqueIngredientsTemp.push({ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed});
+	      var obj = {ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed};
+	      obj.details = [response[i]];
+	      obj.amount = response[i].amount;
+	      uniqueIngredients.push(obj);
+	    }
+	    else {
+	      uniqueIngredients[index].details.push(response[i]);
+	      uniqueIngredients[index].amount = response[i].amount + uniqueIngredients[index].amount;
+	    }
+	  }
+	  $scope.shopitems = uniqueIngredients;
+        });
+      };
+
+      $scope.retrieveShopitems();
+
+      var timer;
+      $scope.startAutoupdate = function() {
+	$scope.autoupdate = true;
+	$scope.retrieveShopitems();
+	timer =  $timeout(function () {
+          $scope.startAutoupdate();
+        }, 5000);
+	$scope.$on( "$destroy",
+	  function( event ) {
+	    $timeout.cancel( timer );
+	  }
+	);
+      };
+
+      $scope.stopAutoupdate = function(){
+	$scope.autoupdate = false;
+	$timeout.cancel(timer);
+      };
+
+      if ($scope.autoupdate === true){
+	$scope.startAutoupdate();
+      }
+
 
       $scope.units = Units.query();
 
@@ -90,28 +122,50 @@ angular.module('app.shopitems', ['ui.router'])
         $scope.newamount = "";
       }
 
-      $scope.removeItem = function(item){
-        $scope.items.splice($scope.items.indexOf(item),1);
-      }
-
-
       $scope.remove = function(item){
-        for(i=0;i<item.details.length;i++){
-          Shopitems.remove({id: item.details[i]._id});
+        for(var i=item.details.length-1;i>=0;i--){
+          Shopitems.remove({id: item.details[i]._id}, null, function(success){
+		var ind = $scope.shopitems.indexOf(item);
+		var index;
+		for(var j=0;j<$scope.shopitems[ind].details.length;j++){
+		  if ($scope.shopitems[ind].details[j]._id == success._id){
+		    index = j;
+		  }
+		}
+              $scope.shopitems[ind].details.splice(index, 1);
+		if ($scope.shopitems[ind].details.length === 0) {
+		  $scope.shopitems.splice(ind, 1);
+		}
+	    }, function(err){
+	      $scope.alerts.push({type: 'danger', msg: 'Network connection error'});
+	    }
+	  );
         }
-        $scope.shopitems.splice($scope.shopitems.indexOf(item), 1);
+	//$scope.shopitems.splice($scope.shopitems.indexOf(item), 1);
       }
 
       $scope.complete = function(item){
-        for(i=0;i<item.details.length;i++){
-          $scope.shopitems[$scope.shopitems.indexOf(item)].details[i].completed = item.completed;
-          Shopitems.update({id: item.details[i]._id}, item.details[i]);
+        for(var i=item.details.length-1;i>=0;i--){
+	  var tempObj = $scope.shopitems[$scope.shopitems.indexOf(item)].details[i];
+	  tempObj.completed = item.completed;
+          Shopitems.update({id: item.details[i]._id}, tempObj, function(success){
+		var ind = $scope.shopitems.indexOf(item);
+		var index;
+		for(var j=0;j<$scope.shopitems[ind].details.length;j++){
+		  if ($scope.shopitems[ind].details[j]._id == success._id){
+		    index = j;
+		  }
+		}
+              $scope.shopitems[$scope.shopitems.indexOf(item)].details[index].completed = item.completed;
+	    }, function(err){
+	      $scope.alerts.push({type: 'danger', msg: 'Network connection error'});
+	    }
+	  );
         }
       }
 
-
       $scope.modalShopitemAdd = function() {
-        var modalAddShopitem = $modal.open({
+        var modalAddShopitem = $uibModal.open({
           animation: true,
           templateUrl: 'partials/shopitems.modal.add.tpl.html',
           controller: 'ModalShopitemAddController',
@@ -127,6 +181,10 @@ angular.module('app.shopitems', ['ui.router'])
           $scope.addShopitem(response);
         });
 
+      }
+
+      $scope.closeAlert = function(index){
+        $scope.alerts.splice(index, 1);
       }
 
     }])

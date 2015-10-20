@@ -81,7 +81,7 @@ angular.module('app.recipes', ['ui.router'])
 
     }])
 
-    .controller('RecipeDetailCtrl', ['$scope', '$stateParams', '$modal', 'UserService', 'Recipes', 'Tags', 'Ingredients', 'Units', '$state', 'TAIngredients', 'TATags', function ($scope, $stateParams, $modal, UserService, Recipes, Tags, Ingredients, Units, $state, TAIngredients, TATags) {
+    .controller('RecipeDetailCtrl', ['$scope', '$stateParams', '$uibModal', 'UserService', 'Recipes', 'Tags', 'Ingredients', 'Units', '$state', 'TAIngredients', 'TATags', function ($scope, $stateParams, $uibModal, UserService, Recipes, Tags, Ingredients, Units, $state, TAIngredients, TATags) {
       $scope.allowEdit = false;
       $scope.alerts = [];
       $scope.submitted = false;
@@ -193,7 +193,7 @@ angular.module('app.recipes', ['ui.router'])
       }
 
       $scope.scheduleAdd = function() {
-        var modalAddSchedule = $modal.open({
+        var modalAddSchedule = $uibModal.open({
           animation: true,
           templateUrl: 'partials/recipes.scheduleadd.tpl.html',
           controller: 'ModalScheduleAddController',
