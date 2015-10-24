@@ -55,6 +55,10 @@
               <td>{{recipe.protein}} g</td>
             </tr>
             <tr>
+              <th>Dish type:</th>
+              <td>{{recipe.dishType.name_translated}}</td>
+            </tr>
+            <tr>
               <th>Tags:</th>
               <td><font size="3"><span ng-repeat="tag in recipe.tags" class="label label-primary" style="margin: 2px; display: inline-block;">{{tag.text}}</span></font></td>
             </tr>
@@ -137,6 +141,12 @@
       <div class="form-group col-xs-12 col-sm-6 col-md-3" ng-class="{ 'has-error': recipeForm.protein.$invalid && submitted }">
         <label class="control-label">Protein / 100g:</label>
         <input type="text" name="protein" ng-model="recipe.protein" ng-required="false" class="form-control" placeholder="Protein...">
+      </div>
+      <div class="form-group col-xs-12" ng-class="{ 'has-error': recipeForm.dishType.$invalid && submitted }">
+        <label class="control-label">Dish type:</label>
+        <select ng-show="recipe.language==='en'" ng-options="dishtype._id as dishtype.name.en for dishtype in dishtypes | orderBy: 'name.en'" ng-model="recipe.dishType._id" ng-required="true" class="form-control" placeholder="Dish type"></select>
+        <select ng-show="recipe.language==='de'" ng-options="dishtype._id as dishtype.name.de for dishtype in dishtypes | orderBy: 'name.de'" ng-model="recipe.dishType._id" ng-required="true" class="form-control" placeholder="Dish type"></select>
+        <select ng-show="recipe.language==='fi'" ng-options="dishtype._id as dishtype.name.fi for dishtype in dishtypes | orderBy: 'name.fi'" ng-model="recipe.dishType._id" ng-required="true" class="form-control" placeholder="Dish type"></select>
       </div>
       <div class="form-group col-xs-12">
         <label class="control-label">Tags:</label>

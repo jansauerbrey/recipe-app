@@ -34,41 +34,37 @@ angular.module('app.recipes', ['ui.router'])
 
 // Recipes
 
-    .controller('RecipesController', ['$scope', 'Recipes', 'Tags', 'UserService', function ($scope, Recipes, Tags, UserService) {
+    .controller('RecipeDishTypeController', ['$scope', 'recipes', 'user', function ($scope, recipes, user) {
+      $scope.user = user;
+      $scope.recipes = recipes;
+    }])
+
+
+    .controller('RecipeListController', ['$scope', '$stateParams', 'recipes', 'tags', 'user', function ($scope, $stateParams, recipes, tags, user) {
+      $scope.user = user;
+      $scope.recipes = recipes;
+      $scope.tags = tags;
+
+      // parameters for search
       $scope.search = {};
-      $scope.editing = [];
       $scope.tagfilter = {};
-      $scope.loading = true;
       $scope.hideAdvSearch = true;
-      $scope.status = {};
-      $scope.status.tags = true;
 
-      $scope.user = UserService.getCurrentLoginUser();
-
-      $scope.tags = Tags.query();
-
-      $scope.recipes = Recipes.query(function(response) {
-        $scope.loading = false;
-        for(i=0;i<response.length;i++){
-          var delta = Math.abs(new Date() - new Date(response[i].updated_at));
-          response[i].new_recipe = (delta < 864000000) ? true : false;
-        }
-        return response;
-      });
-
+      // function for author search filtering
       $scope.disableAndClearAuthor = function() {
         if ($scope.search.author._id !== undefined) {
           $scope.search.author.fullname = undefined;
         }
       }
 
+      // function for tag search filtering
       $scope.filterByTags = function(recipe) {
         var match = true;
         angular.forEach($scope.tagfilter, function(value, key) {
           if (value === true){
             var subMatch = false;
             for(i=0;i<recipe.tags.length;i++){
-              if(key ===recipe.tags[i].text){
+              if(key === recipe.tags[i].text){
                 subMatch =true;
                 break;
               }
@@ -79,9 +75,10 @@ angular.module('app.recipes', ['ui.router'])
         return match;
       }
 
+
     }])
 
-    .controller('RecipeDetailCtrl', ['$scope', '$stateParams', '$uibModal', 'UserService', 'Recipes', 'Tags', 'Ingredients', 'Units', '$state', 'TAIngredients', 'TATags', function ($scope, $stateParams, $uibModal, UserService, Recipes, Tags, Ingredients, Units, $state, TAIngredients, TATags) {
+    .controller('RecipeDetailCtrl', ['$rootScope', '$scope', '$stateParams', '$uibModal', 'UserService', 'Recipes', 'Tags', 'Ingredients', 'Units', 'DishTypes', '$state', 'TAIngredients', 'TATags', function ($rootScope, $scope, $stateParams, $uibModal, UserService, Recipes, Tags, Ingredients, Units, DishTypes, $state, TAIngredients, TATags) {
       $scope.allowEdit = false;
       $scope.alerts = [];
       $scope.submitted = false;
@@ -101,6 +98,7 @@ angular.module('app.recipes', ['ui.router'])
       }
 
       $scope.units = Units.query();
+      $scope.dishtypes = DishTypes.query();
 
       $scope.onTypeaheadSelect = function ($item, $model, $label) {
         if(!$scope.recipe.ingredients.filter(function(n){ return n.ingredient == '' }).length) {
@@ -142,7 +140,7 @@ angular.module('app.recipes', ['ui.router'])
           }
         }
         Recipes.update({id: $scope.recipe._id}, $scope.recipe, function(){
-          $state.go('user.recipes.list');
+          $state.go($rootScope.previousState.name, $rootScope.previousStateParams);
         });
       }
 
@@ -157,7 +155,7 @@ angular.module('app.recipes', ['ui.router'])
 
       $scope.remove = function(){
         Recipes.remove({id: $scope.recipe._id}, function(){
-          $state.go('user.recipes.list');
+          $state.go($rootScope.previousState.name, $rootScope.previousStateParams);
         });
       }
 
@@ -182,7 +180,7 @@ angular.module('app.recipes', ['ui.router'])
         }
         $scope.recipe._id = null;
         $scope.recipe.$save(function(){
-          $state.go('user.recipes.list');
+          $state.go($rootScope.previousState.name, $rootScope.previousStateParams);
         });
       }
 
@@ -258,19 +256,57 @@ angular.module('app.recipes', ['ui.router'])
 		.state('user.recipes', {
 			abstract: true,
 			url: "/recipes",
-			template: "<ui-view />",
+			template: "<ui-view />"
 		})
-      		.state('user.recipes.list', {
-			url: '/list',
-        		templateUrl: 'partials/recipes.tpl.html',
-        		controller: 'RecipesController',
+      		.state('user.recipes.dishtypes', {
+			url: '/dishtypes',
+        		templateUrl: 'partials/recipes.dishtypes.tpl.html',
+        		controller: 'RecipeDishTypeController',
+			resolve: {
+				recipes: function(Recipes){
+					return Recipes.query();
+				},
+				user: function(UserService){
+					return UserService.getCurrentLoginUser();
+				}
+
+			},
 			data: {
 	        		name: 'Recipes',
         			icon: 'glyphicon glyphicon-cutlery'
 			}
       		})
+      		.state('user.recipes.list', {
+			url: '/list',
+			params: {
+				dishType: undefined,
+				author: undefined,
+				new_recipe: undefined
+			},
+        		templateUrl: 'partials/recipes.list.tpl.html',
+        		controller: 'RecipeListController',
+			resolve: {
+				recipes: ['Recipes', '$stateParams', function(Recipes, $stateParams){
+					var searchDate = new Date();
+					searchDate = $stateParams.new_recipe ? searchDate.setDate(searchDate.getDate() - 14) : new Date(2015,0,0);
+					var query = {'author': $stateParams.author, 'updated_at': searchDate, 'dishType': $stateParams.dishType};
+					return Recipes.query(query);
+				}],
+				user: function(UserService){
+					return UserService.getCurrentLoginUser();
+				},
+				tags: function(Tags){
+					return Tags.query();
+				}
+			}
+      		})
+      		.state('user.recipes.view', {
+			url: '/:id/view',
+        		templateUrl: 'partials/recipes.view.tpl.html',
+        		controller: 'RecipeDetailCtrl'
+     		})
       		.state('user.recipes.edit', {
-			url: '/edit/:id',
+			url: '/:id/edit',
         		templateUrl: 'partials/recipes.edit.tpl.html',
         		controller: 'RecipeDetailCtrl'
      		})

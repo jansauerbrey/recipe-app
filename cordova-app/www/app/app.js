@@ -1,4 +1,4 @@
-angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequentshopitems', 'app.shopitems', 'app.cooking', 'app.units', 'app.ingredients', 'app.admin', 'ui.router', 'ngAnimate', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui.checkbox', 'ngTagsInput', 'ngAside'])
+angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequentshopitems', 'app.shopitems', 'app.cooking', 'app.units', 'app.ingredients', 'app.dishtypes', 'app.admin', 'ui.router', 'ngAnimate', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui.checkbox', 'ngTagsInput', 'angular.filter', 'ngAside'])
 
 //---------------
 // Constants
@@ -200,6 +200,8 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequent
 	$rootScope.$stateParams = $stateParams;
 
 	$rootScope.$on("$stateChangeStart", function(event, toState, toStateParams, fromState, fromStateParams) {
+            $rootScope.previousState = fromState;
+            $rootScope.previousStateParams = fromStateParams;
             var authorised;
             if (UserService.getCurrentLoginUser() !== undefined) {
 		$http.get(BASE_URI+'api/user/check');

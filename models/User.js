@@ -11,6 +11,8 @@ var UserSchema = new mongoose.Schema({
   is_admin: { type: Boolean, default: false },
   is_activated: { type: Boolean, default: false },
   settings: {
+    preferredLanguage: String,
+    spokenLanguages: [String],
     categoryOrder: [String]
   },
   autologin: { type: Boolean, default: false },

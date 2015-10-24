@@ -13,6 +13,7 @@ var RecipeSchema = new mongoose.Schema({
   totalTime: Number,
   instructions: String,
   yield: Number,
+  dishType: {type: mongoose.Schema.Types.ObjectId, ref: 'DishType'},
   tags: [{type: mongoose.Schema.Types.ObjectId, ref: 'Tag'}],
   ingredients: [{
       ingredient: {type: mongoose.Schema.Types.ObjectId, ref: 'Ingredient'},

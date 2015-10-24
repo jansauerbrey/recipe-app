@@ -48,6 +48,13 @@
         <label class="control-label">Protein / 100g:</label>
         <input type="text" name="protein" ng-model="recipe.protein" ng-required="false" class="form-control" placeholder="Protein...">
       </div>
+      <div class="col-xs-12"><uib-alert class="col-xs-12" ng-show="recipe.language=== undefined">Please select the recipe language first.</uib-alert></div>
+      <div class="form-group col-xs-12" ng-class="{ 'has-error': recipeForm.dishType.$invalid && submitted }">
+        <label class="control-label">Dish type:</label>
+        <select ng-show="recipe.language==='en'" ng-options="dishtype._id as dishtype.name.en for dishtype in dishtypes | orderBy: 'name.en'" ng-model="recipe.dishType" ng-required="true" class="form-control" placeholder="Dish type"></select>
+        <select ng-show="recipe.language==='de'" ng-options="dishtype._id as dishtype.name.de for dishtype in dishtypes | orderBy: 'name.de'" ng-model="recipe.dishType" ng-required="true" class="form-control" placeholder="Dish type"></select>
+        <select ng-show="recipe.language==='fi'" ng-options="dishtype._id as dishtype.name.fi for dishtype in dishtypes | orderBy: 'name.fi'" ng-model="recipe.dishType" ng-required="true" class="form-control" placeholder="Dish type"></select>
+      </div>
       <div class="form-group col-xs-12" ng-class="{ 'has-error': recipeForm.tagField.$invalid && submitted }">
         <label class="control-label">Tags:</label>
         <tags-input type="text" name="tagField" ng-model="recipe.tags" key-property="_id" display-property="text" on-tag-adding="addTag($tag)" placeholder="Tags..."><auto-complete source="loadTags($query)"></auto-complete></tags-input>

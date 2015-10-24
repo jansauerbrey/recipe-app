@@ -8,6 +8,7 @@ var auth = require('./auth/auth');
 
 var admin = require('./routes/admin');
 var user = require('./routes/user');
+var dishtypes = require('./routes/dishtypes');
 var units = require('./routes/units');
 var ingredients = require('./routes/ingredients');
 var categories = require('./routes/categories');
@@ -58,6 +59,7 @@ app.all('/api/*', function(req, res, next) {
 
 app.use('/api/admin', admin);
 app.use('/api/user', user);
+app.use('/api/dishtypes', dishtypes);
 app.use('/api/units', units);
 app.use('/api/ingredients', ingredients);
 app.use('/api/categories', categories);
