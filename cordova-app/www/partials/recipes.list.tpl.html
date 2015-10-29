@@ -85,7 +85,7 @@
     <div ng-show="loading" class="text-center"><i class="fa fa-spinner fa-spin fa-3x"></i></div>
     <div class="row" style="margin-top: 20px;">
       <div ng-repeat="recipe in filtered=(recipes | filter: search | filter: filterByTags) | orderBy: 'name'" class="col-xs-12 col-sm-6 col-md-4 col-lg-4">
-        <a ui-sref="user.recipes.view({id: recipe._id})">
+        <a ui-sref="user.recipes.details.view({id: recipe._id})">
           <div class="thumbnail"  style="height: 140px;">
             <img ng-src=""></img>
             <div class="caption">

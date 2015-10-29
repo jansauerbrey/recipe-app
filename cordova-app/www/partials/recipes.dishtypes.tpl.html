@@ -9,8 +9,8 @@
     <div class="row" style="margin-top: 20px;">
       <div ng-repeat="(key, value) in recipes | filterBy: ['author']: user._id | groupBy: 'author'" class="col-xs-6 col-sm-4 col-md-3 col-lg-3">
         <a ui-sref="user.recipes.list({author: value[0].author})">
-          <div class="thumbnail" style="height: 300px;">
-            <img ng-src=""></img>
+          <div class="thumbnail thumbnail-fixed">
+            <img ng-src="http://kelleighratzlaff.com/wp-content/uploads/2012/01/RecipeBook1.jpg" class="thumbnail-img"></img>
             <div class="caption">
 	      <h3>My Recipes</h3>
 	      <p class="text-muted">{{value.length}} recipes</p>
@@ -20,8 +20,8 @@
       </div>
       <div ng-repeat="(key, value) in filtered=(recipes | filter: {'new_recipe': true}) | groupBy: 'new_recipe'" class="col-xs-6 col-sm-4 col-md-3 col-lg-3">
         <a ui-sref="user.recipes.list({new_recipe: true})">
-          <div class="thumbnail" style="height: 300px;">
-            <img ng-src=""></img>
+          <div class="thumbnail thumbnail-fixed">
+            <img ng-src="http://www.raeth.ch/new_02.png" class="thumbnail-img"></img>
 	    <div class="caption">
 	      <h3>New Recipes</h3>
 	      <p class="text-muted">{{value.length}} recipes</p>
@@ -31,8 +31,8 @@
       </div>
       <div ng-repeat="(key, value) in recipes | filterBy: ['author']: user._id | groupBy: 'author'" class="col-xs-6 col-sm-4 col-md-3 col-lg-3">
         <a ui-sref="user.recipes.list({author: value[0].author})">
-          <div class="thumbnail" style="height: 300px;">
-            <img ng-src=""></img>
+          <div class="thumbnail thumbnail-fixed">
+            <img ng-src="http://freshideastudio.com/wp-content/uploads/2013/08/Favorite-RECIPES-feature.jpg" class="thumbnail-img"></img>
             <div class="caption">
 	      <h3>Favorite Recipes</h3>
 	      <p class="text-muted">{{value.length}} recipes</p>
@@ -42,8 +42,8 @@
       </div>
       <div ng-repeat="(key, value) in recipes | orderBy: 'dishType.order' | groupBy: 'dishType.name_translated'" class="col-xs-6 col-sm-4 col-md-3 col-lg-3">
         <a ui-sref="user.recipes.list({dishType: value[0].dishType._id})">
-          <div class="thumbnail" style="height: 300px;">
-            <img ng-src="{{value[0].dishType.imagePath}}"></img>
+          <div class="thumbnail thumbnail-fixed">
+            <img ng-src="{{value[0].dishType.imagePath}}" class="thumbnail-img"></img>
 	    <div class="caption">
 	      <h3>{{key}}</h3>
 	      <p class="text-muted">{{value.length}} recipes</p>
@@ -53,8 +53,8 @@
       </div>
       <div class="col-xs-6 col-sm-4 col-md-3 col-lg-3">
         <a ui-sref="user.recipes.list">
-          <div class="thumbnail" style="height: 300px;">
-            <img ng-src=""></img>
+          <div class="thumbnail thumbnail-fixed">
+            <img ng-src="http://www.todaysbuffet.com/wp-content/uploads/2014/01/buffet-lunch-img-8.jpg" class="thumbnail-img"></img>
             <div class="caption">
 	      <h3>All Recipes</h3>
 	      <p class="text-muted">{{recipes.length}} recipes</p>

@@ -60,11 +60,13 @@ router.get('/:id', auth.verify, function(req, res, next) {
 
 /* PUT /recipes/:id */
 router.put('/:id', auth.verify, function(req, res, next) {
+  var preferredLanguage = (req._user.settings && req._user.settings.preferredLanguage) ? req._user.settings.preferredLanguage : 'en';
   Recipe.findById(req.params.id).populate('author', 'fullname').exec( function (err, recipe) {
     if (err) return next(err);
     if (req._user.id == recipe.author._id || req._user.is_admin === true) {
-      Recipe.findByIdAndUpdate(req.params.id, req.body, function (err, recipe) {
+      Recipe.findByIdAndUpdate(req.params.id, req.body, { 'new': true}).populate(['tags', 'ingredients.ingredient', 'ingredients.unit']).populate('author', 'fullname').populate('dishType', 'name.'+preferredLanguage).lean().exec( function (err, recipe) {
         if (err) return next(err);
+        recipe.dishType.name_translated = recipe.dishType.name[preferredLanguage];
         res.json(recipe);
       });
     } else {
