@@ -250,7 +250,7 @@ angular.module('app.recipes', ['ui.router'])
 		.state('user.recipes', {
 			abstract: true,
 			url: "/recipes",
-			template: "<ui-view />"
+			template: '<ui-view  class="anim-in-out anim-fade" data-anim-speed="1500"/>'
 		})
       		.state('user.recipes.dishtypes', {
 			url: '/dishtypes',
@@ -297,7 +297,7 @@ angular.module('app.recipes', ['ui.router'])
 		.state('user.recipes.details', {
 			abstract: true,
 			url: "/details/:id",
-			template: "<ui-view />",
+			template: '<ui-view  class="anim-in-out anim-fade" data-anim-speed="1500"/>',
 			resolve: {
 				recipe: ['Recipes', '$stateParams', function(Recipes, $stateParams){
 					var recipe = Recipes.get({'id': $stateParams.id}, function(response) {

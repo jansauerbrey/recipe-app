@@ -1,4 +1,4 @@
-angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequentshopitems', 'app.shopitems', 'app.cooking', 'app.units', 'app.ingredients', 'app.dishtypes', 'app.admin', 'ui.router', 'ngAnimate', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui.checkbox', 'ngTagsInput', 'angular.filter', 'ngAside'])
+angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequentshopitems', 'app.shopitems', 'app.cooking', 'app.units', 'app.ingredients', 'app.dishtypes', 'app.admin', 'ui.router', 'ngAnimate', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui.checkbox', 'ngTagsInput', 'angular.filter', 'ngAside', 'anim-in-out'])
 
 //---------------
 // Constants
@@ -169,7 +169,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequent
 		})
 		.state('user', {
 			abstract: true,
-			template: "<ui-view />",
+			template: '<ui-view  class="anim-in-out anim-fade" data-anim-speed="1500"/>',
 			data: {
 				requiresLogin: true,
                  		requiredPermissions: ['User']
