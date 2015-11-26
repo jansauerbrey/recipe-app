@@ -50,7 +50,7 @@ router.post('/', auth.verify, function(req, res, next){
       outputStream.on('finish', function(){
         fs.unlinkSync(tempPath);
         console.log('Uploaded: ', fileName, size);
-        res.send('/api/upload/'+imageName);
+        res.send(imageName);
       });
     });
 

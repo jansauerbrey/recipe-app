@@ -87,7 +87,7 @@
       <div ng-repeat="recipe in filtered=(recipes | filter: search | filter: filterByTags) | orderBy: 'name'" class="col-xs-12 col-sm-6 col-md-4 col-lg-4">
         <a ui-sref="user.recipes.details.view({id: recipe._id})">
           <div class="thumbnail" style="min-height: 400px;">
-            <img ng-src="{{recipe.imagePath}}"></img>
+            <img ng-src="http://www.rezept-planer.de/api/upload/{{recipe.imagePath}}"></img>
             <div class="caption">
 	      <p class="text-muted text-uppercase"><small>{{recipe.author.fullname}}</small></p>
 	      <h4 style="height: 40px;">{{recipe.name | limitTo: 50}}</h4>
