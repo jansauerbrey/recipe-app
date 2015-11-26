@@ -78,7 +78,8 @@ angular.module('app.recipes', ['ui.router'])
 
     }])
 
-    .controller('RecipeDetailCtrl', ['$rootScope', '$scope', '$stateParams', '$uibModal', 'user', 'recipe', 'Recipes', 'Tags', 'Ingredients', 'units', 'dishtypes', '$state', 'TAIngredients', 'TATags', function ($rootScope, $scope, $stateParams, $uibModal, user, recipe, Recipes, Tags, Ingredients, units, dishtypes, $state, TAIngredients, TATags) {
+    .controller('RecipeDetailCtrl', ['$rootScope', '$scope', '$stateParams', '$uibModal', 'user', 'recipe', 'Recipes', 'Tags', 'Ingredients', 'units', 'dishtypes', '$state', 'TAIngredients', 'TATags', 'isCordova', function ($rootScope, $scope, $stateParams, $uibModal, user, recipe, Recipes, Tags, Ingredients, units, dishtypes, $state, TAIngredients, TATags, isCordova) {
+	$scope.isCordova = isCordova;
 	$scope.alerts = [];
 	$scope.submitted = false;
 

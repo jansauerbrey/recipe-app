@@ -41,18 +41,28 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequent
 
 // File Upload
 
-		.factory('httpPostFactory', [ '$http', 'BASE_URI', function ($http, BASE_URI) {
-		    return function (file, data, callback) {
-		        $http({
-		            url: BASE_URI+file,
-		            method: "POST",
-		            data: data,
-		            headers: {'Content-Type': undefined}
-		        }).success(function (response) {
-		            callback(response);
-		        });
-		    };
-		}])
+	.factory('httpPostFactory', [ '$http', 'BASE_URI', function ($http, BASE_URI) {
+	    return function (file, data, callback) {
+	        $http({
+	            url: BASE_URI+file,
+	            method: "POST",
+	            data: data,
+	            headers: {'Content-Type': undefined}
+	        }).success(function (response) {
+	            callback(response);
+	        });
+	    };
+	}])
+
+
+	.factory('isCordova', function () {
+		var app = document.URL.indexOf( 'http://' ) === -1 && document.URL.indexOf( 'https://' ) === -1;
+		if ( app ) {
+			return true; // PhoneGap application
+		} else {
+			return false; // Web page
+		}
+	})
 
 
 //---------------
@@ -158,24 +168,44 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequent
     }])
     
     
-		.directive('ngImageUpload', function (httpPostFactory) {
-		    return {
-		        restrict: 'A',
-		        scope: true,
-		        link: function (scope, element, attr) {
-		
-		            element.bind('change', function () {
-		                var formData = new FormData();
-		                formData.append('file', element[0].files[0]);
-		                httpPostFactory('api/upload', formData, function (callback) {
-		                    console.log(callback);
-		                    scope.recipe.imagePath = callback;
-		                });
-		            });
-		
-		        }
-		    };
-		})
+	.directive('ngImageUpload', function (httpPostFactory) {
+	    return {
+	        restrict: 'A',
+	        scope: true,
+	        link: function (scope, element, attr) {
+	
+	            element.bind('change', function () {
+	                var formData = new FormData();
+	                formData.append('file', element[0].files[0]);
+	                httpPostFactory('api/upload', formData, function (callback) {
+	                    console.log(callback);
+	                    scope.recipe.imagePath = callback;
+	                });
+	            });
+	
+	        }
+	    };
+	})
+
+	.directive('cameraButton', function(httpPostFactory) {
+	   return {
+	      restrict: 'A',
+	      scope: true,
+	      link: function(scope, element, attrs) {
+		 element.bind('click', function() {
+		    navigator.camera.getPicture(function (imageURI) {
+		    		var formData = new FormData();
+	            		formData.append('file', element[0].files[0]);
+	               		httpPostFactory('api/upload', formData, function (callback) {
+	                    		scope.recipe.imagePath = callback;
+	               		});
+		    	}, function (err) {},
+		    	{ quality: 50, destinationType: Camera.DestinationType.FILE_URI }
+		    );
+		 });
+	      }
+	   };
+	})
 		
 //---------------
 // Routes
