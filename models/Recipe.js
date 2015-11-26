@@ -14,6 +14,7 @@ var RecipeSchema = new mongoose.Schema({
   instructions: String,
   yield: Number,
   dishType: {type: mongoose.Schema.Types.ObjectId, ref: 'DishType'},
+  imagePath: String,
   tags: [{type: mongoose.Schema.Types.ObjectId, ref: 'Tag'}],
   ingredients: [{
       ingredient: {type: mongoose.Schema.Types.ObjectId, ref: 'Ingredient'},

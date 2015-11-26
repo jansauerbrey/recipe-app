@@ -1,6 +1,7 @@
 <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" dismiss-on-timeout="5000" close="closeAlert($index)">{{alert.msg}}</uib-alert>
 <div class="col-xs-12 col-sm-5 thumbnail">
-	<img ng-src="img/menu2.jpg"></img>
+	<img ng-src="{{recipe.imagePath}}"></img>
+	<input ng-image-upload type="file" name="file">
 </div>
 <div class="col-xs-12 col-sm-7 padding-xs-off" style="padding-right: 0px;" >
 	<div ng-class="{ 'has-error': recipeForm.name.$invalid && submitted }">
