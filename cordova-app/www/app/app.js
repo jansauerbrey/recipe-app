@@ -194,11 +194,20 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequent
 	      link: function(scope, element, attrs) {
 		 element.bind('click', function() {
 		    navigator.camera.getPicture(function (imageURI) {
-		    		var formData = new FormData();
-	            		formData.append('file', element[0].files[0]);
-	               		httpPostFactory('api/upload', formData, function (callback) {
-	                    		scope.recipe.imagePath = callback;
-	               		});
+				window.resolveLocalFileSystemURL(imageURI, function(fileEntry) {
+         				fileEntry.file(function(file) {
+             					var reader = new FileReader();
+                				reader.onloadend = function(e) {
+                      					var imgBlob = new Blob([ this.result ], { type: "image/jpeg" } );
+					    		var formData = new FormData();
+				            		formData.append('file', imgBlob);
+				               		httpPostFactory('api/upload', formData, function (callback) {
+				                    		scope.recipe.imagePath = callback;
+				               		});
+						};
+                 				reader.readAsArrayBuffer(file);
+         				}, function(err){});
+    				}, function(err){});
 		    	}, function (err) {},
 		    	{ quality: 50, destinationType: Camera.DestinationType.FILE_URI }
 		    );

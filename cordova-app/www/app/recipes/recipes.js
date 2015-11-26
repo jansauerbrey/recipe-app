@@ -259,7 +259,7 @@ angular.module('app.recipes', ['ui.router'])
         		controller: 'RecipeDishTypeController',
 			resolve: {
 				recipes: function(Recipes){
-					return Recipes.query();
+					return Recipes.query().$promise;
 				},
 				user: function(UserService){
 					return UserService.getCurrentLoginUser();
@@ -285,13 +285,13 @@ angular.module('app.recipes', ['ui.router'])
 					var searchDate = new Date();
 					searchDate = $stateParams.new_recipe ? searchDate.setDate(searchDate.getDate() - 14) : new Date(2015,0,0);
 					var query = {'author': $stateParams.author, 'updated_at': searchDate, 'dishType': $stateParams.dishType};
-					return Recipes.query(query);
+					return Recipes.query(query).$promise;
 				}],
 				user: function(UserService){
 					return UserService.getCurrentLoginUser();
 				},
 				tags: function(Tags){
-					return Tags.query();
+					return Tags.query().$promise;
 				}
 			}
       		})
@@ -303,17 +303,17 @@ angular.module('app.recipes', ['ui.router'])
 				recipe: ['Recipes', '$stateParams', function(Recipes, $stateParams){
 					var recipe = Recipes.get({'id': $stateParams.id}, function(response) {
 						return response.ingredients.push({qty: '', unit: '', ingredient: ''});
-					});
+					}).$promise;
 					return recipe;
 				}],
 				user: function(UserService){
 					return UserService.getCurrentLoginUser();
 				},
 				units: function(Units){
-					return Units.query();
+					return Units.query().$promise;
 				},
 				dishtypes: function(DishTypes){
-					return DishTypes.query();
+					return DishTypes.query().$promise;
 				}
 			}
 		})
@@ -342,10 +342,10 @@ angular.module('app.recipes', ['ui.router'])
 					return UserService.getCurrentLoginUser();
 				},
 				units: function(Units){
-					return Units.query();
+					return Units.query().$promise;
 				},
 				dishtypes: function(DishTypes){
-					return DishTypes.query();
+					return DishTypes.query().$promise;
 				}
 			}
       		})

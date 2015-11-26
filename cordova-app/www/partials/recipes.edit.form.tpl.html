@@ -29,7 +29,7 @@
 		<select ng-show="recipe.language==='de'" ng-options="dishtype._id as dishtype.name.de for dishtype in dishtypes | orderBy: 'name.de'" ng-model="recipe.dishType._id" ng-required="true" class="form-control" placeholder="Dish type"></select>
 		<select ng-show="recipe.language==='fi'" ng-options="dishtype._id as dishtype.name.fi for dishtype in dishtypes | orderBy: 'name.fi'" ng-model="recipe.dishType._id" ng-required="true" class="form-control" placeholder="Dish type"></select>
 	</div>
-	<div>
+	<div ng-class="{ 'has-error': recipeForm.tags.$invalid && submitted }">
 		<label class="control-label">Tags:</label>
 		<tags-input type="text" ng-model="recipe.tags" key-property="_id" display-property="text" on-tag-adding="addTag($tag)" placeholder="Tags..."><auto-complete source="loadTags($query)"></auto-complete></tags-input>
 	</div>
