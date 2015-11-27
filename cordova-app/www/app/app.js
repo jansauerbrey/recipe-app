@@ -198,9 +198,9 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequent
          				fileEntry.file(function(file) {
              					var reader = new FileReader();
                 				reader.onloadend = function(e) {
-                      					var imgBlob = new Blob([ this.result ], { type: "image/jpeg" } );
+                      					var imgBlob = new Blob([ e.target.result ], { type: file.type } );
 					    		var formData = new FormData();
-				            		formData.append('file', imgBlob);
+				            		formData.append('file', imgBlob, "file.jpg");
 				               		httpPostFactory('api/upload', formData, function (callback) {
 				                    		scope.recipe.imagePath = callback;
 				               		});
