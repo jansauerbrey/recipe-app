@@ -17,7 +17,7 @@ angular.module('app.shopitems', ['ui.router'])
 
 // Shopitems
 
-    .controller('ShopitemsController', ['$scope', '$stateParams', '$uibModal', 'UserService', 'Shopitems', 'TAIngredients', 'Units', '$state', '$filter', '$timeout', function ($scope, $stateParams, $uibModal, UserService, Shopitems, TAIngredients, Units, $state, $filter, $timeout) {
+    .controller('ShopitemsController', ['$scope', '$stateParams', '$uibModal', 'UserService', 'Shopitems', 'TAIngredients', 'units', '$state', '$filter', '$timeout', function ($scope, $stateParams, $uibModal, UserService, Shopitems, TAIngredients, units, $state, $filter, $timeout) {
 
       $scope.autoupdate = true;
       $scope.alerts = [];
@@ -32,12 +32,9 @@ angular.module('app.shopitems', ['ui.router'])
         return false;
       };
 
-      $scope.loading = true;
-
 
       $scope.retrieveShopitems = function(){
 	Shopitems.query(function(response) {
-        $scope.loading = false;
         
 	  var uniqueIngredients = [];
 	  var uniqueIngredientsTemp = [];
@@ -90,7 +87,7 @@ angular.module('app.shopitems', ['ui.router'])
       }
 
 
-      $scope.units = Units.query();
+      $scope.units = units;
 
       $scope.GetIngredients = function(viewValue){
         return TAIngredients.search({search: viewValue, language: 'de'})
@@ -228,6 +225,11 @@ angular.module('app.shopitems', ['ui.router'])
 			url: '/shopitems',
         		templateUrl: 'partials/shopitems.tpl.html',
         		controller: 'ShopitemsController',
+			resolve: {
+				units: function(Units){
+					return Units.query().$promise;
+				}
+			},
 			data: {
 	        		name: 'Shopping',
         			icon: 'glyphicon glyphicon-shopping-cart'

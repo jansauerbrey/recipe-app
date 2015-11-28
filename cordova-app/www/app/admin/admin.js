@@ -18,11 +18,8 @@ angular.module('app.admin', ['ui.router'])
 
 // Admin
 
-    .controller('AdminUserCtrl', ['$scope', '$state', 'Users', function ($scope, $state, Users) {
-      $scope.loading = true;
-      $scope.users = Users.query(function(response) {
-        $scope.loading = false;
-      });
+    .controller('AdminUserCtrl', ['$scope', '$state', 'users', 'Users', function ($scope, $state, users, Users) {
+      $scope.users = users;
 
       $scope.remove = function(user){
         Users.remove({id: user._id}, function(){
@@ -70,6 +67,11 @@ angular.module('app.admin', ['ui.router'])
 			url: '/admin/user',
         		templateUrl: 'partials/admin.user.tpl.html',
         		controller: 'AdminUserCtrl',
+			resolve: {
+				users: function(Users){
+					return Users.query().$promise;
+				}
+			},
 			data: {
 	        		name: 'Users',
         			icon: 'glyphicon glyphicon-user'

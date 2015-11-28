@@ -15,17 +15,12 @@ angular.module('app.frequentshopitems', ['ui.router'])
 
 // Frequentshopitems
 
-    .controller('FrequentshopitemsController', ['$scope', '$stateParams', '$uibModal', 'Frequentshopitems', 'Shopitems', 'Units', '$state', '$filter', function ($scope, $stateParams, $uibModal, Frequentshopitems, Shopitems, Units, $state, $filter) {
+    .controller('FrequentshopitemsController', ['$scope', '$stateParams', '$uibModal', 'frequentshopitems', 'Shopitems', 'units', '$state', '$filter', function ($scope, $stateParams, $uibModal, frequentshopitems, Shopitems, units, $state, $filter) {
 
       $scope.alerts = [];
-      $scope.loading = true;
 
-      Frequentshopitems.query(function(response) {
-        $scope.loading = false;
-	$scope.frequentshopitems = response;
-      });
-
-      $scope.units = Units.query();
+      $scope.frequentshopitems = frequentshopitems;
+      $scope.units = units;
 
       $scope.addShopitem = function(newshopitem){
         var expDate = new Date();
@@ -120,6 +115,14 @@ angular.module('app.frequentshopitems', ['ui.router'])
 			url: '/shopitems/frequent',
         		templateUrl: 'partials/frequentshopitems.tpl.html',
         		controller: 'FrequentshopitemsController',
+			resolve: {
+				frequentshopitems: function(Frequentshopitems){
+					return Frequentshopitems.query().$promise;
+				},
+				units: function(Units){
+					return Units.query().$promise;
+				}
+			},
 			data: {
 	        		name: 'Add to List',
         			icon: 'glyphicon glyphicon-list-alt'

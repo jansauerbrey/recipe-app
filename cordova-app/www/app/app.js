@@ -1,4 +1,4 @@
-angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequentshopitems', 'app.shopitems', 'app.cooking', 'app.units', 'app.ingredients', 'app.dishtypes', 'app.admin', 'ui.router', 'ngAnimate', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui.checkbox', 'ngTagsInput', 'angular.filter', 'ngAside', 'anim-in-out'])
+angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequentshopitems', 'app.shopitems', 'app.cooking', 'app.units', 'app.ingredients', 'app.dishtypes', 'app.admin', 'ui.router', 'ngAnimate', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui.checkbox', 'ngTagsInput', 'angular.filter', 'ngAside', 'anim-in-out', 'angular-spinkit'])
 
 //---------------
 // Constants
@@ -215,6 +215,28 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequent
 	      }
 	   };
 	})
+
+	.directive('stateLoadingIndicator', function($rootScope) {
+	  return {
+	    restrict: 'E',
+	    template: "<div ng-show='isStateLoading' class='loading-indicator overlay'>" +
+	    "<div class='loading-indicator-body'>" +
+	    "<div class='spinner'><double-bounce-spinner></double-bounce-spinner></div>" +
+	    "</div>" +
+	    "</div>",
+	    replace: true,
+	    link: function(scope, elem, attrs) {
+	      scope.isStateLoading = false;
+	 
+	      $rootScope.$on('$stateChangeStart', function() {
+		scope.isStateLoading = true;
+	      });
+	      $rootScope.$on('$stateChangeSuccess', function() {
+		scope.isStateLoading = false;
+	      });
+	    }
+	  };
+	})
 		
 //---------------
 // Routes
@@ -244,7 +266,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequent
 		})
 		.state('user', {
 			abstract: true,
-			template: '<ui-view  class="anim-in-out anim-fade" data-anim-speed="1500"/>',
+			template: '<ui-view />',
 			data: {
 				requiresLogin: true,
                  		requiredPermissions: ['User']

@@ -19,18 +19,12 @@ angular.module('app.dishtypes', ['ui.router'])
 
 // Dishtypes
 
-    .controller('DishTypesController', ['$scope', 'DishTypes', function ($scope, DishTypes) {
-      $scope.editing = [];
-      $scope.loading = true;
-      $scope.dishtypes = DishTypes.query(function(response) {
-        $scope.loading = false;
-      });
-
+    .controller('DishTypesController', ['$scope', 'dishtypes', function ($scope, dishtypes) {
+      $scope.dishtypes = dishtypes;
     }])
 
-    .controller('DishTypeDetailCtrl', ['$scope', '$stateParams', 'DishTypes', '$state', function ($scope, $stateParams, DishTypes, $state) {
-      if (!$stateParams.id) {}
-      else $scope.dishtype = DishTypes.get({id: $stateParams.id });
+    .controller('DishTypeDetailCtrl', ['$scope', '$stateParams', 'dishtype', 'DishTypes', '$state', function ($scope, $stateParams, dishtype, DishTypes, $state) {
+      $scope.dishtype = dishtype;
 
       $scope.update = function(){
         DishTypes.update({id: $scope.dishtype._id}, $scope.dishtype, function(){
@@ -46,9 +40,9 @@ angular.module('app.dishtypes', ['ui.router'])
 
       $scope.save = function(){
         if(!$scope.newdishtype || $scope.newdishtype.length < 1) return;
-        var dishtype = new DishTypes({ name: { en: $scope.newdishtype.name.en, de: $scope.newdishtype.name.de,  fi: $scope.newdishtype.name.fi} , order: $scope.newdishtype.order, imagePath: $scope.newdishtype.imagePath});
+        var dishtype_new = new DishTypes({ name: { en: $scope.newdishtype.name.en, de: $scope.newdishtype.name.de,  fi: $scope.newdishtype.name.fi} , order: $scope.newdishtype.order, imagePath: $scope.newdishtype.imagePath});
 
-        dishtype.$save(function(){
+        dishtype_new.$save(function(){
           $state.go('admin.dishtypes.list');
         });
       }
@@ -73,6 +67,11 @@ angular.module('app.dishtypes', ['ui.router'])
 			url: '/list',
         		templateUrl: 'partials/dishtypes.tpl.html',
         		controller: 'DishTypesController',
+			resolve: {
+				dishtypes: function(DishTypes){
+					return DishTypes.query().$promise;
+				}
+			},
 			data: {
         			name: 'Dish types',
         			icon: 'glyphicon glyphicon-scale'
@@ -81,12 +80,26 @@ angular.module('app.dishtypes', ['ui.router'])
       		.state('admin.dishtypes.edit', {
 			url: '/edit/:id',
         		templateUrl: 'partials/dishtypes.details.tpl.html',
-        		controller: 'DishTypeDetailCtrl'
+        		controller: 'DishTypeDetailCtrl',
+			resolve: {
+				dishtype: ['DishTypes', '$stateParams', function(DishTypes, $stateParams){
+					var dishtype = DishTypes.get({'id': $stateParams.id}, function(response) {
+						return response;
+					}).$promise;
+					return dishtype;
+				}]
+			}
      		})
       		.state('admin.dishtypes.add', {
 			url: '/add',
         		templateUrl: 'partials/dishtypes.add.tpl.html',
-        		controller: 'DishTypeDetailCtrl'
+        		controller: 'DishTypeDetailCtrl',
+			resolve: {
+				dishtype: function(DishTypes){
+					var dishtype = new DishTypes();
+					return dishtype;
+				}
+			}
       		})
     ;
   }])

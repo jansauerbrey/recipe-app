@@ -11,13 +11,15 @@
   <link rel="stylesheet" href="dist/css/ng-tags-input.bootstrap.min.css">
   <link rel="stylesheet" href="dist/css/angular-aside.min.css">
   <link rel="stylesheet" href="dist/css/anim-in-out.css">
+  <link rel="stylesheet" href="dist/css/angular-spinkit.min.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
   <div class="container">
+    <state-loading-indicator></state-loading-indicator>
     <navigation></navigation>
-    <div ui-view class="anim-in-out anim-fade" data-anim-speed="1500"></div>
+    <div ui-view></div>
   </div>
 
 
@@ -35,6 +37,7 @@
 <script src="dist/js/angular-aside.min.js"></script>
 <script src="dist/js/angular-ui-router.min.js"></script>
 <script src="dist/js/anim-in-out.js"></script>
+<script src="dist/js/angular-spinkit.min.js"></script>
 <script src="app/app.js"></script>
 <script src="app/auth/auth.js"></script>
 <script src="app/recipes/recipes.js"></script>

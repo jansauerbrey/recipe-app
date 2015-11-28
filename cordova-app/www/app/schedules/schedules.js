@@ -19,8 +19,6 @@ angular.module('app.schedules', ['ui.router'])
 
     .controller('SchedulesController', ['$scope', '$stateParams', 'Schedules', 'TARecipes', function ($scope, $stateParams, Schedules, TARecipes) {
 
-      $scope.edit = [];
-
       if (!$stateParams.date) {
         $scope.startDate = new Date();
         $scope.endDate = new Date();

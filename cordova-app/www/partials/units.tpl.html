@@ -4,7 +4,6 @@
       <a class="btn btn-primary pull-right" ui-sref="admin.units.add" role="button"><i class="glyphicon glyphicon-plus"></i></a>
     </h3> 
     <input type="text" ng-model="search.name.$" class="form-control" placeholder="Search...">
-    <div ng-show="loading" class="text-center"><i class="fa fa-spinner fa-spin fa-3x"></i></div>
     <div class="list-group" style="margin-top: 20px;">
       <div ng-repeat="unit in units | filter: search | orderBy: 'name.de'">
         <a class="list-group-item col-xs-12" ui-sref="admin.units.edit({id: unit._id})">

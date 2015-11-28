@@ -29,26 +29,19 @@ angular.module('app.ingredients', ['ui.router'])
 
 // Ingredients
 
-    .controller('IngredientsController', ['$scope', 'Ingredients', function ($scope, Ingredients) {
-      $scope.editing = [];
-      $scope.loading = true;
-      $scope.ingredients = Ingredients.query(function(response) {
-        $scope.loading = false;
-      });
-
+    .controller('IngredientsController', ['$scope', 'ingredients', function ($scope, ingredients) {
+      $scope.ingredients = ingredients;
     }])
 
-    .controller('IngredientDetailCtrl', ['$scope', '$stateParams', 'Ingredients', 'Categories', '$state', function ($scope, $stateParams, Ingredients, Categories, $state) {
-      $scope.categories = Categories.query();
+    .controller('IngredientDetailCtrl', ['$scope', '$stateParams', 'ingredient', 'Ingredients', 'categories', '$state', function ($scope, $stateParams, ingredient, Ingredients, categories, $state) {
+      $scope.categories = categories;
       $scope.selectedcategory = {};
 
-      if (!$stateParams.id) {}
-      else $scope.ingredient = Ingredients.get({id: $stateParams.id }, function(response){
-        $scope.selectedcategory.category = response.category;
-        $scope.selectedcategory.subcategory = response.subcategory;
-        $scope.selectedcategory.subsubcategory = response.subsubcategory;
-        $scope.selectedcategory.rewe_cat_id = response.rewe_cat_id;
-      });
+      $scope.ingredient = ingredient;
+      $scope.selectedcategory.category = ingredient.category;
+      $scope.selectedcategory.subcategory = ingredient.subcategory;
+      $scope.selectedcategory.subsubcategory = ingredient.subsubcategory;
+      $scope.selectedcategory.rewe_cat_id = ingredient.rewe_cat_id;
 
 
       $scope.update = function(){
@@ -73,9 +66,9 @@ angular.module('app.ingredients', ['ui.router'])
         $scope.newingredient.subcategory = $scope.selectedcategory.subcategory;
         $scope.newingredient.subsubcategory = $scope.selectedcategory.subsubcategory;
         $scope.newingredient.rewe_cat_id = $scope.selectedcategory.rewe_cat_id;
-        var ingredient = new Ingredients( $scope.newingredient );
+        var ingredient_new = new Ingredients( $scope.newingredient );
 
-        ingredient.$save(function(){
+        ingredient_new.$save(function(){
           $state.go('admin.ingredients.list');
         });
       }
@@ -93,12 +86,17 @@ angular.module('app.ingredients', ['ui.router'])
 		.state('admin.ingredients', {
 			abstract: true,
 			url: '/ingredients',
-			template: "<ui-view />",
+			template: "<ui-view />"
 		})
       		.state('admin.ingredients.list', {
 			url: '/list',
         		templateUrl: 'partials/ingredients.tpl.html',
         		controller: 'IngredientsController',
+			resolve: {
+				ingredients: function(Ingredients){
+					return Ingredients.query().$promise;
+				}
+			},
 			data: {
         			name: 'Ingredients',
         			icon: 'glyphicon glyphicon-apple'
@@ -107,12 +105,32 @@ angular.module('app.ingredients', ['ui.router'])
       		.state('admin.ingredients.edit', {
 			url: '/edit/:id',
         		templateUrl: 'partials/ingredients.details.tpl.html',
-        		controller: 'IngredientDetailCtrl'
+        		controller: 'IngredientDetailCtrl',
+			resolve: {
+				ingredient: ['Ingredients', '$stateParams', function(Ingredients, $stateParams){
+					var ingredient = Ingredients.get({'id': $stateParams.id}, function(response) {
+						return response;
+					}).$promise;
+					return ingredient;
+				}],
+				categories: function(Categories){
+					return Categories.query().$promise;
+				}
+			}
      		})
       		.state('admin.ingredients.add', {
 			url: '/add',
         		templateUrl: 'partials/ingredients.add.tpl.html',
-        		controller: 'IngredientDetailCtrl'
+        		controller: 'IngredientDetailCtrl',
+			resolve: {
+				ingredient: function(Ingredients){
+					var ingredient = new Ingredients();
+					return ingredient;
+				},
+				categories: function(Categories){
+					return Categories.query().$promise;
+				}
+			}
       		})
     ;
   }])

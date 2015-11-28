@@ -4,7 +4,6 @@
     <h3 style="margin-bottom: 30px;">Frequent shopitems
       <button ng-click="modalShopitemAdd()" class="btn btn-primary pull-right"><span class="glyphicon glyphicon-plus"></span></a>
     </h3>
-      <div ng-show="loading" class="text-center"><i class="fa fa-spinner fa-spin fa-3x"></i></div>
     <div class="list-group" style="margin-top: 20px;">
       <div ng-repeat="ingredient in frequentshopitems">
         <a class="list-group-item col-xs-6 col-sm-4 col-md-3 col-lg-2" style="height: 200px; text-align: center;" ng-click="modalFrequentshopitemAdd(ingredient._id)">
