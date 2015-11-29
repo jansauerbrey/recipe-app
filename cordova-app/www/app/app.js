@@ -237,6 +237,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequent
 	    }
 	  };
 	})
+
 		
 //---------------
 // Routes
