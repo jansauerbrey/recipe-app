@@ -44,12 +44,12 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'cordova-app/www/')));
+//app.use(express.static(path.join(__dirname, 'cordova-app/www/')));
 
 
-app.get('/', function(req, res, next) {
-  res.render('index', { title: 'Recipe App' });
-});
+//app.get('/', function(req, res, next) {
+//  res.render('index', { title: 'Recipe App' });
+//});
 
 app.all('/api/*', function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");

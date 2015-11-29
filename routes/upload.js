@@ -42,7 +42,7 @@ router.post('/', auth.verify, function(req, res, next){
       tempPath = file.path;
       extension = file.path.substring(file.path.lastIndexOf('.'));
       imageName = uuid.v4() + extension;
-      destPath = path.join(__dirname, '../images/', imageName);
+      destPath = path.join(__dirname, '../upload/', imageName);
       inputStream = fs.createReadStream(tempPath);
       outputStream = fs.createWriteStream(destPath);
       var resize = im().resize('400x400').quality(90);
@@ -62,13 +62,13 @@ router.post('/', auth.verify, function(req, res, next){
 });
 
 
-router.get('/:file', function(req, res, next){
-	imageName = req.params.file;
-	imagePath = path.join(__dirname, '../images/', imageName);
-	var img = fs.readFileSync(imagePath);
-	res.writeHead(200, {'Content-Type': 'image/jpg' });
-	res.end(img, 'binary');
-});
+//router.get('/:file', function(req, res, next){
+//	imageName = req.params.file;
+//	imagePath = path.join(__dirname, '../upload/', imageName);
+//	var img = fs.readFileSync(imagePath);
+//	res.writeHead(200, {'Content-Type': 'image/jpg' });
+//	res.end(img, 'binary');
+//});
 
 
 module.exports = router;

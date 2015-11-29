@@ -1,6 +1,6 @@
 <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" dismiss-on-timeout="5000" close="closeAlert($index)">{{alert.msg}}</uib-alert>
 <div class="col-xs-12 col-sm-5 thumbnail">
-	<img ng-src="http://www.rezept-planer.de/api/upload/{{recipe.imagePath}}" spinkit-image-preloader='double-bounce-spinner' style="margin-bottom: 5px;"></img>
+	<img ng-src="https://www.rezept-planer.de/upload/{{recipe.imagePath}}" spinkit-image-preloader='double-bounce-spinner' style="margin-bottom: 5px;"></img>
 	<span class="btn btn-block btn-primary btn-file">
 		Select picture&hellip; <input ng-image-upload type="file" name="file">
 	</span>

@@ -1,4 +1,4 @@
-angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequentshopitems', 'app.shopitems', 'app.cooking', 'app.units', 'app.ingredients', 'app.dishtypes', 'app.admin', 'ui.router', 'ngAnimate', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui.checkbox', 'ngTagsInput', 'angular.filter', 'ngAside', 'anim-in-out', 'angular-spinkit'])
+angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequentshopitems', 'app.shopitems', 'app.cooking', 'app.units', 'app.ingredients', 'app.dishtypes', 'app.admin', 'ui.router', 'ngAnimate', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ui.checkbox', 'ngTagsInput', 'angular.filter', 'ngAside', 'angular-spinkit'])
 
 //---------------
 // Constants
@@ -6,7 +6,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequent
 
 
 //    .constant('BASE_URI', '/')
-    .constant('BASE_URI', 'http://rezept-planer.de/')
+    .constant('BASE_URI', 'https://www.rezept-planer.de/')
 
 
 //---------------
@@ -297,8 +297,8 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequent
 	$rootScope.$stateParams = $stateParams;
 
 	$rootScope.$on("$stateChangeStart", function(event, toState, toStateParams, fromState, fromStateParams) {
-            $rootScope.previousState = fromState;
-            $rootScope.previousStateParams = fromStateParams;
+            $rootScope.previousState = fromState ? fromState : '';
+            $rootScope.previousStateParams = fromStateParams ? fromStateParams : '';
             var authorised;
             if (UserService.getCurrentLoginUser() !== undefined) {
 		$http.get(BASE_URI+'api/user/check');
