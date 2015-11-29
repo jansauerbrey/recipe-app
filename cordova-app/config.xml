@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="de.sby.recipeapp" version="0.2.4" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0" xmlns:rim="http://www.blackberry.com/ns/widgets">
+<widget id="de.sby.recipeapp" version="0.2.5" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0" xmlns:rim="http://www.blackberry.com/ns/widgets">
     <name>Rezept Planer</name>
     <description>
         A recipe planner for storing and planning recipes including shopping list, etc.
     </description>
-    <author email="info@rezept-planer.de" href="http://rezept-planer.de">
+    <author email="info@rezept-planer.de" href="http://www.rezept-planer.de">
         Jan Sauerbrey
     </author>
     <content src="index.html" />
@@ -22,7 +22,7 @@
     <access origin="*" />
     <access origin="local://" />
     <access origin="file:///" subdomains="true" />
-    <access origin="http://rezept-planer.de" subdomains="true" />
+    <access origin="https://rezept-planer.de" subdomains="true" />
     <access origin="https://d9gkwhfwam31p.cloudfront.net" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
