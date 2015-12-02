@@ -4,15 +4,22 @@
   <div class="modal-body">
     <div class="form-group">
       <label class="control-label">Persons / portions:</label>
-      <input type="number" ng-model="factor" ng-required="true" class="form-control">
+      <div class="input-group">
+      	<input type="text" ng-model="factor" ng-required="true" class="form-control">
+				<span class="input-group-btn">
+					<button class="btn btn-default" ng-click="factor=factor-1;" type="button">
+						<i class="glyphicon glyphicon-minus"></i>
+					</button>
+					<button class="btn btn-default" ng-click="factor=factor+1;" type="button">
+						<i class="glyphicon glyphicon-plus"></i>
+					</button>
+				</span>
+			</div>
     </div>
-      <label class="control-label">Schedule date:</label>
-      <p class="input-group">
-        <input type="text" class="form-control" ng-model="date" uib-datepicker-popup="dd.MM.yyyy" is-open="calendarIsOpen" starting-day="1" ng-required="true" />
-        <span class="input-group-btn">
-          <button type="button" class="btn btn-default" ng-click="openDate($event)"><i class="glyphicon glyphicon-calendar"></i></button>
-        </span>
-      </p>
+    <div class="control-label"><strong>Schedule date:</strong></div>
+		<div style="display:inline-block; min-height:290px;">
+      <uib-datepicker ng-model="date" starting-day="1" show-weeks="true" class="well well-sm" ng-required="true"></uib-datepicker>
+    </div>
   </div>
   <div class="modal-footer">
     <button ng-click="ok()" class="btn btn-primary">OK</button>

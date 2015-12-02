@@ -26,7 +26,8 @@
     padding-bottom: 0;
 }
 
-body { padding-top: 60px; }
+body { padding-top: 60px;
+       padding-bottom: 60px; }
 
 .done-true {
   text-decoration: line-through;
@@ -147,8 +148,8 @@ body { padding-top: 60px; }
 }
 
 .side-links {
-  margin-top: 20px;
-  margin-bottom: 20px;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 @media (max-width: 767px) {
@@ -188,7 +189,7 @@ body { padding-top: 60px; }
   width: 100%;
   height: 100%;
   z-index: 10;
-  background-color: rgba(0,0,0,0.05); /*dim the background*/
+  background-color: rgba(255,255,255,0.7); /*dim the background*/
 }
 
 .spinner{
@@ -200,5 +201,10 @@ body { padding-top: 60px; }
     position: absolute;
     right: 0;
     top: 0;
-    width: 60px;
+    width: 100px;
+}
+
+.glyphicon-none:before {
+    content: "\2122";
+    color: transparent !important;
 }

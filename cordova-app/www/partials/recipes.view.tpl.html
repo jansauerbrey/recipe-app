@@ -11,14 +11,14 @@
 		      		<p class="text-info text-uppercase"><small>{{recipe.dishType.name_translated}}</small></p>
 				<span ng-repeat="tag in recipe.tags" class="label label-primary" style="margin: 2px; display: inline-block;">{{tag.text}}</span>
 			</div>
-			<div class="col-xs-4 thumbnail">
-				<span class="glyphicon glyphicon-user"> {{recipe.yield}} pers.</span>
+			<div class="col-xs-3 thumbnail" style="padding: 10px;">
+				<span><i class="glyphicon glyphicon-user fa-2x" style="margin-right: 5px;"></i> {{recipe.yield}} pers.</span>
 			</div>
-			<div class="col-xs-4 thumbnail">
-				<span class="glyphicon glyphicon-time"> {{recipe.totalTime}} min.</span>
+			<div class="col-xs-3 col-xs-offset-1 thumbnail" style="padding: 10px;">
+				<span><i class="glyphicon glyphicon-time fa-2x" style="margin-right: 5px;"></i> {{recipe.totalTime}} min.</span>
 			</div>
-			<div class="col-xs-4 thumbnail">
-				<span class="glyphicon glyphicon-glass"> {{recipe.kilocalories}} kcal</span>
+			<div class="col-xs-3 col-xs-offset-1 thumbnail" style="padding: 10px;">
+				<span><i class="glyphicon glyphicon-glass fa-2x" style="margin-right: 5px;"></i> {{recipe.kilocalories}} kcal.</span>
 			</div>
 		</div>
 		<div class="col-xs-12" style="padding: 0px;">

@@ -28,7 +28,9 @@ router.post('/', auth.verify, function(req, res, next) {
         } else {
           amount = schedulePop.recipe.ingredients[i].qty/schedulePop.recipe.yield*schedulePop.factor;
         }
-        Shopitem.create({author: req._user.id, expire_date: schedulePop.date.setDate(schedulePop.date.getDate() + 1), schedule: schedulePop, recipe: schedulePop.recipe, ingredient: schedulePop.recipe.ingredients[i].ingredient, unit: schedulePop.recipe.ingredients[i].unit, amount: amount})
+        var expireDate = new Date();
+        expireDate.setDate(schedulePop.date.getDate() + 1);
+        Shopitem.create({author: req._user.id, expire_date: expireDate, schedule: schedulePop, recipe: schedulePop.recipe, ingredient: schedulePop.recipe.ingredients[i].ingredient, unit: schedulePop.recipe.ingredients[i].unit, amount: amount})
       }
       res.json(schedulePop);
     });

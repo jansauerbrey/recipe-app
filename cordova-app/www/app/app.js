@@ -153,15 +153,49 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequent
         }])
 
 
-    .directive('ngReallyClick', [function() {
+    .directive('ngReallyClick', ['$uibModal', function($uibModal) {
     return {
         restrict: 'A',
+        scope: {
+          ngReallyClick:"&"
+        },
         link: function(scope, element, attrs) {
             element.bind('click', function() {
-                var message = attrs.ngReallyMessage;
-                if (message && confirm(message)) {
-                    scope.$apply(attrs.ngReallyClick);
-                }
+            		if (scope.$parent.schedule && scope.$parent.schedule.recipe && scope.$parent.schedule.recipe.name){
+            			var recipeName = scope.$parent.schedule.recipe.name;
+                  var message =  "Are you sure to delete the recipe "+scope.$parent.schedule.recipe.name+" from schedule?";
+            		} else if (scope.$parent.recipe && scope.$parent.recipe.name){
+            			var recipeName = scope.$parent.recipe.name;
+                	var message =  "Are you sure to delete the recipe "+scope.$parent.recipe.name+"?";
+            		} else {
+            			var message =  "Are you sure?";
+            		}
+            		
+                
+                var modalNgReally = $uibModal.open({
+					        animation: true,
+					        templateUrl: 'partials/ngreally.tpl.html',
+					        controller: ['$scope', '$modalInstance', 'message', function ($scope, $modalInstance, message) {
+      							$scope.message = message;
+      							$scope.ok = function(){
+							        $modalInstance.close();
+							      }
+							      
+							      $scope.cancel = function(){
+							        $modalInstance.dismiss('cancel');
+							      }
+								  }],
+					        size: 'xs',
+					        resolve: {
+					            message: function(){
+					              return message;
+					            }
+					        }
+					      });
+				
+					      modalNgReally.result.then(function(){
+						      scope.ngReallyClick();
+					      });
             });
         }
     }
@@ -275,11 +309,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.frequent
 		})
       		.state('impressum', {
 			url: '/impressum',
-        		templateUrl: 'partials/impressum.tpl.html',
-			data: {
-	        		name: 'Impressum',
-        			icon: 'glyphicon glyphicon-info-sign'
-			}
+        		templateUrl: 'partials/impressum.tpl.html'
       		})
       		.state('accessdenied', {
 			url: '/access/denied',

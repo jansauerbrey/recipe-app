@@ -17,8 +17,10 @@ angular.module('app.schedules', ['ui.router'])
 
 // Schedules
 
-    .controller('SchedulesController', ['$scope', '$stateParams', 'Schedules', 'TARecipes', function ($scope, $stateParams, Schedules, TARecipes) {
+    .controller('SchedulesController', ['$scope', '$stateParams', '$uibModal', 'Schedules', 'TARecipes', function ($scope, $stateParams, $uibModal, Schedules, TARecipes) {
 
+			$scope.alerts = [];
+	
       if (!$stateParams.date) {
         $scope.startDate = new Date();
         $scope.endDate = new Date();
@@ -69,19 +71,14 @@ angular.module('app.schedules', ['ui.router'])
         });	
       }
 
-      $scope.remove = function(index){
-        Schedules.remove({id: $scope.schedulesArray[0].schedule[index]._id}, function(){
+      $scope.remove = function(lineItem){
+        Schedules.remove({id: lineItem._id}, function(){
+        	var index = $scope.schedulesArray[0].schedule.indexOf(lineItem);
           $scope.schedulesArray[0].schedule.splice(index, 1);
+          var message = 'The recipe '+lineItem.recipe.name+' was successfully removed from schedule';
+	        $scope.alerts.push({type: 'info', msg: message});
         });
       }
-
-
-      $scope.update = function(index){
-        Schedules.update({id: $scope.schedulesArray[0].schedule[index]._id}, $scope.schedulesArray[0].schedule[index], function(){
-          $scope.edit[index] = false;
-        });
-      }
-
 
       $scope.openStartDate = function($event) {
         $event.preventDefault();
@@ -96,6 +93,51 @@ angular.module('app.schedules', ['ui.router'])
 
         $scope.endOpened = true;
       };
+      
+      
+      $scope.scheduleEdit = function(lineItem) {
+	      var modalEditSchedule = $uibModal.open({
+	        animation: true,
+	        templateUrl: 'partials/recipes.scheduleadd.tpl.html',
+	        controller: 'ModalScheduleEditController',
+	        size: 'xs',
+	        resolve: {
+	            schedule: function(){
+	              return lineItem;
+	            }
+	        }
+	      });
+	
+	      modalEditSchedule.result.then(function(successMsg){
+	        $scope.alerts.push(successMsg);
+		      $scope.updateSchedules($scope.startDate, $scope.endDate, $scope.populate);
+	      });
+      }
+      
+      $scope.closeAlert = function(index){
+	      $scope.alerts.splice(index, 1);
+    	}
+   	
+    }])
+
+
+    .controller('ModalScheduleEditController', ['$scope', '$stateParams', '$modalInstance', '$filter', 'Schedules', 'schedule', function ($scope, $stateParams, $modalInstance, $filter, Schedules, schedule) {
+      $scope.recipe = schedule.recipe;
+      $scope.date = schedule.date;
+      $scope.factor = schedule.factor;
+     
+      $scope.ok = function(){
+        schedule.date = $scope.date;
+        schedule.factor = $scope.factor;
+        Schedules.update({id: schedule._id}, schedule, function(response){
+          var message = 'The recipe '+$scope.recipe.name+' was successfully scheduled for the '+$filter('date')($scope.date, 'dd.MM.yyyy')+' with '+$scope.factor+' persons.';
+          $modalInstance.close({type: 'success', msg: message});
+        });
+      }
+
+      $scope.cancel = function(){
+        $modalInstance.dismiss('cancel');
+      }
 
     }])
 

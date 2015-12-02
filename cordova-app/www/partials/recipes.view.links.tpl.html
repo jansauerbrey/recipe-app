@@ -1,7 +1,7 @@
-<div class="side-links text-muted"><i class="glyphicon glyphicon-print"></i> Print</div>
-<div class="side-links text-muted"><i class="glyphicon glyphicon-heart"></i> Add to Favorites</div>
-<div class="side-links text-muted"><i class="glyphicon glyphicon-duplicate"></i> Copy to My Recipes</div>
-<div class="side-links text-muted"><i class="glyphicon glyphicon-share"></i> Share</div>
-<div class="side-links" ng-show="allowEdit"><a ui-sref="user.recipes.details.edit({id: recipe._id})"><i class="glyphicon glyphicon-pencil"></i> Edit</a></div>
-<div class="side-links" ng-show="allowEdit"><a href="#" ng-really-message="Are you sure?" ng-really-click="remove()"><i class="glyphicon glyphicon-trash"></i> Remove</a></div>
-<div class="side-links"><a href="#" ng-click="scheduleAdd()"><i class="glyphicon glyphicon-calendar"></i> Add to Schedules</a></div>
+<div class="side-links"><button type="button" class="btn btn-link"><span class=" text-muted"><i class="glyphicon glyphicon-print"></i> Print</span></button></div>
+<div class="side-links"><button type="button" class="btn btn-link"><span class=" text-muted"><i class="glyphicon glyphicon-heart"></i> Add to Favorites</span></button></div>
+<div class="side-links"><button type="button" class="btn btn-link"><span class=" text-muted"><i class="glyphicon glyphicon-duplicate"></i> Copy to My Recipes</span></button></div>
+<div class="side-links"><button type="button" class="btn btn-link"><span class=" text-muted"><i class="glyphicon glyphicon-share"></i> Share</span></button></div>
+<div class="side-links" ng-show="allowEdit"><button type="button" class="btn btn-link" ui-sref="user.recipes.details.edit({id: recipe._id})"><i class="glyphicon glyphicon-pencil"></i> Edit</button></div>
+<div class="side-links" ng-show="allowEdit"><button type="button" class="btn btn-link" ng-really-message="Are you sure?" ng-really-click="remove()"><i class="glyphicon glyphicon-trash"></i> Remove</button></div>
+<div class="side-links"><button type="button" class="btn btn-link" ng-click="scheduleAdd()"><i class="glyphicon glyphicon-calendar"></i> Add to Schedules</button></div>

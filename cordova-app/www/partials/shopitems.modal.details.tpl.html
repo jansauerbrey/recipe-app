@@ -1,0 +1,27 @@
+  <div class="modal-header">
+    <h4 class="modal-title"><strong>{{item.ingredient.name.de}}</strong></h4>
+  </div>
+  <div class="modal-body">
+  	<div class="row">
+	    <div class="col-xs-12" style="margin-bottom: 100px;">
+		    <table class="col-xs-12 table table-striped">
+		      <thead>
+		        <th>Amount</th>
+		        <th>Recipe</th>
+		        <th>Scheduled / Added</th>
+		      </thead>
+		      <tbody>
+		        <tr ng-repeat="subitem in item.details">
+		          <td style="min-width: 80px;">{{subitem.amount | number}} {{subitem.unit.name.de}}</td>
+		          <td>{{subitem.recipe.name || "Manually added to shopping list"}}</td>
+		          <td>{{(subitem.schedule.date | date:'EEE dd.MM.yyyy' ) || (subitem.updated_at | date:'EEE dd.MM.yyyy' )}}</td>
+		        </tr>
+		      </tbody>
+		    </table>
+		  </div>
+	  </div>
+  </div>
+  <div class="modal-footer">
+    <button ng-click="ok()" class="btn btn-primary btn-lg">tick off</button>
+    <button ng-click="cancel()" class="btn btn-default btn-lg">cancel</button>
+  </div>

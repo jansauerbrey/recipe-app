@@ -229,15 +229,6 @@ angular.module('app.recipes', ['ui.router'])
         $modalInstance.dismiss('cancel');
       }
 
-
-      $scope.openDate = function($event) {
-        $event.preventDefault();
-        $event.stopPropagation();
-
-        $scope.calendarIsOpen = true;
-      };
-
-
     }])
 
 

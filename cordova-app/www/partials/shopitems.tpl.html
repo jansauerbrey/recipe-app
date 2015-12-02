@@ -1,47 +1,53 @@
   <div class="row">
-    <div class="col-xs-12" style="margin-bottom: 100px;">
-    <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" dismiss-on-timeout="5000" close="closeAlert($index)">{{alert.msg}}</uib-alert> 
-    <h3 style="margin-bottom: 30px;">Shopitems
-      <button ng-click="modalShopitemAdd()" class="btn btn-primary pull-right visible-xs-block"><span class="glyphicon glyphicon-plus"></span></a>
-      <button ng-show="autoupdate" ng-click="stopAutoupdate()" class="btn btn-success pull-right active" style="margin-right: 10px;"><span class="glyphicon glyphicon-refresh"></span></a>
-      <button ng-show="!autoupdate" ng-click="startAutoupdate()" class="btn btn-default pull-right" style="margin-right: 10px;"><span class="glyphicon glyphicon-refresh"></span></a>
-    </h3>
-      <table class="col-xs-12 table table-striped">
+    <div class="col-xs-12">
+	    <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" dismiss-on-timeout="5000" close="closeAlert($index)">{{alert.msg}}</uib-alert> 
+	    <h3 style="margin-bottom: 30px;">Shopitems
+	      <button ng-click="modalShopitemAdd()" class="btn btn-primary pull-right"><span class="glyphicon glyphicon-plus"></span></a>
+	      <button ng-show="autoupdate" ng-click="stopAutoupdate()" class="btn btn-success pull-right active" style="margin-right: 10px;"><span class="glyphicon glyphicon-refresh"></span></a>
+	      <button ng-show="!autoupdate" ng-click="startAutoupdate()" class="btn btn-default pull-right" style="margin-right: 10px;"><span class="glyphicon glyphicon-refresh"></span></a>
+	    </h3>
+		</div>
+    <div class="col-xs-12 col-sm-8 col-md-6">
+    <div ng-repeat="(key, value) in shopitems | orderBy: 'order' | groupBy: 'ingredient.category'" class="panel panel-primary">
+      <!-- Default panel contents -->
+      <div class="panel-heading"><strong>{{key}}</strong><span class="badge pull-right">{{value.length}}</span></div>
+
+      <!-- Table -->
+      <table class="table table-striped">
         <thead class="hidden-xs">
-          <th></th>
+          <th style="width: 30px;"></th>
           <th>Ingredient</th>
-          <th class="hidden-xs">Amount</th>
-          <th class="hidden-xs">Unit</th>
-          <th class="hidden-sm hidden-md hidden-lg">#</th>
-          <th class="hidden-sm hidden-xs">Category</th>
-          <th class="hidden-sm hidden-xs">Subcategory</th>
-          <th class="hidden-sm hidden-xs">Subsubcategory</th>
-          <th class="hidden-xs"></th>
+          <th style="width: 100px;">Amount</th>
+          <th style="width: 30px;"></th>
+          <th class="hidden-xs" style="width: 30px;"></th>
         </thead>
         <tbody>
-          <tr class="hidden-xs">
-            <td class="text-center" style="vertical-align:middle;"><span class="glyphicon glyphicon-asterisk"></span></td>
-            <td><input type="text" ng-model="newingredient" uib-typeahead="ingredient as ingredient.name.de for ingredient in GetIngredients($viewValue)" typeahead-editable="false" typeahead-template-url="partials/ingredients.typeahead.tpl.html" class="form-control" placeholder="Shopitem..."></td>
-            <td class="hidden-xs"><input type="number" ng-model="newamount" class="form-control" style="width: 70px;"></td>
-            <td class="hidden-xs"><select ng-options="unit._id as unit.name.de for unit in units" ng-model="newunit" class="form-control" placeholder="Unit..."></select></td>
-            <td class="hidden-sm hidden-md hidden-lg"></td>
-            <td class="hidden-sm hidden-xs">{{newingredient.category}}</td>
-            <td class="hidden-sm hidden-xs">{{newingredient.subcategory}}</td>
-            <td class="hidden-sm hidden-xs">{{newingredient.subsubcategory}}</td>
-            <td><a class="btn btn-primary pull-right hidden-xs" ng-click="addShopitem()" role="button"><span class="glyphicon glyphicon-plus"></span></a></td>
-          </tr>
-          <tr ng-repeat="item in shopitems | orderBy: ['completed', 'order', 'ingredient.category','ingredient.subcategory','ingredient.subsubcategory','ingredient.name.de']" class="done-{{item.completed}}">
-            <td><checkbox ng-model="item.completed" ng-change="complete(item)"></checkbox></td>
+          <tr ng-repeat="item in value | orderBy: ['order', 'ingredient.category','ingredient.subcategory','ingredient.subsubcategory','ingredient.name.de']" class="done-{{item.completed}}">
+            <td><button class="btn btn-default" role="button" ng-click="complete(item)"><span class="glyphicon" ng-class="{'glyphicon-none': !item.completed, 'glyphicon-ok': item.completed}"></span></button></td>
             <td>{{item.ingredient.name.de}}</td>
-            <td class="hidden-xs">{{item.amount | number}}</td>
-            <td class="hidden-xs">{{item.unit.name.de}}</td>
-            <td class="hidden-sm hidden-md hidden-lg" style="min-width: 80px;">{{item.amount | number}} {{item.unit.name.de}}</td>
-            <td class="hidden-sm hidden-xs">{{item.ingredient.category}}</td>
-            <td class="hidden-sm hidden-xs">{{item.ingredient.subcategory}}</td>
-            <td class="hidden-sm hidden-xs">{{item.ingredient.subsubcategory}}</td>
-            <td><a class="btn btn-primary pull-right hidden-xs" ng-really-message="Are you sure?" ng-really-click="remove(item)" role="button"><span class="glyphicon glyphicon-trash"></span></a></td>
+            <td>{{item.amount | number}} {{item.unit.name.de}}</td>
+            <td>
+            	<button class="btn btn-primary pull-right" ng-click="shopitemDetails(item)" role="button">
+            		<span class="glyphicon glyphicon-question-sign"></span>
+            	</button>
+            </td>
+            <td class="hidden-xs">
+            	<button class="btn btn-primary pull-right hidden-xs" ng-really-click="remove(item)" role="button">
+            		<span class="glyphicon glyphicon-trash"></span>
+            	</button>
+            </td>
           </tr>
         </tbody>
       </table>
+    </div>
+    <div class="hidden-xs col-sm-4 col-md-6">
+    	<div class="list-group" style="margin-top: 20px;">
+	      <div ng-repeat="ingredient in frequentshopitems">
+	        <a class="list-group-item col-sm-12 col-md-6 col-lg-6" style="height: 200px; text-align: center;" ng-click="modalFrequentshopitemAdd(ingredient._id)">
+	          <div><img style="width: 120px; height: 120px;" ng-src="{{ingredient._id.rewe_img_link_sm}}"></img></div>
+	          <div>{{ingredient._id.name.de}}</div>
+	        </a>
+	      </div>
+      </div>
     </div>
   </div>

@@ -20,6 +20,7 @@ angular.module('app.shopitems', ['ui.router'])
     .controller('ShopitemsController', ['$scope', '$stateParams', '$uibModal', 'UserService', 'Shopitems', 'TAIngredients', 'units', '$state', '$filter', '$timeout', function ($scope, $stateParams, $uibModal, UserService, Shopitems, TAIngredients, units, $state, $filter, $timeout) {
 
       $scope.autoupdate = true;
+			$scope.pauseAutoupdate = false;
       $scope.alerts = [];
 
       $scope.user = UserService.getCurrentLoginUser();
@@ -34,30 +35,32 @@ angular.module('app.shopitems', ['ui.router'])
 
 
       $scope.retrieveShopitems = function(){
-	Shopitems.query(function(response) {
-        
-	  var uniqueIngredients = [];
-	  var uniqueIngredientsTemp = [];
-	  for(i=0;i<response.length;i++){
-	    if ( response[i].ingredient ) {
-	      var order = $scope.user.settings.categoryOrder.indexOf(response[i].ingredient.category) >= 0 ? $scope.user.settings.categoryOrder.indexOf(response[i].ingredient.category) : 99999;
-	    } else {
-	      var order = 99999;
-	    }
-	    var index = containsObj(uniqueIngredientsTemp, {ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed});
-	    if ( index === false) {
-	      uniqueIngredientsTemp.push({ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed});
-	      var obj = {ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed};
-	      obj.details = [response[i]];
-	      obj.amount = response[i].amount;
-	      uniqueIngredients.push(obj);
-	    }
-	    else {
-	      uniqueIngredients[index].details.push(response[i]);
-	      uniqueIngredients[index].amount = response[i].amount + uniqueIngredients[index].amount;
-	    }
-	  }
-	  $scope.shopitems = uniqueIngredients;
+				Shopitems.query(function(response) {
+			        
+				  var uniqueIngredients = [];
+				  var uniqueIngredientsTemp = [];
+				  for(i=0;i<response.length;i++){
+				    if ( response[i].ingredient ) {
+				      var order = $scope.user.settings.categoryOrder.indexOf(response[i].ingredient.category) >= 0 ? $scope.user.settings.categoryOrder.indexOf(response[i].ingredient.category) : 99999;
+				    } else {
+				      var order = 99999;
+				    }
+				    var index = containsObj(uniqueIngredientsTemp, {ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed});
+				    if ( index === false) {
+				      uniqueIngredientsTemp.push({ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed});
+				      var obj = {ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed};
+				      obj.details = [response[i]];
+				      obj.amount = response[i].amount;
+				      uniqueIngredients.push(obj);
+				    }
+				    else {
+				      uniqueIngredients[index].details.push(response[i]);
+				      uniqueIngredients[index].amount = response[i].amount + uniqueIngredients[index].amount;
+				    }
+				  }
+				  if ( $scope.autoupdate && !$scope.pauseAutoupdate) {
+				  	$scope.shopitems = uniqueIngredients;
+					}
         });
       };
 
@@ -65,25 +68,25 @@ angular.module('app.shopitems', ['ui.router'])
 
       var timer;
       $scope.startAutoupdate = function() {
-	$scope.autoupdate = true;
-	$scope.retrieveShopitems();
-	timer =  $timeout(function () {
+				$scope.autoupdate = true;
+				$scope.retrieveShopitems();
+				timer =  $timeout(function () {
           $scope.startAutoupdate();
         }, 5000);
-	$scope.$on( "$destroy",
-	  function( event ) {
-	    $timeout.cancel( timer );
-	  }
-	);
+				$scope.$on( "$destroy",
+					function( event ) {
+						$timeout.cancel( timer );
+					}
+				);
       };
 
       $scope.stopAutoupdate = function(){
-	$scope.autoupdate = false;
-	$timeout.cancel(timer);
+				$scope.autoupdate = false;
+				$timeout.cancel(timer);
       };
 
       if ($scope.autoupdate === true){
-	$scope.startAutoupdate();
+				$scope.startAutoupdate();
       }
 
 
@@ -100,14 +103,14 @@ angular.module('app.shopitems', ['ui.router'])
         var expDate = new Date();
         expDate.setDate(expDate.getDate() + 14);
         expDate.setHours(0, 0, 0, 0);
-	if (!newshopitem) {
+				if (!newshopitem) {
           for(i=0;i<$scope.units.length;i++){
             if($scope.units[i]._id === $scope.newunit) {
               $scope.newunitobject = $scope.units[i];
             }
           }
-	  newshopitem = {ingredient: $scope.newingredient, unit: $scope.newunitobject, amount: $scope.newamount};
-	}
+					newshopitem = {ingredient: $scope.newingredient, unit: $scope.newunitobject, amount: $scope.newamount};
+				}
         var newshopitem = new Shopitems({ingredient: newshopitem.ingredient, unit: newshopitem.unit, amount: newshopitem.amount, completed: false , expire_date: expDate });
         newshopitem.$save();
         obj = {ingredient: newshopitem.ingredient, unit: newshopitem.unit, completed: newshopitem.completed};
@@ -120,46 +123,100 @@ angular.module('app.shopitems', ['ui.router'])
       }
 
       $scope.remove = function(item){
+      	$scope.pauseAutoupdate = true;
         for(var i=item.details.length-1;i>=0;i--){
           Shopitems.remove({id: item.details[i]._id}, null, function(success){
-		var ind = $scope.shopitems.indexOf(item);
-		var index;
-		for(var j=0;j<$scope.shopitems[ind].details.length;j++){
-		  if ($scope.shopitems[ind].details[j]._id == success._id){
-		    index = j;
-		  }
-		}
-              $scope.shopitems[ind].details.splice(index, 1);
-		if ($scope.shopitems[ind].details.length === 0) {
-		  $scope.shopitems.splice(ind, 1);
-		}
-	    }, function(err){
-	      $scope.alerts.push({type: 'danger', msg: 'Network connection error'});
-	    }
-	  );
-        }
-	//$scope.shopitems.splice($scope.shopitems.indexOf(item), 1);
+						var ind = $scope.shopitems.indexOf(item);
+						var index;
+						for(var j=0;j<$scope.shopitems[ind].details.length;j++){
+						  if ($scope.shopitems[ind].details[j]._id == success._id){
+						    index = j;
+						  }
+						}
+	          $scope.shopitems[ind].details.splice(index, 1);
+						if ($scope.shopitems[ind].details.length === 0) {
+						  $scope.shopitems.splice(ind, 1);
+						}
+		    	}, function(err){
+		      	$scope.alerts.push({type: 'danger', msg: 'Network connection error'});
+			    });
+      	}
+      	var pauseTimer;
+				pauseTimer =  $timeout(function () {
+	        $scope.pauseAutoupdate = false;
+	      }, 5000);
+				$scope.$on( "$destroy",
+					function( event ) {
+						$timeout.cancel( pauseTimer );
+					}
+				);
+				//$scope.shopitems.splice($scope.shopitems.indexOf(item), 1);
       }
 
       $scope.complete = function(item){
+      	$scope.pauseAutoupdate = true;
+      	
+      	$scope.arrayObjectIndexOf = function(arr, obj){
+			    for(var i = 0; i < arr.length; i++){
+			        if(angular.equals(arr[i], obj)){
+			            return i;
+			        }
+			    };
+			    return -1;
+				}
+      	
+       	var itemIndex = $scope.arrayObjectIndexOf($scope.shopitems, item);
+      	item.completed = !item.completed;
         for(var i=item.details.length-1;i>=0;i--){
-	  var tempObj = $scope.shopitems[$scope.shopitems.indexOf(item)].details[i];
-	  tempObj.completed = item.completed;
-          Shopitems.update({id: item.details[i]._id}, tempObj, function(success){
-		var ind = $scope.shopitems.indexOf(item);
-		var index;
-		for(var j=0;j<$scope.shopitems[ind].details.length;j++){
-		  if ($scope.shopitems[ind].details[j]._id == success._id){
-		    index = j;
-		  }
-		}
-              $scope.shopitems[$scope.shopitems.indexOf(item)].details[index].completed = item.completed;
-	    }, function(err){
-	      $scope.alerts.push({type: 'danger', msg: 'Network connection error'});
-	    }
-	  );
+					var tempObj = item.details[i];
+					tempObj.completed = item.completed;
+          Shopitems.update({id: tempObj._id}, tempObj, function(success){
+						var index;
+						for(var j=0;j<$scope.shopitems[itemIndex].details.length;j++){
+		  				if ($scope.shopitems[itemIndex].details[j]._id == success._id){
+		    				index = j;
+		  				}
+						}
+            $scope.shopitems[itemIndex].details[index].completed = item.completed;
+	    		}, function(err){
+	      		$scope.alerts.push({type: 'danger', msg: 'Network connection error'});
+	    		});
         }
+        
+        $scope.shopitems[itemIndex].completed = item.completed;
+	      
+	      var pauseTimer;
+				pauseTimer =  $timeout(function () {
+	        $scope.pauseAutoupdate = false;
+	      }, 5000);
+				$scope.$on( "$destroy",
+					function( event ) {
+						$timeout.cancel( pauseTimer );
+					}
+				);
       }
+
+			$scope.shopitemDetails = function(item){
+        var modalShopitemDetails = $uibModal.open({
+          animation: true,
+          templateUrl: 'partials/shopitems.modal.details.tpl.html',
+          controller: 'ModalShopitemDetailsController',
+          size: 'lg',
+          resolve: {
+            item: function(){
+              return item;
+            },
+            units: function(){
+              return $scope.units;
+            }
+          }
+        });
+
+        modalShopitemDetails.result.then(function(response){
+          $scope.complete(response);
+        });
+			}
+
 
       $scope.modalShopitemAdd = function() {
         var modalAddShopitem = $uibModal.open({
@@ -186,6 +243,18 @@ angular.module('app.shopitems', ['ui.router'])
 
     }])
 
+
+    .controller('ModalShopitemDetailsController', ['$scope', '$stateParams', '$modalInstance', 'item', function ($scope, $stateParams, $modalInstance, item) {
+      $scope.item = item;
+
+      $scope.ok = function(){
+        $modalInstance.close($scope.item);
+      }
+
+      $scope.cancel = function(){
+        $modalInstance.dismiss('cancel');
+      }
+    }])
 
     .controller('ModalShopitemAddController', ['$scope', '$stateParams', '$modalInstance', 'TAIngredients', 'units', function ($scope, $stateParams, $modalInstance, TAIngredients, units) {
      

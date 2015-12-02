@@ -22,6 +22,9 @@
       <li ng-repeat="state in states | filter: {requiresLogin: false, panelright: false}" ng-class="{active: activeState(state)}" ng-show="determineVisibility(state.requiredPermissions)">
         <a ui-sref="{{state.name}}"><span class="{{state.icon}}" style="padding-right: 10px;"></span>{{ state.label }}</a>
       </li>
+      <li>
+        <a ui-sref="impressum"><span class="glyphicon glyphicon-info-sign" style="padding-right: 10px;"></span>Impressum</a>
+      </li>
     </ul>
   <div>
 <div>
