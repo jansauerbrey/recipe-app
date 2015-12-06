@@ -17,83 +17,93 @@ angular.module('app.schedules', ['ui.router'])
 
 // Schedules
 
-    .controller('SchedulesController', ['$scope', '$stateParams', '$uibModal', 'Schedules', 'TARecipes', function ($scope, $stateParams, $uibModal, Schedules, TARecipes) {
+    .controller('SchedulesController', ['$scope', '$stateParams', '$uibModal', 'Schedules', function ($scope, $stateParams, $uibModal, Schedules) {
 
 			$scope.alerts = [];
-	
-      if (!$stateParams.date) {
-        $scope.startDate = new Date();
-        $scope.endDate = new Date();
-        $scope.endDate.setDate($scope.startDate.getDate() + 6);
-      }
-      else {
-        $scope.startDate = new Date($stateParams.date);
-        $scope.endDate = new Date($stateParams.date);
-        $scope.prevDate = new Date($stateParams.date);
-        $scope.nextDate = new Date($stateParams.date);
-        $scope.prevDate.setDate($scope.prevDate.getDate() - 1);
-        $scope.nextDate.setDate($scope.nextDate.getDate() + 1);
-      }
-	  // remove hours
-      $scope.startDate.setHours(0, 0, 0, 0);
-      $scope.endDate.setHours(0, 0, 0, 0);
-      $scope.loading = true;
+			$scope.selectedDates = [];
       
+      
+			for(i=0;i<7;i++){
+				var tempDate = new Date();
+				tempDate.setDate(tempDate.getDate()+i);
+      	tempDate.setHours(0, 0, 0, 0);
+				$scope.selectedDates.push(tempDate.getTime());
+			}
+			$scope.activeDate = new Date();
+	  // remove hours
+      $scope.activeDate.setHours(0, 0, 0, 0);
+      
+      
+      var containsObj = function(array, obj) {
+  			var i, l = array.length;
+  			for (i=0;i<array.length;i++)
+  			{
+    			if (angular.equals(array[i], obj)) return i;
+  			}
+  			return false;
+			}
+      
+      $scope.updateSchedules = function(selectedDates){
+      	startDate = Math.min.apply(null, selectedDates);
+      	endDate = Math.max.apply(null, selectedDates);
+      	var startDate = new Date(startDate);
+      	startDate.setHours(0,0,0,0);
+      	startDate = startDate.getTime();
+      	var endDate = new Date(endDate);
+      	endDate.setDate(endDate.getDate() +1);
+      	endDate.setHours(0,0,0,0);
+      	endDate = endDate.getTime();
+      	Schedules.query({startDate: startDate, endDate: endDate}, function(response){
+      		var grouped = [];
+      		for(i=0;i<$scope.selectedDates.length;i++){
+      			var actualDay = new Date($scope.selectedDates[i]);
+	          actualDay.setHours(0, 0, 0, 0);
+	          grouped[i] = {date: actualDay, schedule: []};
+      		}
+      		for(i=0;i<response.length;i++){
+      			var actualDay = new Date(response[i].date);
+	          actualDay.setHours(0, 0, 0, 0);
+	          for (j=0;j<$scope.selectedDates.length;j++)
+  					{
+    					if (angular.equals(grouped[j].date, actualDay)	) {
+    						grouped[j].schedule.push(response[i]);
+    					}
+  					} 
+      		}
+					$scope.schedulesArray = grouped;
+				});
+      };
+      
+      $scope.updateSchedules($scope.selectedDates);
 
-      $scope.updateSchedules = function(startDate, endDate, populate){
-        schedulesArray = [];
-        while(startDate <= endDate) {
-          var nextStartDate = new Date(startDate);
-          nextStartDate.setDate(nextStartDate.getDate() + 1);
-          schedulesArray.push({date: startDate, schedule: Schedules.query({startDate: startDate, endDate: nextStartDate})});
-          startDate = nextStartDate;
-        }
-        $scope.schedulesArray = schedulesArray;
-      }
-      $scope.updateSchedules($scope.startDate, $scope.endDate, $scope.populate);
-
-      $scope.GetRecipes = function($viewValue){
-        return TARecipes.search({search: $viewValue})
-          .$promise.then(function(response) {
-            return response;
-          });
-      }
-
-      $scope.addRecipe = function(){
-        if(!$scope.newrecipe || $scope.newrecipe.length < 1) return;
-        if(!$scope.newfactor || $scope.newfactor.length < 1){
-          $scope.newfactor = $scope.newrecipe.yield;
-        };
-        var newSchedule = new Schedules({date: $scope.startDate.setHours(12), recipe: $scope.newrecipe, factor: $scope.newfactor});
-        newSchedule.$save(function(response){
-          $scope.schedulesArray[0].schedule.push(response);
-          $scope.newrecipe = null;
-        });	
-      }
-
-      $scope.remove = function(lineItem){
+      $scope.remove = function(lineItem, parentIndex){
         Schedules.remove({id: lineItem._id}, function(){
-        	var index = $scope.schedulesArray[0].schedule.indexOf(lineItem);
-          $scope.schedulesArray[0].schedule.splice(index, 1);
+        	var index = $scope.schedulesArray[parentIndex].schedule.indexOf(lineItem);
+          $scope.schedulesArray[parentIndex].schedule.splice(index, 1);
           var message = 'The recipe '+lineItem.recipe.name+' was successfully removed from schedule';
 	        $scope.alerts.push({type: 'info', msg: message});
         });
       }
 
-      $scope.openStartDate = function($event) {
-        $event.preventDefault();
-        $event.stopPropagation();
-
-        $scope.startOpened = true;
-      };
-
-      $scope.openEndDate = function($event) {
-        $event.preventDefault();
-        $event.stopPropagation();
-
-        $scope.endOpened = true;
-      };
       
+      $scope.scheduleAdd = function(date) {
+	      var modalAddSchedule = $uibModal.open({
+	        animation: true,
+	        templateUrl: 'partials/schedules.add.tpl.html',
+	        controller: 'ModalScheduleAddController',
+	        size: 'xs',
+	        resolve: {
+	            date: function(){
+	              return date;
+	            }
+	        }
+	      });
+	
+	      modalAddSchedule.result.then(function(successMsg){
+	        $scope.alerts.push(successMsg);
+		      $scope.updateSchedules($scope.selectedDates);
+	      });
+      }
       
       $scope.scheduleEdit = function(lineItem) {
 	      var modalEditSchedule = $uibModal.open({
@@ -110,7 +120,7 @@ angular.module('app.schedules', ['ui.router'])
 	
 	      modalEditSchedule.result.then(function(successMsg){
 	        $scope.alerts.push(successMsg);
-		      $scope.updateSchedules($scope.startDate, $scope.endDate, $scope.populate);
+		      $scope.updateSchedules($scope.selectedDates);
 	      });
       }
       
@@ -125,7 +135,7 @@ angular.module('app.schedules', ['ui.router'])
       $scope.recipe = schedule.recipe;
       $scope.date = schedule.date;
       $scope.factor = schedule.factor;
-     
+         
       $scope.ok = function(){
         schedule.date = $scope.date;
         schedule.factor = $scope.factor;
@@ -140,6 +150,42 @@ angular.module('app.schedules', ['ui.router'])
       }
 
     }])
+
+
+    .controller('ModalScheduleAddController', ['$scope', '$stateParams', '$modalInstance', '$filter', 'Schedules', 'date', 'TARecipes', function ($scope, $stateParams, $modalInstance, $filter, Schedules, date, TARecipes) {
+
+      $scope.date = date;
+      
+      $scope.GetRecipes = function($viewValue){
+        return TARecipes.search({search: $viewValue})
+          .$promise.then(function(response) {
+            return response;
+          });
+      }
+      
+      $scope.TASelect = function (item) {
+      	$scope.factor = item.yield;
+      };
+      
+      
+      $scope.ok = function(){
+      	if(!$scope.newrecipe || $scope.newrecipe.length < 1) return;
+        if(!$scope.factor || $scope.factor.length < 1){
+          $scope.factor = $scope.recipe.yield;
+        };
+        var newSchedule = new Schedules({date: $scope.date.setHours(12), recipe: $scope.newrecipe, factor: $scope.factor});
+        newSchedule.$save(function(response){
+          var message = 'The recipe '+$scope.newrecipe.name+' was successfully scheduled for the '+$filter('date')($scope.date, 'dd.MM.yyyy')+' with '+$scope.factor+' persons.';
+          $modalInstance.close({type: 'success', msg: message});
+        });
+      }
+
+      $scope.cancel = function(){
+        $modalInstance.dismiss('cancel');
+      }
+
+    }])
+
 
 
 //---------------
@@ -162,11 +208,6 @@ angular.module('app.schedules', ['ui.router'])
 	        		name: 'Schedules',
         			icon: 'glyphicon glyphicon-calendar'
 			}
-      		})
-      		.state('user.schedules.add', {
-			url: '/add/:date',
-        		templateUrl: 'partials/schedules.date.tpl.html',
-        		controller: 'SchedulesController',
       		})
     ;
   }])

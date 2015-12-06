@@ -1,34 +1,56 @@
   <div class="row">
 
-    <div class="col-xs-12" style="margin-bottom: 20px;">
+    <div class="col-xs-12">
+      	<uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" dismiss-on-timeout="5000" close="closeAlert($index)">{{alert.msg}}</uib-alert>
       <h3 style="margin-bottom: 30px;">Schedules</h3>
     </div>
-    <div class="col-md-4 col-xs-12">
-      <p class="input-group">
-        <input type="text" ng-model="startDate" uib-datepicker-popup is-open="startOpened" starting-day="1" ng-required="true" class="form-control" ng-change="updateSchedules(startDate, endDate)" />
-        <span class="input-group-btn">
-          <button type="button" class="btn btn-default" ng-click="openStartDate($event)"><i class="glyphicon glyphicon-calendar"></i></button>
-        </span>
-      </p>
-    </div>
-    <div class="col-md-4 col-md-offset-4 col-xs-12">
-      <p class="input-group">
-        <input type="text" ng-model="endDate" uib-datepicker-popup is-open="endOpened" starting-day="1" ng-required="true" class="form-control" ng-change="updateSchedules(startDate, endDate)" />
-        <span class="input-group-btn">
-          <button type="button" class="btn btn-default" ng-click="openEndDate($event)"><i class="glyphicon glyphicon-calendar"></i></button>
-        </span>
-      </p>
-    </div>
-    <div class="col-xs-12">
-      <div class="list-group">
-        <div ng-repeat="schedules in schedulesArray">
-          <a class="list-group-item" ui-sref="user.schedules.add({date: schedules.date})">
-            <div class="list-group-item-heading">{{schedules.date | date:'EEEE dd.MM.yyyy'}}</div>
-            <div class="list-group-item-text">
-              <div ng-repeat="schedule in schedules.schedule">{{schedule.factor}} Persons: {{schedule.recipe.name}}</div>
-            </div>
-          </a>
-        </div>
+    
+    
+    
+    <div class="col-xs-12 col-sm-7 col-md-7 col-lg-8">
+    	<div class="hidden-sm hidden-md my-datepicker" style="padding-bottom: 20px;">
+      	<uib-datepicker ng-model="activeDate" multi-select="selectedDates" select-range="true" starting-day="1" ng-change="updateSchedules(selectedDates)" show-weeks="false" class="well" ng-required="true" style="margin:auto; width: 320px;"></uib-datepicker>
+      </div>
+	    <div ng-repeat="schedules in schedulesArray | orderBy: 'date'" class="panel panel-primary">
+	      <!-- Default panel contents -->
+	      <div class="panel-heading panel-header-schedules">
+	      	<div style="padding-top: 6px; float: left"><strong>{{schedules.date | date:'EEEE dd.MM.yyyy'}}</strong></div>
+          <button class="btn btn-default pull-right" ng-click="scheduleAdd(schedules.date)" role="button">
+          	<span class="glyphicon glyphicon-plus"></span>
+          </button>
+	      </div>
+	      <!-- Table -->
+	      <table class="table table-striped" ng-show="schedules.schedule">
+	        <tbody>
+	          <tr ng-repeat="schedule in schedules.schedule">
+	            <td style="width: 100px;">{{schedule.factor}} persons</td>
+	            <td>{{schedule.recipe.name}}</td>
+	            <td>
+	            	<button class="btn btn-default pull-right" ng-click="scheduleEdit(schedule)" role="button">
+	            		<span class="glyphicon glyphicon-pencil"></span>
+	            	</button>
+	            </td>
+	            <td class="hidden-xs" style="width: 30px;">
+	            	<button class="btn btn-default pull-right" ng-really-click="remove(schedule, $parent.$index)" role="button">
+	            		<span class="glyphicon glyphicon-trash"></span>
+	            	</button>
+	            </td>
+	          </tr>
+	        </tbody>
+	      </table>
+	      <p ng-hide="schedules.schedule.length>0" style="padding:5px 10px;">No recipes scheduled for this day.</p>
+	    </div>
+	  </div>
+    <div class="hidden-xs col-sm-5 col-md-5 col-lg-4" style="font-size: 14px;">
+    	<div class="pull-right input-group my-datepicker">
+    		<div style="display:inline-block; min-height:290px;">
+      		<uib-datepicker ng-model="startDate" starting-day="1" ng-change="updateSchedules(startDate, endDate)" show-weeks="false" max-date="endDate" class="well" ng-required="true"></uib-datepicker>
+    		</div>
+      </div>
+      <div class="pull-right input-group my-datepicker">
+				<div style="display:inline-block; min-height:290px;">
+		      <uib-datepicker ng-model="endDate" starting-day="1" ng-change="updateSchedules(startDate, endDate)" show-weeks="false" min-date="startDate" class="well" ng-required="true"></uib-datepicker>
+		    </div>
       </div>
     </div>
   </div>

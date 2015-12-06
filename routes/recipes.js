@@ -49,6 +49,16 @@ router.post('/', auth.verify, function(req, res, next) {
 });
 
 /* GET /recpes/id */
+router.get('/random/:number', auth.verify, function(req, res, next) {
+  var preferredLanguage = (req._user.settings && req._user.settings.preferredLanguage) ? req._user.settings.preferredLanguage : 'en';
+  Recipe.aggregate([ { $sample: { size: req.params.number } } ]).exec( function (err, recipe) {
+    if (err) return next(err);
+    res.json(recipe);
+  });
+});
+
+
+/* GET /recpes/id */
 router.get('/:id', auth.verify, function(req, res, next) {
   var preferredLanguage = (req._user.settings && req._user.settings.preferredLanguage) ? req._user.settings.preferredLanguage : 'en';
   Recipe.findById(req.params.id).populate(['tags', 'ingredients.ingredient', 'ingredients.unit']).populate('author', 'fullname').populate('dishType', 'name.'+preferredLanguage).lean().exec( function (err, recipe) {

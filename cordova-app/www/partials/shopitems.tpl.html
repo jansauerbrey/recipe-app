@@ -2,47 +2,56 @@
     <div class="col-xs-12">
 	    <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" dismiss-on-timeout="5000" close="closeAlert($index)">{{alert.msg}}</uib-alert> 
 	    <h3 style="margin-bottom: 30px;">Shopitems
-	      <button ng-click="modalShopitemAdd()" class="btn btn-primary pull-right"><span class="glyphicon glyphicon-plus"></span></button>
+	      <button ng-click="modalShopitemAdd()" class="hidden-sm hidden-md hidden-lg btn btn-default pull-right"><span class="glyphicon glyphicon-plus"></span></button>
 	      <button ng-show="autoupdate" ng-click="stopAutoupdate()" class="btn btn-success pull-right active" style="margin-right: 10px;"><span class="glyphicon glyphicon-refresh"></span></button>
 	      <button ng-show="!autoupdate" ng-click="startAutoupdate()" class="btn btn-default pull-right" style="margin-right: 10px;"><span class="glyphicon glyphicon-refresh"></span></button>
 	    </h3>
 		</div>
     <div class="col-xs-12 col-sm-7 col-md-6 col-lg-5">
-	    <div ng-repeat="(key, value) in shopitems | orderBy: 'order' | groupBy: 'ingredient.category'" class="panel panel-primary">
-	      <!-- Default panel contents -->
-	      <div class="panel-heading"><strong>{{key}}</strong><span class="badge pull-right">{{(value | filter: {completed: false}).length}} / {{value.length}}</span></div>
-	
-	      <!-- Table -->
-	      <table class="table table-striped">
-	        <thead class="hidden-xs">
-	          <th style="width: 30px;"></th>
-	          <th>Ingredient</th>
-	          <th style="width: 100px;">Amount</th>
-	          <th style="width: 30px;"></th>
-	          <th class="hidden-xs" style="width: 30px;"></th>
-	        </thead>
-	        <tbody>
-	          <tr ng-repeat="item in value | orderBy: ['order', 'ingredient.category','ingredient.subcategory','ingredient.subsubcategory','ingredient.name.de']">
-	            <td style="width: 30px;"><button class="btn btn-default" ng-click="complete(item)"><span class="glyphicon" ng-class="{'glyphicon-none': !item.completed, 'glyphicon-ok': item.completed}"></span></button></td>
-	            <td ng-class="{'item-checked': item.completed}">{{item.ingredient.name.de}}</td>
-	            <td ng-class="{'item-checked': item.completed}" style="width: 100px;">{{item.amount | number}} {{item.unit.name.de}}</td>
-	            <td>
-	            	<button class="btn btn-primary pull-right" ng-click="shopitemDetails(item)" role="button">
-	            		<span class="glyphicon glyphicon-question-sign"></span>
-	            	</button>
-	            </td>
-	            <td class="hidden-xs" style="width: 30px;">
-	            	<button class="btn btn-primary pull-right hidden-xs" ng-really-click="remove(item)" role="button">
-	            		<span class="glyphicon glyphicon-trash"></span>
-	            	</button>
-	            </td>
-	          </tr>
-	        </tbody>
-	      </table>
-	    </div>
+		  <div class="well" ng-hide="shopitems.length>0">No ingredients on the shopping list at the moment.</div>
+    	<uib-accordion class="table-panel" close-others="false">
+		    <uib-accordion-group ng-repeat="(key, value) in shopitems | orderBy: 'order' | groupBy: 'ingredient.category'" panel-class="panel-primary" is-open="true">
+		      <!-- Default panel contents -->
+		      <uib-accordion-heading><strong>{{key}}</strong><span class="badge pull-right">{{(value | filter: {completed: false}).length}} / {{value.length}}</span></uib-accordion-heading>
+		
+		      <!-- Table -->
+		      <table class="table table-striped">
+		        <thead class="hidden-xs">
+		          <th style="width: 30px;"></th>
+		          <th>Ingredient</th>
+		          <th style="width: 100px;">Amount</th>
+		          <th style="width: 30px;"></th>
+		          <th class="hidden-xs" style="width: 30px;"></th>
+		        </thead>
+		        <tbody>
+		          <tr ng-repeat="item in value | orderBy: ['order', 'ingredient.category','ingredient.subcategory','ingredient.subsubcategory','ingredient.name.de']">
+		            <td style="width: 30px;"><button class="btn btn-default" ng-click="complete(item)"><span class="glyphicon" ng-class="{'glyphicon-none': !item.completed, 'glyphicon-ok': item.completed}"></span></button></td>
+		            <td ng-class="{'item-checked': item.completed}">{{item.ingredient.name.de}}</td>
+		            <td ng-class="{'item-checked': item.completed}" style="width: 100px;">{{item.amount | number}} {{item.unit.name.de}}</td>
+		            <td>
+		            	<button class="btn btn-default pull-right" ng-click="shopitemDetails(item)" role="button">
+		            		<span class="glyphicon glyphicon-question-sign"></span>
+		            	</button>
+		            </td>
+		            <td class="hidden-xs" style="width: 30px;">
+		            	<button class="btn btn-default pull-right hidden-xs" ng-really-click="remove(item)" role="button">
+		            		<span class="glyphicon glyphicon-trash"></span>
+		            	</button>
+		            </td>
+		          </tr>
+		        </tbody>
+		      </table>
+		    </uib-accordion-group>
+		  </uib-accordion>
 	  </div>
     <div class="hidden-xs col-sm-5 col-md-6 col-lg-7">
     	<div class="list-group">
+	      <div>
+	        <a class="list-group-item col-sm-6 col-md-4 col-lg-3" style="height: 150px; text-align: center;" ng-click="modalShopitemAdd()">
+	          <div><img style="width: 80px; height: 80px;" ng-src="upload/plus.png"></img></div>
+	          <div>Add Ingredient</div>
+	        </a>
+	      </div>
 	      <div ng-repeat="ingredient in frequentshopitems">
 	        <a class="list-group-item col-sm-6 col-md-4 col-lg-3" style="height: 150px; text-align: center;" ng-click="modalFrequentshopitemAdd(ingredient._id)">
 	          <div><img style="width: 80px; height: 80px;" ng-src="{{ingredient._id.rewe_img_link_sm}}"></img></div>

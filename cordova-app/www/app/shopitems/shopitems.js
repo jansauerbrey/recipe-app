@@ -78,6 +78,10 @@ angular.module('app.shopitems', ['ui.router'])
       $scope.autoupdate = true;
 
       $scope.alerts = [];
+      $scope.status = [];
+			for(i=0;i<$scope.shopitems.length;i++){
+				$scope.status[$scope.shopitems[i].ingredient.category] = true;
+			}
 
       
       containsObj = function(array, obj) {

@@ -8,8 +8,7 @@
       <span class="icon-bar"></span>
     </button>
     <div class="beta-tag">&nbsp;BETA&nbsp;</div>
-	<a class="hidden-xs hidden-md hidden-lg navbar-brand" ui-sref="user.home" ng-show="determineVisibility('User')"><span class="glyphicon glyphicon-home" style="padding-left: 20px;"></span></a>
-	<a class="hidden-xs hidden-sm navbar-brand" ui-sref="user.home" ng-show="determineVisibility('User')">rezept-planer.de</a>
+	<a class="hidden-xs navbar-brand" ui-sref="user.home" ng-show="determineVisibility('User')">rezept-planer.de</a>
 	<a class="hidden-xs navbar-brand" ui-sref="anon.startpage" ng-show="determineVisibility('NoUser')">rezept-planer.de</a>
   </div>
   <div class="collapse navbar-collapse">
@@ -20,7 +19,7 @@
       <li ng-repeat="state in states | filter: {requiresLogin: false, panelright: false}" ng-class="{active: $state.is(state.name)}" ng-show="determineVisibility(state.requiredPermissions)">
         <a ui-sref="{{state.name}}">{{ state.label }}</a>
       </li>
-      <li class="hidden-xs hidden-sm" uib-dropdown is-open="othersIsOpen">
+      <li class="hidden-xs" uib-dropdown is-open="othersIsOpen" style="cursor: pointer;">
       <a class="dropdown-toggle" ui-sref="/" uib-dropdown-toggle ng-show="determineVisibility('Admin')">Admin <span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">
           <li ng-repeat="state in states | filter: {requiredPermissions: 'Admin', panelright: false}" ng-class="{active: $state.is(state.name)}" ng-show="determineVisibility(state.requiredPermissions)">
