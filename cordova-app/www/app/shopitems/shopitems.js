@@ -345,8 +345,8 @@ angular.module('app.shopitems', ['ui.router'])
     $stateProvider
       		.state('user.shopitems', {
 			url: '/shopitems',
-        		templateUrl: 'partials/shopitems.tpl.html',
-        		controller: 'ShopitemsController',
+      templateUrl: 'partials/shopitems.tpl.html',
+      controller: 'ShopitemsController',
 			resolve: {
 				frequentshopitems: function(Frequentshopitems){
 					return Frequentshopitems.query().$promise;

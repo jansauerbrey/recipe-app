@@ -74,7 +74,7 @@ angular.module('app.dishtypes', ['ui.router'])
 			},
 			data: {
         			name: 'Dish types',
-        			icon: 'glyphicon glyphicon-scale'
+        			icon: 'glyphicon glyphicon-grain'
 			}
       		})
       		.state('admin.dishtypes.edit', {

@@ -1,12 +1,8 @@
   <div class="row">
-
     <div class="col-xs-12">
       	<uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" dismiss-on-timeout="5000" close="closeAlert($index)">{{alert.msg}}</uib-alert>
       <h3 style="margin-bottom: 30px;">Schedules</h3>
     </div>
-    
-    
-    
     <div class="col-xs-12 col-sm-7 col-md-7 col-lg-8">
     	<div class="hidden-sm hidden-md hidden-lg my-datepicker" style="padding-bottom: 20px;">
       	<uib-datepicker ng-model="activeDate" multi-select="selectedDates" select-range="true" starting-day="1" ng-change="updateSchedules(selectedDates)" show-weeks="false" class="well" ng-required="true" style="margin:auto; width: 320px;"></uib-datepicker>
@@ -24,7 +20,7 @@
 	        <tbody>
 	          <tr ng-repeat="schedule in schedules.schedule">
 	            <td style="width: 100px;"><div style="padding: 5px;">{{schedule.factor}} persons</div></td>
-	            <td><div style="padding: 5px;"><strong>{{schedule.recipe.name}}</strong></div></td>
+	            <td><a  ui-sref="user.recipes.details.view({id: schedule.recipe._id, factor: schedule.factor})"><div style="padding: 5px;"><strong>{{schedule.recipe.name}}</strong></div></a></td>
 	            <td>
 	            	<button class="btn btn-default pull-right" ng-click="scheduleEdit(schedule)" role="button">
 	            		<span class="glyphicon glyphicon-pencil"></span>

@@ -12,13 +12,13 @@
 				<span ng-repeat="tag in recipe.tags" class="label label-primary" style="margin: 2px; display: inline-block;">{{tag.text}}</span>
 			</div>
 			<div class="col-xs-3 thumbnail" style="padding: 10px;">
-				<span><i class="glyphicon glyphicon-user fa-2x" style="margin-right: 5px;"></i> {{recipe.yield}} pers.</span>
+				<div><div style="margin: auto; width: 30px;"><i class="glyphicon glyphicon-user fa-2x"></i></div><div ng-show="factorAvailable"><input type="number" ng-model="factor" ng-required="true" class="form-control" ></div><div ng-hide="factorAvailable" style="margin: auto; width: 80px; padding: 7px;">{{recipe.yield}} persons</div></div>
 			</div>
 			<div class="col-xs-3 col-xs-offset-1 thumbnail" style="padding: 10px;">
-				<span><i class="glyphicon glyphicon-time fa-2x" style="margin-right: 5px;"></i> {{recipe.totalTime}} min.</span>
+				<div><div style="margin: auto; width: 30px;"><i class="glyphicon glyphicon-time fa-2x"></i></div><div style="margin: auto; width: 80px; padding: 7px;">{{recipe.totalTime}} min.</div></div>
 			</div>
 			<div class="col-xs-3 col-xs-offset-1 thumbnail" style="padding: 10px;">
-				<span><i class="glyphicon glyphicon-glass fa-2x" style="margin-right: 5px;"></i> {{recipe.kilocalories}} kcal.</span>
+				<div><div style="margin: auto; width: 30px;"><i class="glyphicon glyphicon-glass fa-2x"></i></div><div style="margin: auto; width: 80px; padding: 7px;">{{recipe.kilocalories}} kcal.</div></div>
 			</div>
 		</div>
 		<div class="col-xs-12" style="padding: 0px;">
@@ -30,7 +30,7 @@
 				</thead>
 				<tbody>
 					<tr ng-repeat="ingredient in recipe.ingredients" ng-if="ingredient.ingredient">
-						<td>{{ingredient.qty | number}}</td>
+						<td>{{factor/recipe.yield*ingredient.qty | number}}</td>
 						<td>
 							<span ng-show="recipe.language==='en'">{{ingredient.unit.name.en}}</span>
 							<span ng-show="recipe.language==='de'">{{ingredient.unit.name.de}}</span>

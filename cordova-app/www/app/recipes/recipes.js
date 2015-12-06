@@ -93,6 +93,9 @@ angular.module('app.recipes', ['ui.router'])
 		$scope.allowEdit = true;
 	}
 
+	$scope.factorAvailable = $stateParams.factor > 0 ? true : false;
+	$scope.factor = $scope.factorAvailable ? $stateParams.factor : $scope.recipe.yield;
+
 	$scope.onTypeaheadSelect = function ($item, $model, $label) {
 		if(!$scope.recipe.ingredients.filter(function(n){ return n.ingredient == '' }).length) {
 			$scope.recipe.ingredients.push({qty: '', unit: '', ingredient: ''});
@@ -286,60 +289,61 @@ angular.module('app.recipes', ['ui.router'])
 				}
 			}
       		})
-		.state('user.recipes.details', {
-			abstract: true,
-			url: "/details/:id",
-			template: '<ui-view />',
-			resolve: {
-				recipe: ['Recipes', '$stateParams', function(Recipes, $stateParams){
-					var recipe = Recipes.get({'id': $stateParams.id}, function(response) {
-						return response.ingredients.push({qty: '', unit: '', ingredient: ''});
-					}).$promise;
-					return recipe;
-				}],
-				user: function(UserService){
-					return UserService.getCurrentLoginUser();
-				},
-				units: function(Units){
-					return Units.query().$promise;
-				},
-				dishtypes: function(DishTypes){
-					return DishTypes.query().$promise;
+			.state('user.recipes.details', {
+				abstract: true,
+				url: "/details/:id",
+				template: '<ui-view />',
+				resolve: {
+					recipe: ['Recipes', '$stateParams', function(Recipes, $stateParams){
+						var recipe = Recipes.get({'id': $stateParams.id}, function(response) {
+							return response.ingredients.push({qty: '', unit: '', ingredient: ''});
+						}).$promise;
+						return recipe;
+					}],
+					user: function(UserService){
+						return UserService.getCurrentLoginUser();
+					},
+					units: function(Units){
+						return Units.query().$promise;
+					},
+					dishtypes: function(DishTypes){
+						return DishTypes.query().$promise;
+					}
 				}
-			}
-		})
-      		.state('user.recipes.details.view', {
-			url: '/view',
-        		templateUrl: 'partials/recipes.view.tpl.html',
-			controller: 'RecipeDetailCtrl'
-     		})
-      		.state('user.recipes.details.edit', {
-			url: '/edit',
-        		templateUrl: 'partials/recipes.edit.tpl.html',
-			controller: 'RecipeDetailCtrl'
-     		})
-      		.state('user.recipes.add', {
-			url: '/add',
-        		templateUrl: 'partials/recipes.add.tpl.html',
-        		controller: 'RecipeDetailCtrl',
-			resolve: {
-				recipe: function(Recipes){
-					var recipe = new Recipes();
-					recipe.ingredients = [];
-					recipe.ingredients.push({qty: '', unit: '', ingredient: ''});
-					return recipe;
-				},
-				user: function(UserService){
-					return UserService.getCurrentLoginUser();
-				},
-				units: function(Units){
-					return Units.query().$promise;
-				},
-				dishtypes: function(DishTypes){
-					return DishTypes.query().$promise;
+			})
+  		.state('user.recipes.details.view', {
+				url: '/view',
+				params: {factor: null},
+    		templateUrl: 'partials/recipes.view.tpl.html',
+				controller: 'RecipeDetailCtrl'
+ 			})
+  		.state('user.recipes.details.edit', {
+				url: '/edit',
+    		templateUrl: 'partials/recipes.edit.tpl.html',
+				controller: 'RecipeDetailCtrl'
+ 			})
+  		.state('user.recipes.add', {
+				url: '/add',
+    		templateUrl: 'partials/recipes.add.tpl.html',
+    		controller: 'RecipeDetailCtrl',
+				resolve: {
+					recipe: function(Recipes){
+						var recipe = new Recipes();
+						recipe.ingredients = [];
+						recipe.ingredients.push({qty: '', unit: '', ingredient: ''});
+						return recipe;
+					},
+					user: function(UserService){
+						return UserService.getCurrentLoginUser();
+					},
+					units: function(Units){
+						return Units.query().$promise;
+					},
+					dishtypes: function(DishTypes){
+						return DishTypes.query().$promise;
+					}
 				}
-			}
-      		})
+  		})
     ;
   }])
 ;

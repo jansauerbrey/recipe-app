@@ -9,6 +9,47 @@ angular.module('app.schedules', ['ui.router'])
             'update': { method:'PUT' }
           });
         }])
+        
+        
+        
+        .factory('retrieveSchedules', ['Schedules', '$q', function(Schedules, $q){
+		      var retrieve = function(selectedDates){
+		      	var deferred = $q.defer();
+		      	startDate = Math.min.apply(null, selectedDates);
+		      	endDate = Math.max.apply(null, selectedDates);
+		      	var startDate = new Date(startDate);
+		      	startDate.setHours(0,0,0,0);
+		      	startDate = startDate.getTime();
+		      	var endDate = new Date(endDate);
+		      	endDate.setDate(endDate.getDate() +1);
+		      	endDate.setHours(0,0,0,0);
+		      	endDate = endDate.getTime();
+		      	Schedules.query({startDate: startDate, endDate: endDate}, function(response){
+		      		var grouped = [];
+		      		for(i=0;i<selectedDates.length;i++){
+		      			var actualDay = new Date(selectedDates[i]);
+			          actualDay.setHours(0, 0, 0, 0);
+			          grouped[i] = {date: actualDay, schedule: []};
+		      		}
+		      		for(i=0;i<response.length;i++){
+		      			var actualDay = new Date(response[i].date);
+			          actualDay.setHours(0, 0, 0, 0);
+			          for (j=0;j<selectedDates.length;j++)
+		  					{
+		    					if (angular.equals(grouped[j].date, actualDay)	) {
+		    						grouped[j].schedule.push(response[i]);
+		    					}
+		  					} 
+		      		}
+							deferred.resolve(grouped);
+						});
+				    return deferred.promise;
+		      };
+      
+		      return {
+            retrieve: retrieve
+        	}
+		    }])
 
 
 //---------------
@@ -17,10 +58,11 @@ angular.module('app.schedules', ['ui.router'])
 
 // Schedules
 
-    .controller('SchedulesController', ['$scope', '$stateParams', '$uibModal', 'Schedules', function ($scope, $stateParams, $uibModal, Schedules) {
+    .controller('SchedulesController', ['$scope', '$stateParams', '$uibModal', 'Schedules', 'schedules', 'retrieveSchedules', function ($scope, $stateParams, $uibModal, Schedules, schedules, retrieveSchedules) {
 
 			$scope.alerts = [];
 			$scope.selectedDates = [];
+			$scope.schedulesArray = schedules;
       
       
 			for(i=0;i<7;i++){
@@ -33,48 +75,6 @@ angular.module('app.schedules', ['ui.router'])
 	  // remove hours
       $scope.activeDate.setHours(0, 0, 0, 0);
       
-      
-      var containsObj = function(array, obj) {
-  			var i, l = array.length;
-  			for (i=0;i<array.length;i++)
-  			{
-    			if (angular.equals(array[i], obj)) return i;
-  			}
-  			return false;
-			}
-      
-      $scope.updateSchedules = function(selectedDates){
-      	startDate = Math.min.apply(null, selectedDates);
-      	endDate = Math.max.apply(null, selectedDates);
-      	var startDate = new Date(startDate);
-      	startDate.setHours(0,0,0,0);
-      	startDate = startDate.getTime();
-      	var endDate = new Date(endDate);
-      	endDate.setDate(endDate.getDate() +1);
-      	endDate.setHours(0,0,0,0);
-      	endDate = endDate.getTime();
-      	Schedules.query({startDate: startDate, endDate: endDate}, function(response){
-      		var grouped = [];
-      		for(i=0;i<$scope.selectedDates.length;i++){
-      			var actualDay = new Date($scope.selectedDates[i]);
-	          actualDay.setHours(0, 0, 0, 0);
-	          grouped[i] = {date: actualDay, schedule: []};
-      		}
-      		for(i=0;i<response.length;i++){
-      			var actualDay = new Date(response[i].date);
-	          actualDay.setHours(0, 0, 0, 0);
-	          for (j=0;j<$scope.selectedDates.length;j++)
-  					{
-    					if (angular.equals(grouped[j].date, actualDay)	) {
-    						grouped[j].schedule.push(response[i]);
-    					}
-  					} 
-      		}
-					$scope.schedulesArray = grouped;
-				});
-      };
-      
-      $scope.updateSchedules($scope.selectedDates);
 
       $scope.remove = function(lineItem, parentIndex){
         Schedules.remove({id: lineItem._id}, function(){
@@ -101,7 +101,9 @@ angular.module('app.schedules', ['ui.router'])
 	
 	      modalAddSchedule.result.then(function(successMsg){
 	        $scope.alerts.push(successMsg);
-		      $scope.updateSchedules($scope.selectedDates);
+		      retrieveSchedules.retrieve($scope.selectedDates).then( function(data){
+						if (data) $scope.schedulesArray = data;
+					});
 	      });
       }
       
@@ -120,7 +122,9 @@ angular.module('app.schedules', ['ui.router'])
 	
 	      modalEditSchedule.result.then(function(successMsg){
 	        $scope.alerts.push(successMsg);
-		      $scope.updateSchedules($scope.selectedDates);
+		      retrieveSchedules.retrieve($scope.selectedDates).then( function(data){
+						if (data) $scope.schedulesArray = data;
+					});
 	      });
       }
       
@@ -202,8 +206,22 @@ angular.module('app.schedules', ['ui.router'])
 		})
       		.state('user.schedules.list', {
 			url: '/list',
-        		templateUrl: 'partials/schedules.tpl.html',
-        		controller: 'SchedulesController',
+      templateUrl: 'partials/schedules.tpl.html',
+      controller: 'SchedulesController',
+			resolve: {
+				schedules: function(retrieveSchedules){
+						var selectedDates = [];
+						for(i=0;i<7;i++){
+							var tempDate = new Date();
+							tempDate.setDate(tempDate.getDate()+i);
+      				tempDate.setHours(0, 0, 0, 0);
+							selectedDates.push(tempDate.getTime());
+						}
+						return retrieveSchedules.retrieve(selectedDates).then( function(data){
+							return data;
+						});
+				}
+			},
 			data: {
 	        		name: 'Schedules',
         			icon: 'glyphicon glyphicon-calendar'
