@@ -216,6 +216,9 @@ body { padding-top: 60px;
     .my-datepicker .btn-sm {
     font-size: 16px;
 		}
+		.my-datepicker .well {
+    width: 320px;
+		}
 }
 
 .panel-header-schedules {
