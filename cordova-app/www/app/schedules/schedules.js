@@ -75,6 +75,12 @@ angular.module('app.schedules', ['ui.router'])
 	  // remove hours
       $scope.activeDate.setHours(0, 0, 0, 0);
       
+			$scope.updateSchedules = function(selectedDates){
+				retrieveSchedules.retrieve(selectedDates).then( function(data){
+							$scope.schedulesArray = data;
+						});
+			}
+
 
       $scope.remove = function(lineItem, parentIndex){
         Schedules.remove({id: lineItem._id}, function(){
