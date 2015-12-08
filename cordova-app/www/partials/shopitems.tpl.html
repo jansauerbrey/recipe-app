@@ -2,7 +2,7 @@
     <div class="col-xs-12">
 	    <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" dismiss-on-timeout="5000" close="closeAlert($index)">{{alert.msg}}</uib-alert> 
 	    <h3 style="margin-bottom: 30px;">Shopitems
-	      <button ng-really-click="remove()" class="btn btn-danger pull-right"><span class="glyphicon glyphicon-trash"></span></button>
+	      <button ng-really-click="remove()" ng-really-message="Are you sure to delete all items in the shopping list?" class="btn btn-danger pull-right"><span class="glyphicon glyphicon-trash"></span></button>
 	      <button ng-click="modalShopitemAdd()" class="hidden-sm hidden-md hidden-lg btn btn-default pull-right"><span class="glyphicon glyphicon-plus"></span></button>
 	      <button ng-show="autoupdate" ng-click="stopAutoupdate()" class="btn btn-success pull-right active" style="margin-right: 10px;"><span class="glyphicon glyphicon-refresh"></span></button>
 	      <button ng-show="!autoupdate" ng-click="startAutoupdate()" class="btn btn-default pull-right" style="margin-right: 10px;"><span class="glyphicon glyphicon-refresh"></span></button>

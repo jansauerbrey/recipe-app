@@ -168,7 +168,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
             			var recipeName = scope.$parent.recipe.name;
                 	var message =  "Are you sure to delete the recipe "+scope.$parent.recipe.name+"?";
             		} else {
-            			var message =  "Are you sure?";
+            			var message =  attrs.ngReallyMessage || "Are you sure?";
             		}
             		
                 
