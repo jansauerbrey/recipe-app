@@ -151,7 +151,7 @@ angular.module('app.shopitems', ['ui.router'])
         $scope.newamount = "";
       }
 
-      $scope.remove = function(item = null){
+      $scope.remove = function(item){
       	$scope.pauseAutoupdate = true;
       	if (!item) {
       		Shopitems.remove({}, null, function(success){
