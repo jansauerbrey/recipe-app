@@ -17,7 +17,7 @@ var transporter = nodemailer.createTransport({
 
 /* GET /user/info. */
 router.get('/info', auth.verify, function(req, res, next) {
-  User.findById( req._user.id, 'username fullname email is_admin settings', function (err, user) {
+  User.findById( req._user.id, 'username fullname email is_admin settings favoriteRecipes', function (err, user) {
     if (err) return next(err);
     res.json(user);
   });
@@ -29,6 +29,21 @@ router.get('/info/:id', auth.verify, function(req, res, next) {
     if (err) return next(err);
     res.json(user);
   });
+});
+
+/* ADD or DELETE /user/favorites/:id */
+router.put('/favorites/:id', auth.verify, function(req, res, next) {
+	if (req.body.method == "delete"){
+		User.findByIdAndUpdate(req._user.id, {$pull: {favoriteRecipes: req.params.id}}, { 'new': true}).select('username fullname email is_admin settings favoriteRecipes').exec( function (err, user) {
+		  if (err) return next(err);
+		  res.json(user);
+		});
+	} else if (req.body.method == "add"){
+		User.findByIdAndUpdate(req._user.id, {$push: {favoriteRecipes: req.params.id}}, { 'new': true}).select('username fullname email is_admin settings favoriteRecipes').exec( function (err, user) {
+		  if (err) return next(err);
+		  res.json(user);
+		});
+	}
 });
 
 

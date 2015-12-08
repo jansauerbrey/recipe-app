@@ -27,6 +27,12 @@ angular.module('app.auth', ['ui.router'])
                 if (currentUser !== undefined){
                     return currentUser.token;
                 }
+            },
+            updateFavoriteRecipes = function(favRecipes) {
+                if (currentUser !== undefined){
+	                currentUser.favoriteRecipes = favRecipes;
+	                $localStorage.user.favoriteRecipes = favRecipes;
+                }
             };
 
             if ($localStorage.user){
@@ -38,7 +44,8 @@ angular.module('app.auth', ['ui.router'])
             getCurrentLoginUser: getCurrentLoginUser,
             deleteCurrentUser: deleteCurrentUser,
             isAuthenticated: isAuthenticated,
-            getToken: getToken
+            getToken: getToken,
+            updateFavoriteRecipes: updateFavoriteRecipes
         }
 
     }])

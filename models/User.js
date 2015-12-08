@@ -13,8 +13,10 @@ var UserSchema = new mongoose.Schema({
   settings: {
     preferredLanguage: String,
     spokenLanguages: [String],
-    categoryOrder: [String]
+    categoryOrder: [String],
+    prefferedWeekStartDay: Number
   },
+	favoriteRecipes: [{type: mongoose.Schema.Types.ObjectId, ref: 'Recipe'}],
   autologin: { type: Boolean, default: false },
   created: { type: Date, default: Date.now },
   resetPasswordToken: { type: String },

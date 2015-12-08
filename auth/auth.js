@@ -1,5 +1,6 @@
 var redisHelper = require('./redisHelper');
 var tokenHelper = require('./tokenHelper');
+var User = require('../models/User.js');
 var TIME_TO_LIVE = 300; //5 minutes
 
 
@@ -33,8 +34,10 @@ exports.verify = function(req, res, next) {
 			console.log(err);
 			return res.sendStatus(401);
 		}
-		req._user = data;
-		next();
+		User.findOne({username: data.username}, function (err, user) {
+			req._user = user;
+			next();
+		});
 	});
 };
 
@@ -69,8 +72,10 @@ exports.verifyAdmin = function(req, res, next) {
 				console.log(err);
 				return res.sendStatus(401);
 			}
-			req._user = data;
-			next();
+			User.findOne({username: data.username}, function (err, user) {
+				req._user = user;
+				next();
+			});
 		}
 		else {
 			return res.sendStatus(401);

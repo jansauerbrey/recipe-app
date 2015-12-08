@@ -151,24 +151,32 @@ angular.module('app.shopitems', ['ui.router'])
         $scope.newamount = "";
       }
 
-      $scope.remove = function(item){
+      $scope.remove = function(item = null){
       	$scope.pauseAutoupdate = true;
-       	var itemIndex = containsObj($scope.shopitems, item);
-        for(var i=item.details.length-1;i>=0;i--){
-          Shopitems.remove({id: item.details[i]._id}, null, function(success){
-						var index;
-						for(var j=0;j<$scope.shopitems[itemIndex].details.length;j++){
-						  if ($scope.shopitems[itemIndex].details[j]._id == success._id){
-						    index = j;
-						  }
-						}
-	          $scope.shopitems[itemIndex].details.splice(index, 1);
-						if ($scope.shopitems[itemIndex].details.length === 0) {
-						  $scope.shopitems.splice(itemIndex, 1);
-						}
+      	if (!item) {
+      		Shopitems.remove({}, null, function(success){
+	          $scope.shopitems = []
 		    	}, function(err){
 		      	$scope.alerts.push({type: 'danger', msg: 'Network connection error'});
 			    });
+      	} else {
+	       	var itemIndex = containsObj($scope.shopitems, item);
+	        for(var i=item.details.length-1;i>=0;i--){
+	          Shopitems.remove({id: item.details[i]._id}, null, function(success){
+							var index;
+							for(var j=0;j<$scope.shopitems[itemIndex].details.length;j++){
+							  if ($scope.shopitems[itemIndex].details[j]._id == success._id){
+							    index = j;
+							  }
+							}
+		          $scope.shopitems[itemIndex].details.splice(index, 1);
+							if ($scope.shopitems[itemIndex].details.length === 0) {
+							  $scope.shopitems.splice(itemIndex, 1);
+							}
+			    	}, function(err){
+			      	$scope.alerts.push({type: 'danger', msg: 'Network connection error'});
+				    });
+	      	}
       	}
       	var pauseTimer;
       	$timeout.cancel( timer );

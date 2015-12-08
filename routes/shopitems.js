@@ -52,9 +52,18 @@ router.put('/:id', auth.verify, function(req, res, next) {
   });
 });
 
-/* DELETE /shopitems/:id */
+
+/* DELETE /shopitems */
 router.delete('/:id', auth.verify, function(req, res, next) {
   Shopitem.findByIdAndRemove(req.params.id, req.body, function (err, shopitems) {
+    if (err) return next(err);
+    res.json(shopitems);
+  });
+});
+
+/* DELETE ALL /shopitems/:id */
+router.delete('/', auth.verify, function(req, res, next) {
+  Shopitem.remove({author: req._user.id, expire_date: {'$gte': new Date()}}, function (err, shopitems) {
     if (err) return next(err);
     res.json(shopitems);
   });

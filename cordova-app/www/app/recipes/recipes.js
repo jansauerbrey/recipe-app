@@ -24,6 +24,11 @@ angular.module('app.recipes', ['ui.router'])
           });
         }])
 
+        .factory('Favorites', ['$resource', 'BASE_URI', function($resource, BASE_URI){
+          return $resource(BASE_URI+'api/user/favorites/:id', null, {
+            'update': { method:'PUT' }
+          });
+        }])
 
 
 //---------------
@@ -78,7 +83,7 @@ angular.module('app.recipes', ['ui.router'])
 
     }])
 
-    .controller('RecipeDetailCtrl', ['$rootScope', '$scope', '$stateParams', '$uibModal', 'user', 'recipe', 'Recipes', 'Tags', 'Ingredients', 'units', 'dishtypes', '$state', 'TAIngredients', 'TATags', 'isCordova', function ($rootScope, $scope, $stateParams, $uibModal, user, recipe, Recipes, Tags, Ingredients, units, dishtypes, $state, TAIngredients, TATags, isCordova) {
+    .controller('RecipeDetailCtrl', ['$rootScope', '$scope', '$stateParams', '$uibModal', 'user', 'recipe', 'Recipes', 'Tags', 'Ingredients', 'units', 'dishtypes', '$state', 'TAIngredients', 'TATags', 'isCordova', 'Favorites', 'UserService', function ($rootScope, $scope, $stateParams, $uibModal, user, recipe, Recipes, Tags, Ingredients, units, dishtypes, $state, TAIngredients, TATags, isCordova, Favorites, UserService) {
 	$scope.isCordova = isCordova;
 	$scope.alerts = [];
 	$scope.submitted = false;
@@ -101,6 +106,21 @@ angular.module('app.recipes', ['ui.router'])
 			$scope.recipe.ingredients.push({qty: '', unit: '', ingredient: ''});
 		}
 	};
+
+
+	$scope.favorite = function(){
+		Favorites.update({id: $scope.recipe._id}, {method: 'add'}, function(response){
+			UserService.updateFavoriteRecipes(response.favoriteRecipes);
+			$scope.recipe.fav_recipe = true;
+		});
+	};
+	$scope.unfavorite = function(){
+		Favorites.update({id: $scope.recipe._id}, {method: 'delete'}, function(response){
+			UserService.updateFavoriteRecipes(response.favoriteRecipes);
+			$scope.recipe.fav_recipe = false;
+		});
+	};
+
 
 	$scope.GetIngredients = function(viewValue){
 		return TAIngredients.search({search: viewValue, language: $scope.recipe.language}).$promise.then(function(response) {
@@ -270,7 +290,8 @@ angular.module('app.recipes', ['ui.router'])
 			params: {
 				dishType: undefined,
 				author: undefined,
-				new_recipe: undefined
+				new_recipe: undefined,
+				fav_recipe: undefined
 			},
         		templateUrl: 'partials/recipes.list.tpl.html',
         		controller: 'RecipeListController',
@@ -278,7 +299,7 @@ angular.module('app.recipes', ['ui.router'])
 				recipes: ['Recipes', '$stateParams', function(Recipes, $stateParams){
 					var searchDate = new Date();
 					searchDate = $stateParams.new_recipe ? searchDate.setDate(searchDate.getDate() - 14) : new Date(2015,0,0);
-					var query = {'author': $stateParams.author, 'updated_at': searchDate, 'dishType': $stateParams.dishType};
+					var query = {'author': $stateParams.author, 'updated_at': searchDate, 'dishType': $stateParams.dishType, '_id': $stateParams.fav_recipe};
 					return Recipes.query(query).$promise;
 				}],
 				user: function(UserService){

@@ -4,8 +4,15 @@
       <h3 style="margin-bottom: 30px;">Schedules</h3>
     </div>
     <div class="col-xs-12 col-sm-7 col-md-7 col-lg-8">
-    	<div class="hidden-sm hidden-md hidden-lg my-datepicker" style="padding-bottom: 20px;">
-      	<uib-datepicker ng-model="activeDate" multi-select="selectedDates" select-range="true" starting-day="1" ng-change="updateSchedules(selectedDates)" show-weeks="false" class="well" ng-required="true" style="margin:auto; width: 320px;"></uib-datepicker>
+    	<div class="hidden-sm hidden-md hidden-lg well">
+    		<div class="my-datepicker" style="margin: auto;">
+	      	<uib-datepicker ng-model="activeDate" multi-select="selectedDates" select-range="true" starting-day="1" ng-change="updateSchedules(selectedDates)" show-weeks="false" ng-required="true"></uib-datepicker>
+	      	<div style="padding-top: 10px;">
+	      		<button class="hidden-sm btn btn-default" ng-click="selectWeek(-8)" role="button" style="margin-right: 5px;">Last week</button>
+	      		<button class="btn btn-default" ng-click="selectWeek(-1)" role="button" style="margin-right: 5px;">This week</button>
+	      		<button class="btn btn-default pull-right" ng-click="selectWeek(6)" role="button">Next week</button>
+	      	</div>
+	      </div>
       </div>
 	    <div ng-repeat="schedules in schedulesArray | orderBy: 'date'" class="panel panel-primary">
 	      <!-- Default panel contents -->
@@ -37,9 +44,16 @@
 	      <p ng-hide="schedules.schedule.length>0" class="text-muted" style="padding:5px 10px;">No recipes scheduled for this day.</p>
 	    </div>
 	  </div>
-    <div class="hidden-xs col-sm-5 col-md-5 col-lg-4" style="font-size: 14px;">
-    	<div class="hidden-xs my-datepicker">
-      	<uib-datepicker ng-model="activeDate" multi-select="selectedDates" select-range="true" starting-day="1" ng-change="updateSchedules(selectedDates)" show-weeks="false" class="well" ng-required="true" style="margin:auto;"></uib-datepicker>
+    <div class="hidden-xs col-sm-5 col-md-5 col-lg-4">
+    	<div class="well">
+    		<div class="my-datepicker" style="margin: auto;">
+	      	<uib-datepicker ng-model="activeDate" multi-select="selectedDates" select-range="true" starting-day="1" ng-change="updateSchedules(selectedDates)" show-weeks="false" ng-required="true"></uib-datepicker>
+	      	<div style="padding-top: 10px;">
+	      		<button class="hidden-sm btn btn-default" ng-click="selectWeek(-8)" role="button" style="margin-right: 5px;">Last week</button>
+	      		<button class="btn btn-default" ng-click="selectWeek(-1)" role="button" style="margin-right: 5px;">This week</button>
+	      		<button class="btn btn-default pull-right" ng-click="selectWeek(6)" role="button">Next week</button>
+	      	</div>
+	      </div>
       </div>
     </div>
   </div>

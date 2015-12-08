@@ -64,21 +64,32 @@ angular.module('app.schedules', ['ui.router'])
 			$scope.selectedDates = [];
 			$scope.schedulesArray = schedules;
       
-      
-			for(i=0;i<7;i++){
-				var tempDate = new Date();
-				tempDate.setDate(tempDate.getDate()+i);
-      	tempDate.setHours(0, 0, 0, 0);
-				$scope.selectedDates.push(tempDate.getTime());
-			}
 			$scope.activeDate = new Date();
-	  // remove hours
       $scope.activeDate.setHours(0, 0, 0, 0);
+      
+      $scope.selectSevenDays = function(date){
+      	$scope.selectedDates = [];
+				for(i=0;i<7;i++){
+					var tempDate = new Date(date.getTime());
+					tempDate.setDate(tempDate.getDate()+i);
+	      	tempDate.setHours(0, 0, 0, 0);
+					$scope.selectedDates.push(tempDate.getTime());
+				}
+			}
+			$scope.selectSevenDays($scope.activeDate);
       
 			$scope.updateSchedules = function(selectedDates){
 				retrieveSchedules.retrieve(selectedDates).then( function(data){
 							$scope.schedulesArray = data;
 						});
+			}
+			
+			$scope.selectWeek = function(dayDelta){
+				var today = new Date();
+				var lastSaturday = new Date(today.getTime());
+				lastSaturday.setDate(lastSaturday.getDate() - lastSaturday.getDay() + dayDelta); 
+				$scope.selectSevenDays(lastSaturday);
+				$scope.updateSchedules($scope.selectedDates);
 			}
 
 

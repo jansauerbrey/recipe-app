@@ -14,11 +14,14 @@
 			<div class="col-xs-3 thumbnail" style="padding: 10px;">
 				<div><div style="margin: auto; width: 30px;"><i class="glyphicon glyphicon-user fa-2x"></i></div><div ng-show="factorAvailable"><input type="number" ng-model="factor" ng-required="true" class="form-control" ></div><div ng-hide="factorAvailable" style="margin: auto; width: 80px; padding: 7px;">{{recipe.yield}} persons</div></div>
 			</div>
-			<div class="col-xs-3 col-xs-offset-1 thumbnail" style="padding: 10px;">
+			<div class="col-xs-3 thumbnail" style="padding: 10px;">
 				<div><div style="margin: auto; width: 30px;"><i class="glyphicon glyphicon-time fa-2x"></i></div><div style="margin: auto; width: 80px; padding: 7px;">{{recipe.totalTime}} min.</div></div>
 			</div>
-			<div class="col-xs-3 col-xs-offset-1 thumbnail" style="padding: 10px;">
+			<div class="col-xs-3 thumbnail" style="padding: 10px;">
 				<div><div style="margin: auto; width: 30px;"><i class="glyphicon glyphicon-glass fa-2x"></i></div><div style="margin: auto; width: 80px; padding: 7px;">{{recipe.kilocalories}} kcal.</div></div>
+			</div>
+			<div class="col-xs-3 thumbnail" style="padding: 10px;">
+				<div><div style="margin: auto; width: 30px;"><i class="glyphicon fa-2x" ng-class="{'glyphicon-heart': recipe.fav_recipe===true, 'glyphicon-heart-empty': recipe.fav_recipe===false}"></i></div><div ng-show="recipe.fav_recipe" style="margin: auto; width: 70px; padding: 7px;">Favorite</div><div ng-hide="recipe.fav_recipe" style="margin: auto; width: 85px; padding: 7px;">No Favorite</div></div>
 			</div>
 		</div>
 		<div class="col-xs-12" style="padding: 0px;">

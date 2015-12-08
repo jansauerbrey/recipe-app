@@ -15,11 +15,14 @@ router.get('/', auth.verify, function(req, res, next) {
       var newIndicatorDate = new Date();
       newIndicatorDate.setDate(newIndicatorDate.getDate() - 14);
       for(i=0;i<recipes.length;i++){
-        recipes[i].new_recipe = (new Date(recipes[i].updated_at) > newIndicatorDate) ? true : false;
-	if (recipes[i].dishType && recipes[i].dishType.name) {
-          recipes[i].dishType.name_translated = recipes[i].dishType.name[preferredLanguage];
-	  recipes[i].dishType.name = undefined;
-	}
+				recipes[i].new_recipe = (new Date(recipes[i].updated_at) > newIndicatorDate) ? true : false;
+					if (recipes[i].dishType && recipes[i].dishType.name) {
+					recipes[i].dishType.name_translated = recipes[i].dishType.name[preferredLanguage];
+					recipes[i].dishType.name = undefined;
+				}
+				console.log(req._user);
+				console.log('recipes[i]._id: ' + recipes[i]._id);
+				recipes[i].fav_recipe = (req._user.favoriteRecipes && req._user.favoriteRecipes.indexOf(recipes[i]._id) > -1) ? true : false;
       }
       res.json(recipes);
     });
@@ -27,12 +30,16 @@ router.get('/', auth.verify, function(req, res, next) {
     if (req.query.updated_at) {
       req.query.updated_at = {'$gt': req.query.updated_at};
     };
+    if (req.query._id) {
+      req.query._id = {'$in': req._user.favoriteRecipes};
+    };
     Recipe.find(req.query).populate(['tags']).populate('author', 'fullname').lean().exec( function (err, recipes) {
       if (err) return next(err);
       var newIndicatorDate = new Date();
       newIndicatorDate.setDate(newIndicatorDate.getDate() - 14);
       for(i=0;i<recipes.length;i++){
         recipes[i].new_recipe = (new Date(recipes[i].updated_at) > newIndicatorDate) ? true : false;
+        recipes[i].fav_recipe = (req._user.favoriteRecipes && req._user.favoriteRecipes.indexOf(recipes[i]._id) > -1) ? true : false;
       }
       res.json(recipes);
     });
@@ -64,6 +71,10 @@ router.get('/:id', auth.verify, function(req, res, next) {
   Recipe.findById(req.params.id).populate(['tags', 'ingredients.ingredient', 'ingredients.unit']).populate('author', 'fullname').populate('dishType', 'name.'+preferredLanguage).lean().exec( function (err, recipe) {
     if (err) return next(err);
     recipe.dishType.name_translated = recipe.dishType.name[preferredLanguage];
+    var newIndicatorDate = new Date();
+    newIndicatorDate.setDate(newIndicatorDate.getDate() - 14);
+    recipe.new_recipe = (new Date(recipe.updated_at) > newIndicatorDate) ? true : false;
+    recipe.fav_recipe = (req._user.favoriteRecipes && req._user.favoriteRecipes.indexOf(recipe._id) > -1) ? true : false;
     res.json(recipe);
   });
 });
