@@ -22,7 +22,7 @@ Clean installation of Ubuntu 14.04 LTS.
 Additional packages required for further process are:
 
 ```bash
-sudo apt-get install gcc g++ git
+sudo apt-get install gcc g++ git make clang clang++ nginx
 ```
 
 
@@ -124,6 +124,64 @@ To actually run it at startup, run the following and execute the generated comma
 ```bash
 pm2 startup ubuntu
 ```
+
+#### Nginx configuration
+
+Example configuration for https config:
+
+/etc/nginx/sites-available/default
+
+```bash
+server {
+       listen         80;
+       server_name    www.rezept-planer.de;
+       return         301 https://$server_name$request_uri;
+}
+
+
+server {
+    listen 443 ssl;
+
+    server_name www.rezept-planer.de;
+
+    client_max_body_size 8M;
+
+        ssl on;
+        ssl_certificate /etc/nginx/ssl/rezept-planer.de.pem;
+        ssl_certificate_key /etc/nginx/ssl/rezept-planer.de.key;
+
+        ssl_session_timeout 5m;
+
+        ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+        ssl_ciphers "ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES128-SHA256:AES256-SHA:AES128-SHA:DES-CBC3-SHA:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!MD5:!PSK:!RC4";
+        ssl_prefer_server_ciphers on;
+
+		# adjust according to your path
+    root /home/jan/recipeApp/cordova-app/www;
+    index index.html index.htm;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+		# adjust according to your path
+    location /upload/ {
+        alias /home/jan/recipeApp/upload/;
+    }
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+
+```
+
+
 
 ## License
 
