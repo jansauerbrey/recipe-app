@@ -8,10 +8,8 @@ The intention of this app is to have a recipe database and a planning tool at th
 - [x] Create, Edit and Delete Ingredients
 - [x] Create, Edit and Delete Recipes including linkage of Ingredients and Units
 - [x] Create, Edit and Delete Schedules
-- [ ] Autofill (random) recipes to schedules
 - [x] Shopping list generation including checking if bought
 - [x] Possibility to add items to shopping list (besides recipe ingredients)
-- [x] Add cocking overview for each planned day
 - [x] User Authentication via token in redis database including login and logout
 - [x] User management (admin level)
 - [ ] Add user registration for new user including email validation
@@ -19,12 +17,21 @@ The intention of this app is to have a recipe database and a planning tool at th
 
 ## Installation (Ubuntu)
 
+Clean installation of Ubuntu 14.04 LTS.
+
+Additional packages required for further process are:
+
+```bash
+sudo apt-get install gcc g++ git
+```
+
+
 ### NodeJS
 
 Get the newest NVM (Node Version Manager), see also https://github.com/creationix/nvm :
 
 ```bash
-wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.25.0/install.sh | bash
+wget -qO- https://raw.githubusercontent.com/creationix/nvm/v0.29.0/install.sh | bash
 ```
 
 Install and activate latest NodeJS version:
@@ -48,13 +55,13 @@ sudo apt-get install mongodb
 
 #### Manual (newest version)
 
-Install MongoDB by using MongoDB repositories (does not work with 15.04):
+Install MongoDB by using MongoDB repositories (does not work with 15.04), see https://docs.mongodb.org/master/tutorial/install-mongodb-on-ubuntu/ :
 
 ```bash
-sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
-echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.0.list
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
 sudo apt-get update
-sudo apt-get install mongodb-org
+sudo apt-get install -y mongodb-org
 ```
 
 ### Redis
@@ -62,9 +69,11 @@ sudo apt-get install mongodb-org
 Install Redis by compiling the newest version:
 
 ```bash
-wget http://download.redis.io/releases/redis-3.0.0.tar.gz
-tar -xzf redis-3.0.0.tar.gz
-cd redis-3.0.0
+wget http://download.redis.io/releases/redis-3.0.5.tar.gz
+tar -xzf redis-3.0.5.tar.gz
+cd redis-3.0.5/deps
+make hiredis lua jemalloc linenoise
+cd ..
 make
 sudo make install
 ```
@@ -111,7 +120,7 @@ For automated startup (service) I use pm2. To install it and make the NodeJS ser
 npm install -g pm2
 pm2 start recipeApp.js
 ```
-To actually run it at startup run the following and execute the generated command in the shell:
+To actually run it at startup, run the following and execute the generated command in the shell:
 ```bash
 pm2 startup ubuntu
 ```
