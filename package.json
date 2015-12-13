@@ -13,6 +13,11 @@
     "ejs": "~2.3.1",
     "morgan": "~1.5.1",
     "bcrypt": "~0.8.2",
-    "kerberos": "~0.0.17"
+    "kerberos": "~0.0.17",
+    "fs": "~0.0.2",
+    "imagemagick-stream": "~3.0.0",
+    "multiparty": "~4.1.2",
+    "node-uuid": "~1.4.7",
+    "nodemailer": "~1.8.0"
   }
 }
