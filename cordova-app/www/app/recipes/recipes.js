@@ -213,7 +213,7 @@ angular.module('app.recipes', ['ui.router'])
         var modalAddSchedule = $uibModal.open({
           animation: true,
           templateUrl: 'partials/recipes.scheduleadd.tpl.html',
-          controller: 'ModalScheduleAddController',
+          controller: 'ModalScheduleAddControllerRecipes',
           size: 'xs',
           resolve: {
             recipe: function(){
@@ -221,6 +221,7 @@ angular.module('app.recipes', ['ui.router'])
             }
           }
         });
+
 
         modalAddSchedule.result.then(function(successMsg){
           $scope.alerts.push(successMsg);
@@ -236,7 +237,7 @@ angular.module('app.recipes', ['ui.router'])
     }])
 
 
-    .controller('ModalScheduleAddController', ['$scope', '$stateParams', '$modalInstance', '$filter', 'Schedules', 'recipe', function ($scope, $stateParams, $modalInstance, $filter, Schedules, recipe) {
+    .controller('ModalScheduleAddControllerRecipes', ['$scope', '$modalInstance', '$filter', 'Schedules', 'recipe', function ($scope, $modalInstance, $filter, Schedules, recipe) {
       $scope.recipe = recipe;
       $scope.date = new Date();
       $scope.factor = $scope.recipe.yield;

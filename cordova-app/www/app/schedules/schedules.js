@@ -141,7 +141,7 @@ angular.module('app.schedules', ['ui.router'])
       $scope.scheduleEdit = function(lineItem) {
 	      var modalEditSchedule = $uibModal.open({
 	        animation: true,
-	        templateUrl: 'partials/recipes.scheduleadd.tpl.html',
+	        templateUrl: 'partials/schedules.edit.tpl.html',
 	        controller: 'ModalScheduleEditController',
 	        size: 'xs',
 	        resolve: {
@@ -170,6 +170,13 @@ angular.module('app.schedules', ['ui.router'])
       $scope.recipe = schedule.recipe;
       $scope.date = schedule.date;
       $scope.factor = schedule.factor;
+       
+      $scope.remove = function(){
+        Schedules.remove({id: schedule._id}, function(){
+          var message = 'The recipe '+schedule.recipe.name+' was successfully removed from schedule';
+	        $modalInstance.close({type: 'info', msg: message});
+        });
+      }
          
       $scope.ok = function(){
         schedule.date = $scope.date;
