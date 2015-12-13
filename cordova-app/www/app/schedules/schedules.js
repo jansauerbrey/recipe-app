@@ -11,6 +11,13 @@ angular.module('app.schedules', ['ui.router'])
         }])
         
         
+        .factory('RandomRecipe', ['$resource', 'BASE_URI', function($resource, BASE_URI){
+          return $resource(BASE_URI+'api/randomitems/recipes/:number', null, {
+            'update': { method:'PUT' }
+          });
+        }])
+        
+        
         
         .factory('retrieveSchedules', ['Schedules', '$q', function(Schedules, $q){
 		      var retrieve = function(selectedDates){
@@ -58,7 +65,7 @@ angular.module('app.schedules', ['ui.router'])
 
 // Schedules
 
-    .controller('SchedulesController', ['$scope', '$stateParams', '$uibModal', 'Schedules', 'schedules', 'retrieveSchedules', function ($scope, $stateParams, $uibModal, Schedules, schedules, retrieveSchedules) {
+    .controller('SchedulesController', ['$scope', '$stateParams', '$uibModal', 'Schedules', 'schedules', 'retrieveSchedules', 'RandomRecipe', function ($scope, $stateParams, $uibModal, Schedules, schedules, retrieveSchedules, RandomRecipe) {
 
 			$scope.alerts = [];
 			$scope.selectedDates = [];
@@ -112,7 +119,14 @@ angular.module('app.schedules', ['ui.router'])
 	        resolve: {
 	            date: function(){
 	              return date;
-	            }
+	            },
+	            randomRecipes: [ 'RandomRecipe', function(RandomRecipe){
+								var randomRecipes = RandomRecipe.query({'number': '3'}, function(response){
+									return response;
+								});
+								
+								return randomRecipes;
+	            }]
 	        }
 	      });
 	
@@ -173,9 +187,10 @@ angular.module('app.schedules', ['ui.router'])
     }])
 
 
-    .controller('ModalScheduleAddController', ['$scope', '$stateParams', '$modalInstance', '$filter', 'Schedules', 'date', 'TARecipes', function ($scope, $stateParams, $modalInstance, $filter, Schedules, date, TARecipes) {
+    .controller('ModalScheduleAddController', ['$scope', '$stateParams', '$modalInstance', '$filter', 'Schedules', 'date', 'randomRecipes', 'TARecipes', function ($scope, $stateParams, $modalInstance, $filter, Schedules, date, randomRecipes, TARecipes) {
 
       $scope.date = date;
+      $scope.randomRecipes = randomRecipes;
       
       $scope.GetRecipes = function($viewValue){
         return TARecipes.search({search: $viewValue})
@@ -186,6 +201,14 @@ angular.module('app.schedules', ['ui.router'])
       
       $scope.TASelect = function (item) {
       	$scope.factor = item.yield;
+      };
+      
+      
+      $scope.selectRecipe = function (item) {
+      	if (!$scope.factor) {
+      		$scope.factor = item.yield;
+      	}
+      	$scope.newrecipe = item;
       };
       
       

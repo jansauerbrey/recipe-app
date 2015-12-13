@@ -225,8 +225,10 @@ angular.module('app.shopitems', ['ui.router'])
           }
         });
 
-        modalShopitemDetails.result.then(function(response){
-          $scope.complete(response);
+        modalShopitemDetails.result.then(function(){
+        	retrieveShopitems.retrieve().then( function(data){
+						if (data) $scope.shopitems = data;
+					});
         });
 			}
 
@@ -280,15 +282,37 @@ angular.module('app.shopitems', ['ui.router'])
     }])
 
 
-    .controller('ModalShopitemDetailsController', ['$scope', '$stateParams', '$modalInstance', 'item', function ($scope, $stateParams, $modalInstance, item) {
+    .controller('ModalShopitemDetailsController', ['$scope', '$stateParams', '$modalInstance', 'item', 'Shopitems', function ($scope, $stateParams, $modalInstance, item, Shopitems) {
       $scope.item = item;
+      
+      
+      $scope.complete = function(item){
+    		item.completed = !item.completed;
+				Shopitems.update({id: item._id}, {completed: item.completed}, function(success){
+					for(var i=0;i<$scope.item.details.length;i++){
+	  				if ($scope.item.details[i]._id == success._id){
+	    				$scope.item.details[i].completed = item.completed;
+	  				}
+					}
+    		}, function(err){
+    		});
+    	}
+    	
+      $scope.remove = function(item){
+    		item.completed = !item.completed;
+				Shopitems.remove({id: item._id}, null, function(success){
+					for(var i=0;i<$scope.item.details.length;i++){
+					  if ($scope.item.details[i]._id == success._id){
+	    				$scope.item.details.splice(i, 1);
+	  				}
+					}
+    		}, function(err){
+    		});
+    	}
 
-      $scope.ok = function(){
-        $modalInstance.close($scope.item);
-      }
 
-      $scope.cancel = function(){
-        $modalInstance.dismiss('cancel');
+      $scope.close = function(){
+        $modalInstance.close();
       }
     }])
 

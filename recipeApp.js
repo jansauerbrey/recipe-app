@@ -19,11 +19,12 @@ var shopitems = require('./routes/shopitems');
 var frequentshopitems = require('./routes/frequentshopitems');
 var typeahead = require('./routes/typeahead');
 var upload = require('./routes/upload');
+var randomitems = require('./routes/randomitems');
 
 var PORT = 3000;
 
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/recipeApp', function(err) {
+mongoose.connect('mongodb://127.0.0.1/recipeApp', function(err) {
     if(err) {
         console.log('connection error', err);
     } else {
@@ -71,6 +72,7 @@ app.use('/api/shopitems', shopitems);
 app.use('/api/frequentshopitems', frequentshopitems);
 app.use('/api/typeahead', typeahead);
 app.use('/api/upload', upload);
+app.use('/api/randomitems', randomitems);
 
 
 // catch 404 and forward to error handler

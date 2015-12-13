@@ -21,6 +21,20 @@
 					</span>
 				</div>
 	    </div>
+	    
+	    <div class="row" style="margin-top: 20px;">
+	      <div ng-repeat="randomRecipe in randomRecipes" class="col-xs-6 col-sm-4 col-md-4 col-lg-4" ng-class="{'hidden-xs': $last}">
+          <a ng-click="selectRecipe(randomRecipe)">
+          <div class="thumbnail">
+            <img ng-src="https://www.rezept-planer.de/upload/{{randomRecipe.imagePath}}" spinkit-image-preloader='double-bounce-spinner'></img>
+            <div class="caption">
+	      			<p style="margin: 0px;">{{randomRecipe.name | limitTo: 50}}</p>
+	    			</div>
+          </div>
+        </a>
+	      </div>
+	    </div>
+	    
 	  </div>
 	  <div class="modal-footer">
 	    <button ng-click="ok()" class="btn btn-primary">OK</button>

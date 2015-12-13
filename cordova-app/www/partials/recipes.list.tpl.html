@@ -88,10 +88,10 @@
           <div class="thumbnail">
             <img ng-src="https://www.rezept-planer.de/upload/{{recipe.imagePath}}" spinkit-image-preloader='double-bounce-spinner'></img>
             <div class="caption">
-	      <p class="text-muted text-uppercase"><small>{{recipe.author.fullname}}</small></p>
-	      <h4 style="height: 40px;">{{recipe.name | limitTo: 50}}</h4>
+	      			<p class="text-muted text-uppercase"><small>{{recipe.author.fullname}}</small></p>
+	      			<h4 style="height: 40px;">{{recipe.name | limitTo: 50}}</h4>
               <span ng-repeat="tag in recipe.tags" class="label label-primary" style="margin: 2px; display: inline-block;">{{tag.text}}</span>
-	    </div>
+	    			</div>
           </div>
         </a>
       </div>

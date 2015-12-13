@@ -8,10 +8,14 @@ var auth = require('../auth/auth.js');
 
 /* GET /recipes listing. */
 router.get('/', auth.verify, function(req, res, next) {
+    console.log("start");
   var preferredLanguage = (req._user.settings && req._user.settings.preferredLanguage) ? req._user.settings.preferredLanguage : 'en';
   if (Object.keys(req.query).length === 0) {
+    console.log("load recipes");
     Recipe.find({}, 'author updated_at dishType').populate('dishType', 'name.'+preferredLanguage+' order imagePath').lean().exec( function (err, recipes) {
+      console.log(err);
       if (err) return next(err);
+      console.log(recipes);
       var newIndicatorDate = new Date();
       newIndicatorDate.setDate(newIndicatorDate.getDate() - 14);
       for(i=0;i<recipes.length;i++){
@@ -55,17 +59,7 @@ router.post('/', auth.verify, function(req, res, next) {
   });
 });
 
-/* GET /recpes/id */
-router.get('/random/:number', auth.verify, function(req, res, next) {
-  var preferredLanguage = (req._user.settings && req._user.settings.preferredLanguage) ? req._user.settings.preferredLanguage : 'en';
-  Recipe.aggregate([ { $sample: { size: req.params.number } } ]).exec( function (err, recipe) {
-    if (err) return next(err);
-    res.json(recipe);
-  });
-});
-
-
-/* GET /recpes/id */
+/* GET /recipes/id */
 router.get('/:id', auth.verify, function(req, res, next) {
   var preferredLanguage = (req._user.settings && req._user.settings.preferredLanguage) ? req._user.settings.preferredLanguage : 'en';
   Recipe.findById(req.params.id).populate(['tags', 'ingredients.ingredient', 'ingredients.unit']).populate('author', 'fullname').populate('dishType', 'name.'+preferredLanguage).lean().exec( function (err, recipe) {

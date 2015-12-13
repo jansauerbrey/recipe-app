@@ -196,6 +196,7 @@ angular.module('app.recipes', ['ui.router'])
             $scope.recipe.ingredients.splice(i, 1);
           }
         }
+        
         $scope.recipe._id = null;
         $scope.recipe.$save(function(){
           $state.go($rootScope.previousState.name, $rootScope.previousStateParams);
@@ -352,6 +353,7 @@ angular.module('app.recipes', ['ui.router'])
 						var recipe = new Recipes();
 						recipe.ingredients = [];
 						recipe.ingredients.push({qty: '', unit: '', ingredient: ''});
+						recipe.imagePath = "no_image.png";
 						return recipe;
 					},
 					user: function(UserService){
