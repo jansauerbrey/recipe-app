@@ -22,7 +22,7 @@ Clean installation of Ubuntu 14.04 LTS.
 Additional packages required for further process are:
 
 ```bash
-sudo apt-get install gcc g++ git make clang clang++ nginx
+sudo apt-get install gcc g++ git make nginx libkrb5-dev imagemagick
 ```
 
 
