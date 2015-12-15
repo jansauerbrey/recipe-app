@@ -3,27 +3,41 @@
   <div>
     <ul class="nav navbar-nav" ng-click="cancel()">
       <li>
-        <a ui-sref="user.home" ng-show="determineVisibility('User')"><span class="glyphicon glyphicon-home" style="padding-right: 10px;"></span>rezept-planer.de</a>
-        <a ui-sref="anon.startpage" ng-show="determineVisibility('NoUser')"><span class="glyphicon glyphicon-home" style="padding-right: 10px;"></span>rezept-planer.de</a>
+        <a ui-sref="user.home" ng-class="{active: $state.includes('user.home')}" access="User"><span class="glyphicon glyphicon-home" style="padding-right: 10px;"></span>rezept-planer.de</a>
+        <a ui-sref="anon.startpage" ng-class="{active: $state.includes('anon.startpage')}" access="NoUser"><span class="glyphicon glyphicon-home" style="padding-right: 10px;"></span>rezept-planer.de</a>
       </li>
       <li class="divider" style="border-bottom: 1px solid #eee;"></li>
-      <li ng-repeat="state in states | filter: {requiredPermissions: 'User', panelright: false}" ng-class="{active: activeState(state)}" ng-show="determineVisibility(state.requiredPermissions)">
-        <a ui-sref="{{state.name}}"><span class="{{state.icon}}" style="padding-right: 10px;"></span>{{ state.label }}</a>
+      <li ng-class="{active: $state.includes('user.recipes')}" access="User">
+        <a ui-sref="user.recipes.dishtypes"><span class="glyphicon glyphicon-cutlery" style="padding-right: 10px;"></span>Recipes</a>
       </li>
-      <li class="divider" style="border-bottom: 1px solid #eee;" ng-show="determineVisibility('User')"></li>
-      <li ng-repeat="state in states | filter: {requiredPermissions: 'Admin', panelright: false}" ng-class="{active: activeState(state)}" ng-show="determineVisibility(state.requiredPermissions)">
-        <a ui-sref="{{state.name}}"><span class="{{state.icon}}" style="padding-right: 10px;"></span>{{ state.label }}</a>
+      <li ng-class="{active: $state.includes('user.schedules')}" access="User">
+        <a ui-sref="user.schedules"><span class="glyphicon glyphicon-calendar" style="padding-right: 10px;"></span>Schedules</a>
       </li>
-      <li class="divider" style="border-bottom: 1px solid #eee;" ng-show="determineVisibility('Admin')"></li>
-      <li ng-repeat="state in states | filter: {panelright: true}" ng-class="{active: activeState(state)}" ng-show="determineVisibility(state.requiredPermissions)">
-        <a ui-sref="{{state.name}}"><span class="{{state.icon}}" style="padding-right: 10px;"></span>{{ state.label }}</a>
+      <li ng-class="{active: $state.includes('user.shopitems')}" access="User">
+        <a ui-sref="user.shopitems"><span class="glyphicon glyphicon-shopping-cart" style="padding-right: 10px;"></span>Shopping</a>
       </li>
-      <li class="divider" style="border-bottom: 1px solid #eee;"></li>
-      <li ng-repeat="state in states | filter: {requiresLogin: false, panelright: false}" ng-class="{active: activeState(state)}" ng-show="determineVisibility(state.requiredPermissions)">
-        <a ui-sref="{{state.name}}"><span class="{{state.icon}}" style="padding-right: 10px;"></span>{{ state.label }}</a>
+      <li class="divider" style="border-bottom: 1px solid #eee;" access="User"></li>
+      <li ng-class="{active: $state.includes('admin.units')}" access="Admin">
+        <a ui-sref="admin.units.list"><span class="glyphicon glyphicon-scale" style="padding-right: 10px;"></span>Units</a>
       </li>
-      <li>
-        <a ui-sref="impressum"><span class="glyphicon glyphicon-info-sign" style="padding-right: 10px;"></span>Impressum</a>
+      <li ng-class="{active: $state.includes('admin.ingredients')}" access="Admin">
+        <a ui-sref="admin.ingredients.list"><span class="glyphicon glyphicon-apple" style="padding-right: 10px;"></span>Ingredients</a>
+      </li>
+      <li ng-class="{active: $state.includes('admin.dishtypes')}" access="Admin">
+        <a ui-sref="admin.dishtypes.list"><span class="glyphicon glyphicon-grain" style="padding-right: 10px;"></span>Dish types</a>
+      </li>
+      <li ng-class="{active: $state.includes('admin.user')}" access="Admin">
+        <a ui-sref="admin.user"><span class="glyphicon glyphicon-user" style="padding-right: 10px;"></span>Users</a>
+      </li>
+      <li class="divider" style="border-bottom: 1px solid #eee;" access="Admin"></li>
+      <li ng-class="{active: $state.includes('user.logout')}" access="User">
+        <a ui-sref="user.logout"><span class="glyphicon glyphicon-log-out" style="padding-right: 10px;"></span>Logout</a>
+      </li>
+      <li ng-class="{active: $state.includes('anon.user.login')}" access="NoUser">
+        <a ui-sref="anon.user.login"><span class="glyphicon glyphicon-log-in" style="padding-right: 10px;"></span>Login</a>
+      </li>
+      <li ng-class="{active: $state.includes('anon.user.register')}" access="NoUser">
+        <a ui-sref="anon.user.register"><span class="glyphicon glyphicon-edit" style="padding-right: 10px;"></span>Register</a>
       </li>
     </ul>
   <div>

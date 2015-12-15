@@ -246,13 +246,8 @@ angular.module('app.schedules', ['ui.router'])
   .config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
 
     $stateProvider
-		.state('user.schedules', {
-			abstract: true,
+      		.state('user.schedules', {
 			url: '/schedules',
-			template: "<ui-view />",
-		})
-      		.state('user.schedules.list', {
-			url: '/list',
       templateUrl: 'partials/schedules.tpl.html',
       controller: 'SchedulesController',
 			resolve: {
@@ -271,7 +266,8 @@ angular.module('app.schedules', ['ui.router'])
 			},
 			data: {
 	        		name: 'Schedules',
-        			icon: 'glyphicon glyphicon-calendar'
+        			icon: 'glyphicon glyphicon-calendar',
+	      title: 'Schedules'
 			}
       		})
     ;

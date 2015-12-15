@@ -51,7 +51,7 @@ angular.module('app.auth', ['ui.router'])
     }])
 
 
-    .factory('AuthenticationService', [ '$http', '$localStorage', 'UserService', 'BASE_URI', function($http, $localStorage, UserService, BASE_URI) {
+    .factory('AuthenticationService', [ '$http', '$localStorage', '$state', '$timeout', 'UserService', 'BASE_URI', function($http, $localStorage, $state, $timeout, UserService, BASE_URI) {
         var logIn = function(username, password, autologin) {
                 return $http.post(BASE_URI+'api/user/login', {username: username, password: password, autologin: autologin}).success(function(data) {
                     data.permissions = ["User"];
@@ -64,8 +64,10 @@ angular.module('app.auth', ['ui.router'])
             },
             logOut = function() {
                 $http.get(BASE_URI+'api/user/logout').success(function(){
-                     UserService.deleteCurrentUser();
-                     return true;
+                  UserService.deleteCurrentUser();
+        					$timeout(function () {
+          					$state.go("anon.user.login");
+        					}, 2000);
                 });
             },
             register = function(user) {
@@ -198,7 +200,7 @@ angular.module('app.auth', ['ui.router'])
 
         $scope.register = function register() {
 	    AuthenticationService.register($scope.user).success(function(data) {
-	        $state.go("anon.login");
+	        $state.go("anon.user.login");
 	    });
 	}
     }])
@@ -255,6 +257,7 @@ angular.module('app.auth', ['ui.router'])
 			data: {
 	        		name: 'Register',
         			icon: 'glyphicon glyphicon-edit',
+	      title: 'Register',
 				panelright: true
 			}
       		})
@@ -265,6 +268,7 @@ angular.module('app.auth', ['ui.router'])
 			data: {
 	        		name: 'Login',
         			icon: 'glyphicon glyphicon-log-in',
+	      title: 'Login',
 				panelright: true
 			}
       		})
@@ -275,18 +279,25 @@ angular.module('app.auth', ['ui.router'])
 			data: {
 				name: 'Logout',
 				icon: 'glyphicon glyphicon-log-out',
+	      title: 'Logout',
 				panelright: true
 			}
       		})
       		.state('anon.forgot', {
 			url: '/user/forgot',
         		templateUrl: 'partials/user.forgot.tpl.html',
-        		controller: 'UserForgotCtrl'
+        		controller: 'UserForgotCtrl',
+			data: {
+	      title: 'Forgot password'
+			}
       		})
       		.state('anon.reset', {
 			url: '/user/reset/:token',
         		templateUrl: 'partials/user.reset.tpl.html',
-        		controller: 'UserForgotCtrl'
+        		controller: 'UserForgotCtrl',
+			data: {
+	      title: 'Reset password'
+			}
       		})
     ;
   }])

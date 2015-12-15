@@ -17,13 +17,13 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 // Navigation
 
     .factory('navigationMenu', function($state) {
-	var states = [];        
+	var states = [];     
 	var stateslist = $state.get();
         angular.forEach(stateslist, function (state) {
             if (state.data && state.data.name) {
                 states.push({
                     path: state.url,
-		    name: state.name,
+		    						name: state.name,
                     label: state.data.name,
                     icon: state.data.icon ? state.data.icon : null,
                     panelright: state.data.panelright ? state.data.panelright : false,
@@ -84,26 +84,13 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 // Directives
 //---------------
 
-    .directive('navigation', ['$aside', 'navigationMenu', 'UserService', 'AuthorisationService', function ($aside, navigationMenu, UserService, AuthorisationService) {
+    .directive('navsidebar', ['$aside', 'navigationMenu', 'UserService', 'AuthorisationService', function ($aside, navigationMenu, UserService, AuthorisationService) {
       return {
         restrict: "E",
         replace: true,
-        templateUrl: "partials/navigation-directive.tpl.html",
+        templateUrl: "partials/navigation.sidebar.button.tpl.html",
         controller:  function ($scope) {
           $scope.hideMobileNav = true;
-          $scope.user = UserService.getCurrentLoginUser();
-          $scope.states = navigationMenu.states;
-
-          $scope.$watch(UserService.isAuthenticated, function () {
-              $scope.user = UserService.getCurrentLoginUser();
-          }, true)
-
-          $scope.determineVisibility = function(roles){
-            if (roles === undefined) return true;
-            roleArray = roles.split(',');
-            var auhtorisation = AuthorisationService.authorize(undefined, roleArray);
-            return (auhtorisation === 0);
-          };
           $scope.navSidebar = function() {
             var asideInstance = $aside.open({
               templateUrl: 'partials/navigation.sidebar.tpl.html',
@@ -116,10 +103,9 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
         }
       };
     }])
+    
 
-    .directive('access', [  
-        'AuthorisationService',
-        function (AuthorisationService) {
+    .directive('access', [ '$rootScope', 'AuthorisationService', function ($rootScope, AuthorisationService) {
             return {
               restrict: 'A',
               link: function (scope, element, attrs) {
@@ -148,6 +134,11 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
                   if (roles.length > 0) {
                       determineVisibility(true);
                   }
+                  $rootScope.$on('$stateChangeSuccess', function() {
+										if (roles.length > 0) {
+	                      determineVisibility(true);
+	                  }
+						      });
               }
             };
         }])
@@ -292,7 +283,10 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 		})
 		.state('anon.startpage', {
 			url: '/',
-			templateUrl: 'partials/startpage.tpl.html'
+			templateUrl: 'partials/startpage.tpl.html',
+			data: {
+	      title: 'rezept-planer.de'
+			}
 		})
 		.state('anon.user', {
 			url: '/user',
@@ -309,7 +303,10 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 		})
       		.state('impressum', {
 			url: '/impressum',
-        		templateUrl: 'partials/impressum.tpl.html'
+        		templateUrl: 'partials/impressum.tpl.html',
+			data: {
+	      title: 'Impressum'
+			}
       		})
       		.state('accessdenied', {
 			url: '/access/denied',
@@ -317,28 +314,38 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
       		})
       		.state('user.home', {
 			url: '/home',
-        		templateUrl: 'partials/home.tpl.html'
+        		templateUrl: 'partials/home.tpl.html',
+			data: {
+	      title: 'Home'
+			}
       		})
 
     ;
   }])
 
     .run(['$rootScope', '$state', '$stateParams', '$http', 'UserService', 'BASE_URI', function($rootScope, $state, $stateParams, $http, UserService, BASE_URI) {
-	$rootScope.$state = $state;
-	$rootScope.$stateParams = $stateParams;
-
-	$rootScope.$on("$stateChangeStart", function(event, toState, toStateParams, fromState, fromStateParams) {
-            $rootScope.previousState = fromState ? fromState : '';
-            $rootScope.previousStateParams = fromStateParams ? fromStateParams : '';
-            var authorised;
-            if (UserService.getCurrentLoginUser() !== undefined) {
-		$http.get(BASE_URI+'api/user/check');
-		if (toState.name == 'anon.startpage') {
-			event.preventDefault(); 
-			$state.go('user.home');
-		};
-	    };
-        });
+			$rootScope.$state = $state;
+			$rootScope.$stateParams = $stateParams;
+			$rootScope.print = function(print){
+		  	window.print();
+			};
+		
+			$rootScope.$on("$stateChangeStart", function(event, toState, toStateParams, fromState, fromStateParams) {
+        $rootScope.previousState = fromState ? fromState : '';
+        $rootScope.previousStateParams = fromStateParams ? fromStateParams : '';
+        var authorised;
+		    if (UserService.getCurrentLoginUser() !== undefined) {
+					$http.get(BASE_URI+'api/user/check');
+					if (toState.name == 'anon.startpage') {
+						event.preventDefault(); 
+						$state.go('user.home');
+					};	
+		    };
+     	});
+     	
+     	$rootScope.$on('$stateChangeSuccess', function() {
+   			document.body.scrollTop = document.documentElement.scrollTop = 0;
+			});
     }])
 
 ;

@@ -62,6 +62,9 @@ angular.module('app.units', ['ui.router'])
 			abstract: true,
 			url: '/units',
 			template: "<ui-view />",
+			data: {
+	      title: 'Units'
+			}
 		})
 		.state('admin.units.list', {
 			url: '/list',

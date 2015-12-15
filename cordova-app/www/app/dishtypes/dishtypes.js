@@ -62,6 +62,9 @@ angular.module('app.dishtypes', ['ui.router'])
 			abstract: true,
 			url: '/dishtypes',
 			template: "<ui-view />",
+			data: {
+	      title: 'Dish types'
+			}
 		})
 		.state('admin.dishtypes.list', {
 			url: '/list',
@@ -73,8 +76,8 @@ angular.module('app.dishtypes', ['ui.router'])
 				}
 			},
 			data: {
-        			name: 'Dish types',
-        			icon: 'glyphicon glyphicon-grain'
+  			name: 'Dish types',
+  			icon: 'glyphicon glyphicon-grain'
 			}
       		})
       		.state('admin.dishtypes.edit', {

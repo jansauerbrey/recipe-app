@@ -237,3 +237,7 @@ body { padding-top: 60px;
   .selected-day button {
     background-color: #95d6e9;
   }
+  
+.active {
+	background-color: #eee;	
+}

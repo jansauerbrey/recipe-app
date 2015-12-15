@@ -393,8 +393,9 @@ angular.module('app.shopitems', ['ui.router'])
 				}
 			},
 			data: {
-	        		name: 'Shopping',
-        			icon: 'glyphicon glyphicon-shopping-cart'
+    		name: 'Shopping',
+  			icon: 'glyphicon glyphicon-shopping-cart',
+	      title: 'Shopping'
 			}
       		})
     ;

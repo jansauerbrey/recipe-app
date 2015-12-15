@@ -267,12 +267,15 @@ angular.module('app.recipes', ['ui.router'])
 		.state('user.recipes', {
 			abstract: true,
 			url: "/recipes",
-			template: '<ui-view />'
+			template: '<ui-view />',
+			data: {
+	      title: 'Recipes'
+			}
 		})
-      		.state('user.recipes.dishtypes', {
+    .state('user.recipes.dishtypes', {
 			url: '/dishtypes',
-        		templateUrl: 'partials/recipes.dishtypes.tpl.html',
-        		controller: 'RecipeDishTypeController',
+      templateUrl: 'partials/recipes.dishtypes.tpl.html',
+      controller: 'RecipeDishTypeController',
 			resolve: {
 				recipes: function(Recipes){
 					return Recipes.query().$promise;
@@ -283,11 +286,11 @@ angular.module('app.recipes', ['ui.router'])
 
 			},
 			data: {
-	        		name: 'Recipes',
-        			icon: 'glyphicon glyphicon-cutlery'
+	      name: 'Recipes',
+        icon: 'glyphicon glyphicon-cutlery'
 			}
-      		})
-      		.state('user.recipes.list', {
+    })
+    .state('user.recipes.list', {
 			url: '/list',
 			params: {
 				dishType: undefined,
@@ -295,8 +298,8 @@ angular.module('app.recipes', ['ui.router'])
 				new_recipe: undefined,
 				fav_recipe: undefined
 			},
-        		templateUrl: 'partials/recipes.list.tpl.html',
-        		controller: 'RecipeListController',
+  		templateUrl: 'partials/recipes.list.tpl.html',
+  		controller: 'RecipeListController',
 			resolve: {
 				recipes: ['Recipes', '$stateParams', function(Recipes, $stateParams){
 					var searchDate = new Date();

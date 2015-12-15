@@ -86,7 +86,10 @@ angular.module('app.ingredients', ['ui.router'])
 		.state('admin.ingredients', {
 			abstract: true,
 			url: '/ingredients',
-			template: "<ui-view />"
+			template: "<ui-view />",
+			data: {
+	      title: 'Ingredients'
+			}
 		})
       		.state('admin.ingredients.list', {
 			url: '/list',
