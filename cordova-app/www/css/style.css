@@ -222,8 +222,16 @@ body { padding-top: 60px;
 		.my-datepicker {
     width: 282px;
 		}
+		
+		.sidelinks{
+			 position: fixed;
+		}
 }
 
+.actionbutton {
+	float: right;
+	padding: 6px 14px;
+}
 .panel-header-schedules {
 	overflow: hidden;
 	padding: 3px 8px 3px 8px;

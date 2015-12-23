@@ -78,6 +78,8 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
       }
 
     }])
+    
+
 
 
 //---------------
@@ -331,8 +333,9 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 			};
 		
 			$rootScope.$on("$stateChangeStart", function(event, toState, toStateParams, fromState, fromStateParams) {
-        $rootScope.previousState = fromState ? fromState : '';
-        $rootScope.previousStateParams = fromStateParams ? fromStateParams : '';
+        $rootScope.previousState = fromState ? fromState : {};
+        $rootScope.previousState.name = fromState.name ? fromState.name : 'user.home';
+        $rootScope.previousStateParams = fromStateParams ? fromStateParams : {};
         var authorised;
 		    if (UserService.getCurrentLoginUser() !== undefined) {
 					$http.get(BASE_URI+'api/user/check');

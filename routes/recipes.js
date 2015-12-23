@@ -53,7 +53,8 @@ router.get('/', auth.verify, function(req, res, next) {
 /* POST /recipes */
 router.post('/', auth.verify, function(req, res, next) {
   req.body.author = req._user.id;
-  Recipe.create(req.body, function (err, recipe) {
+  var recipe = new Recipe(req.body);
+  recipe.save( function (err, recipe) {
     if (err) return next(err);
     res.json(recipe);
   });

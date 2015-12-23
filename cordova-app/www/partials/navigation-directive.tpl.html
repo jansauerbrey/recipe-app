@@ -2,11 +2,12 @@
 <nav class="navbar navbar-default navbar-fixed-top" style="padding:0;" role="navigation">
 <div class="container">
   <div class="navbar-header">
-  	<navsidebar></navsidebar>
+  	<div><navsidebar></navsidebar></div>
     <div class="beta-tag">&nbsp;BETA&nbsp;</div>
-	<a class="hidden-xs navbar-brand" ui-sref="user.home" ng-class="{active: $state.includes('user.home')}" access="User">rezept-planer.de</a>
-	<a class="hidden-xs navbar-brand" ui-sref="anon.startpage" ng-class="{active: $state.includes('anon.startpage')}" access="NoUser">rezept-planer.de</a>
-	<h4 class="visible-xs" style="margin-top: 15px; margin-left: 80px;">{{$state.current.data.title}}</h4>
+		<a class="hidden-xs navbar-brand" ui-sref="user.home" ng-class="{active: $state.includes('user.home')}" access="User">rezept-planer.de</a>
+		<a class="hidden-xs navbar-brand" ui-sref="anon.startpage" ng-class="{active: $state.includes('anon.startpage')}" access="NoUser">rezept-planer.de</a>
+		<h4 class="visible-xs" style="margin-top: 15px; width: 160px; float: left;">{{$state.current.data.title}}</h4>
+  	<div ui-view="actionnavigation"></div>
   </div>
   <div class="collapse navbar-collapse">
     <ul class="nav navbar-nav">
