@@ -32,14 +32,14 @@ angular.module('app.recipes', ['ui.router'])
 
         .factory('recipeActions', ['$rootScope', '$stateParams', '$uibModal', 'Recipes', '$state', 'isCordova', 'Favorites', 'UserService', 'Tags', function ($rootScope, $stateParams, $uibModal, Recipes, $state, isCordova, Favorites, UserService, Tags) {
           var recipe;
-          var getRecipes = function(id){
-          	return Recipes.get({'id': id}, function(response) {
-							return response.ingredients.push({qty: '', unit: '', ingredient: ''});
-						});
+          var recipeOrig;
+          var setRecipe = function(recipeItem){
+          	this.recipe = recipeItem;
+          	this.recipeOrig = angular.copy(this.recipe);
           }
           var submitted = false;
           var alerts = [];
-          var create = function(validForm){
+          var create = function(recipe, validForm){
 			        if(!validForm){
 								alerts.push({type: 'danger', msg: 'Please complete all required fields before saving.'})
 			          submitted = true;
@@ -62,10 +62,10 @@ angular.module('app.recipes', ['ui.router'])
 			        
 			        recipe._id = null;
 			        recipe.$save(function(response){
-			          return response;
+			          $state.go($rootScope.previousState.name, $rootScope.previousStateParams);
 			        });
 			      };
-			      var update = function(validForm){
+			      var update = function(recipe, validForm){
 							if(!validForm){
 								alerts.push({type: 'danger', msg: 'Please complete all required fields before saving.'})
 								submitted = true;
@@ -86,10 +86,11 @@ angular.module('app.recipes', ['ui.router'])
 							}
 
 							Recipes.update({id: recipe._id}, recipe, function(response){
+								setRecipe(response);
 								$state.go($rootScope.previousState.name, $rootScope.previousStateParams);
 							});
 					  };
-					  var remove = function(){
+					  var remove = function(recipe){
 							Recipes.remove({id: recipe._id}, function(){
 								if ($rootScope.previousState.name === 'user.recipes.details.edit' ) {
 									$state.go('user.recipes.dishtypes');
@@ -99,6 +100,7 @@ angular.module('app.recipes', ['ui.router'])
 							});
 						};
 						var cancel = function(){
+							this.recipe = angular.copy(this.recipeOrig);
 							$state.go($rootScope.previousState.name, $rootScope.previousStateParams);
 						};
 						        
@@ -106,6 +108,7 @@ angular.module('app.recipes', ['ui.router'])
           	recipe: recipe,
           	submitted: submitted,
           	alerts: alerts,
+          	setRecipe: setRecipe,
             create: create,
             update: update,
             remove: remove,
@@ -226,11 +229,17 @@ angular.module('app.recipes', ['ui.router'])
 
 
 	$scope.save = function(validForm) {
-    recipeActions.create(validForm);
+    recipeActions.create($scope.recipe, validForm);
   }
-	$scope.update = recipeActions.update;
-	$scope.remove = recipeActions.remove;
-	$scope.cancel = recipeActions.cancel;
+	$scope.update = function(validForm) {
+    recipeActions.update($scope.recipe, validForm);
+  }
+	$scope.remove = function() {
+    recipeActions.remove($scope.recipe);
+  }
+	$scope.cancel = function() {
+    recipeActions.cancel();
+  };
 
 /*	$scope.update = function(validForm){
 		if(!validForm){
@@ -417,7 +426,7 @@ angular.module('app.recipes', ['ui.router'])
 					recipe: ['Recipes', '$stateParams', 'recipeActions', function(Recipes, $stateParams, recipeActions){
 						var recipe = Recipes.get({'id': $stateParams.id}, function(response) {
 							response.ingredients.push({qty: '', unit: '', ingredient: ''});
-							recipeActions.recipe = response;
+							recipeActions.setRecipe(response);
 						}).$promise;
 						return recipe;
 					}],
