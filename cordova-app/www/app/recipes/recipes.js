@@ -35,7 +35,7 @@ angular.module('app.recipes', ['ui.router'])
           var recipeOrig;
           var factorAvailable;
           var factor;
-					var allowEdit = false;
+					var allowEdit;
           
           var setRecipe = function(recipeItem, factor){
           	this.recipe = recipeItem;
@@ -45,6 +45,8 @@ angular.module('app.recipes', ['ui.router'])
           	var user = UserService.getCurrentLoginUser();
 						if (this.recipe.author && user._id == this.recipe.author._id || user.is_admin === true) {
 							this.allowEdit = true;
+						} else {
+							this.allowEdit = false;
 						}
           }
           var submitted = false;
