@@ -30,6 +30,89 @@ angular.module('app.recipes', ['ui.router'])
           });
         }])
 
+        .factory('recipeActions', ['$rootScope', '$stateParams', '$uibModal', 'Recipes', '$state', 'isCordova', 'Favorites', 'UserService', 'Tags', function ($rootScope, $stateParams, $uibModal, Recipes, $state, isCordova, Favorites, UserService, Tags) {
+          var recipe;
+          var getRecipes = function(id){
+          	return Recipes.get({'id': id}, function(response) {
+							return response.ingredients.push({qty: '', unit: '', ingredient: ''});
+						});
+          }
+          var submitted = false;
+          var alerts = [];
+          var create = function(validForm){
+			        if(!validForm){
+								alerts.push({type: 'danger', msg: 'Please complete all required fields before saving.'})
+			          submitted = true;
+			          return;
+			        }
+			        if(!recipe || recipe.length < 1) return;
+			        recipe.ingredients = recipe.ingredients.filter(function(n){ return n != ''});
+			        for(i=0;i<recipe.tags.length;i++){
+			          if (!recipe.tags[i]._id){
+			            var tag = new Tags(recipe.tags[i]);
+			            tag.$save();
+			            recipe.tags[i] = tag._id;
+			          }
+			        }
+			        for(i=0;i<recipe.ingredients.length;i++){
+			          if (!(recipe.ingredients[i].ingredient && recipe.ingredients[i].ingredient._id)) {
+			            recipe.ingredients.splice(i, 1);
+			          }
+			        }
+			        
+			        recipe._id = null;
+			        recipe.$save(function(response){
+			          return response;
+			        });
+			      };
+			      var update = function(validForm){
+							if(!validForm){
+								alerts.push({type: 'danger', msg: 'Please complete all required fields before saving.'})
+								submitted = true;
+								return;
+							}
+							for(i=0;i<recipe.tags.length;i++){
+								if (!recipe.tags[i]._id){
+									var tag = new Tags(recipe.tags[i]);
+									tag.$save();
+									recipe.tags[i] = tag._id;
+								}
+							}
+							recipe.ingredients = recipe.ingredients.filter(function(n){ return n != ''});
+							for(i=0;i<recipe.ingredients.length;i++){
+								if (!(recipe.ingredients[i].ingredient && recipe.ingredients[i].ingredient._id)) {
+									recipe.ingredients.splice(i, 1);
+								}
+							}
+
+							Recipes.update({id: recipe._id}, recipe, function(response){
+								$state.go($rootScope.previousState.name, $rootScope.previousStateParams);
+							});
+					  };
+					  var remove = function(){
+							Recipes.remove({id: recipe._id}, function(){
+								if ($rootScope.previousState.name === 'user.recipes.details.edit' ) {
+									$state.go('user.recipes.dishtypes');
+								} else {
+									$state.go($rootScope.previousState.name, $rootScope.previousStateParams);
+								}
+							});
+						};
+						var cancel = function(){
+							$state.go($rootScope.previousState.name, $rootScope.previousStateParams);
+						};
+						        
+          return {
+          	recipe: recipe,
+          	submitted: submitted,
+          	alerts: alerts,
+            create: create,
+            update: update,
+            remove: remove,
+            cancel: cancel
+        }
+        }])
+
 
 //---------------
 // Controllers
@@ -83,18 +166,21 @@ angular.module('app.recipes', ['ui.router'])
 
     }])
 
-    .controller('RecipeDetailCtrl', ['$rootScope', '$scope', '$stateParams', '$uibModal', 'user', 'recipe', 'Recipes', 'Tags', 'Ingredients', 'units', 'dishtypes', '$state', 'TAIngredients', 'TATags', 'isCordova', 'Favorites', 'UserService', function ($rootScope, $scope, $stateParams, $uibModal, user, recipe, Recipes, Tags, Ingredients, units, dishtypes, $state, TAIngredients, TATags, isCordova, Favorites, UserService) {
+    .controller('RecipeDetailCtrl', ['$rootScope', '$scope', '$stateParams', '$uibModal', 'user', 'Recipes', 'Tags', 'Ingredients', 'units', 'dishtypes', '$state', 'TAIngredients', 'TATags', 'isCordova', 'Favorites', 'UserService', 'recipeActions', function ($rootScope, $scope, $stateParams, $uibModal, user, Recipes, Tags, Ingredients, units, dishtypes, $state, TAIngredients, TATags, isCordova, Favorites, UserService, recipeActions) {
 	$scope.isCordova = isCordova;
-	$scope.alerts = [];
-	$scope.submitted = false;
+	//$scope.alerts = [];
+	$scope.alerts = recipeActions.alerts;
+	//$scope.submitted = false;
+	$scope.submitted = recipeActions.submitted;
 
 	$scope.user = user;
-	$scope.recipe = recipe;
+	//$scope.recipe = recipe;
+	$scope.recipe = recipeActions.recipe;
 	$scope.units = units;
 	$scope.dishtypes = dishtypes;
 
 	$scope.allowEdit = false;
-	if (recipe.author && user._id == recipe.author._id || user.is_admin === true) {
+	if ($scope.recipe && $scope.recipe.author && user._id == $scope.recipe.author._id || user.is_admin === true) {
 		$scope.allowEdit = true;
 	}
 
@@ -138,7 +224,15 @@ angular.module('app.recipes', ['ui.router'])
 		}
 	};
 
-	$scope.update = function(validForm){
+
+	$scope.save = function(validForm) {
+    recipeActions.create(validForm);
+  }
+	$scope.update = recipeActions.update;
+	$scope.remove = recipeActions.remove;
+	$scope.cancel = recipeActions.cancel;
+
+/*	$scope.update = function(validForm){
 		if(!validForm){
 			$scope.alerts.push({type: 'danger', msg: 'Please complete all required fields before saving.'})
 			$scope.submitted = true;
@@ -202,7 +296,7 @@ angular.module('app.recipes', ['ui.router'])
           $state.go($rootScope.previousState.name, $rootScope.previousStateParams);
         });
       }
-
+*/
       $scope.loadTags = function(viewValue) {
         return TATags.search({search: viewValue}).$promise.then(function(response) {
           return response;
@@ -320,9 +414,10 @@ angular.module('app.recipes', ['ui.router'])
 				url: "/details/:id",
 				template: '<ui-view />',
 				resolve: {
-					recipe: ['Recipes', '$stateParams', function(Recipes, $stateParams){
+					recipe: ['Recipes', '$stateParams', 'recipeActions', function(Recipes, $stateParams, recipeActions){
 						var recipe = Recipes.get({'id': $stateParams.id}, function(response) {
-							return response.ingredients.push({qty: '', unit: '', ingredient: ''});
+							response.ingredients.push({qty: '', unit: '', ingredient: ''});
+							recipeActions.recipe = response;
 						}).$promise;
 						return recipe;
 					}],
@@ -353,13 +448,14 @@ angular.module('app.recipes', ['ui.router'])
     		templateUrl: 'partials/recipes.add.tpl.html',
     		controller: 'RecipeDetailCtrl',
 				resolve: {
-					recipe: function(Recipes){
+					recipe: ['Recipes', 'recipeActions', function(Recipes, recipeActions){
 						var recipe = new Recipes();
 						recipe.ingredients = [];
 						recipe.ingredients.push({qty: '', unit: '', ingredient: ''});
 						recipe.imagePath = "no_image.png";
+						recipeActions.recipe = recipe;
 						return recipe;
-					},
+					}],
 					user: function(UserService){
 						return UserService.getCurrentLoginUser();
 					},
