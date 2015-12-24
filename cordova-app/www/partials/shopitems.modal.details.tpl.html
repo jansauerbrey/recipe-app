@@ -10,7 +10,7 @@
 		        <th>Amount</th>
 		        <th>Recipe</th>
 		        <th>Scheduled / Added</th>
-	          <th class="hidden-xs" style="width: 30px;"></th>
+	          <th style="width: 30px;"></th>
 		      </thead>
 		      <tbody>
 		        <tr ng-repeat="subitem in item.details">
@@ -18,8 +18,8 @@
 		          <td style="min-width: 80px;">{{subitem.amount | number}} {{subitem.unit.name.de}}</td>
 		          <td>{{subitem.recipe.name || "Manually added to shopping list"}}</td>
 		          <td>{{(subitem.schedule.date | date:'EEE dd.MM.yyyy' ) || (subitem.updated_at | date:'EEE dd.MM.yyyy' )}}</td>
-	            <td class="hidden-xs" style="width: 30px;">
-	            	<button class="btn btn-default pull-right hidden-xs" ng-really-click="remove(subitem)" role="button">
+	            <td style="width: 30px;">
+	            	<button class="btn btn-default pull-right" ng-really-click="remove(subitem)" role="button">
 	            		<span class="glyphicon glyphicon-trash"></span>
 	            	</button>
 	            </td>
