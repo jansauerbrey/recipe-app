@@ -36,6 +36,9 @@ angular.module('app.recipes', ['ui.router'])
           var factorAvailable;
           var factor;
 					var allowEdit;
+          var submitted = false;
+          var validForm = false;
+          var alerts = [];
           
           var setRecipe = function(recipeItem, factor){
           	this.recipe = recipeItem;
@@ -49,13 +52,11 @@ angular.module('app.recipes', ['ui.router'])
 							this.allowEdit = false;
 						}
           }
-          var submitted = false;
-          var validForm = false;
-          var alerts = [];
           var create = function(){
 			        if(!this.validForm){
 								this.alerts.push({type: 'danger', msg: 'Please complete all required fields before saving.'})
-			          this.submitted = true;
+								this.submitted = true;
+								$rootScope.$broadcast("submittedValueChanged");
 			          return;
 			        }
 			        if(!this.recipe || this.recipe.length < 1) return;
@@ -82,6 +83,7 @@ angular.module('app.recipes', ['ui.router'])
 							if(!this.validForm){
 								this.alerts.push({type: 'danger', msg: 'Please complete all required fields before saving.'})
 								this.submitted = true;
+								$rootScope.$broadcast("submittedValueChanged");
 								return;
 							}
 							for(i=0;i<this.recipe.tags.length;i++){
@@ -233,6 +235,10 @@ angular.module('app.recipes', ['ui.router'])
       $scope.closeAlert = function(index){
         $scope.alerts.splice(index, 1);
       }
+      
+      $scope.$on("submittedValueChanged", function(){
+				$scope.submitted = recipeActions.submitted;
+      });
 
 
       $scope.scheduleAdd = function() {
@@ -316,6 +322,7 @@ angular.module('app.recipes', ['ui.router'])
     .controller('RecipeDetailActionsCtrl', ['$rootScope', '$scope', '$uibModal', 'recipeActions', function ($rootScope, $scope, $uibModal, recipeActions) {
     		
 			$scope.alerts = recipeActions.alerts;
+			$scope.submitted = recipeActions.submitted;
 			$scope.recipe = recipeActions.recipe;
 			$scope.allowEdit = recipeActions.allowEdit;
 			
@@ -369,6 +376,7 @@ angular.module('app.recipes', ['ui.router'])
     .controller('RecipeDetailActionSidebarCtrl', ['$rootScope', '$scope', '$uibModal', 'recipeActions', '$modalInstance', function ($rootScope, $scope, $uibModal, recipeActions, $modalInstance) {
 			
 			$scope.alerts = recipeActions.alerts;
+			$scope.submitted = recipeActions.submitted;
 			$scope.recipe = recipeActions.recipe;
 			$scope.allowEdit = recipeActions.allowEdit;
 			
@@ -380,9 +388,11 @@ angular.module('app.recipes', ['ui.router'])
 		    recipeActions.unsetFavorite();
 		  }
 			$scope.save = function() {
+				recipeActions.submitted = true;
 		    recipeActions.create();
 		  }
 			$scope.update = function() {
+				recipeActions.submitted = true;
 		    recipeActions.update();
 		  }
 			$scope.remove = function() {

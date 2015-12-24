@@ -13,12 +13,12 @@
 			<label class="control-label">Name:</label>
 			<input type="text" name="name" ng-model="recipe.name" ng-required="true" class="form-control" placeholder="Name...">
 		</div>
-		<div>
+		<div ng-class="{ 'has-error': recipeForm.language.$invalid && submitted }">
 			<label class="control-label">Recipe Language:</label><br />
 			<div class="btn-group">
-				<label class="btn btn-primary" ng-model="recipe.language" ng-required="!recipe.language" uib-btn-radio="'en'">English</label>
-				<label class="btn btn-primary" ng-model="recipe.language" ng-required="!recipe.language" uib-btn-radio="'de'">German</label>
-				<label class="btn btn-primary" ng-model="recipe.language" ng-required="!recipe.language" uib-btn-radio="'fi'">Finnish</label>
+				<label name="language" class="btn btn-primary" ng-model="recipe.language" ng-required="!recipe.language" uib-btn-radio="'en'">English</label>
+				<label name="language" class="btn btn-primary" ng-model="recipe.language" ng-required="!recipe.language" uib-btn-radio="'de'">German</label>
+				<label name="language" class="btn btn-primary" ng-model="recipe.language" ng-required="!recipe.language" uib-btn-radio="'fi'">Finnish</label>
 			</div>
 		</div>
 		<div ng-class="{ 'has-error': recipeForm.dishType.$invalid && submitted }">
@@ -26,13 +26,13 @@
 			<div class="col-xs-12" style="padding: 0;">
 				<uib-alert ng-show="recipe.language=== undefined">Please select the recipe language first.</uib-alert>
 			</div>
-			<select ng-show="recipe.language==='en'" ng-options="dishtype._id as dishtype.name.en for dishtype in dishtypes | orderBy: 'name.en'" ng-model="recipe.dishType._id" ng-required="true" class="form-control" placeholder="Dish type"></select>
-			<select ng-show="recipe.language==='de'" ng-options="dishtype._id as dishtype.name.de for dishtype in dishtypes | orderBy: 'name.de'" ng-model="recipe.dishType._id" ng-required="true" class="form-control" placeholder="Dish type"></select>
-			<select ng-show="recipe.language==='fi'" ng-options="dishtype._id as dishtype.name.fi for dishtype in dishtypes | orderBy: 'name.fi'" ng-model="recipe.dishType._id" ng-required="true" class="form-control" placeholder="Dish type"></select>
+			<select name="dishType" ng-show="recipe.language==='en'" ng-options="dishtype._id as dishtype.name.en for dishtype in dishtypes | orderBy: 'name.en'" ng-model="recipe.dishType._id" ng-required="true" class="form-control" placeholder="Dish type"></select>
+			<select name="dishType" ng-show="recipe.language==='de'" ng-options="dishtype._id as dishtype.name.de for dishtype in dishtypes | orderBy: 'name.de'" ng-model="recipe.dishType._id" ng-required="true" class="form-control" placeholder="Dish type"></select>
+			<select name="dishType" ng-show="recipe.language==='fi'" ng-options="dishtype._id as dishtype.name.fi for dishtype in dishtypes | orderBy: 'name.fi'" ng-model="recipe.dishType._id" ng-required="true" class="form-control" placeholder="Dish type"></select>
 		</div>
-		<div ng-class="{ 'has-error': recipeForm.tags.$invalid && submitted }">
+		<div ng-class="{ 'has-error': !recipe.tags[0] && submitted }">
 			<label class="control-label">Tags:</label>
-			<tags-input type="text" ng-model="recipe.tags" key-property="_id" display-property="text" on-tag-adding="addTag($tag)" placeholder="Tags..."><auto-complete source="loadTags($query)"></auto-complete></tags-input>
+			<tags-input name="tags" type="text" ng-model="recipe.tags" key-property="_id" display-property="text" on-tag-adding="addTag($tag)" placeholder="Tags..."><auto-complete source="loadTags($query)"></auto-complete></tags-input>
 		</div>
 	
 		<div ng-class="{ 'has-error': recipeForm.yield.$invalid && submitted }">
@@ -47,7 +47,7 @@
 	<div ng-repeat="ingredient in recipe.ingredients">
 		<div class="form-group col-xs-12"  style="padding:0;">
 			<div class="col-xs-3 col-sm-2 col-md-1" style="padding:0;" ng-class="{ 'has-error': submitted && !(ingredient.qty > 0) && ingredient.ingredient && ingredient.unit._id !== '5511d2fd4194de051c7efd60' && ingredient.unit !== undefined }">
-				<input type="number" ng-model="ingredient.qty" ng-required="ingredient.ingredient && ingredient.unit && ingredient.unit._id !== '5511d2fd4194de051c7efd60'" class="form-control" placeholder="Amount">
+				<input ng-hide="recipe.language=== undefined" type="number" ng-model="ingredient.qty" ng-required="ingredient.ingredient && ingredient.unit && ingredient.unit._id !== '5511d2fd4194de051c7efd60'" class="form-control" placeholder="Amount">
 			</div>
 			<div class="col-xs-4 col-sm-3 col-md-2" style="padding:0;" ng-class="{ 'has-error': submitted && ingredient.ingredient && (ingredient.unit === undefined || ingredient.unit._id === undefined) }">
 				<select ng-show="recipe.language==='en'" ng-options="unit._id as unit.name.en for unit in units | orderBy: 'name.en'" ng-model="ingredient.unit._id" ng-required="ingredient.ingredient" class="form-control" placeholder="Unit"></select>
