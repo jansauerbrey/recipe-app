@@ -30,7 +30,7 @@ angular.module('app.recipes', ['ui.router'])
           });
         }])
 
-        .factory('recipeActions', ['$rootScope', '$stateParams', '$uibModal', 'Recipes', '$state', 'isCordova', 'Favorites', 'UserService', 'Tags', function ($rootScope, $stateParams, $uibModal, Recipes, $state, isCordova, Favorites, UserService, Tags) {
+        .factory('recipeActions', ['$rootScope', '$stateParams', '$uibModal', 'Recipes', '$state', 'Favorites', 'UserService', 'Tags', function ($rootScope, $stateParams, $uibModal, Recipes, $state, Favorites, UserService, Tags) {
           var recipe;
           var recipeOrig;
           var factorAvailable;

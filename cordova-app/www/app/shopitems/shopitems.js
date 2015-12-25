@@ -16,8 +16,9 @@ angular.module('app.shopitems', ['ui.router'])
         }])
         
         
-        .factory('retrieveShopitems', ['UserService', 'Shopitems', '$q', function(UserService, Shopitems, $q){
+        .factory('shopitemsActions', ['$rootScope', '$timeout', 'UserService', 'Shopitems', '$q', function($rootScope, $timeout, UserService, Shopitems, $q){
       		
+    			var data = {shopitems: [], alerts: [], autoupdate: true, pauseAutoupdate: false};
     			var containsObj = function(array, obj) {
       			var i, l = array.length;
       			for (i=0;i<array.length;i++)
@@ -25,7 +26,8 @@ angular.module('app.shopitems', ['ui.router'])
         			if (angular.equals(array[i], obj)) return i;
       			}
       			return false;
-    			}, retrieve = function(pauseExecution){
+    			};
+    			var retrieveShopitems = function(pauseExecution){
       			var deferred = $q.defer();
 						Shopitems.query(function(response) {
 						  var uniqueIngredients = [];
@@ -37,11 +39,11 @@ angular.module('app.shopitems', ['ui.router'])
 						    } else {
 						      var order = 99999;
 						    }
-						    var obj = {ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed};
+						    var obj = {ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed, details: [], amount: 0};
 						    var index = containsObj(uniqueIngredientsTemp, obj);
 						    if ( index === false) {
 						      uniqueIngredientsTemp.push({ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed});
-						      obj.details = [response[i]];
+						      obj.details.push(response[i]);
 						      obj.amount = response[i].amount;
 						      uniqueIngredients.push(obj);
 						    }
@@ -51,12 +53,144 @@ angular.module('app.shopitems', ['ui.router'])
 						    }
 						  }
 						 	deferred.resolve(uniqueIngredients);
+		        	data.shopitems = uniqueIngredients;
+							$rootScope.$broadcast("schopitemsUpdated");
 		        });
 		        return deferred.promise;
 		      };
 		      
+		      
+		      var addShopitem = function(newshopitem){
+		        var expDate = new Date();
+		        expDate.setDate(expDate.getDate() + 14);
+		        expDate.setHours(0, 0, 0, 0);
+						/*if (!newshopitem) {
+		          for(i=0;i<$scope.units.length;i++){
+		            if($scope.units[i]._id === $scope.newunit) {
+		              $scope.newunitobject = $scope.units[i];
+		            }
+		          }
+							newshopitem = {ingredient: $scope.newingredient, unit: $scope.newunitobject, amount: $scope.newamount};
+						}*/
+		        var newshopitemClean = new Shopitems({ingredient: newshopitem.ingredient, unit: newshopitem.unit, amount: newshopitem.amount, completed: false , expire_date: expDate });
+		        newshopitemClean.$save();
+		        obj = {ingredient: newshopitem.ingredient, unit: newshopitem.unit, completed: newshopitem.completed};
+		        obj.details = [newshopitem];
+		        obj.amount = newshopitem.amount;
+		        data.shopitems.push(obj);
+		        /*$scope.newingredient = "";
+		        $scope.newunit = "";
+		        $scope.newamount = "";*/
+		      }
+		
+		      var remove = function(item){
+		      	data.pauseAutoupdate = true;
+		      	if (!item) {
+		      		Shopitems.remove({}, null, function(success){
+			          data.shopitems = []
+				    	}, function(err){
+				      	data.alerts.push({type: 'danger', msg: 'Network connection error'});
+					    });
+		      	} else {
+			       	var itemIndex = containsObj(data.shopitems, item);
+			        if (itemIndex === false) {
+			        	data.alerts.push({type: 'danger', msg: 'Match not found in existing shopping list, please inform the developer.'});
+			        } else {
+			        	for(var i=item.details.length-1;i>=0;i--){
+				          Shopitems.remove({id: item.details[i]._id}, null, function(success){
+										var index;
+										for(var j=0;j<data.shopitems[itemIndex].details.length;j++){
+										  if (data.shopitems[itemIndex].details[j]._id == success._id){
+										    index = j;
+										  }
+										}
+					          data.shopitems[itemIndex].details.splice(index, 1);
+										if (data.shopitems[itemIndex].details.length === 0) {
+										  data.shopitems.splice(itemIndex, 1);
+										}
+						    	}, function(err){
+						      	data.alerts.push({type: 'danger', msg: 'Network connection error'});
+							    });
+							  }
+			      	}
+		      	}
+		      	var pauseTimer;
+		      	$timeout.cancel( timer );
+						pauseTimer =  $timeout(function () {
+			        data.pauseAutoupdate = false;
+			        startAutoupdate();
+			      }, 5000);
+		      }
+		
+		      var complete = function(item){
+		      	data.pauseAutoupdate = true;
+		      	
+		       	var itemIndex = containsObj(data.shopitems, item);
+		       	if (itemIndex === false) {
+			        	data.alerts.push({type: 'danger', msg: 'Match not found in existing shopping list, please inform the developer.'});
+			      } else {
+			      	item.completed = !item.completed;
+			        for(var i=item.details.length-1;i>=0;i--){
+			          Shopitems.update({id: item.details[i]._id}, {completed: item.completed}, function(success){
+									var index;
+									for(var j=0;j<data.shopitems[itemIndex].details.length;j++){
+					  				if (data.shopitems[itemIndex].details[j]._id == success._id){
+					    				index = j;
+					  				}
+									}
+			            data.shopitems[itemIndex].details[index].completed = item.completed;
+				    		}, function(err){
+				      		data.alerts.push({type: 'danger', msg: 'Network connection error'});
+				    		});
+			        }
+			        
+			        data.shopitems[itemIndex].completed = item.completed;
+			      }
+				    data.pauseAutoupdate = false;
+		      }
+		      
+		      
+		      
+		      // autoupdate
+		      var timer;
+		      var syncFunction = function() {
+		      	if (data.autoupdate === true && data.pauseAutoupdate === false){
+							retrieveShopitems().then( function(response){
+								if (response && data.autoupdate === true && data.pauseAutoupdate === false) data.shopitems = response;
+							});
+							this.timer =  $timeout(function () {
+			          syncFunction();
+			        }, 5000);
+						} else if (data.autoupdate === false) {
+							$timeout.cancel(timer);
+						} else {
+							this.timer =  $timeout(function () {
+			          syncFunction();
+			        }, 5000);
+			      }
+		      }
+		      
+		      var startAutoupdate = function() {
+		      	if (data.autoupdate === false || !this.timer) {
+							data.autoupdate = true;
+			        syncFunction();
+		      	}
+		      };
+		
+		      var stopAutoupdate = function(){
+						data.autoupdate = false;
+						$timeout.cancel(timer);
+		      };
+		
+		      
 		      return {
-            retrieve: retrieve
+		      	data: data,
+		      	retrieve: retrieveShopitems,
+		      	addShopitem: addShopitem,
+		      	remove: remove,
+		      	complete: complete,
+            startAutoupdate: startAutoupdate,
+            stopAutoupdate: stopAutoupdate,
         	}
 		    }])
         
@@ -68,16 +202,21 @@ angular.module('app.shopitems', ['ui.router'])
 
 // Shopitems
 
-    .controller('ShopitemsController', ['$scope', '$stateParams', '$uibModal', 'shopitems', 'retrieveShopitems', 'Shopitems', 'frequentshopitems', 'TAIngredients', 'units', '$state', '$filter', '$timeout', function ($scope, $stateParams, $uibModal, shopitems, retrieveShopitems, Shopitems, frequentshopitems, TAIngredients, units, $state, $filter, $timeout) {
+    .controller('ShopitemsController', ['$scope', '$stateParams', '$uibModal', 'shopitems', 'shopitemsActions', 'Shopitems', 'frequentshopitems', 'TAIngredients', 'units', '$state', '$filter', '$timeout', function ($scope, $stateParams, $uibModal, shopitems, shopitemsActions, Shopitems, frequentshopitems, TAIngredients, units, $state, $filter, $timeout) {
 
       $scope.units = units;
-      $scope.shopitems = shopitems;
       $scope.frequentshopitems = frequentshopitems;
-	    $scope.pauseAutoupdate = false;
+      $scope.shopitems = shopitemsActions.data.shopitems;
+	    $scope.pauseAutoupdate = shopitemsActions.data.pauseAutoupdate;
+      $scope.autoupdate = shopitemsActions.data.autoupdate;
+      $scope.alerts = shopitemsActions.data.alerts;
       
-      $scope.autoupdate = true;
-
-      $scope.alerts = [];
+      
+      $scope.$on("shopitemsUpdated", function(){
+      	$scope.shopitems = shopitemsActions.data.shopitems;
+      });
+      
+      
       $scope.status = [];
 			for(i=0;i<$scope.shopitems.length;i++){
 				$scope.status[$scope.shopitems[i].ingredient.category] = true;
@@ -93,32 +232,36 @@ angular.module('app.shopitems', ['ui.router'])
         return false;
       };
 
-      var timer;
-      $scope.startAutoupdate = function() {
-				$scope.autoupdate = true;
-				if (!$scope.pauseAutoupdate){
-					retrieveShopitems.retrieve().then( function(data){
-						if (data) $scope.shopitems = data;
-					});
-				}
-				timer =  $timeout(function () {
-          $scope.startAutoupdate();
-        }, 5000);
-				$scope.$on( "$destroy",
-					function( event ) {
-						$timeout.cancel( timer );
-					}
-				);
-      };
 
-      $scope.stopAutoupdate = function(){
-				$scope.autoupdate = false;
-				$timeout.cancel(timer);
-      };
+      $scope.addShopitem = function(item) {
+      	shopitemsActions.addShopitem(item);
+      }
+      
+      $scope.remove = function(item) {
+      	shopitemsActions.remove(item);
+      }
+      
+      $scope.complete = function(item) {
+      	shopitemsActions.complete(item);
+      }
+
+      $scope.startAutoupdate = function() {
+      	shopitemsActions.startAutoupdate();
+      }
+      
+      $scope.stopAutoupdate = function() {
+      	shopitemsActions.stopAutoupdate();
+      }
 
       if ($scope.autoupdate === true){
 				$scope.startAutoupdate();
       }
+      
+			$scope.$on( "$destroy",
+				function( event ) {
+					$scope.stopAutoupdate();
+				}
+			);
 
 
       $scope.GetIngredients = function(viewValue){
@@ -128,7 +271,7 @@ angular.module('app.shopitems', ['ui.router'])
         });
       };
 
-      $scope.addShopitem = function(newshopitem){
+/*      $scope.addShopitem = function(newshopitem){
         var expDate = new Date();
         expDate.setDate(expDate.getDate() + 14);
         expDate.setHours(0, 0, 0, 0);
@@ -207,7 +350,7 @@ angular.module('app.shopitems', ['ui.router'])
         
         $scope.shopitems[itemIndex].completed = item.completed;
 	      $scope.pauseAutoupdate = false;
-      }
+      }*/
 
 			$scope.shopitemDetails = function(item){
         var modalShopitemDetails = $uibModal.open({
@@ -226,7 +369,7 @@ angular.module('app.shopitems', ['ui.router'])
         });
 
         modalShopitemDetails.result.then(function(){
-        	retrieveShopitems.retrieve().then( function(data){
+        	shopitemsActions.retrieve().then( function(data){
 						if (data) $scope.shopitems = data;
 					});
         });
@@ -386,8 +529,8 @@ angular.module('app.shopitems', ['ui.router'])
 				units: function(Units){
 					return Units.query().$promise;
 				},
-				shopitems: function(retrieveShopitems){
-						return retrieveShopitems.retrieve().then( function(data){
+				shopitems: function(shopitemsActions){
+						return shopitemsActions.retrieve().then( function(data){
 							return data;
 						});
 				}
