@@ -18,7 +18,7 @@ angular.module('app.shopitems', ['ui.router'])
         
         .factory('shopitemsActions', ['$rootScope', '$timeout', '$q', 'UserService', 'Shopitems', function($rootScope, $timeout, $q, UserService, Shopitems){
       		
-    			var data = {shopitems: [], alerts: [], autoupdate: false, pauseAutoupdate: 0};
+    			var data = {shopitems: [], alerts: [], autoupdate: true, pauseAutoupdate: 0};
     			var containsObj = function(array, obj) {
       			var i, l = array.length;
       			for (i=0;i<array.length;i++)
