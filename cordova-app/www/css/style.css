@@ -249,3 +249,19 @@ body { padding-top: 60px;
 .active {
 	background-color: #eee;	
 }
+
+.navbar-sm-more {
+    color: #777;
+    line-height: 20px;
+    padding-bottom: 15px;
+    padding-top: 15px;
+    display: block;
+    padding-left: 10px;
+    padding-right: 10px;
+    position: relative;
+}
+a.navbar-sm-more:hover, a.navbar-sm-more:focus {
+    color: #333;
+    background-color: transparent;
+    text-decoration: none;
+}

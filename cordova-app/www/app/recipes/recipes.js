@@ -444,7 +444,7 @@ angular.module('app.recipes', ['ui.router'])
               template: '<div ng-click="closeSidebar()" ng-include="\'partials/recipes.view.links.tpl.html\'"></div>',
               controller: 'RecipeDetailActionSidebarCtrl',
               placement: 'right',
-              size: 'lg'
+              size: 'sm'
             });
           }
           
@@ -453,7 +453,7 @@ angular.module('app.recipes', ['ui.router'])
               template: '<div ng-click="closeSidebar()" ng-include="\'partials/recipes.edit.links.tpl.html\'"></div>',
               controller: 'RecipeDetailActionSidebarCtrl',
               placement: 'right',
-              size: 'lg'
+              size: 'sm'
             });
           }
           
@@ -462,7 +462,7 @@ angular.module('app.recipes', ['ui.router'])
               template: '<div ng-click="closeSidebar()" ng-include="\'partials/recipes.add.links.tpl.html\'"></div>',
               controller: 'RecipeDetailActionSidebarCtrl',
               placement: 'right',
-              size: 'lg'
+              size: 'sm'
             });
           }
 
@@ -491,7 +491,7 @@ angular.module('app.recipes', ['ui.router'])
 	    		templateUrl: 'partials/recipes.dishtypes.tpl.html',
 					controller: 'RecipeDishTypeController'
 				},
-				'actionnavigation@': {
+				'actionnavigation-xs@': {
 	    		template: '<button type="button" class="navbar-toggle actionbutton" ui-sref="user.recipes.details.add"><i class="glyphicon glyphicon-plus"></i></button>',
 					controller: 'ActionSidebarRecipeController'
 				}
@@ -523,7 +523,7 @@ angular.module('app.recipes', ['ui.router'])
 	    		templateUrl: 'partials/recipes.list.tpl.html',
 					controller: 'RecipeListController'
 				},
-				'actionnavigation@': {
+				'actionnavigation-xs@': {
 	    		template: '<button type="button" class="navbar-toggle actionbutton" ui-sref="user.recipes.details.add"><i class="glyphicon glyphicon-plus"></i></button>',
 					controller: 'ActionSidebarRecipeController'
 				}
@@ -585,9 +585,13 @@ angular.module('app.recipes', ['ui.router'])
 		    		templateUrl: 'partials/recipes.view.links.tpl.html',
 						controller: 'RecipeDetailActionsCtrl'
 					},
-					'actionnavigation@': {
+					'actionnavigation-xs@': {
 		    		template: '<button type="button" class="navbar-toggle actionbutton" ng-click="recipeDetailsView()"><i class="glyphicon glyphicon-option-horizontal"></i></button>',
 						controller: 'ActionSidebarRecipeController'
+					},
+					'actionnavigation-sm@': {
+		    		template: '<a ng-click="recipeDetailsView()" class="navbar-sm-more"><span class="glyphicon glyphicon-plus" style="padding-right: 10px;"></span>More</a>',
+						controller: 'ActionSidebarRecipeController' 
 					}
 				}
 				
@@ -603,15 +607,18 @@ angular.module('app.recipes', ['ui.router'])
 		    		templateUrl: 'partials/recipes.edit.links.tpl.html',
 						controller: 'RecipeDetailActionsCtrl'
 					},
-					'actionnavigation@': {
+					'actionnavigation-xs@': {
 		    		template: '<button type="button" class="navbar-toggle actionbutton" ng-click="recipeDetailsEdit()"><i class="glyphicon glyphicon-option-horizontal"></i></button>',
 						controller: 'ActionSidebarRecipeController'
+					},
+					'actionnavigation-sm@': {
+		    		template: '<a ng-click="recipeDetailsEdit()" class="navbar-sm-more"><span class="glyphicon glyphicon-floppy-disk" style="padding-right: 10px;"></span>Save</a>',
+						controller: 'ActionSidebarRecipeController' 
 					}
 				}
  			})
   		.state('user.recipes.details.add', {
 				url: '^/recipe/add',
-				templateUrl: 'partials/recipes.details.layout.tpl.html',
 				views: {
 	    		'main': {
 		    		templateUrl: 'partials/recipes.edit.form.tpl.html',
@@ -621,9 +628,13 @@ angular.module('app.recipes', ['ui.router'])
 		    		templateUrl: 'partials/recipes.add.links.tpl.html',
 						controller: 'RecipeDetailActionsCtrl'
 					},
-					'actionnavigation@': {
+					'actionnavigation-xs@': {
 		    		template: '<button type="button" class="navbar-toggle actionbutton" ng-click="recipeDetailsAdd()"><i class="glyphicon glyphicon-option-horizontal"></i></button>',
 						controller: 'ActionSidebarRecipeController'
+					},
+					'actionnavigation-sm@': {
+		    		template: '<a ng-click="recipeDetailsAdd()" class="navbar-sm-more"><span class="glyphicon glyphicon-floppy-disk" style="padding-right: 10px;"></span>Save</a>',
+						controller: 'ActionSidebarRecipeController' 
 					}
 				}
   		})

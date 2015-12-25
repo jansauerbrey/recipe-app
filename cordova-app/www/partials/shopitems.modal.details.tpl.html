@@ -9,15 +9,15 @@
 		        <th style="width: 30px;"></th>
 		        <th>Amount</th>
 		        <th>Recipe</th>
-		        <th>Scheduled / Added</th>
+		        <th class="hidden-xs">Scheduled / Added</th>
 	          <th style="width: 30px;"></th>
 		      </thead>
 		      <tbody>
 		        <tr ng-repeat="subitem in item.details">
 	            <td style="width: 30px;"><button class="btn btn-default" ng-click="complete(subitem)"><span class="glyphicon" ng-class="{'glyphicon-none': !subitem.completed, 'glyphicon-ok': subitem.completed}"></span></button></td>
 		          <td style="min-width: 80px;">{{subitem.amount | number}} {{subitem.unit.name.de}}</td>
-		          <td>{{subitem.recipe.name || "Manually added to shopping list"}}</td>
-		          <td>{{(subitem.schedule.date | date:'EEE dd.MM.yyyy' ) || (subitem.updated_at | date:'EEE dd.MM.yyyy' )}}</td>
+		          <td>{{subitem.recipe.name || "Manually added to shopping list"}}<br class="visible-xs"/><span class="visible-xs">{{(subitem.schedule.date | date:'dd.MM.yyyy' ) || (subitem.updated_at | date:'dd.MM.yyyy' )}}</span></td>
+		          <td class="hidden-xs">{{(subitem.schedule.date | date:'EEE dd.MM.yyyy' ) || (subitem.updated_at | date:'EEE dd.MM.yyyy' )}}</td>
 	            <td style="width: 30px;">
 	            	<button class="btn btn-default pull-right" ng-really-click="remove(subitem)" role="button">
 	            		<span class="glyphicon glyphicon-trash"></span>
