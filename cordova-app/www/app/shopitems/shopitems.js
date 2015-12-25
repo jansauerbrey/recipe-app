@@ -74,6 +74,7 @@ angular.module('app.shopitems', ['ui.router'])
 		      	if (!item) {
 		      		Shopitems.remove({}, null, function(success){
 			          data.shopitems = []
+								$rootScope.$broadcast("shopitemsUpdated");
 				    	}, function(err){
 				      	data.alerts.push({type: 'danger', msg: 'Network connection error'});
 					    });
