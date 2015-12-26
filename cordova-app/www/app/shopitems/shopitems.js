@@ -558,6 +558,9 @@ angular.module('app.shopitems', ['ui.router'])
 						return Units.query().$promise;
 					}
 				},
+				data: {
+		      title: 'Shopping'
+				}
 			})
       .state('user.shopitems.view', {
 				url: '',

@@ -60,7 +60,9 @@ angular.module('app.auth', ['ui.router'])
                     }
                     UserService.createUser(data);
                     return true;
-                });
+                }).error(function(err){
+									alert("Network connection or certificate error");
+								});
             },
             logOut = function() {
                 $http.get(BASE_URI+'api/user/logout').success(function(){

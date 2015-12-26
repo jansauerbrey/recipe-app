@@ -504,10 +504,6 @@ angular.module('app.recipes', ['ui.router'])
 					return UserService.getCurrentLoginUser();
 				}
 
-			},
-			data: {
-	      name: 'Recipes',
-        icon: 'glyphicon glyphicon-cutlery'
 			}
     })
     .state('user.recipes.list', {

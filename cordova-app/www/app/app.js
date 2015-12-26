@@ -79,7 +79,14 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 
     }])
     
+    .controller('StartpageController', ['$scope', function ($scope) {
+     
+      $scope.openLink = function(link){
+        window.open(link);
+      }
 
+    }])
+    
 
 
 //---------------
@@ -286,6 +293,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 		.state('anon.startpage', {
 			url: '/',
 			templateUrl: 'partials/startpage.tpl.html',
+			controller: 'StartpageController',
 			data: {
 	      title: 'rezept-planer.de'
 			}
