@@ -546,6 +546,7 @@ angular.module('app.shopitems', ['ui.router'])
 				templateUrl: 'partials/shopitems.layout.tpl.html',
 				resolve: {
 					shopitems: function(shopitemsActions){
+						shopitemsActions.data.autoupdate = true; //TODO: set with user settings instead
 						return shopitemsActions.retrieveShopitems().then( function(data){
 								return data;
 							});

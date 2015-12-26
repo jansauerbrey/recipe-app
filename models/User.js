@@ -14,7 +14,8 @@ var UserSchema = new mongoose.Schema({
     preferredLanguage: String,
     spokenLanguages: [String],
     categoryOrder: [String],
-    prefferedWeekStartDay: Number
+    prefferedWeekStartDay: Number,
+  	autoupdate: { type: Boolean, default: true }
   },
 	favoriteRecipes: [{type: mongoose.Schema.Types.ObjectId, ref: 'Recipe'}],
   autologin: { type: Boolean, default: false },
