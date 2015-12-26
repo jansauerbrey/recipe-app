@@ -604,7 +604,7 @@ angular.module('app.recipes', ['ui.router'])
 						controller: 'RecipeDetailActionsCtrl'
 					},
 					'actionnavigation-xs@': {
-		    		template: '<button type="button" class="navbar-toggle actionbutton" ng-click="recipeDetailsEdit()"><i class="glyphicon glyphicon-option-horizontal"></i></button>',
+		    		template: '<button type="button" class="navbar-toggle actionbutton" ng-click="recipeDetailsEdit()"><i class="glyphicon glyphicon-floppy-disk"></i></button>',
 						controller: 'ActionSidebarRecipeController'
 					},
 					'actionnavigation-sm@': {
@@ -625,7 +625,7 @@ angular.module('app.recipes', ['ui.router'])
 						controller: 'RecipeDetailActionsCtrl'
 					},
 					'actionnavigation-xs@': {
-		    		template: '<button type="button" class="navbar-toggle actionbutton" ng-click="recipeDetailsAdd()"><i class="glyphicon glyphicon-option-horizontal"></i></button>',
+		    		template: '<button type="button" class="navbar-toggle actionbutton" ng-click="recipeDetailsAdd()"><i class="glyphicon glyphicon-floppy-disk"></i></button>',
 						controller: 'ActionSidebarRecipeController'
 					},
 					'actionnavigation-sm@': {

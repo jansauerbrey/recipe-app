@@ -4,7 +4,7 @@
     <description>
         A recipe planner for storing and planning recipes including shopping list, etc.
     </description>
-    <author email="info@rezept-planer.de" href="http://www.rezept-planer.de">
+    <author email="info@rezept-planer.de" href="https://www.rezept-planer.de">
         Jan Sauerbrey
     </author>
     <content src="index.html" />
@@ -19,20 +19,19 @@
     <icon src="www/res/img/icon.png" platform="android" density="hdpi" />
     <icon src="www/res/img/icon.png" platform="android" density="xhdpi" />
     <plugin name="cordova-plugin-whitelist" version="1" />
-    <access origin="*" />
     <access origin="local://" />
     <access origin="file:///" subdomains="true" />
     <access origin="https://rezept-planer.de" subdomains="true" />
     <access origin="https://d9gkwhfwam31p.cloudfront.net" />
-    <allow-intent href="http://*/*" />
-    <allow-intent href="https://*/*" />
+    <allow-intent href="http://helsinki.sby.eu/*" />
     <allow-intent href="tel:*" />
-    <allow-intent href="sms:*" />
     <allow-intent href="mailto:*" />
     <preference name="SplashScreen" value="screen" />
-    <preference name="SplashScreenDelay" value="10000" />
+    <preference name="SplashScreenDelay" value="3000" />
     <platform name="android">
         <allow-intent href="market:*" />
+        <preference name="android-minSdkVersion" value="17" />
+        <preference name="AppendUserAgent" value="RPv0.3.0" />
         <splash src="www/res/img/screen.png" density="port-ldpi" />
         <splash src="www/res/img/screen.png" density="port-mdpi" />
         <splash src="www/res/img/screen.png" density="port-hdpi" />
