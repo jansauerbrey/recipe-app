@@ -19,29 +19,18 @@
     <icon src="www/res/img/icon.png" platform="android" density="hdpi" />
     <icon src="www/res/img/icon.png" platform="android" density="xhdpi" />
     <plugin name="cordova-plugin-whitelist" version="1" />
-    <access origin="local://" />
-    <access origin="file:///" subdomains="true" />
-    <access origin="https://rezept-planer.de" subdomains="true" />
-    <access origin="https://d9gkwhfwam31p.cloudfront.net" />
+    <access origin="file:///" />
+    <access origin="https://www.rezept-planer.de" subdomains="false" />
+    <access origin="https://d9gkwhfwam31p.cloudfront.net" subdomains="false" />
     <allow-intent href="http://helsinki.sby.eu/*" />
-    <allow-intent href="tel:*" />
-    <allow-intent href="mailto:*" />
+    <allow-intent href="mailto:info@rezept-planer.de" />
     <preference name="SplashScreen" value="screen" />
     <preference name="SplashScreenDelay" value="3000" />
     <platform name="android">
-        <allow-intent href="market:*" />
         <preference name="android-minSdkVersion" value="17" />
-        <preference name="AppendUserAgent" value="RPv0.3.0" />
         <splash src="www/res/img/screen.png" density="port-ldpi" />
         <splash src="www/res/img/screen.png" density="port-mdpi" />
         <splash src="www/res/img/screen.png" density="port-hdpi" />
         <splash src="www/res/img/screen.png" density="port-xhdpi" />
-    </platform>
-    <platform name="ios">
-        <allow-intent href="itms:*" />
-        <allow-intent href="itms-apps:*" />
-    </platform>
-    <platform name="blackberry">
-        <rim:splash src="www/res/img/screen.png" />
     </platform>
 </widget>
