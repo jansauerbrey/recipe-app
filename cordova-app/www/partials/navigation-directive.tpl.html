@@ -4,8 +4,12 @@
   <div class="navbar-header">
   	<div><navsidebar></navsidebar></div>
     <div class="beta-tag">&nbsp;BETA&nbsp;</div>
-		<a class="hidden-xs navbar-brand" ui-sref="user.home" ng-class="{active: $state.includes('user.home')}" access="User">rezept-planer.de</a>
-		<a class="hidden-xs navbar-brand" ui-sref="anon.startpage" ng-class="{active: $state.includes('anon.startpage')}" access="NoUser">rezept-planer.de</a>
+    <a class="navbar-brand hidden-xs" ui-sref="user.home" access="User" style="padding: 5px 15px;">
+      <img alt="Brand" src="img/icon.png">
+    </a>
+    <a class="navbar-brand hidden-xs" ui-sref="anon.startpage" access="NoUser" style="padding: 5px 15px;">
+      <img alt="Brand" src="img/icon.png">
+    </a>
 		<h4 class="visible-xs" style="margin-top: 15px; width: 160px; float: left;">{{$state.current.data.title}}</h4>
   	<div ui-view="actionnavigation-xs"></div>
   </div>
@@ -48,7 +52,7 @@
       <li ng-class="{active: $state.includes('anon.user.register')}" access="NoUser">
         <a ui-sref="anon.user.register"><span class="glyphicon glyphicon-edit" style="padding-right: 10px;"></span>Register</a>
       </li>
-  		<li class="visible-sm"><span ui-view="actionnavigation-sm"></span></li>
+  		<li ui-view="actionnavigation-sm" class="visible-sm"></li>
     </ul>
     <p class="navbar-text navbar-right visible-lg-block" access="User"><a ui-sref="user.details" class="navbar-link">{{user.fullname}}</a></p>
   </div>

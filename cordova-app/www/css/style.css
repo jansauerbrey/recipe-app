@@ -264,4 +264,5 @@ a.navbar-sm-more:hover, a.navbar-sm-more:focus {
     color: #333;
     background-color: transparent;
     text-decoration: none;
+    curser: pointer;
 }
