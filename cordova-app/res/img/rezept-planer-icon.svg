@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="1024"
+   height="1024"
+   viewBox="0 0 1024 1024"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="rezept-planer-icon.svg"
+   inkscape:export-filename="/home/jan/Desktop/rezept-planer-icon_192.png"
+   inkscape:export-xdpi="34.560001"
+   inkscape:export-ydpi="34.560001">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.89746094"
+     inkscape:cx="556.57018"
+     inkscape:cy="645.71055"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:snap-center="false"
+     inkscape:snap-object-midpoints="false"
+     inkscape:snap-bbox="false"
+     inkscape:bbox-nodes="false"
+     inkscape:bbox-paths="false"
+     inkscape:snap-bbox-edge-midpoints="false"
+     inkscape:snap-bbox-midpoints="false"
+     inkscape:window-width="1855"
+     inkscape:window-height="1056"
+     inkscape:window-x="65"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     units="px" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Layer 2"
+     transform="translate(-181.98424,239.11229)" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-181.98424,239.11229)">
+    <g
+       id="g5790"
+       transform="matrix(2.0479998,0,0,2.0480028,-190.71944,-822.56458)">
+      <rect
+         ry="72.096817"
+         y="303.5441"
+         x="200.64061"
+         height="462.68726"
+         width="462.68726"
+         id="rect5101"
+         style="fill:#fdfdfd;fill-opacity:1;stroke:#fdfdfd;stroke-width:37.31274414;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <g
+         transform="matrix(0.70616533,0.70804698,-0.70804698,0.70616533,258.31622,-358.25683)"
+         id="g5073">
+        <rect
+           style="fill:#3379b6;fill-opacity:1;fill-rule:evenodd"
+           id="rect3417-2-7-3"
+           width="314.92136"
+           height="40"
+           x="440.9588"
+           y="-776.64276"
+           transform="matrix(0,1,-1,0,0,0)" />
+        <ellipse
+           style="fill:#3379b6;fill-opacity:1"
+           id="path4236-5-2"
+           cx="756.70825"
+           cy="364.95883"
+           rx="75"
+           ry="100" />
+        <rect
+           style="fill:#3379b6;fill-opacity:1;fill-rule:evenodd"
+           id="rect3417-5-4"
+           width="227.14618"
+           height="40"
+           x="774.25366"
+           y="490.9588" />
+        <path
+           style="fill:#3379b6;fill-opacity:1"
+           d="m 522.61045,540.58481 c -17.90719,-19.0227 -19.07488,-49.626 -19.07488,-49.626 l 213.2285,0 0,79.88277 c 0,0 -125.89548,0.002 -126.53121,0 -33.42304,-0.10008 -49.71523,-11.23406 -67.62241,-30.25677 z"
+           id="rect4258-4-4"
+           inkscape:connector-curvature="0"
+           sodipodi:nodetypes="zcccsz" />
+      </g>
+    </g>
+  </g>
+</svg>

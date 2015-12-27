@@ -9,15 +9,11 @@
     </author>
     <content src="index.html" />
     <!-- Default application icon -->
-    <icon src="www/res/img/icon.png" />
+    <icon src="res/img/rezept-planer-icon_192.png" />
     <!--
     Default icon should work, but cordova don't overwrite
     the default on all densities
     -->
-    <icon src="www/res/img/icon.png" platform="android" density="ldpi" />
-    <icon src="www/res/img/icon.png" platform="android" density="mdpi" />
-    <icon src="www/res/img/icon.png" platform="android" density="hdpi" />
-    <icon src="www/res/img/icon.png" platform="android" density="xhdpi" />
     <plugin name="cordova-plugin-whitelist" version="1" />
     <access origin="file:///" />
     <access origin="https://www.rezept-planer.de" subdomains="false" />
@@ -26,12 +22,31 @@
     <allow-intent href="mailto:info@rezept-planer.de" />
     <preference name="SplashScreen" value="screen" />
     <preference name="SplashScreenDelay" value="3000" />
+    <preference name="DisallowOverscroll" value="true"/>
     <platform name="android">
         <preference name="android-minSdkVersion" value="17" />
-        <splash src="www/res/img/screen.png" density="port-ldpi" />
-        <splash src="www/res/img/screen.png" density="port-mdpi" />
-        <splash src="www/res/img/screen.png" density="port-hdpi" />
-        <splash src="www/res/img/screen.png" density="port-xhdpi" />
+        
+		    <!-- Icon -->
+		    <icon src="res/android/rezept-planer-icon_36.png" density="ldpi" />
+		    <icon src="res/android/rezept-planer-icon_48.png" density="mdpi" />
+		    <icon src="res/android/rezept-planer-icon_72.png" density="hdpi" />
+		    <icon src="res/android/rezept-planer-icon_96.png" density="xhdpi" />
+		    <icon src="res/android/rezept-planer-icon_144.png" density="xxhdpi" />
+		    <icon src="res/android/rezept-planer-icon_192.png" density="xxxhdpi" />
+        
+		    <!-- Splash Screen -->
+		    <splash src="res/android/splash-land-hdpi.png" density="land-hdpi"/>
+		    <splash src="res/android/splash-land-ldpi.png" density="land-ldpi"/>
+		    <splash src="res/android/splash-land-mdpi.png" density="land-mdpi"/>
+		    <splash src="res/android/splash-land-xhdpi.png" density="land-xhdpi"/>
+		
+		    <splash src="res/android/rezept-planer-splash_200x320.png" density="port-ldpi"/>
+		    <splash src="res/android/rezept-planer-splash_320x480.png" density="port-mdpi"/>
+		    <splash src="res/android/rezept-planer-splash_480x800.png" density="port-hdpi"/>
+		    <splash src="res/android/rezept-planer-splash_720x1280.png" density="port-xhdpi"/>
+		    <splash src="res/android/rezept-planer-splash_960x1600.png" density="port-xxhdpi"/>
+		    <splash src="res/android/rezept-planer-splash_1280x1920.png" density="port-xxxhdpi"/>
+        
     </platform>
     <platform name="ios">
     	<preference name="BackupWebStorage" value="local"/>
@@ -39,5 +54,16 @@
     	<preference name="StatusBarOverlaysWebView" value="false" /> 
 			<preference name="StatusBarBackgroundColor" value="#f8f8f8" />
 			<preference name="StatusBarStyle" value="default" />
+			<preference name="KeyboardDisplayRequiresUserAction" value="false"/>
+      <!-- iOS 8.0+ -->
+      <!-- iPhone 6 Plus  -->
+      <icon src="res/ios/icon_60@3x.png" width="180" height="180" />
+      <!-- iOS 7.0+ -->
+      <!-- iPhone / iPod Touch  -->
+      <icon src="res/ios/icon_60.png" width="60" height="60" />
+      <icon src="res/ios/icon_60@2x.png" width="120" height="120" />
+      <!-- iPad -->
+      <icon src="res/ios/icon-76.png" width="76" height="76" />
+      <icon src="res/ios/icon-76@2x.png" width="152" height="152" />
     </platform>
 </widget>
