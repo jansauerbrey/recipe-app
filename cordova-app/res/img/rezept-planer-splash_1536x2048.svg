@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="1536"
+   height="2048"
+   viewBox="0 0 1536 2048"
+   id="svg3341"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="rezept-planer-splash_1536x2048.svg"
+   inkscape:export-filename="/home/jan/Desktop/rezept-planer-splash_1536x2048.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <defs
+     id="defs3343" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#fdfdfd"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="1"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.44873047"
+     inkscape:cx="768"
+     inkscape:cy="1024"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     units="px"
+     inkscape:window-width="1855"
+     inkscape:window-height="1056"
+     inkscape:window-x="65"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata3346">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,995.63786)">
+    <g
+       id="g4854"
+       transform="matrix(5.9999999,0,0,6.0000054,164,-5361.816)">
+      <g
+         id="g5871"
+         transform="matrix(0.04882811,0,0,0.04882794,66.114055,859.03769)">
+        <g
+           id="g5853">
+          <rect
+             ry="147.65448"
+             y="-200.90541"
+             x="220.19249"
+             height="947.58478"
+             width="947.58344"
+             id="rect5101"
+             style="fill:none;fill-opacity:1;stroke:#3379b6;stroke-width:76.41654968;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+        </g>
+        <g
+           id="g5073"
+           transform="matrix(1.4462265,1.4500822,-1.4500801,1.4462286,338.31213,-1556.2756)">
+          <rect
+             transform="matrix(0,1,-1,0,0,0)"
+             y="-776.64276"
+             x="440.9588"
+             height="40"
+             width="314.92136"
+             id="rect3417-2-7-3"
+             style="fill:#3379b6;fill-opacity:1;fill-rule:evenodd" />
+          <ellipse
+             ry="100"
+             rx="75"
+             cy="364.95883"
+             cx="756.70825"
+             id="path4236-5-2"
+             style="fill:#3379b6;fill-opacity:1" />
+          <rect
+             y="490.9588"
+             x="774.25366"
+             height="40"
+             width="227.14618"
+             id="rect3417-5-4"
+             style="fill:#3379b6;fill-opacity:1;fill-rule:evenodd" />
+          <path
+             sodipodi:nodetypes="zcccsz"
+             inkscape:connector-curvature="0"
+             id="rect4258-4-4"
+             d="m 522.61045,540.58481 c -17.90719,-19.0227 -19.07488,-49.626 -19.07488,-49.626 l 213.2285,0 0,79.88277 c 0,0 -125.89548,0.002 -126.53121,0 -33.42304,-0.10008 -49.71523,-11.23406 -67.62241,-30.25677 z"
+             style="fill:#3379b6;fill-opacity:1" />
+        </g>
+      </g>
+      <text
+         transform="scale(1.0147895,0.98542605)"
+         sodipodi:linespacing="125%"
+         id="text4773"
+         y="993.83722"
+         x="38.083786"
+         style="font-style:normal;font-weight:normal;font-size:39.14704895px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#3379b6;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="font-size:14.6801424px;fill:#3379b6;fill-opacity:1"
+           y="993.83722"
+           x="38.083786"
+           id="tspan4775"
+           sodipodi:role="line">rezept-planer.de</tspan></text>
+    </g>
+  </g>
+</svg>
