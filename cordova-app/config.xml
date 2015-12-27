@@ -33,4 +33,11 @@
         <splash src="www/res/img/screen.png" density="port-hdpi" />
         <splash src="www/res/img/screen.png" density="port-xhdpi" />
     </platform>
+    <platform name="ios">
+    	<preference name="BackupWebStorage" value="local"/>
+    	<preference name="deployment-target" value="7.0" />
+    	<preference name="StatusBarOverlaysWebView" value="false" /> 
+			<preference name="StatusBarBackgroundColor" value="#f8f8f8" />
+			<preference name="StatusBarStyle" value="default" />
+    </platform>
 </widget>
