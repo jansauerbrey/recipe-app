@@ -20,7 +20,6 @@
     <access origin="https://d9gkwhfwam31p.cloudfront.net" subdomains="false" />
     <allow-intent href="http://helsinki.sby.eu/*" />
     <allow-intent href="mailto:info@rezept-planer.de" />
-    <preference name="SplashScreen" value="screen" />
     <preference name="SplashScreenDelay" value="3000" />
     <preference name="DisallowOverscroll" value="true"/>
     <platform name="android">
