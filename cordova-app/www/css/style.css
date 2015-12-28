@@ -270,3 +270,10 @@ a.navbar-sm-more:hover, a.navbar-sm-more:focus {
 .spacing-10 {
 	margin-top: 10px;
 }
+.hover-show-element {
+	display: none;
+}
+
+.hover-ref-element:hover .hover-show-element {
+	display: inline;
+}

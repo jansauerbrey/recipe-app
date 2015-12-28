@@ -7,7 +7,14 @@ angular.module('app.auth', ['ui.router'])
 
 // Auth
 
-    .factory('UserService', [ '$localStorage', function($localStorage){
+
+        .factory('User', ['$resource', 'BASE_URI', function($resource, BASE_URI){
+          return $resource(BASE_URI+'api/user/info/:id', null, {
+            'update': { method:'PUT' }
+          });
+        }])
+
+    .factory('UserService', [ '$localStorage', '$injector', function($localStorage, $injector){
         var currentUser,
             createUser = function(data){
                 currentUser = data;
@@ -33,6 +40,15 @@ angular.module('app.auth', ['ui.router'])
 	                currentUser.favoriteRecipes = favRecipes;
 	                $localStorage.user.favoriteRecipes = favRecipes;
                 }
+            },
+            updateUserSettings = function(userSettings, callback) {
+                if (currentUser !== undefined){
+                	var User = $injector.get('User');
+                	User.update({id: currentUser._id}, userSettings, function(response){
+                		for (var attrname in response) { currentUser[attrname] = response[attrname]; }
+                		callback(currentUser);
+									});
+                }
             };
 
             if ($localStorage.user){
@@ -45,7 +61,8 @@ angular.module('app.auth', ['ui.router'])
             deleteCurrentUser: deleteCurrentUser,
             isAuthenticated: isAuthenticated,
             getToken: getToken,
-            updateFavoriteRecipes: updateFavoriteRecipes
+            updateFavoriteRecipes: updateFavoriteRecipes,
+            updateUserSettings: updateUserSettings
         }
 
     }])
@@ -174,9 +191,6 @@ angular.module('app.auth', ['ui.router'])
         };
     }])
 
-        .factory('User', ['$resource', 'BASE_URI', function($resource, BASE_URI){
-          return $resource(BASE_URI+'api/user/info/:id');
-        }])
 
 
 
@@ -234,6 +248,20 @@ angular.module('app.auth', ['ui.router'])
             }
 	}
     }])
+    
+    
+	.controller('UserSettingsCtrl', ['$scope', '$state', 'UserService', function UserCtrl($scope, $state, UserService) {
+ 		$scope.alerts = [];
+		$scope.user = UserService.getCurrentLoginUser();
+		
+		$scope.updateUserSettings = function() {
+			UserService.updateUserSettings({fullname: $scope.user.fullname, email: $scope.user.email, settings: $scope.user.settings}, function(response){
+				$scope.user = UserService.getCurrentLoginUser();
+				$scope.alerts.push({type: 'success', msg: 'Settings successfully updated.'});
+			});
+		}
+		
+	}])
 
 
 
@@ -301,6 +329,24 @@ angular.module('app.auth', ['ui.router'])
 	      title: 'Reset password'
 			}
       		})
+			.state('user.settings', {
+				abstract: true,
+				url: '/user/settings',
+				template: '<ui-view />',
+				data: {
+					title: 'User settings'
+				}
+			})
+			.state('user.settings.view', {
+				url: '/view',
+				templateUrl: 'partials/user.settings.view.tpl.html',
+				controller: 'UserSettingsCtrl'
+			})
+			.state('user.settings.edit', {
+				url: '/edit',
+				templateUrl: 'partials/user.settings.edit.tpl.html',
+				controller: 'UserSettingsCtrl'
+			})
     ;
   }])
 ;

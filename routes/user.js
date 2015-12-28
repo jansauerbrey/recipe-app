@@ -23,6 +23,15 @@ router.get('/info', auth.verify, function(req, res, next) {
   });
 });
 
+/* PUT /user/info */
+router.put('/info', auth.verify, function(req, res, next) {
+	var userInfo = {fullname: req.body.fullname, email: req.body.email, settings: req.body.settings};
+  User.findByIdAndUpdate(req._user.id, userInfo, { 'new': true}).select('username fullname email is_admin settings favoriteRecipes').exec( function (err, user) {
+	  if (err) return next(err);
+	  res.json(user);
+  });
+});
+
 /* GET /user/info/id */
 router.get('/info/:id', auth.verify, function(req, res, next) {
   User.findById(req.params.id, 'fullname', function (err, user) {
