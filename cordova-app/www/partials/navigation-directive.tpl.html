@@ -25,7 +25,7 @@
         <a ui-sref="user.shopitems.view"><span class="glyphicon glyphicon-shopping-cart" style="padding-right: 10px;"></span>Shopping</a>
       </li>
       <li class="hidden-xs" uib-dropdown is-open="othersIsOpen" style="cursor: pointer;" ng-class="{active: $state.includes('admin')}" access="Admin">
-      <a class="dropdown-toggle" ui-sref="/" uib-dropdown-toggle access="Admin">Admin <span class="caret"></span></a>
+      <a class="dropdown-toggle" uib-dropdown-toggle access="Admin">Admin <span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">       	
 		      <li ng-class="{active: $state.includes('admin.units')}" access="Admin">
 		        <a ui-sref="admin.units.list"><span class="glyphicon glyphicon-scale" style="padding-right: 10px;"></span>Units</a>

@@ -31,82 +31,84 @@ angular.module('app.recipes', ['ui.router'])
         }])
 
         .factory('recipeActions', ['$rootScope', '$stateParams', '$uibModal', 'Recipes', '$state', 'Favorites', 'UserService', 'Tags', function ($rootScope, $stateParams, $uibModal, Recipes, $state, Favorites, UserService, Tags) {
-          var recipe;
-          var recipeOrig;
-          var factorAvailable;
-          var factor;
-					var allowEdit;
-          var submitted = false;
-          var validForm = false;
-          var alerts = [];
+          var data = {recipe: {},
+          	recipeOrig: {},
+          	factorAvailable: false,
+          	factor: 0,
+          	userExists: false,
+          	allowEdit: false,
+          	submitted: false,
+          	validForm: false,
+          	alerts: []};
           
           var setRecipe = function(recipeItem, factor){
-          	this.recipe = recipeItem;
-          	this.recipeOrig = angular.copy(this.recipe);
-          	this.factorAvailable = factor > 0 ? true : false;
-          	this.factor = this.factorAvailable ? factor : this.recipe.yield;
+          	data.recipe = recipeItem;
+          	data.recipeOrig = angular.copy(data.recipe);
+          	data.factorAvailable = factor > 0 ? true : false;
+          	data.factor = data.factorAvailable ? factor : data.recipe.yield;
           	var user = UserService.getCurrentLoginUser();
-						if (this.recipe.author && user._id == this.recipe.author._id || user.is_admin === true) {
-							this.allowEdit = true;
-						} else {
-							this.allowEdit = false;
+						if (data.recipe.author && user && user._id == data.recipe.author._id || user && user.is_admin === true) {
+							data.userExists = true;
+							data.allowEdit = true;
+						} else if (user){
+							data.userExists = true;
 						}
           }
           var create = function(){
-			        if(!this.validForm){
-								this.alerts.push({type: 'danger', msg: 'Please complete all required fields before saving.'})
-								this.submitted = true;
+			        if(!data.validForm){
+								data.alerts.push({type: 'danger', msg: 'Please complete all required fields before saving.'})
+								data.submitted = true;
 								$rootScope.$broadcast("submittedValueChanged");
 			          return;
 			        }
-			        if(!this.recipe || this.recipe.length < 1) return;
-			        this.recipe.ingredients = this.recipe.ingredients.filter(function(n){ return n != ''});
-			        for(i=0;i<this.recipe.tags.length;i++){
-			          if (!this.recipe.tags[i]._id){
-			            var tag = new Tags(this.recipe.tags[i]);
+			        if(!data.recipe || data.recipe.length < 1) return;
+			        data.recipe.ingredients = data.recipe.ingredients.filter(function(n){ return n != ''});
+			        for(i=0;i<data.recipe.tags.length;i++){
+			          if (!data.recipe.tags[i]._id){
+			            var tag = new Tags(data.recipe.tags[i]);
 			            tag.$save();
-			            this.recipe.tags[i] = tag._id;
+			            data.recipe.tags[i] = tag._id;
 			          }
 			        }
-			        for(i=0;i<this.recipe.ingredients.length;i++){
-			          if (!(this.recipe.ingredients[i].ingredient && this.recipe.ingredients[i].ingredient._id)) {
-			            this.recipe.ingredients.splice(i, 1);
+			        for(i=0;i<data.recipe.ingredients.length;i++){
+			          if (!(data.recipe.ingredients[i].ingredient && data.recipe.ingredients[i].ingredient._id)) {
+			            data.recipe.ingredients.splice(i, 1);
 			          }
 			        }
 			        
-			        delete this.recipe._id;
-			        this.recipe.$save(function(response){
+			        delete data.recipe._id;
+			        data.recipe.$save(function(response){
 			          $state.go('user.recipes.details.view', {id: response._id});
 			        });
 			      };
 			      var update = function(){
-							if(!this.validForm){
-								this.alerts.push({type: 'danger', msg: 'Please complete all required fields before saving.'})
-								this.submitted = true;
+							if(!data.validForm){
+								data.alerts.push({type: 'danger', msg: 'Please complete all required fields before saving.'})
+								data.submitted = true;
 								$rootScope.$broadcast("submittedValueChanged");
 								return;
 							}
-							for(i=0;i<this.recipe.tags.length;i++){
-								if (!this.recipe.tags[i]._id){
-									var tag = new Tags(this.recipe.tags[i]);
+							for(i=0;i<data.recipe.tags.length;i++){
+								if (!data.recipe.tags[i]._id){
+									var tag = new Tags(data.recipe.tags[i]);
 									tag.$save();
-									this.recipe.tags[i] = tag._id;
+									data.recipe.tags[i] = tag._id;
 								}
 							}
-							this.recipe.ingredients = this.recipe.ingredients.filter(function(n){ return n != ''});
-							for(i=0;i<this.recipe.ingredients.length;i++){
-								if (!(this.recipe.ingredients[i].ingredient && this.recipe.ingredients[i].ingredient._id)) {
-									this.recipe.ingredients.splice(i, 1);
+							data.recipe.ingredients = data.recipe.ingredients.filter(function(n){ return n != ''});
+							for(i=0;i<data.recipe.ingredients.length;i++){
+								if (!(data.recipe.ingredients[i].ingredient && data.recipe.ingredients[i].ingredient._id)) {
+									data.recipe.ingredients.splice(i, 1);
 								}
 							}
 
-							Recipes.update({id: this.recipe._id}, this.recipe, function(response){
+							Recipes.update({id: data.recipe._id}, data.recipe, function(response){
 								setRecipe(response);
 								$state.go($rootScope.previousState.name, $rootScope.previousStateParams);
 							});
 					  };
 					  var remove = function(){
-							Recipes.remove({id: this.recipe._id}, function(){
+							Recipes.remove({id: data.recipe._id}, function(){
 								if ($rootScope.previousState.name === 'user.recipes.details.edit' ) {
 									$state.go('user.recipes.dishtypes');
 								} else {
@@ -115,32 +117,26 @@ angular.module('app.recipes', ['ui.router'])
 							});
 						};
 						var cancel = function(){
-							this.recipe = angular.copy(this.recipeOrig);
+							data.recipe = angular.copy(data.recipeOrig);
 							$state.go($rootScope.previousState.name, $rootScope.previousStateParams);
 						};
 						var setFavorite = function(){
-							var parent = this;
-							Favorites.update({id: this.recipe._id}, {method: 'add'}, function(response){
+							var parent = data;
+							Favorites.update({id: data.recipe._id}, {method: 'add'}, function(response){
 								UserService.updateFavoriteRecipes(response.favoriteRecipes);
 								parent.recipe.fav_recipe = true;
 							});
 						};
 						var unsetFavorite = function(){
-							var parent = this;
-							Favorites.update({id: this.recipe._id}, {method: 'delete'}, function(response){
+							var parent = data;
+							Favorites.update({id: data.recipe._id}, {method: 'delete'}, function(response){
 								UserService.updateFavoriteRecipes(response.favoriteRecipes);
 								parent.recipe.fav_recipe = false;
 							});
 						};
 						        
           return {
-          	recipe: recipe,
-          	submitted: submitted,
-          	validForm: validForm,
-          	alerts: alerts,
-          	factorAvailable: factorAvailable,
-          	factor: factor,
-          	allowEdit: allowEdit,
+          	data: data,
           	setRecipe: setRecipe,
           	setFavorite: setFavorite,
           	unsetFavorite: unsetFavorite,
@@ -207,12 +203,13 @@ angular.module('app.recipes', ['ui.router'])
     .controller('RecipeDetailCtrl', ['$rootScope', '$scope', '$stateParams', '$uibModal', 'Tags', 'units', 'dishtypes', 'TAIngredients', 'TATags', 'isCordova', 'recipeActions', function ($rootScope, $scope, $stateParams, $uibModal, Tags, units, dishtypes, TAIngredients, TATags, isCordova, recipeActions) {
 			$scope.isCordova = isCordova;
 			
-			$scope.alerts = recipeActions.alerts;
-			$scope.submitted = recipeActions.submitted;
-			$scope.recipe = recipeActions.recipe;
-			$scope.factorAvailable = recipeActions.factorAvailable;
-			$scope.factor = recipeActions.factor;
-			$scope.allowEdit = recipeActions.allowEdit;
+			$scope.alerts = recipeActions.data.alerts;
+			$scope.submitted = recipeActions.data.submitted;
+			$scope.recipe = recipeActions.data.recipe;
+			$scope.factorAvailable = recipeActions.data.factorAvailable;
+			$scope.factor = recipeActions.data.factor;
+			$scope.allowEdit = recipeActions.data.allowEdit;
+			$scope.userExists = recipeActions.data.userExists;
       
 			$scope.favorite = function() {
 		    recipeActions.setFavorite();
@@ -237,7 +234,7 @@ angular.module('app.recipes', ['ui.router'])
       }
       
       $scope.$on("submittedValueChanged", function(){
-				$scope.submitted = recipeActions.submitted;
+				$scope.submitted = recipeActions.data.submitted;
       });
 
 
@@ -256,6 +253,26 @@ angular.module('app.recipes', ['ui.router'])
 
 
         modalAddSchedule.result.then(function(successMsg){
+          $scope.alerts.push(successMsg);
+        });
+
+      }
+      
+      $scope.share = function() {
+        var modalShare = $uibModal.open({
+          animation: true,
+          templateUrl: 'partials/recipes.share.tpl.html',
+          controller: 'ModalShareControllerRecipes',
+          size: 'xs',
+          resolve: {
+            recipe: function(){
+              return $scope.recipe;
+            }
+          }
+        });
+
+
+        modalShare.result.then(function(successMsg){
           $scope.alerts.push(successMsg);
         });
 
@@ -293,7 +310,7 @@ angular.module('app.recipes', ['ui.router'])
       }
       
      	$scope.$watch('recipeForm.$valid', function(newVal) {
-          recipeActions.validForm = newVal;
+          recipeActions.data.validForm = newVal;
       });
 
     }])
@@ -318,13 +335,29 @@ angular.module('app.recipes', ['ui.router'])
 
     }])
     
+    .controller('ModalShareControllerRecipes', ['$scope', '$modalInstance', '$filter', 'recipe', function ($scope, $modalInstance, $filter, recipe) {
+      $scope.recipe = recipe;
+      
+      var hashtagArray = [];
+      for(i=0;i<recipe.tags.length;i++){
+      	hashtagArray.push(recipe.tags[i].text);
+      }
+      $scope.hashtags = hashtagArray.join(", ")
+     
+      $scope.cancel = function(){
+        $modalInstance.dismiss('cancel');
+      }
+
+    }])
+    
     
     .controller('RecipeDetailActionsCtrl', ['$rootScope', '$scope', '$uibModal', 'recipeActions', function ($rootScope, $scope, $uibModal, recipeActions) {
     		
-			$scope.alerts = recipeActions.alerts;
-			$scope.submitted = recipeActions.submitted;
-			$scope.recipe = recipeActions.recipe;
-			$scope.allowEdit = recipeActions.allowEdit;
+			$scope.alerts = recipeActions.data.alerts;
+			$scope.submitted = recipeActions.data.submitted;
+			$scope.recipe = recipeActions.data.recipe;
+			$scope.allowEdit = recipeActions.data.allowEdit;
+			$scope.userExists = recipeActions.data.userExists;
 			
       
 			$scope.favorite = function() {
@@ -370,15 +403,35 @@ angular.module('app.recipes', ['ui.router'])
 
       }
 
+      $scope.share = function() {
+        var modalShare = $uibModal.open({
+          animation: true,
+          templateUrl: 'partials/recipes.share.tpl.html',
+          controller: 'ModalShareControllerRecipes',
+          size: 'xs',
+          resolve: {
+            recipe: function(){
+              return $scope.recipe;
+            }
+          }
+        });
+
+
+        modalShare.result.then(function(successMsg){
+          $scope.alerts.push(successMsg);
+        });
+
+      }
     }])
     
     
     .controller('RecipeDetailActionSidebarCtrl', ['$rootScope', '$scope', '$uibModal', 'recipeActions', '$modalInstance', function ($rootScope, $scope, $uibModal, recipeActions, $modalInstance) {
 			
-			$scope.alerts = recipeActions.alerts;
-			$scope.submitted = recipeActions.submitted;
-			$scope.recipe = recipeActions.recipe;
-			$scope.allowEdit = recipeActions.allowEdit;
+			$scope.alerts = recipeActions.data.alerts;
+			$scope.submitted = recipeActions.data.submitted;
+			$scope.recipe = recipeActions.data.recipe;
+			$scope.allowEdit = recipeActions.data.allowEdit;
+			$scope.userExists = recipeActions.data.userExists;
 			
       
 			$scope.favorite = function() {
@@ -388,11 +441,11 @@ angular.module('app.recipes', ['ui.router'])
 		    recipeActions.unsetFavorite();
 		  }
 			$scope.save = function() {
-				recipeActions.submitted = true;
+				recipeActions.data.submitted = true;
 		    recipeActions.create();
 		  }
 			$scope.update = function() {
-				recipeActions.submitted = true;
+				recipeActions.data.submitted = true;
 		    recipeActions.update();
 		  }
 			$scope.remove = function() {
@@ -421,6 +474,27 @@ angular.module('app.recipes', ['ui.router'])
 
 
         modalAddSchedule.result.then(function(successMsg){
+          $scope.alerts.push(successMsg);
+        });
+
+      }
+      
+      
+      $scope.share = function() {
+        var modalShare = $uibModal.open({
+          animation: true,
+          templateUrl: 'partials/recipes.share.tpl.html',
+          controller: 'ModalShareControllerRecipes',
+          size: 'xs',
+          resolve: {
+            recipe: function(){
+              return $scope.recipe;
+            }
+          }
+        });
+
+
+        modalShare.result.then(function(successMsg){
           $scope.alerts.push(successMsg);
         });
 
@@ -547,17 +621,17 @@ angular.module('app.recipes', ['ui.router'])
 				resolve: {
 					recipe: ['Recipes', '$stateParams', 'recipeActions', function(Recipes, $stateParams, recipeActions){
 						if ($stateParams.id) {
-								var recipe = Recipes.get({'id': $stateParams.id}, function(response) {
-									response.ingredients.push({qty: '', unit: '', ingredient: ''});
-									recipeActions.setRecipe(response, $stateParams.factor);
-								}).$promise;
+							var recipe = Recipes.get({'id': $stateParams.id}, function(response) {
+								response.ingredients.push({qty: '', unit: '', ingredient: ''});
+								recipeActions.setRecipe(response, $stateParams.factor);
+							}).$promise;
 							return recipe;
 						} else {
 							var recipe = new Recipes();
 							recipe.ingredients = [];
 							recipe.ingredients.push({qty: '', unit: '', ingredient: ''});
 							recipe.imagePath = "no_image.png";
-							recipeActions.recipe = recipe;
+							recipeActions.data.recipe = recipe;
 							return recipe;
 						}
 					}],
@@ -634,6 +708,69 @@ angular.module('app.recipes', ['ui.router'])
 					}
 				}
   		})
+  		
+  		
+			.state('anon.recipes', {
+				abstract: true,
+				url: "/sharedrecipe",
+				template: '<ui-view />',
+				data: {
+		      title: 'Recipes'
+				}
+			})
+			.state('anon.recipes.details', {
+				abstract: true,
+				url: "/:id",
+				params: {factor: null},
+				templateUrl: 'partials/recipes.details.layout.tpl.html',
+				resolve: {
+					recipe: ['Recipes', '$stateParams', 'recipeActions', function(Recipes, $stateParams, recipeActions){
+						if ($stateParams.id) {
+								var recipe = Recipes.get({'id': $stateParams.id}, function(response) {
+									response.ingredients.push({qty: '', unit: '', ingredient: ''});
+									recipeActions.setRecipe(response, $stateParams.factor);
+								}).$promise;
+							return recipe;
+						} else {
+							var recipe = new Recipes();
+							recipe.ingredients = [];
+							recipe.ingredients.push({qty: '', unit: '', ingredient: ''});
+							recipe.imagePath = "no_image.png";
+							recipeActions.data.recipe = recipe;
+							return recipe;
+						}
+					}],
+					units: function(){
+						return {};
+					},
+					dishtypes: function(){
+						return {};
+					}
+				}
+			})
+  		.state('anon.recipes.details.view', {
+				url: '',
+				params: {factor: null},
+				views: {
+	    		'main': {
+		    		templateUrl: 'partials/recipes.view.tpl.html',
+						controller: 'RecipeDetailCtrl'
+					},
+					'sidelinks': {
+		    		templateUrl: 'partials/recipes.view.links.tpl.html',
+						controller: 'RecipeDetailActionsCtrl'
+					},
+					'actionnavigation-xs@': {
+		    		template: '<button type="button" class="navbar-toggle actionbutton" ng-click="recipeDetailsView()"><i class="glyphicon glyphicon-option-horizontal"></i></button>',
+						controller: 'ActionSidebarRecipeController'
+					},
+					'actionnavigation-sm@': {
+		    		template: '<a ng-click="recipeDetailsView()" class="navbar-sm-more"><span class="glyphicon glyphicon-plus" style="padding-right: 10px;"></span>More</a>',
+						controller: 'ActionSidebarRecipeController' 
+					}
+				}
+				
+ 			})
     ;
   }])
 ;

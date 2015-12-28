@@ -266,3 +266,7 @@ a.navbar-sm-more:hover, a.navbar-sm-more:focus {
     text-decoration: none;
     cursor: pointer;
 }
+
+.spacing-10 {
+	margin-top: 10px;
+}

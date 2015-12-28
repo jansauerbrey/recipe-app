@@ -7,6 +7,46 @@ var TIME_TO_LIVE = 300; //5 minutes
 /*
 * Middleware to verify the token and store the user data in req._user
 */
+exports.loadUser = function(req, res, next) {
+	var headers = req.headers;
+	var token;
+	if (headers != null){
+		// Get token
+		try {
+			token = tokenHelper.extractTokenFromHeader(headers);
+		} catch (err) {
+			console.log(err);
+		}
+	}
+
+	//Verify it in redis, set data in req._user
+	if (token) {
+		redisHelper.getDataByToken(token, function(err, data) {
+			if (!err){
+		
+				if (data.autologin === true){
+					TIME_TO_LIVE = 60*60*24*30;
+				}
+		    
+		    try {
+					redisHelper.renewToken(token, TIME_TO_LIVE, function(err, success){
+						return (err, success);
+					});
+				} catch (err) {
+					console.log(err);
+					next();
+				}
+				console.log(data);
+				User.findOne({username: data.username}, function (err, user) {
+					req._user = user;
+				});
+			}
+		});
+	}
+	next();
+};
+
+
 exports.verify = function(req, res, next) {
 	var headers = req.headers;
 	if (headers == null) return res.sendStatus(401);

@@ -61,15 +61,15 @@ router.post('/', auth.verify, function(req, res, next) {
 });
 
 /* GET /recipes/id */
-router.get('/:id', auth.verify, function(req, res, next) {
-  var preferredLanguage = (req._user.settings && req._user.settings.preferredLanguage) ? req._user.settings.preferredLanguage : 'en';
+router.get('/:id', auth.loadUser, function(req, res, next) {
+  var preferredLanguage = (req._user && req._user.settings && req._user.settings.preferredLanguage) ? req._user.settings.preferredLanguage : 'en';
   Recipe.findById(req.params.id).populate(['tags', 'ingredients.ingredient', 'ingredients.unit']).populate('author', 'fullname').populate('dishType', 'name.'+preferredLanguage).lean().exec( function (err, recipe) {
     if (err) return next(err);
     recipe.dishType.name_translated = recipe.dishType.name[preferredLanguage];
     var newIndicatorDate = new Date();
     newIndicatorDate.setDate(newIndicatorDate.getDate() - 14);
     recipe.new_recipe = (new Date(recipe.updated_at) > newIndicatorDate) ? true : false;
-    recipe.fav_recipe = (req._user.favoriteRecipes && req._user.favoriteRecipes.indexOf(recipe._id) > -1) ? true : false;
+    recipe.fav_recipe = (req._user && req._user.favoriteRecipes && req._user.favoriteRecipes.indexOf(recipe._id) > -1) ? true : false;
     res.json(recipe);
   });
 });
