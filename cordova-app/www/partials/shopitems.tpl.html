@@ -48,10 +48,10 @@
 	          <div>Add Ingredient</div>
 	        </a>
 	      </div>
-	      <div ng-repeat="ingredient in frequentshopitems">
-	        <a class="list-group-item col-sm-6 col-md-6 col-lg-3" style="height: 150px; text-align: center;" ng-click="modalFrequentshopitemAdd(ingredient._id)">
-	          <div><img style="width: 80px; height: 80px;" ng-src="{{ingredient._id.rewe_img_link_sm}}"></img></div>
-	          <div>{{ingredient._id.name.de}}</div>
+	      <div ng-repeat="item in frequentshopitems">
+	        <a class="list-group-item col-sm-6 col-md-6 col-lg-3" style="height: 150px; text-align: center;" ng-click="modalFrequentshopitemAdd(item)">
+	          <div><img style="width: 80px; height: 80px;" ng-src="{{item.ingredient.rewe_img_link_sm}}"></img></div>
+	          <div>{{item.ingredient.name.de}} ({{item.unit.name.de}})</div>
 	        </a>
 	      </div>
       </div>

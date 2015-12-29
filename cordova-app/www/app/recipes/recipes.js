@@ -237,6 +237,9 @@ angular.module('app.recipes', ['ui.router'])
 				$scope.submitted = recipeActions.data.submitted;
       });
 
+			$scope.clearImage = function(){
+				$scope.recipe.imagePath =  "no_image.png";
+			}
 
       $scope.scheduleAdd = function() {
         var modalAddSchedule = $uibModal.open({

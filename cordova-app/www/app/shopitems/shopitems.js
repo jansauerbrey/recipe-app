@@ -277,8 +277,14 @@ angular.module('app.shopitems', ['ui.router'])
           controller: 'ModalShopitemAddController',
           size: 'lg',
           resolve: {
+            ingredient: function(){
+              return false;
+            },
             units: function(){
               return $scope.units;
+            },
+            preferredUnit: function(){
+              return false;
             }
           }
         });
@@ -290,18 +296,21 @@ angular.module('app.shopitems', ['ui.router'])
       }
       
 
-      $scope.modalFrequentshopitemAdd = function(ingredient) {
+      $scope.modalFrequentshopitemAdd = function(item) {
         var modalAddFrequentshopitem = $uibModal.open({
           animation: true,
           templateUrl: 'partials/frequentshopitems.modal.add.tpl.html',
-          controller: 'ModalFrequentshopitemAddController',
+          controller: 'ModalShopitemAddController',
           size: 'lg',
           resolve: {
             ingredient: function(){
-              return ingredient;
+              return item.ingredient;
             },
             units: function(){
               return $scope.units;
+            },
+            preferredUnit: function(){
+              return item.unit;
             }
           }
         });
@@ -358,8 +367,14 @@ angular.module('app.shopitems', ['ui.router'])
           controller: 'ModalShopitemAddController',
           size: 'lg',
           resolve: {
+            ingredient: function(){
+              return false;
+            },
             units: function(){
               return $scope.units;
+            },
+            preferredUnit: function(){
+              return false;
             }
           }
         });
@@ -410,8 +425,14 @@ angular.module('app.shopitems', ['ui.router'])
           controller: 'ModalShopitemAddController',
           size: 'lg',
           resolve: {
+            ingredient: function(){
+              return false;
+            },
             units: function(){
               return $scope.units;
+            },
+            preferredUnit: function(){
+              return false;
             }
           }
         });
@@ -464,9 +485,12 @@ angular.module('app.shopitems', ['ui.router'])
       }
     }])
 
-    .controller('ModalShopitemAddController', ['$scope', '$stateParams', '$modalInstance', 'TAIngredients', 'units', function ($scope, $stateParams, $modalInstance, TAIngredients, units) {
+    .controller('ModalShopitemAddController', ['$scope', '$stateParams', '$modalInstance', 'TAIngredients', 'units', 'ingredient', 'preferredUnit', function ($scope, $stateParams, $modalInstance, TAIngredients, units, ingredient, preferredUnit) {
      
+			$scope.submitted = false;
       $scope.units = units;
+      $scope.newunit = preferredUnit ? preferredUnit._id: undefined;
+      $scope.newingredient = ingredient ? ingredient : undefined;
 
       $scope.GetIngredients = function(viewValue){
         return TAIngredients.search({search: viewValue, language: 'de'})
@@ -475,7 +499,11 @@ angular.module('app.shopitems', ['ui.router'])
         });
       };
 
-      $scope.ok = function(){
+      $scope.ok = function(validForm){
+	      if(!validForm){
+					$scope.submitted = true;
+	        return;
+	      }
         for(i=0;i<$scope.units.length;i++){
           if($scope.units[i]._id === $scope.newunit) {
             $scope.newunitobject = $scope.units[i];
@@ -490,31 +518,6 @@ angular.module('app.shopitems', ['ui.router'])
 
 
     }])
-
-
-    .controller('ModalFrequentshopitemAddController', ['$scope', '$stateParams', '$modalInstance', 'ingredient', 'units', function ($scope, $stateParams, $modalInstance, ingredient, units) {
-     
-      $scope.units = units;
-      $scope.newunit = $scope.units[2]._id;
-
-      $scope.ingredient = ingredient;
-
-      $scope.ok = function(){
-	for(i=0;i<$scope.units.length;i++){
-	    if($scope.units[i]._id === $scope.newunit) {
-	      $scope.newunitobject = $scope.units[i];
-	    }
-	  }
-        $modalInstance.close({amount: $scope.amount, unit: $scope.newunitobject, ingredient: $scope.ingredient});
-      }
-
-      $scope.cancel = function(){
-        $modalInstance.dismiss('cancel');
-      }
-
-
-    }])
-
 
 
     .controller('ActionSidebarShopitemsController', ['$scope', '$aside', 'units', function ($scope, $aside, units) {
