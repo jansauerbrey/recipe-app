@@ -269,52 +269,6 @@ angular.module('app.shopitems', ['ui.router', 'ui.bootstrap', 'modalstate'])
         });
 			}
 
-
-      $scope.modalShopitemAdd = function() {
-        var modalAddShopitem = $uibModal.open({
-          animation: true,
-          templateUrl: 'partials/shopitems.modal.add.tpl.html',
-          controller: 'ModalShopitemAddController',
-          size: 'lg',
-          resolve: {
-            units: function(){
-              return $scope.units;
-            }
-          }
-        });
-
-        modalAddShopitem.result.then(function(response){
-          $scope.addShopitem(response);
-        });
-
-      }
-      
-
-      $scope.modalFrequentshopitemAdd = function(item) {
-        var modalAddFrequentshopitem = $uibModal.open({
-          animation: true,
-          templateUrl: 'partials/frequentshopitems.modal.add.tpl.html',
-          controller: 'ModalShopitemAddController',
-          size: 'lg',
-          resolve: {
-            ingredient: function(){
-              return item.ingredient;
-            },
-            units: function(){
-              return $scope.units;
-            },
-            preferredUnit: function(){
-              return item.unit;
-            }
-          }
-        });
-
-        modalAddFrequentshopitem.result.then(function(response){
-          $scope.addShopitem(response);
-        });
-
-      }
-
       $scope.closeAlert = function(index){
         $scope.alerts.splice(index, 1);
       }
@@ -353,31 +307,6 @@ angular.module('app.shopitems', ['ui.router', 'ui.bootstrap', 'modalstate'])
       }
 
 
-
-      $scope.modalShopitemAdd = function() {
-        var modalAddShopitem = $uibModal.open({
-          animation: true,
-          templateUrl: 'partials/shopitems.modal.add.tpl.html',
-          controller: 'ModalShopitemAddController',
-          size: 'lg',
-          resolve: {
-            ingredient: function(){
-              return false;
-            },
-            units: function(){
-              return $scope.units;
-            },
-            preferredUnit: function(){
-              return false;
-            }
-          }
-        });
-
-        modalAddShopitem.result.then(function(response){
-          $scope.addShopitem(response);
-        });
-      }
-
     }])
 
 
@@ -408,32 +337,6 @@ angular.module('app.shopitems', ['ui.router', 'ui.bootstrap', 'modalstate'])
       
       $scope.stopAutoupdate = function() {
       	shopitemsActions.stopAutoupdate();
-      }
-
-
-
-      $scope.modalShopitemAdd = function() {
-        var modalAddShopitem = $uibModal.open({
-          animation: true,
-          templateUrl: 'partials/shopitems.modal.add.tpl.html',
-          controller: 'ModalShopitemAddController',
-          size: 'lg',
-          resolve: {
-            ingredient: function(){
-              return false;
-            },
-            units: function(){
-              return $scope.units;
-            },
-            preferredUnit: function(){
-              return false;
-            }
-          }
-        });
-
-        modalAddShopitem.result.then(function(response){
-          $scope.addShopitem(response);
-        });
       }
       
       $scope.closeSidebar = function(){
