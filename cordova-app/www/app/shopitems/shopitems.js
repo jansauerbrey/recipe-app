@@ -1,4 +1,4 @@
-angular.module('app.shopitems', ['ui.router'])
+angular.module('app.shopitems', ['ui.router', 'ui.bootstrap', 'modalstate'])
 
 //---------------
 // Services
@@ -277,14 +277,8 @@ angular.module('app.shopitems', ['ui.router'])
           controller: 'ModalShopitemAddController',
           size: 'lg',
           resolve: {
-            ingredient: function(){
-              return false;
-            },
             units: function(){
               return $scope.units;
-            },
-            preferredUnit: function(){
-              return false;
             }
           }
         });
@@ -388,7 +382,7 @@ angular.module('app.shopitems', ['ui.router'])
 
 
 
-    .controller('ShopitemsActionSidebarCtrl', ['$scope', '$uibModal', 'shopitemsActions', 'units', '$modalInstance', function ($scope, $uibModal, shopitemsActions, units, $modalInstance) {
+    .controller('ShopitemsActionSidebarCtrl', ['$scope', '$uibModal', 'shopitemsActions', 'units', '$uibModalInstance', function ($scope, $uibModal, shopitemsActions, units, $uibModalInstance) {
 
       $scope.units = units;
       $scope.autoupdate = shopitemsActions.data.autoupdate;
@@ -443,7 +437,7 @@ angular.module('app.shopitems', ['ui.router'])
       }
       
       $scope.closeSidebar = function(){
-        $modalInstance.dismiss('cancel');
+        $uibModalInstance.dismiss('cancel');
       }
 
     }])
@@ -451,7 +445,7 @@ angular.module('app.shopitems', ['ui.router'])
 
 
 
-    .controller('ModalShopitemDetailsController', ['$scope', '$stateParams', '$modalInstance', 'item', 'Shopitems', function ($scope, $stateParams, $modalInstance, item, Shopitems) {
+    .controller('ModalShopitemDetailsController', ['$scope', '$stateParams', '$uibModalInstance', 'item', 'Shopitems', function ($scope, $stateParams, $uibModalInstance, item, Shopitems) {
       $scope.item = item;
       
       
@@ -481,16 +475,16 @@ angular.module('app.shopitems', ['ui.router'])
 
 
       $scope.close = function(){
-        $modalInstance.close();
+        $uibModalInstance.close();
       }
     }])
 
-    .controller('ModalShopitemAddController', ['$scope', '$stateParams', '$modalInstance', 'TAIngredients', 'units', 'ingredient', 'preferredUnit', function ($scope, $stateParams, $modalInstance, TAIngredients, units, ingredient, preferredUnit) {
+    .controller('ModalShopitemAddController', ['$scope', '$stateParams', '$uibModalInstance', 'TAIngredients', 'units', 'shopitemsActions', function ($scope, $stateParams, $uibModalInstance, TAIngredients, units, shopitemsActions) {
      
 			$scope.submitted = false;
       $scope.units = units;
-      $scope.newunit = preferredUnit ? preferredUnit._id: undefined;
-      $scope.newingredient = ingredient ? ingredient : undefined;
+      $scope.newunit = $stateParams.unit ? $stateParams.unit._id: undefined;
+      $scope.newingredient = $stateParams.ingredient ? $stateParams.ingredient : undefined;
 
       $scope.GetIngredients = function(viewValue){
         return TAIngredients.search({search: viewValue, language: 'de'})
@@ -509,11 +503,14 @@ angular.module('app.shopitems', ['ui.router'])
             $scope.newunitobject = $scope.units[i];
           }
         }
-        $modalInstance.close({amount: $scope.newamount, unit: $scope.newunitobject, ingredient: $scope.newingredient});
+        
+        var item = {amount: $scope.newamount, unit: $scope.newunitobject, ingredient: $scope.newingredient};
+      	shopitemsActions.addShopitem(item);
+        $uibModalInstance.close();
       }
 
       $scope.cancel = function(){
-        $modalInstance.dismiss('cancel');
+        $uibModalInstance.dismiss('cancel');
       }
 
 
@@ -540,7 +537,8 @@ angular.module('app.shopitems', ['ui.router'])
 // Routes
 //---------------
 
-  .config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
+
+  .config(['$stateProvider', 'modalStateProvider', '$urlRouterProvider', function ($stateProvider, modalStateProvider, $urlRouterProvider) {
 
     $stateProvider
 			.state('user.shopitems', {
@@ -585,6 +583,29 @@ angular.module('app.shopitems', ['ui.router'])
 						controller: 'ActionSidebarShopitemsController' 
 					}
 				}
+      });
+      
+      
+    modalStateProvider
+      .state('user.shopitems.view.add', {
+      	url: '/add',
+      	templateUrl: 'partials/shopitems.modal.add.tpl.html',
+		    controller: 'ModalShopitemAddController',
+				params: {
+					ingredient: undefined,
+					unit: undefined
+				},
+		    resolve: {
+					units: function(Units){
+						return Units.query().$promise;
+					},
+					ingredient: function(){
+						return false;
+					},
+					preferredUnit: function(){
+						return false;
+					}	
+		    }
       })
     ;
   }])

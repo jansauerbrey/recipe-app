@@ -71,10 +71,10 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 
 // Sidebar
 
-    .controller('NavSidebarController', ['$scope', '$modalInstance', function ($scope, $modalInstance) {
+    .controller('NavSidebarController', ['$scope', '$uibModalInstance', function ($scope, $uibModalInstance) {
      
       $scope.cancel = function(){
-        $modalInstance.dismiss('cancel');
+        $uibModalInstance.dismiss('cancel');
       }
 
     }])
@@ -175,14 +175,14 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
                 var modalNgReally = $uibModal.open({
 					        animation: true,
 					        templateUrl: 'partials/ngreally.tpl.html',
-					        controller: ['$scope', '$modalInstance', 'message', function ($scope, $modalInstance, message) {
+					        controller: ['$scope', '$uibModalInstance', 'message', function ($scope, $uibModalInstance, message) {
       							$scope.message = message;
       							$scope.ok = function(){
-							        $modalInstance.close();
+							        $uibModalInstance.close();
 							      }
 							      
 							      $scope.cancel = function(){
-							        $modalInstance.dismiss('cancel');
+							        $uibModalInstance.dismiss('cancel');
 							      }
 								  }],
 					        size: 'xs',
@@ -222,32 +222,32 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 	})
 
 	.directive('cameraButton', function(httpPostFactory) {
-	   return {
-	      restrict: 'A',
-	      scope: true,
-	      link: function(scope, element, attrs) {
-		 element.bind('click', function() {
-		    navigator.camera.getPicture(function (imageURI) {
-				window.resolveLocalFileSystemURL(imageURI, function(fileEntry) {
-         				fileEntry.file(function(file) {
-             					var reader = new FileReader();
-                				reader.onloadend = function(e) {
-                      					var imgBlob = new Blob([ e.target.result ], { type: file.type } );
-					    		var formData = new FormData();
-				            		formData.append('file', imgBlob, "file.jpg");
-				               		httpPostFactory('api/upload', formData, function (callback) {
-				                    		scope.recipe.imagePath = callback;
-				               		});
-						};
-                 				reader.readAsArrayBuffer(file);
-         				}, function(err){});
-    				}, function(err){});
-		    	}, function (err) {},
-		    	{ quality: 50, destinationType: Camera.DestinationType.FILE_URI }
-		    );
-		 });
-	      }
-	   };
+	  return {
+			restrict: 'A',
+			scope: true,
+			link: function(scope, element, attrs) {
+				element.bind('click', function() {
+				  navigator.camera.getPicture(function (imageURI) {
+					window.resolveLocalFileSystemURL(imageURI, function(fileEntry) {
+				   				fileEntry.file(function(file) {
+				       					var reader = new FileReader();
+				          				reader.onloadend = function(e) {
+				                					var imgBlob = new Blob([ e.target.result ], { type: file.type } );
+						    		var formData = new FormData();
+					            		formData.append('file', imgBlob, "file.jpg");
+					               		httpPostFactory('api/upload', formData, function (callback) {
+					                    		scope.recipe.imagePath = callback;
+					               		});
+							};
+				           				reader.readAsArrayBuffer(file);
+				   				}, function(err){});
+							}, function(err){});
+				  	}, function (err) {},
+				  	{ quality: 50, destinationType: Camera.DestinationType.FILE_URI }
+				  );
+				});
+	    }
+	  };
 	})
 
 	.directive('stateLoadingIndicator', function($rootScope) {
@@ -261,21 +261,25 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 	    replace: true,
 	    link: function(scope, elem, attrs) {
 	      scope.isStateLoading = false;
-	 
+	 			
 	      $rootScope.$on('$stateChangeStart', function() {
-		scope.isStateLoading = true;
+					scope.isStateLoading = true;
 	      });
 	      $rootScope.$on('$stateChangeSuccess', function() {
-		scope.isStateLoading = false;
+					scope.isStateLoading = false;
 	      });
 	    }
 	  };
 	})
+	
+	
+
 
 		
 //---------------
 // Routes
 //---------------
+
 
   .config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
 
@@ -284,7 +288,9 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
     $stateProvider
 		.state('anon', {
 			abstract: true,
-			template: "<ui-view />",
+			views: {'root':
+				{template: "<ui-view />"}
+			},
 			data	: {
 				requiresLogin: false,
                  		requiredPermissions: ['NoUser']
@@ -305,31 +311,36 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 		})
 		.state('user', {
 			abstract: true,
-			template: '<ui-view />',
+			views: {'root':
+				{template: '<ui-view />'}
+			},
 			data: {
 				requiresLogin: true,
                  		requiredPermissions: ['User']
 			}
 		})
-      		.state('impressum', {
+    .state('impressum', {
 			url: '/impressum',
-        		templateUrl: 'partials/impressum.tpl.html',
+			views: {'root':
+				{ templateUrl: 'partials/impressum.tpl.html'}
+      },
 			data: {
 	      title: 'Impressum'
 			}
-      		})
-      		.state('accessdenied', {
+    })
+    .state('accessdenied', {
 			url: '/access/denied',
-        		templateUrl: 'partials/access.denied.tpl.html'
-      		})
-      		.state('user.home', {
+			views: {'root':
+        { templateUrl: 'partials/access.denied.tpl.html'}
+      }
+    })
+    .state('user.home', {
 			url: '/home',
-        		templateUrl: 'partials/home.tpl.html',
+			templateUrl: 'partials/home.tpl.html',
 			data: {
 	      title: 'Home'
 			}
-      		})
-
+    })
     ;
   }])
 
@@ -360,5 +371,3 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
     }])
 
 ;
-
-

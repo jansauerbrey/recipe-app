@@ -8,14 +8,14 @@ var auth = require('../auth/auth.js');
 
 /* GET /recipes listing. */
 router.get('/', auth.verify, function(req, res, next) {
-    console.log("start");
+    //console.log("start");
   var preferredLanguage = (req._user.settings && req._user.settings.preferredLanguage) ? req._user.settings.preferredLanguage : 'en';
   if (Object.keys(req.query).length === 0) {
-    console.log("load recipes");
+    //console.log("load recipes");
     Recipe.find({}, 'author updated_at dishType').populate('dishType', 'name.'+preferredLanguage+' order imagePath').lean().exec( function (err, recipes) {
-      console.log(err);
+      //console.log(err);
       if (err) return next(err);
-      console.log(recipes);
+      //console.log(recipes);
       var newIndicatorDate = new Date();
       newIndicatorDate.setDate(newIndicatorDate.getDate() - 14);
       for(i=0;i<recipes.length;i++){
@@ -24,8 +24,8 @@ router.get('/', auth.verify, function(req, res, next) {
 					recipes[i].dishType.name_translated = recipes[i].dishType.name[preferredLanguage];
 					recipes[i].dishType.name = undefined;
 				}
-				console.log(req._user);
-				console.log('recipes[i]._id: ' + recipes[i]._id);
+				//console.log(req._user);
+				//console.log('recipes[i]._id: ' + recipes[i]._id);
 				recipes[i].fav_recipe = (req._user.favoriteRecipes && req._user.favoriteRecipes.indexOf(recipes[i]._id) > -1) ? true : false;
       }
       res.json(recipes);

@@ -57,7 +57,9 @@ angular.module('app.admin', ['ui.router'])
     $stateProvider
 		.state('admin', {
 			abstract: true,
-			template: "<ui-view />",
+			views: {'root':
+        { template: "<ui-view />" }
+      },
 			data: {
 				requiresLogin: true,
         requiredPermissions: ['Admin'],
@@ -74,8 +76,6 @@ angular.module('app.admin', ['ui.router'])
 				}
 			},
 			data: {
-    		name: 'Users',
-  			icon: 'glyphicon glyphicon-user',
 	      title: 'Users'
 			}
     })
