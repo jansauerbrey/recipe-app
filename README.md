@@ -1,6 +1,8 @@
 # RecipeApp
 
-The intention of this app is to have a recipe database and a planning tool at the same time. A week in advance can be planned and a shopping list is created. Recipes show up on the corresponding days and number of persons are incorporated into the shopping list and recipes. In addition due to personal reasons the database supports three languages for the same ingredient (english, german and finnish).
+The intention of this app / website is to have a recipe database and a planning tool at the same time. I.e. a week in advance can be planned and a shopping list is created automatically. Recipes show up on the corresponding days and number of persons are incorporated into the shopping list and recipes. In addition due to personal reasons the database supports three languages for the same ingredient (english, german and finnish).
+
+Demo (login requires activation of me, so please email before): https://www.rezept-planer.de
 
 ## Features
 
@@ -12,7 +14,28 @@ The intention of this app is to have a recipe database and a planning tool at th
 - [x] Possibility to add items to shopping list (besides recipe ingredients)
 - [x] User Authentication via token in redis database including login and logout
 - [x] User management (admin level)
+
+## Todos / BUGs
+
 - [ ] Add user registration for new user including email validation
+- [ ] Better usability with appropriate error messages (ie. in case of login-in before activation of account)
+- [ ] Hide actionbar on back button (ie Android app)
+- [ ] Case insensitive usernames
+- [ ] On recipe search: hide of on screen keyboard as soon as scrolling is started
+- [ ] Add button for scheduling already in recipe overview
+- [ ] Fix rotation of recipe images
+- [ ] Fix print menu esp. on mobile and extend print button also to shopping list, schedules and print also a whole week of schedules incl. recipes
+- [ ] Add possibility to add new ingredients directly in recipe creation process
+- [ ] add possibility to distinguesh between user added ingredient (not public) and admin approved ingredients (public)
+
+## Future Features / Thoughts
+
+- [ ] Add user settings with default language, etc.
+- [ ] Add possibility of default unit per ingredient (ie. gramm) and scondary units with factor calculation (ie. ml, kg, cup)
+- [ ] Add shopping units per ingredient (ie. can) for improved shopping list
+- [ ] Add possibility to order whole shopping basket online (ie. at REWE online)
+- [ ] Add possibility to comment on recipes (public)
+- [ ] Add possibility to make own remarks to recipes of other uthors (non-puplic)
 
 
 ## Installation (Ubuntu)
