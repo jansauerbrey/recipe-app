@@ -16,7 +16,7 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
         }])
         
         
-        .factory('shopitemsActions', ['$rootScope', '$timeout', '$q', 'UserService', 'Shopitems', function($rootScope, $timeout, $q, UserService, Shopitems){
+        .factory('ShopitemService', ['$rootScope', '$timeout', '$q', 'UserService', 'Shopitems', function($rootScope, $timeout, $q, UserService, Shopitems){
       		
     			var data = {shopitems: [], alerts: [], autoupdate: true, pauseAutoupdate: 0};
     			var containsObj = function(array, obj) {
@@ -189,20 +189,20 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
 
 // Shopitems
 
-    .controller('ShopitemsController', ['$scope', '$uibModal', 'shopitemsActions', 'Shopitems', 'frequentshopitems', 'TAIngredients', 'units', 'shopitems', function ($scope, $uibModal, shopitemsActions, Shopitems, frequentshopitems, TAIngredients, units, shopitems) {
+    .controller('ShopitemsController', ['$scope', '$uibModal', 'ShopitemService', 'Shopitems', 'frequentshopitems', 'TAIngredients', 'units', 'shopitems', function ($scope, $uibModal, ShopitemService, Shopitems, frequentshopitems, TAIngredients, units, shopitems) {
 
       $scope.units = units;
       $scope.frequentshopitems = frequentshopitems;
-      $scope.shopitems = shopitemsActions.data.shopitems;
-      $scope.autoupdate = shopitemsActions.data.autoupdate;
-      $scope.alerts = shopitemsActions.data.alerts;
+      $scope.shopitems = ShopitemService.data.shopitems;
+      $scope.autoupdate = ShopitemService.data.autoupdate;
+      $scope.alerts = ShopitemService.data.alerts;
       
       
       $scope.$on("shopitemsUpdated", function(){
-      	$scope.shopitems = shopitemsActions.data.shopitems;
+      	$scope.shopitems = ShopitemService.data.shopitems;
       });
       $scope.$on("autoupdateValueChanged", function(){
-      	$scope.autoupdate = shopitemsActions.data.autoupdate;
+      	$scope.autoupdate = ShopitemService.data.autoupdate;
       });
       
       
@@ -212,23 +212,23 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
 			}
 
       $scope.addShopitem = function(item) {
-      	shopitemsActions.addShopitem(item);
+      	ShopitemService.addShopitem(item);
       }
       
       $scope.remove = function(item) {
-      	shopitemsActions.remove(item);
+      	ShopitemService.remove(item);
       }
       
       $scope.complete = function(item) {
-      	shopitemsActions.complete(item);
+      	ShopitemService.complete(item);
       }
 
       $scope.startAutoupdate = function() {
-      	shopitemsActions.startAutoupdate();
+      	ShopitemService.startAutoupdate();
       }
       
       $scope.stopAutoupdate = function() {
-      	shopitemsActions.stopAutoupdate();
+      	ShopitemService.stopAutoupdate();
       }
 
       if ($scope.autoupdate === true){
@@ -265,7 +265,7 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
         });
 
         modalShopitemDetails.result.then(function(){
-        	shopitemsActions.retrieveShopitems();
+        	ShopitemService.retrieveShopitems();
         });
 			}
 
@@ -278,32 +278,32 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
 
 
 
-    .controller('ShopitemsActionController', ['$scope', '$uibModal', 'shopitemsActions', 'units', function ($scope, $uibModal, shopitemsActions, units) {
+    .controller('ShopitemsActionController', ['$scope', '$uibModal', 'ShopitemService', 'units', function ($scope, $uibModal, ShopitemService, units) {
 
       $scope.units = units;
-      $scope.autoupdate = shopitemsActions.data.autoupdate;
-      $scope.alerts = shopitemsActions.data.alerts;
+      $scope.autoupdate = ShopitemService.data.autoupdate;
+      $scope.alerts = ShopitemService.data.alerts;
       
       $scope.$on("autoupdateValueChanged", function(){
-      	$scope.autoupdate = shopitemsActions.data.autoupdate;
+      	$scope.autoupdate = ShopitemService.data.autoupdate;
       });
       
       
 
       $scope.addShopitem = function(item) {
-      	shopitemsActions.addShopitem(item);
+      	ShopitemService.addShopitem(item);
       }
       
       $scope.remove = function(item) {
-      	shopitemsActions.remove(item);
+      	ShopitemService.remove(item);
       }
 
       $scope.startAutoupdate = function() {
-      	shopitemsActions.startAutoupdate();
+      	ShopitemService.startAutoupdate();
       }
       
       $scope.stopAutoupdate = function() {
-      	shopitemsActions.stopAutoupdate();
+      	ShopitemService.stopAutoupdate();
       }
 
 
@@ -311,32 +311,32 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
 
 
 
-    .controller('ShopitemsActionSidebarCtrl', ['$scope', '$uibModal', 'shopitemsActions', 'units', '$uibModalInstance', function ($scope, $uibModal, shopitemsActions, units, $uibModalInstance) {
+    .controller('shopitemsActionSidebarCtrl', ['$scope', '$uibModal', 'ShopitemService', 'units', '$uibModalInstance', function ($scope, $uibModal, ShopitemService, units, $uibModalInstance) {
 
       $scope.units = units;
-      $scope.autoupdate = shopitemsActions.data.autoupdate;
-      $scope.alerts = shopitemsActions.data.alerts;
+      $scope.autoupdate = ShopitemService.data.autoupdate;
+      $scope.alerts = ShopitemService.data.alerts;
       
       $scope.$on("autoupdateValueChanged", function(){
-      	$scope.autoupdate = shopitemsActions.data.autoupdate;
+      	$scope.autoupdate = ShopitemService.data.autoupdate;
       });
       
       
 
       $scope.addShopitem = function(item) {
-      	shopitemsActions.addShopitem(item);
+      	ShopitemService.addShopitem(item);
       }
       
       $scope.remove = function(item) {
-      	shopitemsActions.remove(item);
+      	ShopitemService.remove(item);
       }
 
       $scope.startAutoupdate = function() {
-      	shopitemsActions.startAutoupdate();
+      	ShopitemService.startAutoupdate();
       }
       
       $scope.stopAutoupdate = function() {
-      	shopitemsActions.stopAutoupdate();
+      	ShopitemService.stopAutoupdate();
       }
       
       $scope.closeSidebar = function(){
@@ -382,7 +382,7 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
       }
     }])
 
-    .controller('ModalShopitemAddController', ['$scope', '$stateParams', '$uibModalInstance', 'TAIngredients', 'units', 'shopitemsActions', function ($scope, $stateParams, $uibModalInstance, TAIngredients, units, shopitemsActions) {
+    .controller('ModalShopitemAddController', ['$scope', '$stateParams', '$uibModalInstance', 'TAIngredients', 'units', 'ShopitemService', function ($scope, $stateParams, $uibModalInstance, TAIngredients, units, ShopitemService) {
      
 			$scope.submitted = false;
       $scope.units = units;
@@ -408,7 +408,7 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
         }
         
         var item = {amount: $scope.newamount, unit: $scope.newunitobject, ingredient: $scope.newingredient};
-      	shopitemsActions.addShopitem(item);
+      	ShopitemService.addShopitem(item);
         $uibModalInstance.close();
       }
 
@@ -449,9 +449,9 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
 				url: "/shopitems",
 				templateUrl: 'partials/shopitems.layout.tpl.html',
 				resolve: {
-					shopitems: function(shopitemsActions){
-						shopitemsActions.data.autoupdate = true; //TODO: set with user settings instead
-						return shopitemsActions.retrieveShopitems().then( function(data){
+					shopitems: function(ShopitemService){
+						ShopitemService.data.autoupdate = true; //TODO: set with user settings instead
+						return ShopitemService.retrieveShopitems().then( function(data){
 								return data;
 							});
 					},

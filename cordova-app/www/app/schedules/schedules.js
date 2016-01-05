@@ -218,7 +218,7 @@ angular.module('app.schedules', ['ui.router', 'modalstate'])
     }])
 
 
-    .controller('ModalScheduleAddController', ['$scope', '$stateParams', '$uibModalInstance', '$filter', 'AlertService', 'SchedulesService', 'Schedules', 'randomRecipes', 'TARecipes', function ($scope, $stateParams, $uibModalInstance, $filter, AlertService, SchedulesService, Schedules, randomRecipes, TARecipes) {
+    .controller('ModalScheduleAddController', ['$scope', '$state', '$stateParams', '$uibModalInstance', '$filter', 'AlertService', 'SchedulesService', 'Schedules', 'randomRecipes', 'TARecipes', function ($scope, $state, $stateParams, $uibModalInstance, $filter, AlertService, SchedulesService, Schedules, randomRecipes, TARecipes) {
 
       $scope.date = $stateParams.date ? $stateParams.date : new Date();
       $scope.newrecipe = $stateParams.recipe ? $stateParams.recipe : undefined;
@@ -254,7 +254,9 @@ angular.module('app.schedules', ['ui.router', 'modalstate'])
         newSchedule.$save(function(response){
           var message = 'The recipe '+$scope.newrecipe.name+' was successfully scheduled for the '+$filter('date')($scope.date, 'dd.MM.yyyy')+' with '+$scope.factor+' persons.';
           AlertService.add('success', message);
-          SchedulesService.update();
+          if ($state.includes('user.schedules')){
+          	SchedulesService.update();
+          }
           $uibModalInstance.close();
         });
       }

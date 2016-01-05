@@ -55,7 +55,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
           }
           var create = function(){
 			        if(!data.validForm){
-								//AlertService.add('danger', 'Please complete all required fields before saving.');
+								AlertService.add('danger', 'Please complete all required fields before saving.');
 								data.submitted = true;
 								$rootScope.$broadcast("submittedValueChanged");
 			          return;
@@ -82,7 +82,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 			      };
 			      var update = function(){
 							if(!data.validForm){
-								//AlertService.add('danger', 'Please complete all required fields before saving.')
+								AlertService.add('danger', 'Please complete all required fields before saving.')
 								data.submitted = true;
 								$rootScope.$broadcast("submittedValueChanged");
 								return;
@@ -668,6 +668,24 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
     
     modalStateProvider
       .state('user.recipes.details.view.scheduleadd', {
+      	url: '/add',
+      	templateUrl: 'partials/recipes.scheduleadd.tpl.html',
+		    controller: 'ModalScheduleAddController',
+				params: {
+					date: undefined,
+					recipe: undefined
+				},
+		    resolve: {
+          randomRecipes: [ 'RandomRecipe', function(RandomRecipe){
+						var randomRecipes = RandomRecipe.query({'number': '3'}, function(response){
+							return response;
+						});
+						
+						return randomRecipes;
+          }]
+		    }
+      })
+      .state('user.recipes.list.scheduleadd', {
       	url: '/add',
       	templateUrl: 'partials/recipes.scheduleadd.tpl.html',
 		    controller: 'ModalScheduleAddController',

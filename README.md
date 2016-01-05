@@ -17,7 +17,6 @@ Demo (login requires activation of me, so please email before): https://www.reze
 
 ## Todos / BUGs
 
-- [ ] Add button for scheduling already in recipe overview
 - [ ] On recipe search: hide on screen keyboard as soon as scrolling is started
 - [ ] Better usability with appropriate error messages (ie. in case of login-in before activation of account)
 - [ ] Add possibility to add new ingredients directly in recipe creation process

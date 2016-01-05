@@ -45,7 +45,7 @@ router.post('/', auth.verify, function(req, res, next){
       destPath = path.join(__dirname, '../upload/', imageName);
       inputStream = fs.createReadStream(tempPath);
       outputStream = fs.createWriteStream(destPath);
-      var resize = im().resize('400x').gravity('center').crop('400x266+0+0').quality(90);
+      var resize = im().autoOrient().resize('400x').gravity('center').crop('400x266+0+0').quality(90);
       inputStream.pipe(resize).pipe(outputStream);
       outputStream.on('finish', function(){
         fs.unlinkSync(tempPath);
