@@ -5,4 +5,4 @@
 <div class="side-links"><button type="button" class="btn btn-link" ng-click="share()"><i class="glyphicon glyphicon-share"></i> Share</button></div>
 <div class="side-links" ng-show="allowEdit"><button type="button" class="btn btn-link" ui-sref="user.recipes.details.edit({id: recipe._id})"><i class="glyphicon glyphicon-pencil"></i> Edit</button></div>
 <div class="side-links" ng-show="allowEdit"><button type="button" class="btn btn-link" ng-really-message="Are you sure?" ng-really-click="remove()"><i class="glyphicon glyphicon-trash"></i> Remove</button></div>
-<div class="side-links" ng-show="userExists"><button type="button" class="btn btn-link" ng-click="scheduleAdd()"><i class="glyphicon glyphicon-calendar"></i> Add to Schedules</button></div>
+<div class="side-links" ng-show="userExists"><button type="button" class="btn btn-link" ui-sref="user.recipes.details.view.scheduleadd({recipe: recipe})"><i class="glyphicon glyphicon-calendar"></i> Add to Schedules</button></div>

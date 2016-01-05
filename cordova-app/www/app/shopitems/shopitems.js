@@ -1,4 +1,4 @@
-angular.module('app.shopitems', ['ui.router', 'ui.bootstrap', 'modalstate'])
+angular.module('app.shopitems', ['ui.router', 'modalstate'])
 
 //---------------
 // Services
@@ -501,13 +501,7 @@ angular.module('app.shopitems', ['ui.router', 'ui.bootstrap', 'modalstate'])
 		    resolve: {
 					units: function(Units){
 						return Units.query().$promise;
-					},
-					ingredient: function(){
-						return false;
-					},
-					preferredUnit: function(){
-						return false;
-					}	
+					}
 		    }
       })
     ;

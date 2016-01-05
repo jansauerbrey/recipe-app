@@ -1,4 +1,4 @@
-angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitems', 'app.units', 'app.ingredients', 'app.dishtypes', 'app.admin', 'ui.router', 'ngAnimate', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ngTagsInput', 'angular.filter', 'ngAside', 'angular-spinkit', 'gm.datepickerMultiSelect', '720kb.socialshare', 'as.sortable'])
+angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitems', 'app.units', 'app.ingredients', 'app.dishtypes', 'app.admin', 'app.alert', 'ui.router', 'ngAnimate', 'ngResource', 'ngStorage', 'ui.bootstrap', 'ngTagsInput', 'angular.filter', 'ngAside', 'angular-spinkit', 'gm.datepickerMultiSelect', '720kb.socialshare', 'as.sortable'])
 
 //---------------
 // Constants
@@ -37,6 +37,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
             states: states
         };
     })
+
 
 
 // File Upload
@@ -87,7 +88,6 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 
     }])
     
-
 
 //---------------
 // Directives

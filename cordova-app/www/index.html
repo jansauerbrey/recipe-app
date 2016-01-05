@@ -20,6 +20,9 @@
   <div class="container">
     <state-loading-indicator></state-loading-indicator>
     <div ng-include="'partials/navigation-directive.tpl.html'"></div>
+    <div ng-controller="AlertController">
+    	<uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" dismiss-on-timeout="5000" close="alert.close()">{{ alert.msg }}</uib-alert>
+		</div>
     <div ui-view="root"></div>
     <div class="navbar navbar-inverse navbar-fixed-bottom hidden-xs" role="navigation">
       <div class="container">
@@ -52,6 +55,7 @@
 <script src="dist/js/ng-sortable.min.js"></script>
 <script src="dist/js/modalstate.min.js"></script>
 <script src="app/app.js"></script>
+<script src="app/services/alert.js"></script>
 <script src="app/auth/auth.js"></script>
 <script src="app/recipes/recipes.js"></script>
 <script src="app/schedules/schedules.js"></script>

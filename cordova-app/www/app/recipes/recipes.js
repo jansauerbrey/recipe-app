@@ -1,4 +1,4 @@
-angular.module('app.recipes', ['ui.router'])
+angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 
         .factory('Recipes', ['$resource', 'BASE_URI', function($resource, BASE_URI){
           return $resource(BASE_URI+'api/recipes/:id', null, {
@@ -30,7 +30,7 @@ angular.module('app.recipes', ['ui.router'])
           });
         }])
 
-        .factory('recipeActions', ['$rootScope', '$stateParams', '$uibModal', 'Recipes', '$state', 'Favorites', 'UserService', 'Tags', function ($rootScope, $stateParams, $uibModal, Recipes, $state, Favorites, UserService, Tags) {
+        .factory('recipeActions', ['$rootScope', '$stateParams', '$uibModal', 'AlertService', 'Recipes', '$state', 'Favorites', 'UserService', 'Tags', function ($rootScope, $stateParams, $uibModal, AlertService, Recipes, $state, Favorites, UserService, Tags) {
           var data = {recipe: {},
           	recipeOrig: {},
           	factorAvailable: false,
@@ -38,8 +38,7 @@ angular.module('app.recipes', ['ui.router'])
           	userExists: false,
           	allowEdit: false,
           	submitted: false,
-          	validForm: false,
-          	alerts: []};
+          	validForm: false};
           
           var setRecipe = function(recipeItem, factor){
           	data.recipe = recipeItem;
@@ -56,7 +55,7 @@ angular.module('app.recipes', ['ui.router'])
           }
           var create = function(){
 			        if(!data.validForm){
-								data.alerts.push({type: 'danger', msg: 'Please complete all required fields before saving.'})
+								//AlertService.add('danger', 'Please complete all required fields before saving.');
 								data.submitted = true;
 								$rootScope.$broadcast("submittedValueChanged");
 			          return;
@@ -83,7 +82,7 @@ angular.module('app.recipes', ['ui.router'])
 			      };
 			      var update = function(){
 							if(!data.validForm){
-								data.alerts.push({type: 'danger', msg: 'Please complete all required fields before saving.'})
+								//AlertService.add('danger', 'Please complete all required fields before saving.')
 								data.submitted = true;
 								$rootScope.$broadcast("submittedValueChanged");
 								return;
@@ -203,7 +202,6 @@ angular.module('app.recipes', ['ui.router'])
     .controller('RecipeDetailCtrl', ['$rootScope', '$scope', '$stateParams', '$uibModal', 'Tags', 'units', 'dishtypes', 'TAIngredients', 'TATags', 'isCordova', 'recipeActions', function ($rootScope, $scope, $stateParams, $uibModal, Tags, units, dishtypes, TAIngredients, TATags, isCordova, recipeActions) {
 			$scope.isCordova = isCordova;
 			
-			$scope.alerts = recipeActions.data.alerts;
 			$scope.submitted = recipeActions.data.submitted;
 			$scope.recipe = recipeActions.data.recipe;
 			$scope.factorAvailable = recipeActions.data.factorAvailable;
@@ -229,9 +227,6 @@ angular.module('app.recipes', ['ui.router'])
 			$scope.cancel = function() {
 		    recipeActions.cancel();
 		  };
-      $scope.closeAlert = function(index){
-        $scope.alerts.splice(index, 1);
-      }
       
       $scope.$on("submittedValueChanged", function(){
 				$scope.submitted = recipeActions.data.submitted;
@@ -241,7 +236,7 @@ angular.module('app.recipes', ['ui.router'])
 				$scope.recipe.imagePath =  "no_image.png";
 			}
 
-      $scope.scheduleAdd = function() {
+/*      $scope.scheduleAdd = function() {
         var modalAddSchedule = $uibModal.open({
           animation: true,
           templateUrl: 'partials/recipes.scheduleadd.tpl.html',
@@ -259,7 +254,7 @@ angular.module('app.recipes', ['ui.router'])
           $scope.alerts.push(successMsg);
         });
 
-      }
+      }*/
       
       $scope.share = function() {
         var modalShare = $uibModal.open({
@@ -272,11 +267,6 @@ angular.module('app.recipes', ['ui.router'])
               return $scope.recipe;
             }
           }
-        });
-
-
-        modalShare.result.then(function(successMsg){
-          $scope.alerts.push(successMsg);
         });
 
       }
@@ -318,7 +308,7 @@ angular.module('app.recipes', ['ui.router'])
 
     }])
 
-
+/*
     .controller('ModalScheduleAddControllerRecipes', ['$scope', '$modalInstance', '$filter', 'Schedules', 'recipe', function ($scope, $modalInstance, $filter, Schedules, recipe) {
       $scope.recipe = recipe;
       $scope.date = new Date();
@@ -336,7 +326,7 @@ angular.module('app.recipes', ['ui.router'])
         $modalInstance.dismiss('cancel');
       }
 
-    }])
+    }])*/
     
     .controller('ModalShareControllerRecipes', ['$scope', '$modalInstance', '$filter', 'recipe', function ($scope, $modalInstance, $filter, recipe) {
       $scope.recipe = recipe;
@@ -356,7 +346,6 @@ angular.module('app.recipes', ['ui.router'])
     
     .controller('RecipeDetailActionsCtrl', ['$rootScope', '$scope', '$uibModal', 'recipeActions', function ($rootScope, $scope, $uibModal, recipeActions) {
     		
-			$scope.alerts = recipeActions.data.alerts;
 			$scope.submitted = recipeActions.data.submitted;
 			$scope.recipe = recipeActions.data.recipe;
 			$scope.allowEdit = recipeActions.data.allowEdit;
@@ -381,12 +370,9 @@ angular.module('app.recipes', ['ui.router'])
 			$scope.cancel = function() {
 		    recipeActions.cancel();
 		  };
-      $scope.closeAlert = function(index){
-        $scope.alerts.splice(index, 1);
-      }
 
 
-      $scope.scheduleAdd = function() {
+/*      $scope.scheduleAdd = function() {
         var modalAddSchedule = $uibModal.open({
           animation: true,
           templateUrl: 'partials/recipes.scheduleadd.tpl.html',
@@ -404,7 +390,7 @@ angular.module('app.recipes', ['ui.router'])
           $scope.alerts.push(successMsg);
         });
 
-      }
+      }*/
 
       $scope.share = function() {
         var modalShare = $uibModal.open({
@@ -417,11 +403,6 @@ angular.module('app.recipes', ['ui.router'])
               return $scope.recipe;
             }
           }
-        });
-
-
-        modalShare.result.then(function(successMsg){
-          $scope.alerts.push(successMsg);
         });
 
       }
@@ -430,7 +411,6 @@ angular.module('app.recipes', ['ui.router'])
     
     .controller('RecipeDetailActionSidebarCtrl', ['$rootScope', '$scope', '$uibModal', 'recipeActions', '$modalInstance', function ($rootScope, $scope, $uibModal, recipeActions, $modalInstance) {
 			
-			$scope.alerts = recipeActions.data.alerts;
 			$scope.submitted = recipeActions.data.submitted;
 			$scope.recipe = recipeActions.data.recipe;
 			$scope.allowEdit = recipeActions.data.allowEdit;
@@ -457,12 +437,9 @@ angular.module('app.recipes', ['ui.router'])
 			$scope.cancel = function() {
 		    recipeActions.cancel();
 		  };
-      $scope.closeAlert = function(index){
-        $scope.alerts.splice(index, 1);
-      }
 
 
-      $scope.scheduleAdd = function() {
+/*      $scope.scheduleAdd = function() {
         var modalAddSchedule = $uibModal.open({
           animation: true,
           templateUrl: 'partials/recipes.scheduleadd.tpl.html',
@@ -480,7 +457,7 @@ angular.module('app.recipes', ['ui.router'])
           $scope.alerts.push(successMsg);
         });
 
-      }
+      }*/
       
       
       $scope.share = function() {
@@ -496,10 +473,6 @@ angular.module('app.recipes', ['ui.router'])
           }
         });
 
-
-        modalShare.result.then(function(successMsg){
-          $scope.alerts.push(successMsg);
-        });
 
       }
       
@@ -550,7 +523,7 @@ angular.module('app.recipes', ['ui.router'])
 // Routes
 //---------------
 
-  .config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
+  .config(['$stateProvider', 'modalStateProvider', '$urlRouterProvider', function ($stateProvider, modalStateProvider, $urlRouterProvider) {
 
     $stateProvider
 		.state('user.recipes', {
@@ -775,6 +748,28 @@ angular.module('app.recipes', ['ui.router'])
 				
  			})
     ;
+    
+    modalStateProvider
+      .state('user.recipes.details.view.scheduleadd', {
+      	url: '/add',
+      	templateUrl: 'partials/recipes.scheduleadd.tpl.html',
+		    controller: 'ModalScheduleAddController',
+				params: {
+					date: undefined,
+					recipe: undefined
+				},
+		    resolve: {
+          randomRecipes: [ 'RandomRecipe', function(RandomRecipe){
+						var randomRecipes = RandomRecipe.query({'number': '3'}, function(response){
+							return response;
+						});
+						
+						return randomRecipes;
+          }]
+		    }
+      })
+    ;
+    
   }])
 ;
 

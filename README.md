@@ -17,20 +17,20 @@ Demo (login requires activation of me, so please email before): https://www.reze
 
 ## Todos / BUGs
 
-- [ ] Add user registration for new user including email validation
+- [ ] Add button for scheduling already in recipe overview
+- [ ] On recipe search: hide on screen keyboard as soon as scrolling is started
 - [ ] Better usability with appropriate error messages (ie. in case of login-in before activation of account)
+- [ ] Add possibility to add new ingredients directly in recipe creation process
+- [ ] Add possibility to distinguish between user added ingredient (not public) and admin approved ingredients (public)
+- [ ] Add user registration for new users including email validation
 - [ ] Hide actionbar on back button (ie Android app)
 - [ ] Case insensitive usernames
-- [ ] On recipe search: hide of on screen keyboard as soon as scrolling is started
-- [ ] Add button for scheduling already in recipe overview
 - [ ] Fix rotation of recipe images
 - [ ] Fix print menu esp. on mobile and extend print button also to shopping list, schedules and print also a whole week of schedules incl. recipes
-- [ ] Add possibility to add new ingredients directly in recipe creation process
-- [ ] add possibility to distinguesh between user added ingredient (not public) and admin approved ingredients (public)
+- [ ] Add user settings with default language, etc.
 
 ## Future Features / Thoughts
 
-- [ ] Add user settings with default language, etc.
 - [ ] Add possibility of default unit per ingredient (ie. gramm) and scondary units with factor calculation (ie. ml, kg, cup)
 - [ ] Add shopping units per ingredient (ie. can) for improved shopping list
 - [ ] Add possibility to order whole shopping basket online (ie. at REWE online)

@@ -18,7 +18,7 @@
 	      <!-- Default panel contents -->
 	      <div class="panel-heading panel-header-schedules">
 	      	<div style="padding-top: 6px; float: left"><strong>{{schedules.date | date:'EEEE dd.MM.yyyy'}}</strong></div>
-          <button class="btn btn-default pull-right" ng-click="scheduleAdd(schedules.date)" role="button">
+          <button class="btn btn-default pull-right" ui-sref="user.schedules.add({date: schedules.date})" role="button">
           	<span class="glyphicon glyphicon-plus"></span>
           </button>
 	      </div>
