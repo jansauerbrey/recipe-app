@@ -153,14 +153,6 @@ angular.module('app.schedules', ['ui.router', 'modalstate'])
       $scope.selectSevenDays = function(date){
       	SchedulesService.selectPeriod(date, 7);
       }
-/*      	$scope.selectedDates = [];
-				for(i=0;i<7;i++){
-					var tempDate = new Date(date.getTime());
-					tempDate.setDate(tempDate.getDate()+i);
-	      	tempDate.setHours(0, 0, 0, 0);
-					$scope.selectedDates.push(tempDate.getTime());
-				}
-			}*/
 			$scope.selectSevenDays($scope.activeDate);
       
 			$scope.updateSchedules = function(){
@@ -170,54 +162,12 @@ angular.module('app.schedules', ['ui.router', 'modalstate'])
 			$scope.selectWeek = function(dayDelta){
 				SchedulesService.selectWeek(dayDelta);
 			}
-/*				var today = new Date();
-				var lastSaturday = new Date(today.getTime());
-				lastSaturday.setDate(lastSaturday.getDate() - lastSaturday.getDay() + dayDelta); 
-				$scope.selectSevenDays(lastSaturday);
-				$scope.updateSchedules($scope.selectedDates);
-			}*/
 
 
       $scope.remove = function(lineItem, parentIndex){
       	SchedulesService.remove(lineItem, parentIndex);
       }
-/*        Schedules.remove({id: lineItem._id}, function(){
-        	var index = $scope.schedulesArray[parentIndex].schedule.indexOf(lineItem);
-          $scope.schedulesArray[parentIndex].schedule.splice(index, 1);
-          var message = 'The recipe '+lineItem.recipe.name+' was successfully removed from schedule';
-	        $scope.alerts.push({type: 'info', msg: message});
-        });
-      }*/
 
-      
-/*      $scope.scheduleAdd = function(date) {
-	      var modalAddSchedule = $uibModal.open({
-	        animation: true,
-	        templateUrl: 'partials/schedules.add.tpl.html',
-	        controller: 'ModalScheduleAddController',
-	        size: 'xs',
-	        resolve: {
-	            date: function(){
-	              return date;
-	            },
-	            randomRecipes: [ 'RandomRecipe', function(RandomRecipe){
-								var randomRecipes = RandomRecipe.query({'number': '3'}, function(response){
-									return response;
-								});
-								
-								return randomRecipes;
-	            }]
-	        }
-	      });
-	
-	      modalAddSchedule.result.then(function(successMsg){
-	        $scope.alerts.push(successMsg);
-		      retrieveSchedules.retrieve($scope.selectedDates).then( function(data){
-						if (data) $scope.schedulesArray = data;
-					});
-	      });
-      }*/
-      
       $scope.scheduleEdit = function(lineItem) {
 	      var modalEditSchedule = $uibModal.open({
 	        animation: true,
@@ -231,10 +181,6 @@ angular.module('app.schedules', ['ui.router', 'modalstate'])
 	        }
 	      });
 	
-	      modalEditSchedule.result.then(function(successMsg){
-	        //$scope.alerts.push(successMsg);
-		      SchedulesService.update();
-	      });
       }
    	
     }])
@@ -334,20 +280,11 @@ angular.module('app.schedules', ['ui.router', 'modalstate'])
       controller: 'SchedulesController',
 			resolve: {
 				schedules: function(SchedulesService){
-						/*var selectedDates = [];
-						for(i=0;i<7;i++){
-							var tempDate = new Date();
-							tempDate.setDate(tempDate.getDate()+i);
-      				tempDate.setHours(0, 0, 0, 0);
-							selectedDates.push(tempDate.getTime());
-						}*/
 						SchedulesService.selectPeriod();
 						return SchedulesService.update();
 				}
 			},
 			data: {
-	        		name: 'Schedules',
-        			icon: 'glyphicon glyphicon-calendar',
 	      title: 'Schedules'
 			}
       		})
