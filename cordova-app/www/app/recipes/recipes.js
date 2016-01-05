@@ -235,26 +235,6 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 			$scope.clearImage = function(){
 				$scope.recipe.imagePath =  "no_image.png";
 			}
-
-/*      $scope.scheduleAdd = function() {
-        var modalAddSchedule = $uibModal.open({
-          animation: true,
-          templateUrl: 'partials/recipes.scheduleadd.tpl.html',
-          controller: 'ModalScheduleAddControllerRecipes',
-          size: 'xs',
-          resolve: {
-            recipe: function(){
-              return $scope.recipe;
-            }
-          }
-        });
-
-
-        modalAddSchedule.result.then(function(successMsg){
-          $scope.alerts.push(successMsg);
-        });
-
-      }*/
       
       $scope.share = function() {
         var modalShare = $uibModal.open({
@@ -307,26 +287,6 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
       });
 
     }])
-
-/*
-    .controller('ModalScheduleAddControllerRecipes', ['$scope', '$modalInstance', '$filter', 'Schedules', 'recipe', function ($scope, $modalInstance, $filter, Schedules, recipe) {
-      $scope.recipe = recipe;
-      $scope.date = new Date();
-      $scope.factor = $scope.recipe.yield;
-     
-      $scope.ok = function(){
-        var newSchedule = new Schedules({date: $scope.date.setHours(12), recipe: $scope.recipe, factor: $scope.factor});
-        newSchedule.$save(function(response){
-          var message = 'The recipe '+$scope.recipe.name+' was successfully scheduled for the '+$filter('date')($scope.date, 'dd.MM.yyyy')+' with '+$scope.factor+' persons.';
-          $modalInstance.close({type: 'success', msg: message});
-        });
-      }
-
-      $scope.cancel = function(){
-        $modalInstance.dismiss('cancel');
-      }
-
-    }])*/
     
     .controller('ModalShareControllerRecipes', ['$scope', '$modalInstance', '$filter', 'recipe', function ($scope, $modalInstance, $filter, recipe) {
       $scope.recipe = recipe;
@@ -370,27 +330,6 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 			$scope.cancel = function() {
 		    RecipeService.cancel();
 		  };
-
-
-/*      $scope.scheduleAdd = function() {
-        var modalAddSchedule = $uibModal.open({
-          animation: true,
-          templateUrl: 'partials/recipes.scheduleadd.tpl.html',
-          controller: 'ModalScheduleAddControllerRecipes',
-          size: 'xs',
-          resolve: {
-            recipe: function(){
-              return $scope.recipe;
-            }
-          }
-        });
-
-
-        modalAddSchedule.result.then(function(successMsg){
-          $scope.alerts.push(successMsg);
-        });
-
-      }*/
 
       $scope.share = function() {
         var modalShare = $uibModal.open({
@@ -438,28 +377,6 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 		    RecipeService.cancel();
 		  };
 
-
-/*      $scope.scheduleAdd = function() {
-        var modalAddSchedule = $uibModal.open({
-          animation: true,
-          templateUrl: 'partials/recipes.scheduleadd.tpl.html',
-          controller: 'ModalScheduleAddControllerRecipes',
-          size: 'xs',
-          resolve: {
-            recipe: function(){
-              return $scope.recipe;
-            }
-          }
-        });
-
-
-        modalAddSchedule.result.then(function(successMsg){
-          $scope.alerts.push(successMsg);
-        });
-
-      }*/
-      
-      
       $scope.share = function() {
         var modalShare = $uibModal.open({
           animation: true,
