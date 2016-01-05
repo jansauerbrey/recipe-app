@@ -30,7 +30,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
           });
         }])
 
-        .factory('recipeActions', ['$rootScope', '$stateParams', '$uibModal', 'AlertService', 'Recipes', '$state', 'Favorites', 'UserService', 'Tags', function ($rootScope, $stateParams, $uibModal, AlertService, Recipes, $state, Favorites, UserService, Tags) {
+        .factory('RecipeService', ['$rootScope', '$stateParams', '$uibModal', 'AlertService', 'Recipes', '$state', 'Favorites', 'UserService', 'Tags', function ($rootScope, $stateParams, $uibModal, AlertService, Recipes, $state, Favorites, UserService, Tags) {
           var data = {recipe: {},
           	recipeOrig: {},
           	factorAvailable: false,
@@ -199,37 +199,37 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 
     }])
 
-    .controller('RecipeDetailCtrl', ['$rootScope', '$scope', '$stateParams', '$uibModal', 'Tags', 'units', 'dishtypes', 'TAIngredients', 'TATags', 'isCordova', 'recipeActions', function ($rootScope, $scope, $stateParams, $uibModal, Tags, units, dishtypes, TAIngredients, TATags, isCordova, recipeActions) {
+    .controller('RecipeDetailCtrl', ['$rootScope', '$scope', '$stateParams', '$uibModal', 'Tags', 'units', 'dishtypes', 'TAIngredients', 'TATags', 'isCordova', 'RecipeService', function ($rootScope, $scope, $stateParams, $uibModal, Tags, units, dishtypes, TAIngredients, TATags, isCordova, RecipeService) {
 			$scope.isCordova = isCordova;
 			
-			$scope.submitted = recipeActions.data.submitted;
-			$scope.recipe = recipeActions.data.recipe;
-			$scope.factorAvailable = recipeActions.data.factorAvailable;
-			$scope.factor = recipeActions.data.factor;
-			$scope.allowEdit = recipeActions.data.allowEdit;
-			$scope.userExists = recipeActions.data.userExists;
+			$scope.submitted = RecipeService.data.submitted;
+			$scope.recipe = RecipeService.data.recipe;
+			$scope.factorAvailable = RecipeService.data.factorAvailable;
+			$scope.factor = RecipeService.data.factor;
+			$scope.allowEdit = RecipeService.data.allowEdit;
+			$scope.userExists = RecipeService.data.userExists;
       
 			$scope.favorite = function() {
-		    recipeActions.setFavorite();
+		    RecipeService.setFavorite();
 		  }
 		  $scope.unfavorite = function() {
-		    recipeActions.unsetFavorite();
+		    RecipeService.unsetFavorite();
 		  }
 			$scope.save = function() {
-		    recipeActions.create();
+		    RecipeService.create();
 		  }
 			$scope.update = function() {
-		    recipeActions.update();
+		    RecipeService.update();
 		  }
 			$scope.remove = function() {
-		    recipeActions.remove();
+		    RecipeService.remove();
 		  }
 			$scope.cancel = function() {
-		    recipeActions.cancel();
+		    RecipeService.cancel();
 		  };
       
       $scope.$on("submittedValueChanged", function(){
-				$scope.submitted = recipeActions.data.submitted;
+				$scope.submitted = RecipeService.data.submitted;
       });
 
 			$scope.clearImage = function(){
@@ -303,7 +303,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
       }
       
      	$scope.$watch('recipeForm.$valid', function(newVal) {
-          recipeActions.data.validForm = newVal;
+          RecipeService.data.validForm = newVal;
       });
 
     }])
@@ -344,31 +344,31 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
     }])
     
     
-    .controller('RecipeDetailActionsCtrl', ['$rootScope', '$scope', '$uibModal', 'recipeActions', function ($rootScope, $scope, $uibModal, recipeActions) {
+    .controller('RecipeDetailActionsCtrl', ['$rootScope', '$scope', '$uibModal', 'RecipeService', function ($rootScope, $scope, $uibModal, RecipeService) {
     		
-			$scope.submitted = recipeActions.data.submitted;
-			$scope.recipe = recipeActions.data.recipe;
-			$scope.allowEdit = recipeActions.data.allowEdit;
-			$scope.userExists = recipeActions.data.userExists;
+			$scope.submitted = RecipeService.data.submitted;
+			$scope.recipe = RecipeService.data.recipe;
+			$scope.allowEdit = RecipeService.data.allowEdit;
+			$scope.userExists = RecipeService.data.userExists;
 			
       
 			$scope.favorite = function() {
-		    recipeActions.setFavorite();
+		    RecipeService.setFavorite();
 		  }
 		  $scope.unfavorite = function() {
-		    recipeActions.unsetFavorite();
+		    RecipeService.unsetFavorite();
 		  }
 			$scope.save = function() {
-		    recipeActions.create();
+		    RecipeService.create();
 		  }
 			$scope.update = function() {
-		    recipeActions.update();
+		    RecipeService.update();
 		  }
 			$scope.remove = function() {
-		    recipeActions.remove();
+		    RecipeService.remove();
 		  }
 			$scope.cancel = function() {
-		    recipeActions.cancel();
+		    RecipeService.cancel();
 		  };
 
 
@@ -409,33 +409,33 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
     }])
     
     
-    .controller('RecipeDetailActionSidebarCtrl', ['$rootScope', '$scope', '$uibModal', 'recipeActions', '$modalInstance', function ($rootScope, $scope, $uibModal, recipeActions, $modalInstance) {
+    .controller('RecipeDetailActionSidebarCtrl', ['$rootScope', '$scope', '$uibModal', 'RecipeService', '$modalInstance', function ($rootScope, $scope, $uibModal, RecipeService, $modalInstance) {
 			
-			$scope.submitted = recipeActions.data.submitted;
-			$scope.recipe = recipeActions.data.recipe;
-			$scope.allowEdit = recipeActions.data.allowEdit;
-			$scope.userExists = recipeActions.data.userExists;
+			$scope.submitted = RecipeService.data.submitted;
+			$scope.recipe = RecipeService.data.recipe;
+			$scope.allowEdit = RecipeService.data.allowEdit;
+			$scope.userExists = RecipeService.data.userExists;
 			
       
 			$scope.favorite = function() {
-		    recipeActions.setFavorite();
+		    RecipeService.setFavorite();
 		  }
 		  $scope.unfavorite = function() {
-		    recipeActions.unsetFavorite();
+		    RecipeService.unsetFavorite();
 		  }
 			$scope.save = function() {
-				recipeActions.data.submitted = true;
-		    recipeActions.create();
+				RecipeService.data.submitted = true;
+		    RecipeService.create();
 		  }
 			$scope.update = function() {
-				recipeActions.data.submitted = true;
-		    recipeActions.update();
+				RecipeService.data.submitted = true;
+		    RecipeService.update();
 		  }
 			$scope.remove = function() {
-		    recipeActions.remove();
+		    RecipeService.remove();
 		  }
 			$scope.cancel = function() {
-		    recipeActions.cancel();
+		    RecipeService.cancel();
 		  };
 
 
@@ -595,11 +595,11 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 				params: {factor: null},
 				templateUrl: 'partials/recipes.details.layout.tpl.html',
 				resolve: {
-					recipe: ['Recipes', '$stateParams', 'recipeActions', function(Recipes, $stateParams, recipeActions){
+					recipe: ['Recipes', '$stateParams', 'RecipeService', function(Recipes, $stateParams, RecipeService){
 						if ($stateParams.id) {
 							var recipe = Recipes.get({'id': $stateParams.id}, function(response) {
 								response.ingredients.push({qty: '', unit: '', ingredient: ''});
-								recipeActions.setRecipe(response, $stateParams.factor);
+								RecipeService.setRecipe(response, $stateParams.factor);
 							}).$promise;
 							return recipe;
 						} else {
@@ -607,7 +607,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 							recipe.ingredients = [];
 							recipe.ingredients.push({qty: '', unit: '', ingredient: ''});
 							recipe.imagePath = "no_image.png";
-							recipeActions.data.recipe = recipe;
+							RecipeService.data.recipe = recipe;
 							return recipe;
 						}
 					}],
@@ -700,11 +700,11 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 				params: {factor: null},
 				templateUrl: 'partials/recipes.details.layout.tpl.html',
 				resolve: {
-					recipe: ['Recipes', '$stateParams', 'recipeActions', function(Recipes, $stateParams, recipeActions){
+					recipe: ['Recipes', '$stateParams', 'RecipeService', function(Recipes, $stateParams, RecipeService){
 						if ($stateParams.id) {
 								var recipe = Recipes.get({'id': $stateParams.id}, function(response) {
 									response.ingredients.push({qty: '', unit: '', ingredient: ''});
-									recipeActions.setRecipe(response, $stateParams.factor);
+									RecipeService.setRecipe(response, $stateParams.factor);
 								}).$promise;
 							return recipe;
 						} else {
@@ -712,7 +712,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 							recipe.ingredients = [];
 							recipe.ingredients.push({qty: '', unit: '', ingredient: ''});
 							recipe.imagePath = "no_image.png";
-							recipeActions.data.recipe = recipe;
+							RecipeService.data.recipe = recipe;
 							return recipe;
 						}
 					}],
