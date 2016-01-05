@@ -64,7 +64,7 @@ router.get('/check', auth.verify, function(req, res, next) {
 /* LOGIN */
 router.post('/login', function(req, res) {
     //verify credential (use POST)
-    var username = req.body.username || '';
+    var username = req.body.username.toLowerCase() || '';
     var password = req.body.password || '';
     var autologin = req.body.autologin || false;
  
@@ -72,7 +72,7 @@ router.post('/login', function(req, res) {
         return res.send(401);
     }
 
-    User.findOne({username: username}, function (err, user) {
+    User.findOne({username_lower: username}, function (err, user) {
         if (err) {
             console.log(err);
             return res.sendStatus(401);
@@ -124,6 +124,7 @@ router.get('/logout', auth.verify, function(req, res) {
 /* REGISTER */
 router.post('/register', function(req, res) {
     var username = req.body.username || '';
+    var username_lower = username.toLowerCase();
     var password = req.body.password || '';
     var passwordConfirmation = req.body.passwordConfirmation || '';
     var email = req.body.email || '';
@@ -135,7 +136,7 @@ router.post('/register', function(req, res) {
     }
 
 
-    var userData = {username: username, password: password, email:email, fullname:fullname};
+    var userData = {username: username, username_lower: username_lower, password: password, email:email, fullname:fullname};
 
     User.create(userData, function(err) {
         if (err) {
@@ -172,9 +173,13 @@ router.post('/register', function(req, res) {
 /* RESET PASSWORD */
 router.post('/forgot', function(req, res) {
     //verify credential (use POST)
-    var username = req.body.username || '';
+    var username = req.body.username.toLowerCase() || '';
  
-    User.findOne({username: username}, function (err, user) {
+    if (username == '') {
+        return res.send(401);
+    }
+    
+    User.findOne({username_lower: username}, function (err, user) {
         if (err) {
             console.log(err);
             return res.sendStatus(401);

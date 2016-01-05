@@ -4,39 +4,6 @@ The intention of this app / website is to have a recipe database and a planning 
 
 Demo (login requires activation of me, so please email before): https://www.rezept-planer.de
 
-## Features
-
-- [x] Create, Edit and Delete Units
-- [x] Create, Edit and Delete Ingredients
-- [x] Create, Edit and Delete Recipes including linkage of Ingredients and Units
-- [x] Create, Edit and Delete Schedules
-- [x] Shopping list generation including checking if bought
-- [x] Possibility to add items to shopping list (besides recipe ingredients)
-- [x] User Authentication via token in redis database including login and logout
-- [x] User management (admin level)
-
-## Todos / BUGs
-
-- [ ] On recipe search: hide on screen keyboard as soon as scrolling is started
-- [ ] Better usability with appropriate error messages (ie. in case of login-in before activation of account)
-- [ ] Add possibility to add new ingredients directly in recipe creation process
-- [ ] Add possibility to distinguish between user added ingredient (not public) and admin approved ingredients (public)
-- [ ] Add user registration for new users including email validation
-- [ ] Hide actionbar on back button (ie Android app)
-- [ ] Case insensitive usernames
-- [ ] Fix rotation of recipe images
-- [ ] Fix print menu esp. on mobile and extend print button also to shopping list, schedules and print also a whole week of schedules incl. recipes
-- [ ] Add user settings with default language, etc.
-
-## Future Features / Thoughts
-
-- [ ] Add possibility of default unit per ingredient (ie. gramm) and scondary units with factor calculation (ie. ml, kg, cup)
-- [ ] Add shopping units per ingredient (ie. can) for improved shopping list
-- [ ] Add possibility to order whole shopping basket online (ie. at REWE online)
-- [ ] Add possibility to comment on recipes (public)
-- [ ] Add possibility to make own remarks to recipes of other uthors (non-puplic)
-
-
 ## Installation (Ubuntu)
 
 Clean installation of Ubuntu 14.04 LTS.
@@ -66,16 +33,7 @@ nvm alias default stable
 
 ### MongoDB
 
-#### Official Version
-
-Get the newest MongoDB from the official Ubuntu repositories:
-
-```bash
-sudo apt-get update
-sudo apt-get install mongodb
-```
-
-#### Manual (newest version)
+#### Manual (newest version, at least 3.2 required)
 
 Install MongoDB by using MongoDB repositories (does not work with 15.04), see https://docs.mongodb.org/master/tutorial/install-mongodb-on-ubuntu/ :
 
