@@ -9,13 +9,15 @@ var UserSchema = new mongoose.Schema({
   password: { type: String, required: true },
   fullname: String,
   email: String,
+  emailNotConfirmed: String,
+  emailConfirmationToken: { type: String },
   is_admin: { type: Boolean, default: false },
   is_activated: { type: Boolean, default: false },
   settings: {
     preferredLanguage: String,
     spokenLanguages: [String],
     categoryOrder: [String],
-    prefferedWeekStartDay: Number,
+    preferredWeekStartDay: Number,
   	autoupdate: { type: Boolean, default: true }
   },
 	favoriteRecipes: [{type: mongoose.Schema.Types.ObjectId, ref: 'Recipe'}],

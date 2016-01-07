@@ -54,7 +54,6 @@ angular.module('app.alert', [])
     .controller('AlertController', ['$scope', 'AlertService', function ($scope, AlertService) {
      
       $scope.alerts = AlertService.get();
-      AlertService.add('success', 'AlertService was started');
 
     }])
 
