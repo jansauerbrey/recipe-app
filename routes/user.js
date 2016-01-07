@@ -123,99 +123,123 @@ router.get('/logout', auth.verify, function(req, res) {
 
 /* REGISTER */
 router.post('/register', function(req, res) {
-    var username = req.body.username || '';
-    var username_lower = username.toLowerCase();
-    var password = req.body.password || '';
-    var passwordConfirmation = req.body.passwordConfirmation || '';
-    var email = req.body.email || '';
-    var emailConfirmation = req.body.emailConfirmation || '';
-    var fullname = req.body.fullname || '';
+	var username = req.body.username || '';
+	var username_lower = username.toLowerCase();
+	var password = req.body.password || '';
+	var passwordConfirmation = req.body.passwordConfirmation || '';
+	var email = req.body.email || '';
+	var emailConfirmation = req.body.emailConfirmation || '';
+	var fullname = req.body.fullname || '';
+	
+	if (username == '' || password == '' || password != passwordConfirmation || email == '' || fullname == '' || email != emailConfirmation) {
+	    return res.sendStatus(400);
+	}
+	
+	
+	var userData = {username: username, username_lower: username_lower, password: password, emailNotConfirmed:email, fullname:fullname};
+	
+	
+	tokenHelper.createToken(function(err, token) {
+		if (err) callback(err);
+		userData.emailConfirmationToken = token;
+		User.create(userData, function(err) {
+	    if (err) return next(err);
+	    User.count(function(err, counter) {
+	      if (err) return next(err);
+	      if (counter == 1) {
+	        User.update({username: username}, {is_admin:true, is_activated: true}, function(err, nbRow) {
+	          if (err) return next(err);
+	          console.log('First user created as an Admin');
+	          return res.sendStatus(200);
+	        });
+	      }
+	      else {
+	      	var mailOptions = {
+						from: 'rezept-planer.de <admin@rezept-planer.de>', // sender address
+						to: user.email, // list of receivers
+						subject: 'Confirm Email', // Subject line
+						text: 'Please, use the following link to confirm your email address:\n\nhttps://rezept-planer.de/#/user/confirm/'+userData.emailConfirmationToken+'\n\nYour rezept-planer.de Team', // plaintext body
+					};
+					transporter.sendMail(mailOptions, function(err, info){
+						if (err) return next(err);
+						console.log('Message sent: ' + info.response);
+						return res.sendStatus(200);
+					});
+	      }
+	    }
+		});
+	});
+});
 
-    if (username == '' || password == '' || password != passwordConfirmation || email == '' || fullname == '' || email != emailConfirmation) {
-        return res.sendStatus(400);
-    }
 
 
-    var userData = {username: username, username_lower: username_lower, password: password, email:email, fullname:fullname};
+/* CONFIRM EMAIL ADDRESS */
+router.get('/confirm/:token', function(req, res, next) {
 
-    User.create(userData, function(err) {
-        if (err) {
-            console.log(err);
-            return res.sendStatus(500);
-        }	
-
-        User.count(function(err, counter) {
-            if (err) {
-                console.log(err);
-                return res.sendStatus(500);
-            }
-
-            if (counter == 1) {
-                User.update({username: username}, {is_admin:true, is_activated: true}, function(err, nbRow) {
-                    if (err) {
-                        console.log(err);
-                        return res.sendStatus(500);
-                    }
-
-                    console.log('First user created as an Admin');
-                    return res.sendStatus(200);
-                });
-            } 
-            else {
-                return res.sendStatus(200);
-            }
-        });
-    });
+		User.findOne({emailConfirmationToken: req.params.token}, function (err, user) {
+			if (err) return next(err);
+			if (user == undefined) {
+				console.log("User undefined");
+				return res.sendStatus(401);
+			}
+			user.is_activated = true;
+			user.email = user.emailNotConfirmed;
+			user.emailConfirmationToken = null;
+			user.save(user, function (err, updatedUser) {
+				if (err) return next(err);
+				return res.sendStatus(200);
+			});
+		});
 });
 
 
 
 /* RESET PASSWORD */
 router.post('/forgot', function(req, res) {
-    //verify credential (use POST)
-    var username = req.body.username.toLowerCase() || '';
- 
-    if (username == '') {
-        return res.send(401);
-    }
-    
-    User.findOne({username_lower: username}, function (err, user) {
-        if (err) {
-            console.log(err);
-            return res.sendStatus(401);
-        }
+	//verify credential (use POST)
+	var username = req.body.username.toLowerCase() || '';
+	
+	if (username == '') {
+	    return res.send(401);
+	}
+	
+	User.findOne({username_lower: username}, function (err, user) {
+		if (err) {
+		    console.log(err);
+		    return res.sendStatus(401);
+		}
+		
+		if (user == undefined) {
+		    console.log("User undefined");
+		    return res.sendStatus(401);
+		}
+		
+		if (user.is_activated === false) {
+		    console.log("User not activated");
+		    return res.sendStatus(401);
+		}
 
-        if (user == undefined) {
-            console.log("User undefined");
-            return res.sendStatus(401);
-        }
- 
-        if (user.is_activated === false) {
-            console.log("User not activated");
-            return res.sendStatus(401);
-        }
-
-	tokenHelper.createToken(function(err, token) {
-		if (err) callback(err);
-		resetPasswordExpires = Date.now() + 3600000;
-		User.findByIdAndUpdate(user.id, {resetPasswordToken: token, resetPasswordExpires: resetPasswordExpires}, { 'new': true}, function (err, user) {
-	    		if (err) return next(err);
-			var mailOptions = {
-	    			from: 'rezept-planer.de <admin@rezept-planer.de>', // sender address
-	    			to: user.email, // list of receivers
-	    			subject: 'Reset Password', // Subject line
-	    			text: 'Please, use the following link to reset your password:\n\nhttp://rezept-planer.de/#/user/reset/'+user.resetPasswordToken+'\n\nYour rezept-planer.de Team', // plaintext body
-			};
-	    		transporter.sendMail(mailOptions, function(error, info){
-	    			if(error){
-					return console.log(error);
-	    			}
-	    			console.log('Message sent: ' + info.response);
-				return res.sendStatus(200);
+		tokenHelper.createToken(function(err, token) {
+			if (err) callback(err);
+			resetPasswordExpires = Date.now() + 3600000; // 1 hour
+			User.findByIdAndUpdate(user.id, {resetPasswordToken: token, resetPasswordExpires: resetPasswordExpires}, { 'new': true}, function (err, user) {
+				if (err) return next(err);
+				var mailOptions = {
+					from: 'rezept-planer.de <admin@rezept-planer.de>', // sender address
+					to: user.email, // list of receivers
+					subject: 'Reset Password', // Subject line
+					text: 'Please, use the following link to reset your password:\n\nhttps://rezept-planer.de/#/user/reset/'+user.resetPasswordToken+'\n\nYour rezept-planer.de Team', // plaintext body
+				};
+				transporter.sendMail(mailOptions, function(error, info){
+					if(error){
+						return console.log(error);
+					}
+					console.log('Message sent: ' + info.response);
+					return res.sendStatus(200);
+				});
 			});
-	  	});
+		});
 	});
-    });
 });
 
 

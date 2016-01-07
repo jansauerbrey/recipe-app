@@ -68,90 +68,136 @@ angular.module('app.auth', ['ui.router'])
     }])
 
 
-    .factory('AuthenticationService', [ '$http', '$localStorage', '$state', '$timeout', 'UserService', 'BASE_URI', function($http, $localStorage, $state, $timeout, UserService, BASE_URI) {
-        var logIn = function(username, password, autologin) {
-                return $http.post(BASE_URI+'api/user/login', {username: username, password: password, autologin: autologin}).success(function(data) {
-                    data.permissions = ["User"];
-                    if (data.is_admin) {
-                        data.permissions.push("Admin");
-                    }
-                    UserService.createUser(data);
-                    return true;
-                }).error(function(err){
-									alert("Network connection or certificate error");
-								});
-            },
-            logOut = function() {
-                $http.get(BASE_URI+'api/user/logout').success(function(){
-                  UserService.deleteCurrentUser();
-        					$timeout(function () {
-          					$state.go("anon.user.login");
-        					}, 2000);
-                });
-            },
-            register = function(user) {
-                return $http.post(BASE_URI+'api/user/register', user);
-            };
-
-        return {
-            logIn: logIn,
-            logOut: logOut,
-            register: register
+    .factory('AuthenticationService', [ '$http', '$localStorage', '$state', '$rootScope', 'UserService', 'BASE_URI', 'AlertService',
+    	function($http, $localStorage, $state, $rootScope, UserService, BASE_URI, AlertService) {
+    	var logIn = function(username, password, autologin) {
+        if (username !== undefined && password !== undefined) {
+        	$http.post(BASE_URI+'api/user/login', {username: username, password: password, autologin: autologin}).success(function(data) {
+						data.permissions = ["User"];
+						if (data.is_admin) {
+							data.permissions.push("Admin");
+						}
+						UserService.createUser(data);
+	      		$state.go("user.home");
+					}).error(function(err){
+						AlertService.add('danger', 'Network or certificate error');
+					});
+        } else {
+					AlertService.add('danger', ' Please fill out username and password.');
         }
-    }])
+			},
+			logOut = function() {
+				$http.get(BASE_URI+'api/user/logout').success(function(){
+					UserService.deleteCurrentUser();
+					AlertService.add('success', 'You hav been successfully loged out.');
+					$state.go("anon.startpage");
+				}).error( function(){
+					AlertService.add('danger', 'Network connection error.');
+					$state.go($rootScope.previousState.name, $rootScope.previousStateParams);
+				});
+			},
+			register = function(user) {
+				$http.post(BASE_URI+'api/user/register', user).success(function(){
+					AlertService.add('success', ' Please check your email to confirm your address and to activate your account.');
+					$state.go("anon.user.login");
+				}).error(function(err){
+					AlertService.add('danger', 'Network or certificate error.');
+				});
+			},
+			confirmEmail = function(){
+				if($stateParams && $stateParams.token){
+					$http.get(BASE_URI+'api/user/confirm/'+$stateParams.token).success(function(data) {
+						AlertService.add('success', 'Email has been successfully confirmed. You are now able to login with your credentials.');
+						$state.go("anon.user.login");
+					}).error(function(err){
+						AlertService.add('danger', 'Network or certificate error.');
+					});
+				}
+			},
+			requestNewPassword = function(username) {
+        if (username !== undefined ) { 
+					return $http.post(BASE_URI+'api/user/forgot', {username: username}).success(function(data) {
+						AlertService.add('success', 'Password renewal process has been started. Please check your email for further instructions.');
+						$state.go("anon.user.login");
+					});
+				} else {
+						AlertService.add('danger', 'Please enter username.');
+				}
+			},
+			resetPassword = function(password, passwordConfirmation) {
+				if (password !== undefined && password === passwordConfirmation ) { 
+					return $http.put(BASE_URI+'api/user/reset/'+$stateParams.token, {password: password, passwordConfirmation: passwordConfirmation}).success(function(data) {
+						AlertService.add('success', 'Password has been reset successfully. Please use the new password to login.');
+						$state.go("anon.user.login");
+					});
+				} else {
+						AlertService.add('danger', 'Please enter the same password into password and password confirmation.');
+				}
+			};
+			
+			return {
+				logIn: logIn,
+				logOut: logOut,
+				register: register,
+				confirmEmail: confirmEmail,
+				requestNewPassword: requestNewPassword,
+				resetPassword: resetPassword
+			}
+		}])
 
-    .factory('AuthorisationService', ['UserService', function(UserService) {
-	var authorize = function (requiresLogin, requiredPermissions, permissionType) {
-	    var result = 0,
-		user = UserService.getCurrentLoginUser(),
-		loweredPermissions = [],
-		hasPermission = true,
-		permission, i;
-
-	    permissionType = permissionType || 0;
-	    if (requiresLogin === true && user === undefined) {
-		result = 1;
-	    } else if ((requiresLogin === true && user !== undefined) &&
-		(requiredPermissions === undefined || requiredPermissions.length === 0)) {
-		// Login is required but no specific permissions are specified.
-		result = 0;
-	    } else if (requiredPermissions) {
-                // fill NoUser info to user in case there is no user
-                if (user === undefined){
-                  user = {permissions: ['NoUser']};
-                }
-		loweredPermissions = [];
-		angular.forEach(user.permissions, function (permission) {
-		    loweredPermissions.push(permission.toLowerCase());
-		});
-
-		for (i = 0; i < requiredPermissions.length; i += 1) {
-		    permission = requiredPermissions[i].toLowerCase();
-
-		    if (permissionType === 1) {
-		        hasPermission = hasPermission && loweredPermissions.indexOf(permission) > -1;
-		        // if all the permissions are required and hasPermission is false there is no point carrying on
-		        if (hasPermission === false) {
-		            break;
-		        }
-		    } else if (permissionType === 0) {
-		        hasPermission = loweredPermissions.indexOf(permission) > -1;
-		        // if we only need one of the permissions and we have it there is no point carrying on
-		        if (hasPermission) {
-		            break;
-		        }
-		    }
-		}
-
-		result = hasPermission ? 0 : 2;
-	    }
-
-	    return result;
-	};
-
-	return {
-	  authorize: authorize
-	};
+		.factory('AuthorisationService', ['UserService',
+			function(UserService) {
+			
+			var authorize = function (requiresLogin, requiredPermissions, permissionType) {
+				var result = 0,
+				user = UserService.getCurrentLoginUser(),
+				loweredPermissions = [],
+				hasPermission = true,
+				permission, i;
+				
+				permissionType = permissionType || 0;
+				if (requiresLogin === true && user === undefined) {
+					result = 1;
+				} else if ((requiresLogin === true && user !== undefined) &&
+					(requiredPermissions === undefined || requiredPermissions.length === 0)) {
+					// Login is required but no specific permissions are specified.
+					result = 0;
+				} else if (requiredPermissions) {
+					// fill NoUser info to user in case there is no user
+					if (user === undefined){
+				  	user = {permissions: ['NoUser']};
+					}
+					loweredPermissions = [];
+					angular.forEach(user.permissions, function (permission) {
+						loweredPermissions.push(permission.toLowerCase());
+					});
+				
+					for (i = 0; i < requiredPermissions.length; i += 1) {
+						permission = requiredPermissions[i].toLowerCase();
+				
+						if (permissionType === 1) {
+							hasPermission = hasPermission && loweredPermissions.indexOf(permission) > -1;
+							// if all the permissions are required and hasPermission is false there is no point carrying on
+							if (hasPermission === false) {
+								break;
+							}
+						} else if (permissionType === 0) {
+							hasPermission = loweredPermissions.indexOf(permission) > -1;
+							// if we only need one of the permissions and we have it there is no point carrying on
+							if (hasPermission) {
+								break;
+							}
+						}
+					}
+					result = hasPermission ? 0 : 2;
+				}
+				
+				return result;
+			};
+			
+			return {
+			authorize: authorize
+			};
     }])
 
 
@@ -200,64 +246,59 @@ angular.module('app.auth', ['ui.router'])
 
 
 // Auth
-
-    .controller('UserCtrl', ['$scope', '$state', 'Users', 'AuthenticationService',
-        function UserCtrl($scope, $state, Users, AuthenticationService) {
- 
-        $scope.logIn = function logIn(username, password, autologin) {
-            if (username !== undefined && password !== undefined) { 
-                AuthenticationService.logIn(username, password, autologin).then(function(){
-	          $state.go("user.home");
-                });
-            }
-        }
- 
-        $scope.user = new Users();
-
-        $scope.register = function register() {
-	    AuthenticationService.register($scope.user).success(function(data) {
-	        $state.go("anon.user.login");
-	    });
-	}
-    }])
+		
+		.controller('UserAuthenticationController', ['$scope', 'Users', 'AuthenticationService',
+			function UserAuthenticationController($scope, Users, AuthenticationService) {
+			
+			$scope.user = new Users();
+			$scope.logIn = function logIn() {
+				AuthenticationService.logIn($scope.login.username, $scope.login.password, $scope.login.autologin);
+			}
+			
+			$scope.register = function register() {
+				AuthenticationService.register($scope.user);
+			}
+		}])
 
 
+		.controller('UserConfirmEmailController', ['AuthenticationService',
+			function UserConfirmEmailController(AuthenticationService) {
+				
+			AuthenticationService.confirmEmail();
+		}])
 
-    .controller('UserLogout', ['$scope', '$state', '$localStorage', 'AuthenticationService',
-        function UserLogout($scope, $state, $localStorage, AuthenticationService) {
-        AuthenticationService.logOut();
-    }])
+
+		.controller('UserLogoutController', ['AuthenticationService',
+			function UserLogoutController(AuthenticationService) {
+			
+			AuthenticationService.logOut();
+		}])
 
 
-    .controller('UserForgotCtrl', ['$scope', '$state', '$stateParams', '$http', 'BASE_URI',
-        function UserForgotCtrl($scope, $state, $stateParams, $http, BASE_URI) {
- 
-        $scope.requestNewPassword = function requestNewPassword(username) {
-            if (username !== undefined ) { 
-		return $http.post(BASE_URI+'api/user/forgot', {username: username}).success(function(data) {
-                    $state.go("anon.user.login");
-                });
-            }
-        }
+    .controller('UserPasswordRenewalController', ['$scope', 'AuthenticationService',
+      function UserPasswordRenewalController($scope, AuthenticationService) {
 
-        $scope.resetPassword = function resetPassword(password, passwordConfirmation) {
-            if (password !== undefined && password === passwordConfirmation ) { 
-		return $http.put(BASE_URI+'api/user/reset/'+$stateParams.token, {password: password, passwordConfirmation: passwordConfirmation}).success(function(data) {
-                    $state.go("anon.user.login");
-                });
-            }
-	}
-    }])
+			$scope.requestNewPassword = function(username) {
+        AuthenticationService.requestNewPassword();
+			}
+
+			$scope.resetPassword = function(password, passwordConfirmation) {
+				AuthenticationService.resetPassword();
+			}
+		}])
     
     
-	.controller('UserSettingsCtrl', ['$scope', '$state', 'UserService', function UserCtrl($scope, $state, UserService) {
- 		$scope.alerts = [];
+	.controller('UserSettingsController', ['$scope', '$state', 'UserService', 'AlertService',
+		function UserSettingsController($scope, $state, UserService, AlertService) {
+			
 		$scope.user = UserService.getCurrentLoginUser();
 		
-		$scope.updateUserSettings = function() {
-			UserService.updateUserSettings({fullname: $scope.user.fullname, email: $scope.user.email, settings: $scope.user.settings}, function(response){
+		$scope.updateUserSettings = function updateUserSettings() {
+			var userSettings = {fullname: $scope.user.fullname, email: $scope.user.email, settings: $scope.user.settings};
+			UserService.updateUserSettings(userSettings, function(response){
 				$scope.user = UserService.getCurrentLoginUser();
-				$scope.alerts.push({type: 'success', msg: 'Settings successfully updated.'});
+				AlertService.add('success', 'Settings successfully updated.');
+				$state.go('user.settings.view');
 			});
 		}
 		
@@ -277,58 +318,55 @@ angular.module('app.auth', ['ui.router'])
 // Routes
 //---------------
 
-  .config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
+	.config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
 
-   $stateProvider
-		.state('anon.user.register', {
-			url: '/register',
-        		templateUrl: 'partials/user.register.tpl.html',
-        		controller: 'UserCtrl',
-			data: {
-	        		name: 'Register',
-        			icon: 'glyphicon glyphicon-edit',
-	      title: 'Register',
-				panelright: true
-			}
-      		})
-      		.state('anon.user.login', {
-			url: '/login',
-        		templateUrl: 'partials/user.login.tpl.html',
-        		controller: 'UserCtrl',
-			data: {
-	        		name: 'Login',
-        			icon: 'glyphicon glyphicon-log-in',
-	      title: 'Login',
-				panelright: true
-			}
-      		})
-      		.state('user.logout', {
-			url: '/user/logout',
-        		templateUrl: 'partials/user.logout.tpl.html',
-        		controller: 'UserLogout',
-			data: {
-				name: 'Logout',
-				icon: 'glyphicon glyphicon-log-out',
-	      title: 'Logout',
-				panelright: true
-			}
-      		})
-      		.state('anon.forgot', {
-			url: '/user/forgot',
-        		templateUrl: 'partials/user.forgot.tpl.html',
-        		controller: 'UserForgotCtrl',
-			data: {
-	      title: 'Forgot password'
-			}
-      		})
-      		.state('anon.reset', {
-			url: '/user/reset/:token',
-        		templateUrl: 'partials/user.reset.tpl.html',
-        		controller: 'UserForgotCtrl',
-			data: {
-	      title: 'Reset password'
-			}
-      		})
+		$stateProvider
+			.state('anon.user.register', {
+				url: '/register',
+				templateUrl: 'partials/user.register.tpl.html',
+				controller: 'UserAuthenticationController',
+				data: {
+		      title: 'Register'
+				}
+			})
+			.state('anon.user.confirm', {
+				url: '/user/confirm/:token',
+				controller: 'UserConfirmEmailController',
+				data: {
+		      title: 'Confirm Email'
+				}
+			})
+			.state('anon.user.login', {
+				url: '/login',
+				templateUrl: 'partials/user.login.tpl.html',
+				controller: 'UserAuthenticationController',
+				data: {
+		      title: 'Login'
+				}
+			})
+			.state('user.logout', {
+				url: '/user/logout',
+				controller: 'UserLogoutController',
+				data: {
+		      title: 'Logout'
+				}
+			})
+			.state('anon.forgot', {
+				url: '/user/forgot',
+				templateUrl: 'partials/user.forgot.tpl.html',
+				controller: 'UserPasswordRenewalController',
+				data: {
+		      title: 'Forgot password'
+				}
+			})
+			.state('anon.reset', {
+				url: '/user/reset/:token',
+				templateUrl: 'partials/user.reset.tpl.html',
+				controller: 'UserPasswordRenewalController',
+				data: {
+		      title: 'Reset password'
+				}
+			})
 			.state('user.settings', {
 				abstract: true,
 				url: '/user/settings',
@@ -340,12 +378,12 @@ angular.module('app.auth', ['ui.router'])
 			.state('user.settings.view', {
 				url: '/view',
 				templateUrl: 'partials/user.settings.view.tpl.html',
-				controller: 'UserSettingsCtrl'
+				controller: 'UserSettingsController'
 			})
 			.state('user.settings.edit', {
 				url: '/edit',
 				templateUrl: 'partials/user.settings.edit.tpl.html',
-				controller: 'UserSettingsCtrl'
+				controller: 'UserSettingsController'
 			})
     ;
   }])
