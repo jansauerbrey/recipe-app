@@ -14,7 +14,7 @@ angular.module('app.auth', ['ui.router'])
           });
         }])
 
-    .factory('UserService', [ '$localStorage', '$injector', function($localStorage, $injector){
+		.factory('UserService', [ '$localStorage', '$injector', function($localStorage, $injector){
         var currentUser,
             createUser = function(data){
                 currentUser = data;
@@ -35,6 +35,52 @@ angular.module('app.auth', ['ui.router'])
                     return currentUser.token;
                 }
             },
+            authorize = function (requiresLogin, requiredPermissions, permissionType) {
+							var result = 0,
+							user = getCurrentLoginUser(),
+							loweredPermissions = [],
+							hasPermission = true,
+							permission, i;
+							
+							permissionType = permissionType || 0;
+							if (requiresLogin === true && user === undefined) {
+								result = 1;
+							} else if ((requiresLogin === true && user !== undefined) &&
+								(requiredPermissions === undefined || requiredPermissions.length === 0)) {
+								// Login is required but no specific permissions are specified.
+								result = 0;
+							} else if (requiredPermissions) {
+								// fill NoUser info to user in case there is no user
+								if (user === undefined){
+							  	user = {permissions: ['NoUser']};
+								}
+								loweredPermissions = [];
+								angular.forEach(user.permissions, function (permission) {
+									loweredPermissions.push(permission.toLowerCase());
+								});
+							
+								for (i = 0; i < requiredPermissions.length; i += 1) {
+									permission = requiredPermissions[i].toLowerCase();
+							
+									if (permissionType === 1) {
+										hasPermission = hasPermission && loweredPermissions.indexOf(permission) > -1;
+										// if all the permissions are required and hasPermission is false there is no point carrying on
+										if (hasPermission === false) {
+											break;
+										}
+									} else if (permissionType === 0) {
+										hasPermission = loweredPermissions.indexOf(permission) > -1;
+										// if we only need one of the permissions and we have it there is no point carrying on
+										if (hasPermission) {
+											break;
+										}
+									}
+								}
+								result = hasPermission ? 0 : 2;
+							}
+							
+							return result;
+						},
             updateFavoriteRecipes = function(favRecipes) {
                 if (currentUser !== undefined){
 	                currentUser.favoriteRecipes = favRecipes;
@@ -55,17 +101,17 @@ angular.module('app.auth', ['ui.router'])
                 createUser($localStorage.user);
             }
 
-        return {
-            createUser: createUser,
-            getCurrentLoginUser: getCurrentLoginUser,
-            deleteCurrentUser: deleteCurrentUser,
-            isAuthenticated: isAuthenticated,
-            getToken: getToken,
-            updateFavoriteRecipes: updateFavoriteRecipes,
-            updateUserSettings: updateUserSettings
-        }
-
-    }])
+			return {
+				createUser: createUser,
+				getCurrentLoginUser: getCurrentLoginUser,
+				deleteCurrentUser: deleteCurrentUser,
+				isAuthenticated: isAuthenticated,
+				getToken: getToken,
+				authorize: authorize,
+				updateFavoriteRecipes: updateFavoriteRecipes,
+				updateUserSettings: updateUserSettings
+			}
+		}])
 
 
     .factory('AuthenticationService', [ '$http', '$localStorage', '$state', '$rootScope', 'UserService', 'BASE_URI', 'AlertService',
@@ -144,61 +190,6 @@ angular.module('app.auth', ['ui.router'])
 				resetPassword: resetPassword
 			}
 		}])
-
-		.factory('AuthorisationService', ['UserService',
-			function(UserService) {
-			
-			var authorize = function (requiresLogin, requiredPermissions, permissionType) {
-				var result = 0,
-				user = UserService.getCurrentLoginUser(),
-				loweredPermissions = [],
-				hasPermission = true,
-				permission, i;
-				
-				permissionType = permissionType || 0;
-				if (requiresLogin === true && user === undefined) {
-					result = 1;
-				} else if ((requiresLogin === true && user !== undefined) &&
-					(requiredPermissions === undefined || requiredPermissions.length === 0)) {
-					// Login is required but no specific permissions are specified.
-					result = 0;
-				} else if (requiredPermissions) {
-					// fill NoUser info to user in case there is no user
-					if (user === undefined){
-				  	user = {permissions: ['NoUser']};
-					}
-					loweredPermissions = [];
-					angular.forEach(user.permissions, function (permission) {
-						loweredPermissions.push(permission.toLowerCase());
-					});
-				
-					for (i = 0; i < requiredPermissions.length; i += 1) {
-						permission = requiredPermissions[i].toLowerCase();
-				
-						if (permissionType === 1) {
-							hasPermission = hasPermission && loweredPermissions.indexOf(permission) > -1;
-							// if all the permissions are required and hasPermission is false there is no point carrying on
-							if (hasPermission === false) {
-								break;
-							}
-						} else if (permissionType === 0) {
-							hasPermission = loweredPermissions.indexOf(permission) > -1;
-							// if we only need one of the permissions and we have it there is no point carrying on
-							if (hasPermission) {
-								break;
-							}
-						}
-					}
-					result = hasPermission ? 0 : 2;
-				}
-				
-				return result;
-			};
-			
-			return {
-			authorize: authorize
-			};
-    }])
 
 
     .factory('TokenInterceptor', ['$q', 'UserService', '$injector', function ($q, UserService, $injector) {

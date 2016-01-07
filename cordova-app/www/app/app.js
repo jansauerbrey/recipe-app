@@ -93,7 +93,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 // Directives
 //---------------
 
-    .directive('navsidebar', ['$aside', 'navigationMenu', 'UserService', 'AuthorisationService', function ($aside, navigationMenu, UserService, AuthorisationService) {
+    .directive('navsidebar', ['$aside', 'navigationMenu', 'UserService', function ($aside, navigationMenu, UserService) {
       return {
         restrict: "E",
         replace: true,
@@ -114,7 +114,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
     }])
     
 
-    .directive('access', [ '$rootScope', 'AuthorisationService', function ($rootScope, AuthorisationService) {
+    .directive('access', [ '$rootScope', 'UserService', function ($rootScope, UserService) {
             return {
               restrict: 'A',
               link: function (scope, element, attrs) {
@@ -130,7 +130,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
                               makeVisible();
                           }
 
-                          result = AuthorisationService.authorize(undefined, roles);
+                          result = UserService.authorize(undefined, roles);
                           if (result === 0) {
                               makeVisible();
                           } else {
