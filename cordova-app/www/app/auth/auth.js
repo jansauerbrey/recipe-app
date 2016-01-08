@@ -282,6 +282,7 @@ angular.module('app.auth', ['ui.router'])
 	.controller('UserSettingsController', ['$scope', '$state', 'UserService', 'AlertService',
 		function UserSettingsController($scope, $state, UserService, AlertService) {
 			
+		$scope.languageOptions = [{id: 'en', name: 'English'}, {id: 'de', name: 'Deutsch'},{id: 'fi', name: 'Suomi'}];
 		$scope.user = UserService.getCurrentLoginUser();
 		
 		$scope.updateUserSettings = function updateUserSettings() {
