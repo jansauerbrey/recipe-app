@@ -312,7 +312,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 		.state('user', {
 			abstract: true,
 			views: {'root':
-				{template: '<ui-view />'}
+				{template: '<div ui-view="main"></div>'}
 			},
 			data: {
 				requiresLogin: true,
@@ -336,7 +336,9 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
     })
     .state('user.home', {
 			url: '/home',
-			templateUrl: 'partials/home.tpl.html',
+			views: {'main':
+				{templateUrl: 'partials/home.tpl.html'}
+			},
 			data: {
 	      title: 'Home'
 			}

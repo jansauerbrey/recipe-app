@@ -283,6 +283,13 @@ angular.module('app.auth', ['ui.router'])
 		function UserSettingsController($scope, $state, UserService, AlertService) {
 			
 		$scope.languageOptions = [{id: 'en', name: 'English'}, {id: 'de', name: 'Deutsch'},{id: 'fi', name: 'Suomi'}];
+		$scope.weekdayOptions = [{id: 0, name: 'Sunday'},
+															{id: 1, name: 'Monday'},
+															{id: 2, name: 'Tueasday'},
+															{id: 3, name: 'Wednesday'},
+															{id: 4, name: 'Thursday'},
+															{id: 5, name: 'Friday'},
+															{id: 6, name: 'Saturday'}];
 		$scope.user = UserService.getCurrentLoginUser();
 		
 		$scope.updateUserSettings = function updateUserSettings() {
@@ -360,22 +367,31 @@ angular.module('app.auth', ['ui.router'])
 				}
 			})
 			.state('user.settings', {
-				abstract: true,
 				url: '/user/settings',
-				template: '<ui-view />',
+				views: {
+	    		'main': {
+						templateUrl: 'partials/user.settings.view.tpl.html',
+						controller: 'UserSettingsController'
+					},
+					'actionnavigation-xs@': {
+		    		template: '<button type="button" class="navbar-toggle actionbutton" ui-sref="user.settings.edit"><i class="glyphicon glyphicon-pencil"></i></button>'
+					}
+				},
 				data: {
 					title: 'User settings'
 				}
 			})
-			.state('user.settings.view', {
-				url: '/view',
-				templateUrl: 'partials/user.settings.view.tpl.html',
-				controller: 'UserSettingsController'
-			})
 			.state('user.settings.edit', {
 				url: '/edit',
-				templateUrl: 'partials/user.settings.edit.tpl.html',
-				controller: 'UserSettingsController'
+				views: {
+	    		'main@user': {
+						templateUrl: 'partials/user.settings.edit.tpl.html',
+						controller: 'UserSettingsController'
+					},
+					'actionnavigation-xs@': {
+		    		template: '<button type="button" class="navbar-toggle actionbutton" ui-sref="user.settings"><i class="glyphicon glyphicon-floppy-disk"></i></button>'
+					}
+				}
 			})
     ;
   }])
