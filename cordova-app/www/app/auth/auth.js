@@ -16,15 +16,28 @@ angular.module('app.auth', ['ui.router'])
 
 		.factory('UserService', [ '$localStorage', '$injector', function($localStorage, $injector){
         var currentUser,
-            createUser = function(data){
-                currentUser = data;
-                $localStorage.user = data;
+        		currentUserSettings,
+        		languageOptions = [{id: 'en', name: 'English'}, {id: 'de', name: 'Deutsch'},{id: 'fi', name: 'Suomi'}],
+        		weekdayOptions = [{id: 0, name: 'Sunday'},
+															{id: 1, name: 'Monday'},
+															{id: 2, name: 'Tueasday'},
+															{id: 3, name: 'Wednesday'},
+															{id: 4, name: 'Thursday'},
+															{id: 5, name: 'Friday'},
+															{id: 6, name: 'Saturday'}],
+            createUser = function(userData){
+                currentUser = userData;
+                currentUserSettings = userData.settings;
+                currentUserSettingsOrig = angular.copy(currentUserSettings);
+                $localStorage.user = userData;
             },
             getCurrentLoginUser = function(){
                 return currentUser;
             },
             deleteCurrentUser = function(){
                 currentUser = undefined;
+                currentUserSettings = undefined;
+                currentUserSettingsOrig = undefined;
                 delete $localStorage.user;
             },
             isAuthenticated = function() {
@@ -87,14 +100,15 @@ angular.module('app.auth', ['ui.router'])
 	                $localStorage.user.favoriteRecipes = favRecipes;
                 }
             },
-            updateUserSettings = function(userSettings, callback) {
-                if (currentUser !== undefined){
-                	var User = $injector.get('User');
-                	User.update({id: currentUser._id}, userSettings, function(response){
-                		for (var attrname in response) { currentUser[attrname] = response[attrname]; }
-                		callback(currentUser);
-									});
-                }
+            updateUserSettings = function(callback) {
+							var userSettings = {fullname: currentUserSettings.fullname, settings: currentUserSettings.settings};
+              if (currentUser !== undefined){
+              	var User = $injector.get('User');
+              	User.update({id: currentUser._id}, userSettings, function(response){
+              		for (var attrname in response) { currentUser[attrname] = response[attrname]; }
+              		callback(currentUser);
+								});
+              }
             };
 
             if ($localStorage.user){
@@ -109,7 +123,10 @@ angular.module('app.auth', ['ui.router'])
 				getToken: getToken,
 				authorize: authorize,
 				updateFavoriteRecipes: updateFavoriteRecipes,
-				updateUserSettings: updateUserSettings
+				updateUserSettings: updateUserSettings,
+				currentUserSettings: currentUserSettings,
+				languageOptions: languageOptions,
+				weekdayOptions: weekdayOptions
 			}
 		}])
 
@@ -192,7 +209,7 @@ angular.module('app.auth', ['ui.router'])
 		}])
 
 
-    .factory('TokenInterceptor', ['$q', 'UserService', '$injector', function ($q, UserService, $injector) {
+    .factory('TokenInterceptor', ['$q', 'UserService', '$injector', 'AlertService', function ($q, UserService, $injector, AlertService) {
         return {
             request: function (config) {
                 config.headers = config.headers || {};
@@ -219,8 +236,9 @@ angular.module('app.auth', ['ui.router'])
             responseError: function(rejection) {
                 if (rejection != null && rejection.status === 401) {
                     UserService.deleteCurrentUser();
-		    var stateService = $injector.get('$state');
-                    stateService.go('accessdenied');
+                    AlertService.add('danger', 'Access denied!');
+		    						var $state = $injector.get('$state');
+                    $state.go('anon.startpage');
                 }
 
                 return $q.reject(rejection);
@@ -281,28 +299,23 @@ angular.module('app.auth', ['ui.router'])
     
 	.controller('UserSettingsController', ['$scope', '$state', 'UserService', 'AlertService',
 		function UserSettingsController($scope, $state, UserService, AlertService) {
-			
-		$scope.languageOptions = [{id: 'en', name: 'English'}, {id: 'de', name: 'Deutsch'},{id: 'fi', name: 'Suomi'}];
-		$scope.weekdayOptions = [{id: 0, name: 'Sunday'},
-															{id: 1, name: 'Monday'},
-															{id: 2, name: 'Tueasday'},
-															{id: 3, name: 'Wednesday'},
-															{id: 4, name: 'Thursday'},
-															{id: 5, name: 'Friday'},
-															{id: 6, name: 'Saturday'}];
-		$scope.user = UserService.getCurrentLoginUser();
+		
+		$scope.languageOptions = UserService.languageOptions;
+		$scope.weekdayOptions = UserService.weekdayOptions;
+		
+		// copy current user settings and link to data in factory
+		UserService.currentUserSettings = UserService.getCurrentLoginUser();
+		$scope.user = UserService.currentUserSettings;
 		
 		$scope.updateUserSettings = function updateUserSettings() {
-			var userSettings = {fullname: $scope.user.fullname, email: $scope.user.email, settings: $scope.user.settings};
-			UserService.updateUserSettings(userSettings, function(response){
-				$scope.user = UserService.getCurrentLoginUser();
+			UserService.updateUserSettings(function(response){
+				UserService.currentUserSettings = UserService.getCurrentLoginUser();
 				AlertService.add('success', 'Settings successfully updated.');
-				$state.go('user.settings.view');
+				$state.go('user.settings');
 			});
 		}
 		
 	}])
-
 
 
 //---------------
@@ -345,7 +358,12 @@ angular.module('app.auth', ['ui.router'])
 			})
 			.state('user.logout', {
 				url: '/user/logout',
-				controller: 'UserLogoutController',
+				views: {
+					'main': {
+						template: '<div class="loading-indicator overlay"><div class="loading-indicator-body"><div class="spinner"><double-bounce-spinner></double-bounce-spinner></div></div></div>',
+					controller: 'UserLogoutController'
+					}
+				},
 				data: {
 		      title: 'Logout'
 				}
@@ -389,7 +407,8 @@ angular.module('app.auth', ['ui.router'])
 						controller: 'UserSettingsController'
 					},
 					'actionnavigation-xs@': {
-		    		template: '<button type="button" class="navbar-toggle actionbutton" ui-sref="user.settings"><i class="glyphicon glyphicon-floppy-disk"></i></button>'
+		    		template: '<button type="button" class="navbar-toggle actionbutton" ng-click="updateUserSettings()"><i class="glyphicon glyphicon-floppy-disk"></i></button>',
+						controller: 'UserSettingsController'
 					}
 				}
 			})
