@@ -166,7 +166,7 @@ router.post('/register', function(req, res) {
 						return res.sendStatus(200);
 					});
 	      }
-	    }
+	    });
 		});
 	});
 });
