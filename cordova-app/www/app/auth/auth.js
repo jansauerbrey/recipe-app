@@ -27,8 +27,7 @@ angular.module('app.auth', ['ui.router'])
 															{id: 6, name: 'Saturday'}],
             createUser = function(userData){
                 currentUser = userData;
-                currentUserSettings = userData.settings;
-                currentUserSettingsOrig = angular.copy(currentUserSettings);
+                currentUserSettings = userData;
                 $localStorage.user = userData;
             },
             getCurrentLoginUser = function(){

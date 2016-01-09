@@ -24,8 +24,14 @@ router.get('/info', auth.verify, function(req, res, next) {
 });
 
 /* PUT /user/info */
-router.put('/info', auth.verify, function(req, res, next) {
-	var userInfo = {fullname: req.body.fullname, email: req.body.email, settings: req.body.settings};
+router.put('/info/:id', auth.verify, function(req, res, next) {
+  var fullname = req.body.fullname || '';
+  var settings = req.body.settings || '';
+	
+  if (fullname == '' || settings == '') {
+      return res.send(401);
+  }
+	var userInfo = {fullname: req.body.fullname, settings: req.body.settings};
   User.findByIdAndUpdate(req._user.id, userInfo, { 'new': true}).select('username fullname email is_admin settings favoriteRecipes').exec( function (err, user) {
 	  if (err) return next(err);
 	  res.json(user);
@@ -88,27 +94,29 @@ router.post('/login', function(req, res) {
             return res.sendStatus(401);
         }
 
+        console.log(user);
         user.comparePassword(password, function(isMatch) {
             if (!isMatch) {
                 console.log("Attempt failed to login with " + user.username);
                 return res.sendStatus(401);
             }
  
-            var userData = {id: user._id, username: user.username, is_admin: user.is_admin, autologin: autologin};
+            var userDataForRedis = {id: user._id, username: user.username, is_admin: user.is_admin, autologin: autologin};
+            var userData = user;
             var expiration = 300; // 5 minutes
 
             if (autologin === true) {
               expiration = 60*60*24*30; //30 days
             }
 
-            auth.createAndStoreToken(userData, expiration, function(err, token) {
+            auth.createAndStoreToken(userDataForRedis, expiration, function(err, token) {
                 if (err) {
                     console.log(err);
                     return res.sendStatus(400);
                 }
 
                 //Send back token
-                return res.json({token: token, is_admin: user.is_admin, fullname: user.fullname, _id: user._id, username: user.username, settings: user.settings});
+                return res.json({token: token, is_admin: userData.is_admin, email: userData.email, fullname: userData.fullname, _id: userData._id, username: userData.username, settings: userData.settings});
             });
         });
     });

@@ -278,8 +278,12 @@ angular.module('app.schedules', ['ui.router', 'modalstate'])
     $stateProvider
       		.state('user.schedules', {
 			url: '/schedules',
-      templateUrl: 'partials/schedules.tpl.html',
-      controller: 'SchedulesController',
+			views: {
+				'main': {
+		      templateUrl: 'partials/schedules.tpl.html',
+		      controller: 'SchedulesController'
+      	}
+			},
 			resolve: {
 				schedules: function(SchedulesService){
 						SchedulesService.selectPeriod();

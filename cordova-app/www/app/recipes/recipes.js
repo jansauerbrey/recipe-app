@@ -446,7 +446,9 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 		.state('user.recipes', {
 			abstract: true,
 			url: "/recipes",
-			template: '<ui-view />',
+			views: {
+				'main': {template: '<ui-view />'}
+			},
 			data: {
 	      title: 'Recipes'
 			}

@@ -447,7 +447,9 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
 			.state('user.shopitems', {
 				abstract: true,
 				url: "/shopitems",
-				templateUrl: 'partials/shopitems.layout.tpl.html',
+				views: {
+					'main': {templateUrl: 'partials/shopitems.layout.tpl.html'}
+				},
 				resolve: {
 					shopitems: function(ShopitemService){
 						ShopitemService.data.autoupdate = true; //TODO: set with user settings instead
