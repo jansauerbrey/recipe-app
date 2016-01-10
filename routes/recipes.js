@@ -10,9 +10,11 @@ var auth = require('../auth/auth.js');
 router.get('/', auth.verify, function(req, res, next) {
     //console.log("start");
   var preferredLanguage = (req._user.settings && req._user.settings.preferredLanguage) ? req._user.settings.preferredLanguage : 'en';
+  
+  //TO BE DELETED: first part of if clause
   if (Object.keys(req.query).length === 0) {
     //console.log("load recipes");
-    Recipe.find({}, 'author updated_at dishType').populate('dishType', 'name.'+preferredLanguage+' order imagePath').lean().exec( function (err, recipes) {
+    Recipe.find({}, 'author updated_at dishType').populate('dishType', 'identifier name.'+preferredLanguage+' order imagePath').lean().exec( function (err, recipes) {
       //console.log(err);
       if (err) return next(err);
       //console.log(recipes);
@@ -36,6 +38,9 @@ router.get('/', auth.verify, function(req, res, next) {
     };
     if (req.query._id) {
       req.query._id = {'$in': req._user.favoriteRecipes};
+    };
+    if (req.query.author == 'self') {
+      req.query.author = req._user._id;
     };
     Recipe.find(req.query).populate(['tags']).populate('author', 'fullname').lean().exec( function (err, recipes) {
       if (err) return next(err);

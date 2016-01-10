@@ -155,9 +155,8 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 
 // Recipes
 
-    .controller('RecipeDishTypeController', ['$scope', 'recipes', 'user', function ($scope, recipes, user) {
-      $scope.user = user;
-      $scope.recipes = recipes;
+    .controller('RecipeDishTypeController', ['$scope', 'UserService', function ($scope, UserService) {
+      $scope.user = UserService.getCurrentLoginUser();
     }])
 
 
@@ -442,18 +441,56 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 
   .config(['$stateProvider', 'modalStateProvider', '$urlRouterProvider', function ($stateProvider, modalStateProvider, $urlRouterProvider) {
 
+		function getDishtypeState(url, params) {
+			return {
+				url: url,
+				params: params,
+				views: {
+	    		'main@user': {
+		    		templateUrl: 'partials/recipes.list.tpl.html',
+						controller: 'RecipeListController'
+					},
+					'actionnavigation-xs@': {
+		    		template: '<button type="button" class="navbar-toggle actionbutton" ui-sref="user.recipes.details.add"><i class="glyphicon glyphicon-plus"></i></button>',
+						controller: 'ActionSidebarRecipeController'
+					}
+				},
+				resolve: {
+					recipes: ['Recipes', '$stateParams', function(Recipes, $stateParams){
+						var searchDate = new Date();
+						searchDate = $stateParams.new_recipe ? searchDate.setDate(searchDate.getDate() - 14) : new Date(2015,0,0);
+						var query = {'author': $stateParams.author, 'updated_at': searchDate, 'dishType': $stateParams.dishType, '_id': $stateParams.fav_recipe};
+						return Recipes.query(query).$promise;
+					}],
+					user: function(UserService){
+						return UserService.getCurrentLoginUser();
+					},
+					tags: function(Tags){
+						return Tags.query().$promise;
+					}
+				}
+			};
+		};
+
+
     $stateProvider
 		.state('user.recipes', {
-			abstract: true,
 			url: "/recipes",
 			views: {
-				'main': {template: '<ui-view />'}
+    		'main': {
+	    		templateUrl: 'partials/recipes.dishtypes.tpl.html',
+					controller: 'RecipeDishTypeController'
+				},
+				'actionnavigation-xs@': {
+	    		template: '<button type="button" class="navbar-toggle actionbutton" ui-sref="user.recipes.details.add"><i class="glyphicon glyphicon-plus"></i></button>',
+					controller: 'ActionSidebarRecipeController'
+				}
 			},
 			data: {
 	      title: 'Recipes'
 			}
 		})
-    .state('user.recipes.dishtypes', {
+    /*.state('user.recipes.dishtypes', {
 			url: '/dishtypes',
 			views: {
     		'': {
@@ -472,10 +509,108 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 				user: function(UserService){
 					return UserService.getCurrentLoginUser();
 				}
-
 			}
-    })
-    .state('user.recipes.list', {
+    })*/
+		.state('user.recipes.breakfast', getDishtypeState('/breakfast', {
+					dishType: '56294bad07ee48b60ec4405b',
+					author: undefined,
+					new_recipe: undefined,
+					fav_recipe: undefined
+			})
+		)
+		.state('user.recipes.appetizer', getDishtypeState('/appetizer', {
+					dishType: '562934ae137c052908b75e23',
+					author: undefined,
+					new_recipe: undefined,
+					fav_recipe: undefined
+			})
+		)
+		.state('user.recipes.drinks', getDishtypeState('/drinks', {
+					dishType: '562940bd4bdc01930dca94d8',
+					author: undefined,
+					new_recipe: undefined,
+					fav_recipe: undefined
+			})
+		)
+		.state('user.recipes.salads', getDishtypeState('/salads', {
+					dishType: '562940db4bdc01930dca94da',
+					author: undefined,
+					new_recipe: undefined,
+					fav_recipe: undefined
+			})
+		)
+		.state('user.recipes.main-dishes', getDishtypeState('/main-dishes', {
+					dishType: '56293446137c052908b75e22',
+					author: undefined,
+					new_recipe: undefined,
+					fav_recipe: undefined
+			})
+		)
+		.state('user.recipes.side-dishes', getDishtypeState('/side-dishes', {
+					dishType: '562940cc4bdc01930dca94d9',
+					author: undefined,
+					new_recipe: undefined,
+					fav_recipe: undefined
+			})
+		)
+		.state('user.recipes.desserts', getDishtypeState('/desserts', {
+					dishType: '562940ee4bdc01930dca94db',
+					author: undefined,
+					new_recipe: undefined,
+					fav_recipe: undefined
+			})
+		)
+		.state('user.recipes.breads', getDishtypeState('/breads', {
+					dishType: '562aabc37a696f1229593c42',
+					author: undefined,
+					new_recipe: undefined,
+					fav_recipe: undefined
+			})
+		)
+		.state('user.recipes.evening-snacks', getDishtypeState('/evening-snacks', {
+					dishType: '5668a3b36faed8e960d4f213',
+					author: undefined,
+					new_recipe: undefined,
+					fav_recipe: undefined
+			})
+		)
+		.state('user.recipes.other', getDishtypeState('/other', {
+					dishType: '5629f52a2b9118f35b96c2ca',
+					author: undefined,
+					new_recipe: undefined,
+					fav_recipe: undefined
+			})
+		)
+		.state('user.recipes.all', getDishtypeState('/all', {
+					dishType: undefined,
+					author: undefined,
+					new_recipe: undefined,
+					fav_recipe: undefined
+			})
+		)
+		.state('user.recipes.my', getDishtypeState('/my', {
+					dishType: undefined,
+					author: 'self',
+					new_recipe: undefined,
+					fav_recipe: undefined
+			})
+		)
+		.state('user.recipes.new', getDishtypeState('/new', {
+					dishType: undefined,
+					author: undefined,
+					new_recipe: true,
+					fav_recipe: undefined
+			})
+		)
+		.state('user.recipes.favorites', getDishtypeState('/favorites', {
+					dishType: undefined,
+					author: undefined,
+					new_recipe: undefined,
+					fav_recipe: true
+			})
+		)
+		/*.state('user.recipes.list', 
+		{
 			url: '/list',
 			params: {
 				dishType: undefined,
@@ -484,7 +619,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 				fav_recipe: undefined
 			},
 			views: {
-    		'': {
+    		'main@user': {
 	    		templateUrl: 'partials/recipes.list.tpl.html',
 					controller: 'RecipeListController'
 				},
@@ -507,12 +642,16 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 					return Tags.query().$promise;
 				}
 			}
-      		})
+		})*/
 			.state('user.recipes.details', {
 				abstract: true,
 				url: "/details/:id",
 				params: {factor: null},
-				templateUrl: 'partials/recipes.details.layout.tpl.html',
+				views: {
+					'main@user': {
+						templateUrl: 'partials/recipes.details.layout.tpl.html',
+					}
+				},
 				resolve: {
 					recipe: ['Recipes', '$stateParams', 'RecipeService', function(Recipes, $stateParams, RecipeService){
 						if ($stateParams.id) {
