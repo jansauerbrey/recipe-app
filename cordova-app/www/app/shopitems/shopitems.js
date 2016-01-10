@@ -311,7 +311,7 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
 
 
 
-    .controller('shopitemsActionSidebarCtrl', ['$scope', '$uibModal', 'ShopitemService', 'units', '$uibModalInstance', function ($scope, $uibModal, ShopitemService, units, $uibModalInstance) {
+    .controller('ShopitemsActionSidebarController', ['$scope', '$uibModal', 'ShopitemService', 'units', '$uibModalInstance', function ($scope, $uibModal, ShopitemService, units, $uibModalInstance) {
 
       $scope.units = units;
       $scope.autoupdate = ShopitemService.data.autoupdate;
@@ -424,7 +424,7 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
       $scope.shopitemsActions = function() {
             var asideInstance = $aside.open({
               template: '<div ng-click="closeSidebar()" ng-include="\'partials/shopitems.links.tpl.html\'"></div>',
-              controller: 'ShopitemsActionSidebarCtrl',
+              controller: 'ShopitemsActionSidebarController',
               placement: 'right',
               size: 'sm',
 		          resolve: {
@@ -464,7 +464,7 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
 						return Units.query().$promise;
 					}
 				},
-				data: {
+				data: {	
 		      title: 'Shopping'
 				}
 			})

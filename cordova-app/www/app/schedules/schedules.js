@@ -19,7 +19,7 @@ angular.module('app.schedules', ['ui.router', 'modalstate'])
         
         
         
-        .factory('SchedulesService', ['AlertService', 'Schedules', '$q', '$rootScope', function(AlertService, Schedules, $q, $rootScope){
+        .factory('SchedulesService', ['UserService', 'AlertService', 'Schedules', '$q', '$rootScope', function(UserService, AlertService, Schedules, $q, $rootScope){
           var data = {schedules: [],
           	selectedDates: [],
           	activeDate: false};
@@ -54,11 +54,16 @@ angular.module('app.schedules', ['ui.router', 'modalstate'])
 					};
 					
 							
-					var selectWeek = function(dayDelta){ //dayDelta should be user settings
+					var selectWeek = function(weekDelta){ //dayDelta should be user settings
 						var today = new Date();
-						var dayOfWeekStart = new Date(today.getTime());
-						dayOfWeekStart.setDate(dayOfWeekStart.getDate() - dayOfWeekStart.getDay() + dayDelta); 
-						selectPeriod(dayOfWeekStart, 7);
+						var deltaWeekStart = today.getDay();
+						var userDelta = UserService.data.currentUser.settings.preferredWeekStartDay ? UserService.data.currentUser.settings.preferredWeekStartDay : 0;
+						if (deltaWeekStart < userDelta) {
+							today.setDate(today.getDate() - today.getDay() + userDelta - 7 + weekDelta*7);
+						} else {
+							today.setDate(today.getDate() - today.getDay() + userDelta + weekDelta*7); 
+						}
+						selectPeriod(today, 7);
 						update();
 					};
 
@@ -159,8 +164,8 @@ angular.module('app.schedules', ['ui.router', 'modalstate'])
 				SchedulesService.update();
 			}
 			
-			$scope.selectWeek = function(dayDelta){
-				SchedulesService.selectWeek(dayDelta);
+			$scope.selectWeek = function(weekDelta){
+				SchedulesService.selectWeek(weekDelta);
 			}
 
 

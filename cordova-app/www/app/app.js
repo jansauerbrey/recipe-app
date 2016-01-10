@@ -358,7 +358,8 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
         $rootScope.previousState.name = fromState.name ? fromState.name : 'user.home';
         $rootScope.previousStateParams = fromStateParams ? fromStateParams : {};
         var authorised;
-		    if (UserService.getCurrentLoginUser() !== undefined) {
+        var authenticated = UserService.isAuthenticated();
+		    if (authenticated === true) {
 					$http.get(BASE_URI+'api/user/check');
 					if (toState.name == 'anon.startpage') {
 						event.preventDefault(); 

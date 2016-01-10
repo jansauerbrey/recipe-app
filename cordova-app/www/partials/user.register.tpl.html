@@ -38,6 +38,18 @@
 			</div>
 		</div>
 		<div class="form-group">
+			<label class="col-sm-4 control-label">Preferred language:</label>
+			<div class="col-sm-4">
+				<select name="preferredLanguage" ng-options="languageOption.id as languageOption.name for languageOption in languageOptions | orderBy: 'name'" ng-model="user.settings.preferredLanguage" ng-required="true" class="form-control"></select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-4 control-label">Spoken languages:</label>
+			<div class="col-sm-4">
+				<select multiple name="spokenLanguages" ng-options="languageOption.id as languageOption.name for languageOption in languageOptions | orderBy: 'name'" ng-model="user.settings.spokenLanguages" ng-required="true" class="form-control"></select>
+			</div>
+		</div>
+		<div class="form-group">
 			<div class="col-sm-offset-4 col-sm-10">
 				<button type="submit" class="btn btn-default" ng-click="register(register.username, register.password, register.passwordConfirmation)">Register</button>
 			</div>
