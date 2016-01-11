@@ -85,16 +85,16 @@
     <div class="row" style="margin-top: 20px;">
       <div ng-repeat="recipe in filtered=(recipes | filter: search | filter: filterByTags) | orderBy: 'name'" class="col-xs-12 col-sm-6 col-md-4 col-lg-4">
 	      <div class="thumbnail">
-	        <a ui-sref="user.recipes.details.view({id: recipe._id})">
+	        <a ui-sref=".details.view({id: recipe._id})">
             <img ng-class="{'hidden-xs': recipe.imagePath=='no_image.png'}" ng-src="https://www.rezept-planer.de/upload/{{recipe.imagePath}}" spinkit-image-preloader='double-bounce-spinner'></img>
         	</a>
           <div class="caption">
-		        <a ui-sref="user.recipes.details.view({id: recipe._id})">
+		        <a ui-sref=".details.view({id: recipe._id})">
 	      			<p class="text-muted text-uppercase"><small>{{recipe.author.fullname}}</small></p>
 	      			<h4 style="height: 40px;">{{recipe.name | limitTo: 50}}</h4>
 	        	</a>
             <span ng-repeat="tag in recipe.tags" class="label label-primary" style="margin: 2px; display: inline-block;">{{tag.text}}</span>
-            <button type="button" class="btn btn-link pull-right" ui-sref="user.recipes.list.scheduleadd({recipe: recipe})"><i class="glyphicon glyphicon-calendar"></i></button>
+            <button type="button" class="btn btn-link pull-right" ui-sref=".scheduleadd({recipe: recipe})"><i class="glyphicon glyphicon-calendar"></i></button>
     			</div>
         </div>
       </div>

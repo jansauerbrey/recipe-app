@@ -55,6 +55,55 @@ router.get('/', auth.verify, function(req, res, next) {
   }
 });
 
+
+/* GET /recipes count. */
+router.get('/count', auth.verify, function(req, res, next) {
+    
+    Recipe.aggregate([{
+        $group : {
+           _id : "$dishType",
+           count: { $sum: 1 }
+        }
+    },{$project:
+  		{	dishType: '$_id',
+  			count: 1,
+  			_id: 0
+  		}
+    }]).exec( function (err, recipes) {
+    	Recipe.populate(recipes, {path: "dishType", select: 'identifier imagePath'}, function(err, response){
+		    if (err) return next(err);
+		    var finalResponse = {};
+	      response.forEach(function(item) {
+	       	finalResponse[item.dishType.identifier] = item.count;
+	      });
+	      Recipe.count().exec(function(err, count){
+		    	if (err) return next(err);
+		    	finalResponse.all = count;
+		    	
+		      Recipe.count({author: req._user.id}).exec(function(err, count){
+			    	if (err) return next(err);
+			    	finalResponse.my = count;
+			    	
+				    var updatedAtDate = new Date();
+		      	updatedAtDate.setDate(updatedAtDate.getDate() - 14);
+			      Recipe.count({updated_at: {'$gt': updatedAtDate}}).exec(function(err, count){
+				    	if (err) return next(err);
+				    	finalResponse.new = count;
+				    	
+				      Recipe.count({_id: {'$in': req._user.favoriteRecipes}}).exec(function(err, count){
+					    	if (err) return next(err);
+					    	finalResponse.favorites = count;
+					    	
+					    	res.json(finalResponse);
+				      });
+			      });
+		      });
+		      
+	      });
+	    });
+	  });
+	});
+
 /* POST /recipes */
 router.post('/', auth.verify, function(req, res, next) {
   req.body.author = req._user.id;

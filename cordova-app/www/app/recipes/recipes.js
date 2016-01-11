@@ -155,8 +155,9 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 
 // Recipes
 
-    .controller('RecipeDishTypeController', ['$scope', 'UserService', function ($scope, UserService) {
+    .controller('RecipeDishTypeController', ['$scope', 'UserService', 'recipeCount', function ($scope, UserService, recipeCount) {
       $scope.user = UserService.getCurrentLoginUser();
+      $scope.recipeCount = recipeCount.data;
     }])
 
 
@@ -471,6 +472,104 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 				}
 			};
 		};
+		
+		
+		function getRecipeDetailState(){
+			return {
+				abstract: true,
+				url: "/details/:id",
+				views: {
+					'main@user': {
+						templateUrl: 'partials/recipes.details.layout.tpl.html',
+					}
+				},
+				resolve: {
+					recipe: ['Recipes', '$stateParams', 'RecipeService', function(Recipes, $stateParams, RecipeService){
+						var recipe = Recipes.get({'id': $stateParams.id}, function(response) {
+							RecipeService.setRecipe(response);
+						}).$promise;
+						return recipe;
+					}],
+					units: function(Units){
+						return Units.query().$promise;
+					},
+					dishtypes: function(DishTypes){
+						return DishTypes.query().$promise;
+					}
+				}
+			};	
+		}
+		
+		function getRecipeDetailViewState(){
+			return {
+				url: '',
+				params: {factor: null},
+				views: {
+	    		'main': {
+		    		templateUrl: 'partials/recipes.view.tpl.html',
+						controller: 'RecipeDetailCtrl'
+					},
+					'sidelinks': {
+		    		templateUrl: 'partials/recipes.view.links.tpl.html',
+						controller: 'RecipeDetailActionsCtrl'
+					},
+					'actionnavigation-xs@': {
+		    		template: '<button type="button" class="navbar-toggle actionbutton" ng-click="recipeDetailsView()"><i class="glyphicon glyphicon-option-horizontal"></i></button>',
+						controller: 'ActionSidebarRecipeController'
+					},
+					'actionnavigation-sm@': {
+		    		template: '<a ng-click="recipeDetailsView()" class="navbar-sm-more"><span class="glyphicon glyphicon-plus" style="padding-right: 10px;"></span>More</a>',
+						controller: 'ActionSidebarRecipeController' 
+					}
+				}
+				
+ 			};
+		}
+		
+		function getRecipeDetailEditState(){
+			return {
+				url: '/edit',
+				views: {
+	    		'main': {
+		    		templateUrl: 'partials/recipes.edit.form.tpl.html',
+						controller: 'RecipeDetailCtrl'
+					},
+					'sidelinks': {
+		    		templateUrl: 'partials/recipes.edit.links.tpl.html',
+						controller: 'RecipeDetailActionsCtrl'
+					},
+					'actionnavigation-xs@': {
+		    		template: '<button type="button" class="navbar-toggle actionbutton" ng-click="recipeDetailsEdit()"><i class="glyphicon glyphicon-floppy-disk"></i></button>',
+						controller: 'ActionSidebarRecipeController'
+					},
+					'actionnavigation-sm@': {
+		    		template: '<a ng-click="recipeDetailsEdit()" class="navbar-sm-more"><span class="glyphicon glyphicon-floppy-disk" style="padding-right: 10px;"></span>Save</a>',
+						controller: 'ActionSidebarRecipeController' 
+					}
+				}
+ 			};
+		}
+		
+		function getRecipeScheduleAddState(){
+			return {
+      	url: '/scheduleadd',
+      	templateUrl: 'partials/recipes.scheduleadd.tpl.html',
+		    controller: 'ModalScheduleAddController',
+				params: {
+					date: undefined,
+					recipe: undefined
+				},
+		    resolve: {
+          randomRecipes: [ 'RandomRecipe', function(RandomRecipe){
+						var randomRecipes = RandomRecipe.query({'number': '3'}, function(response){
+							return response;
+						});
+						
+						return randomRecipes;
+          }]
+		    }
+      };
+		}
 
 
     $stateProvider
@@ -486,31 +585,18 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 					controller: 'ActionSidebarRecipeController'
 				}
 			},
+			resolve: {
+				recipeCount: ['$http', 'BASE_URI', function($http, BASE_URI){
+					return $http.get(BASE_URI+'api/recipes/count').success(function(data) {
+						return data;
+					});
+				}]
+			},
 			data: {
 	      title: 'Recipes'
 			}
 		})
-    /*.state('user.recipes.dishtypes', {
-			url: '/dishtypes',
-			views: {
-    		'': {
-	    		templateUrl: 'partials/recipes.dishtypes.tpl.html',
-					controller: 'RecipeDishTypeController'
-				},
-				'actionnavigation-xs@': {
-	    		template: '<button type="button" class="navbar-toggle actionbutton" ui-sref="user.recipes.details.add"><i class="glyphicon glyphicon-plus"></i></button>',
-					controller: 'ActionSidebarRecipeController'
-				}
-			},
-			resolve: {
-				recipes: function(Recipes){
-					return Recipes.query().$promise;
-				},
-				user: function(UserService){
-					return UserService.getCurrentLoginUser();
-				}
-			}
-    })*/
+		
 		.state('user.recipes.breakfast', getDishtypeState('/breakfast', {
 					dishType: '56294bad07ee48b60ec4405b',
 					author: undefined,
@@ -518,6 +604,9 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 					fav_recipe: undefined
 			})
 		)
+		.state('user.recipes.breakfast.details', getRecipeDetailState())
+		.state('user.recipes.breakfast.details.view', getRecipeDetailViewState())
+		.state('user.recipes.breakfast.details.edit', getRecipeDetailEditState())
 		.state('user.recipes.appetizer', getDishtypeState('/appetizer', {
 					dishType: '562934ae137c052908b75e23',
 					author: undefined,
@@ -525,6 +614,9 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 					fav_recipe: undefined
 			})
 		)
+		.state('user.recipes.appetizer.details', getRecipeDetailState())
+		.state('user.recipes.appetizer.details.view', getRecipeDetailViewState())
+		.state('user.recipes.appetizer.details.edit', getRecipeDetailEditState())
 		.state('user.recipes.drinks', getDishtypeState('/drinks', {
 					dishType: '562940bd4bdc01930dca94d8',
 					author: undefined,
@@ -532,6 +624,9 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 					fav_recipe: undefined
 			})
 		)
+		.state('user.recipes.drinks.details', getRecipeDetailState())
+		.state('user.recipes.drinks.details.view', getRecipeDetailViewState())
+		.state('user.recipes.drinks.details.edit', getRecipeDetailEditState())
 		.state('user.recipes.salads', getDishtypeState('/salads', {
 					dishType: '562940db4bdc01930dca94da',
 					author: undefined,
@@ -539,20 +634,29 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 					fav_recipe: undefined
 			})
 		)
-		.state('user.recipes.main-dishes', getDishtypeState('/main-dishes', {
+		.state('user.recipes.salads.details', getRecipeDetailState())
+		.state('user.recipes.salads.details.view', getRecipeDetailViewState())
+		.state('user.recipes.salads.details.edit', getRecipeDetailEditState())
+		.state('user.recipes.maindishes', getDishtypeState('/maindishes', {
 					dishType: '56293446137c052908b75e22',
 					author: undefined,
 					new_recipe: undefined,
 					fav_recipe: undefined
 			})
 		)
-		.state('user.recipes.side-dishes', getDishtypeState('/side-dishes', {
+		.state('user.recipes.maindishes.details', getRecipeDetailState())
+		.state('user.recipes.maindishes.details.view', getRecipeDetailViewState())
+		.state('user.recipes.maindishes.details.edit', getRecipeDetailEditState())
+		.state('user.recipes.sidedishes', getDishtypeState('/sidedishes', {
 					dishType: '562940cc4bdc01930dca94d9',
 					author: undefined,
 					new_recipe: undefined,
 					fav_recipe: undefined
 			})
 		)
+		.state('user.recipes.sidedishes.details', getRecipeDetailState())
+		.state('user.recipes.sidedishes.details.view', getRecipeDetailViewState())
+		.state('user.recipes.sidedishes.details.edit', getRecipeDetailEditState())
 		.state('user.recipes.desserts', getDishtypeState('/desserts', {
 					dishType: '562940ee4bdc01930dca94db',
 					author: undefined,
@@ -560,6 +664,9 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 					fav_recipe: undefined
 			})
 		)
+		.state('user.recipes.desserts.details', getRecipeDetailState())
+		.state('user.recipes.desserts.details.view', getRecipeDetailViewState())
+		.state('user.recipes.desserts.details.edit', getRecipeDetailEditState())
 		.state('user.recipes.breads', getDishtypeState('/breads', {
 					dishType: '562aabc37a696f1229593c42',
 					author: undefined,
@@ -567,13 +674,19 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 					fav_recipe: undefined
 			})
 		)
-		.state('user.recipes.evening-snacks', getDishtypeState('/evening-snacks', {
+		.state('user.recipes.breads.details', getRecipeDetailState())
+		.state('user.recipes.breads.details.view', getRecipeDetailViewState())
+		.state('user.recipes.breads.details.edit', getRecipeDetailEditState())
+		.state('user.recipes.eveningsnacks', getDishtypeState('/eveningsnacks', {
 					dishType: '5668a3b36faed8e960d4f213',
 					author: undefined,
 					new_recipe: undefined,
 					fav_recipe: undefined
 			})
 		)
+		.state('user.recipes.eveningsnacks.details', getRecipeDetailState())
+		.state('user.recipes.eveningsnacks.details.view', getRecipeDetailViewState())
+		.state('user.recipes.eveningsnacks.details.edit', getRecipeDetailEditState())
 		.state('user.recipes.other', getDishtypeState('/other', {
 					dishType: '5629f52a2b9118f35b96c2ca',
 					author: undefined,
@@ -581,6 +694,9 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 					fav_recipe: undefined
 			})
 		)
+		.state('user.recipes.other.details', getRecipeDetailState())
+		.state('user.recipes.other.details.view', getRecipeDetailViewState())
+		.state('user.recipes.other.details.edit', getRecipeDetailEditState())
 		.state('user.recipes.all', getDishtypeState('/all', {
 					dishType: undefined,
 					author: undefined,
@@ -588,6 +704,9 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 					fav_recipe: undefined
 			})
 		)
+		.state('user.recipes.all.details', getRecipeDetailState())
+		.state('user.recipes.all.details.view', getRecipeDetailViewState())
+		.state('user.recipes.all.details.edit', getRecipeDetailEditState())
 		.state('user.recipes.my', getDishtypeState('/my', {
 					dishType: undefined,
 					author: 'self',
@@ -595,6 +714,9 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 					fav_recipe: undefined
 			})
 		)
+		.state('user.recipes.my.details', getRecipeDetailState())
+		.state('user.recipes.my.details.view', getRecipeDetailViewState())
+		.state('user.recipes.my.details.edit', getRecipeDetailEditState())
 		.state('user.recipes.new', getDishtypeState('/new', {
 					dishType: undefined,
 					author: undefined,
@@ -602,6 +724,9 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 					fav_recipe: undefined
 			})
 		)
+		.state('user.recipes.new.details', getRecipeDetailState())
+		.state('user.recipes.new.details.view', getRecipeDetailViewState())
+		.state('user.recipes.new.details.edit', getRecipeDetailEditState())
 		.state('user.recipes.favorites', getDishtypeState('/favorites', {
 					dishType: undefined,
 					author: undefined,
@@ -609,40 +734,10 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 					fav_recipe: true
 			})
 		)
-		/*.state('user.recipes.list', 
-		{
-			url: '/list',
-			params: {
-				dishType: undefined,
-				author: undefined,
-				new_recipe: undefined,
-				fav_recipe: undefined
-			},
-			views: {
-    		'main@user': {
-	    		templateUrl: 'partials/recipes.list.tpl.html',
-					controller: 'RecipeListController'
-				},
-				'actionnavigation-xs@': {
-	    		template: '<button type="button" class="navbar-toggle actionbutton" ui-sref="user.recipes.details.add"><i class="glyphicon glyphicon-plus"></i></button>',
-					controller: 'ActionSidebarRecipeController'
-				}
-			},
-			resolve: {
-				recipes: ['Recipes', '$stateParams', function(Recipes, $stateParams){
-					var searchDate = new Date();
-					searchDate = $stateParams.new_recipe ? searchDate.setDate(searchDate.getDate() - 14) : new Date(2015,0,0);
-					var query = {'author': $stateParams.author, 'updated_at': searchDate, 'dishType': $stateParams.dishType, '_id': $stateParams.fav_recipe};
-					return Recipes.query(query).$promise;
-				}],
-				user: function(UserService){
-					return UserService.getCurrentLoginUser();
-				},
-				tags: function(Tags){
-					return Tags.query().$promise;
-				}
-			}
-		})*/
+		.state('user.recipes.favorites.details', getRecipeDetailState())
+		.state('user.recipes.favorites.details.view', getRecipeDetailViewState())
+		.state('user.recipes.favorites.details.edit', getRecipeDetailEditState())
+		
 			.state('user.recipes.details', {
 				abstract: true,
 				url: "/details/:id",
@@ -677,50 +772,8 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 					}
 				}
 			})
-  		.state('user.recipes.details.view', {
-				url: '/view',
-				params: {factor: null},
-				views: {
-	    		'main': {
-		    		templateUrl: 'partials/recipes.view.tpl.html',
-						controller: 'RecipeDetailCtrl'
-					},
-					'sidelinks': {
-		    		templateUrl: 'partials/recipes.view.links.tpl.html',
-						controller: 'RecipeDetailActionsCtrl'
-					},
-					'actionnavigation-xs@': {
-		    		template: '<button type="button" class="navbar-toggle actionbutton" ng-click="recipeDetailsView()"><i class="glyphicon glyphicon-option-horizontal"></i></button>',
-						controller: 'ActionSidebarRecipeController'
-					},
-					'actionnavigation-sm@': {
-		    		template: '<a ng-click="recipeDetailsView()" class="navbar-sm-more"><span class="glyphicon glyphicon-plus" style="padding-right: 10px;"></span>More</a>',
-						controller: 'ActionSidebarRecipeController' 
-					}
-				}
-				
- 			})
-  		.state('user.recipes.details.edit', {
-				url: '/edit',
-				views: {
-	    		'main': {
-		    		templateUrl: 'partials/recipes.edit.form.tpl.html',
-						controller: 'RecipeDetailCtrl'
-					},
-					'sidelinks': {
-		    		templateUrl: 'partials/recipes.edit.links.tpl.html',
-						controller: 'RecipeDetailActionsCtrl'
-					},
-					'actionnavigation-xs@': {
-		    		template: '<button type="button" class="navbar-toggle actionbutton" ng-click="recipeDetailsEdit()"><i class="glyphicon glyphicon-floppy-disk"></i></button>',
-						controller: 'ActionSidebarRecipeController'
-					},
-					'actionnavigation-sm@': {
-		    		template: '<a ng-click="recipeDetailsEdit()" class="navbar-sm-more"><span class="glyphicon glyphicon-floppy-disk" style="padding-right: 10px;"></span>Save</a>',
-						controller: 'ActionSidebarRecipeController' 
-					}
-				}
- 			})
+  		.state('user.recipes.details.view', getRecipeDetailViewState())
+  		.state('user.recipes.details.edit', getRecipeDetailEditState())
   		.state('user.recipes.details.add', {
 				url: '^/recipe/add',
 				views: {
@@ -808,42 +861,35 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
     ;
     
     modalStateProvider
-      .state('user.recipes.details.view.scheduleadd', {
-      	url: '/add',
-      	templateUrl: 'partials/recipes.scheduleadd.tpl.html',
-		    controller: 'ModalScheduleAddController',
-				params: {
-					date: undefined,
-					recipe: undefined
-				},
-		    resolve: {
-          randomRecipes: [ 'RandomRecipe', function(RandomRecipe){
-						var randomRecipes = RandomRecipe.query({'number': '3'}, function(response){
-							return response;
-						});
-						
-						return randomRecipes;
-          }]
-		    }
-      })
-      .state('user.recipes.list.scheduleadd', {
-      	url: '/add',
-      	templateUrl: 'partials/recipes.scheduleadd.tpl.html',
-		    controller: 'ModalScheduleAddController',
-				params: {
-					date: undefined,
-					recipe: undefined
-				},
-		    resolve: {
-          randomRecipes: [ 'RandomRecipe', function(RandomRecipe){
-						var randomRecipes = RandomRecipe.query({'number': '3'}, function(response){
-							return response;
-						});
-						
-						return randomRecipes;
-          }]
-		    }
-      })
+      .state('user.recipes.breakfast.details.view.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.appetizer.details.view.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.drinks.details.view.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.salads.details.view.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.maindisches.details.view.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.sidedisches.details.view.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.desserts.details.view.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.breads.details.view.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.eveningsnacks.details.view.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.other.details.view.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.all.details.view.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.my.details.view.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.new.details.view.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.favorites.details.view.scheduleadd', getRecipeScheduleAddState())
+      
+      .state('user.recipes.breakfast.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.appetizer.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.drinks.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.salads.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.maindisches.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.sidedisches.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.desserts.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.breads.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.eveningsnacks.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.other.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.all.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.my.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.new.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.favorites.scheduleadd', getRecipeScheduleAddState())
     ;
     
   }])
