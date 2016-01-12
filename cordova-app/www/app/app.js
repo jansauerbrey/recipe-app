@@ -93,13 +93,21 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 // Directives
 //---------------
 
-    .directive('navsidebar', ['$aside', 'navigationMenu', 'UserService', function ($aside, navigationMenu, UserService) {
+    .directive('navsidebar', ['$aside', 'UserService', function ($aside, UserService) {
       return {
         restrict: "E",
         replace: true,
         templateUrl: "partials/navigation.sidebar.button.tpl.html",
-        controller:  function ($scope) {
+        controller: function ($scope, $state) {
           $scope.hideMobileNav = true;
+          $scope.goToParent = function goToParent() {
+			      // special case
+			      to = $state.$current;
+		        do{
+		          to = to.parent;
+		        }while(to.abstract)
+			      return $state.transitionTo(to, {}, { inherit: true, relative: $state.$current });
+			    };
           $scope.navSidebar = function() {
             var asideInstance = $aside.open({
               templateUrl: 'partials/navigation.sidebar.tpl.html',
@@ -108,8 +116,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
               size: 'lg'
             });
           }
-
-        }
+      	}
       };
     }])
     

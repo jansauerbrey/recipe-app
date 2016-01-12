@@ -1,5 +1,11 @@
-<button type="button" class="navbar-toggle" style="float: left; margin-left: 15px;" ng-click="navSidebar()">
+<span><button ng-hide="$state.$current.path.length>2" type="button" class="navbar-toggle" style="float: left; margin-left: 15px;" ng-click="navSidebar()">
   <span class="icon-bar"></span>
   <span class="icon-bar"></span>
   <span class="icon-bar"></span>
 </button>
+<button ng-show="$state.$current.path.length>2" type="button" class="navbar-toggle" style="float: left; margin-left: 15px; padding-left: 7px;" ng-click="goToParent()">
+  <i class="glyphicon glyphicon-menu-left pull-left"></i>
+  <span class="icon-bar" style="margin-left: 15px; width: 10px;"></span>
+  <span class="icon-bar" style="margin-left: 15px; width: 10px;"></span>
+  <span class="icon-bar" style="margin-left: 15px; width: 10px;"></span>
+</button></span>

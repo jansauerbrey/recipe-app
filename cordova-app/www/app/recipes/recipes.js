@@ -442,7 +442,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 
   .config(['$stateProvider', 'modalStateProvider', '$urlRouterProvider', function ($stateProvider, modalStateProvider, $urlRouterProvider) {
 
-		function getDishtypeState(url, params) {
+		function getDishtypeState(title, url, params) {
 			return {
 				url: url,
 				params: params,
@@ -469,6 +469,9 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 					tags: function(Tags){
 						return Tags.query().$promise;
 					}
+				},
+				data: {
+		      title: title
 				}
 			};
 		};
@@ -597,7 +600,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 			}
 		})
 		
-		.state('user.recipes.breakfast', getDishtypeState('/breakfast', {
+		.state('user.recipes.breakfast', getDishtypeState('Breakfast', '/breakfast', {
 					dishType: '56294bad07ee48b60ec4405b',
 					author: undefined,
 					new_recipe: undefined,
@@ -607,7 +610,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 		.state('user.recipes.breakfast.details', getRecipeDetailState())
 		.state('user.recipes.breakfast.details.view', getRecipeDetailViewState())
 		.state('user.recipes.breakfast.details.edit', getRecipeDetailEditState())
-		.state('user.recipes.appetizer', getDishtypeState('/appetizer', {
+		.state('user.recipes.appetizer', getDishtypeState('Appetizer', '/appetizer', {
 					dishType: '562934ae137c052908b75e23',
 					author: undefined,
 					new_recipe: undefined,
@@ -617,7 +620,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 		.state('user.recipes.appetizer.details', getRecipeDetailState())
 		.state('user.recipes.appetizer.details.view', getRecipeDetailViewState())
 		.state('user.recipes.appetizer.details.edit', getRecipeDetailEditState())
-		.state('user.recipes.drinks', getDishtypeState('/drinks', {
+		.state('user.recipes.drinks', getDishtypeState('Drinks', '/drinks', {
 					dishType: '562940bd4bdc01930dca94d8',
 					author: undefined,
 					new_recipe: undefined,
@@ -627,7 +630,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 		.state('user.recipes.drinks.details', getRecipeDetailState())
 		.state('user.recipes.drinks.details.view', getRecipeDetailViewState())
 		.state('user.recipes.drinks.details.edit', getRecipeDetailEditState())
-		.state('user.recipes.salads', getDishtypeState('/salads', {
+		.state('user.recipes.salads', getDishtypeState('Salads', '/salads', {
 					dishType: '562940db4bdc01930dca94da',
 					author: undefined,
 					new_recipe: undefined,
@@ -637,7 +640,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 		.state('user.recipes.salads.details', getRecipeDetailState())
 		.state('user.recipes.salads.details.view', getRecipeDetailViewState())
 		.state('user.recipes.salads.details.edit', getRecipeDetailEditState())
-		.state('user.recipes.maindishes', getDishtypeState('/maindishes', {
+		.state('user.recipes.maindishes', getDishtypeState('Main Dishes', '/maindishes', {
 					dishType: '56293446137c052908b75e22',
 					author: undefined,
 					new_recipe: undefined,
@@ -647,7 +650,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 		.state('user.recipes.maindishes.details', getRecipeDetailState())
 		.state('user.recipes.maindishes.details.view', getRecipeDetailViewState())
 		.state('user.recipes.maindishes.details.edit', getRecipeDetailEditState())
-		.state('user.recipes.sidedishes', getDishtypeState('/sidedishes', {
+		.state('user.recipes.sidedishes', getDishtypeState('Side Dishes', '/sidedishes', {
 					dishType: '562940cc4bdc01930dca94d9',
 					author: undefined,
 					new_recipe: undefined,
@@ -657,7 +660,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 		.state('user.recipes.sidedishes.details', getRecipeDetailState())
 		.state('user.recipes.sidedishes.details.view', getRecipeDetailViewState())
 		.state('user.recipes.sidedishes.details.edit', getRecipeDetailEditState())
-		.state('user.recipes.desserts', getDishtypeState('/desserts', {
+		.state('user.recipes.desserts', getDishtypeState('Desserts', '/desserts', {
 					dishType: '562940ee4bdc01930dca94db',
 					author: undefined,
 					new_recipe: undefined,
@@ -667,7 +670,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 		.state('user.recipes.desserts.details', getRecipeDetailState())
 		.state('user.recipes.desserts.details.view', getRecipeDetailViewState())
 		.state('user.recipes.desserts.details.edit', getRecipeDetailEditState())
-		.state('user.recipes.breads', getDishtypeState('/breads', {
+		.state('user.recipes.breads', getDishtypeState('Breads', '/breads', {
 					dishType: '562aabc37a696f1229593c42',
 					author: undefined,
 					new_recipe: undefined,
@@ -677,7 +680,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 		.state('user.recipes.breads.details', getRecipeDetailState())
 		.state('user.recipes.breads.details.view', getRecipeDetailViewState())
 		.state('user.recipes.breads.details.edit', getRecipeDetailEditState())
-		.state('user.recipes.eveningsnacks', getDishtypeState('/eveningsnacks', {
+		.state('user.recipes.eveningsnacks', getDishtypeState('Evening Snacks', '/eveningsnacks', {
 					dishType: '5668a3b36faed8e960d4f213',
 					author: undefined,
 					new_recipe: undefined,
@@ -687,7 +690,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 		.state('user.recipes.eveningsnacks.details', getRecipeDetailState())
 		.state('user.recipes.eveningsnacks.details.view', getRecipeDetailViewState())
 		.state('user.recipes.eveningsnacks.details.edit', getRecipeDetailEditState())
-		.state('user.recipes.other', getDishtypeState('/other', {
+		.state('user.recipes.other', getDishtypeState('Other Recipes', '/other', {
 					dishType: '5629f52a2b9118f35b96c2ca',
 					author: undefined,
 					new_recipe: undefined,
@@ -697,7 +700,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 		.state('user.recipes.other.details', getRecipeDetailState())
 		.state('user.recipes.other.details.view', getRecipeDetailViewState())
 		.state('user.recipes.other.details.edit', getRecipeDetailEditState())
-		.state('user.recipes.all', getDishtypeState('/all', {
+		.state('user.recipes.all', getDishtypeState('All Recipes', '/all', {
 					dishType: undefined,
 					author: undefined,
 					new_recipe: undefined,
@@ -707,7 +710,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 		.state('user.recipes.all.details', getRecipeDetailState())
 		.state('user.recipes.all.details.view', getRecipeDetailViewState())
 		.state('user.recipes.all.details.edit', getRecipeDetailEditState())
-		.state('user.recipes.my', getDishtypeState('/my', {
+		.state('user.recipes.my', getDishtypeState('My Recipes', '/my', {
 					dishType: undefined,
 					author: 'self',
 					new_recipe: undefined,
@@ -717,7 +720,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 		.state('user.recipes.my.details', getRecipeDetailState())
 		.state('user.recipes.my.details.view', getRecipeDetailViewState())
 		.state('user.recipes.my.details.edit', getRecipeDetailEditState())
-		.state('user.recipes.new', getDishtypeState('/new', {
+		.state('user.recipes.new', getDishtypeState('New Recipes', '/new', {
 					dishType: undefined,
 					author: undefined,
 					new_recipe: true,
@@ -727,7 +730,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 		.state('user.recipes.new.details', getRecipeDetailState())
 		.state('user.recipes.new.details.view', getRecipeDetailViewState())
 		.state('user.recipes.new.details.edit', getRecipeDetailEditState())
-		.state('user.recipes.favorites', getDishtypeState('/favorites', {
+		.state('user.recipes.favorites', getDishtypeState('Favorite Recipes', '/favorites', {
 					dishType: undefined,
 					author: undefined,
 					new_recipe: undefined,
