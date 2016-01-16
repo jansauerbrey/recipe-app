@@ -90,7 +90,10 @@
         	</a>
           <div class="caption">
 		        <a ui-sref=".details.view({id: recipe._id})">
-	      			<p class="text-muted text-uppercase"><small>{{recipe.author.fullname}}</small></p>
+	      			<p class="text-muted text-uppercase">
+	      				<small>{{recipe.author.fullname}}</small>
+            		<span ng-show="recipe.fav_recipe" class="pull-right"><i class="glyphicon glyphicon-heart"></i></span>
+            	</p>
 	      			<h4 style="height: 40px;">{{recipe.name | limitTo: 50}}</h4>
 	        	</a>
             <span ng-repeat="tag in recipe.tags" class="label label-primary" style="margin: 2px; display: inline-block;">{{tag.text}}</span>

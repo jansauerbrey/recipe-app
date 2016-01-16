@@ -3,7 +3,7 @@
   </div>
   <div class="modal-body">
 		<a class="btn btn-default spacing-10"
-			href="mailto:?subject=Look at this Recipe: {{recipe.name}}&body=Hi, I found this recipe and thought you might like it https://www.rezept-planer.de/#/sharedrecipe/{{recipe.id}}" >
+			href="mailto:?subject=Look at this Recipe: {{recipe.name}}&body=Hi, I found this recipe and thought you might like it https://www.rezept-planer.de/#/sharedrecipe/{{recipe._id}}" >
 			<i class="fa fa-envelope"></i> Email
 		</a>
 		<button class="btn btn-default spacing-10"
@@ -14,7 +14,7 @@
 			socialshare-media="https://www.rezept-planer.de/upload/{{recipe.imagePath}}"
 			socialshare-text="{{recipe.name}}"
 			socialshare-caption="www.rezept-planer.de"
-			socialshare-url="https://www.rezept-planer.de/#/sharedrecipe/{{recipe.id}}"
+			socialshare-url="https://www.rezept-planer.de/#/sharedrecipe/{{recipe._id}}"
 			socialshare-redirect-uri="https://www.rezept-planer.de/closewindow.html"
 			socialshare-trigger="click" >
 			<i class="fa fa-facebook"></i> Facebook
@@ -25,7 +25,7 @@
 			socialshare-hashtags="{{hashtags}}"
 			socialshare-via="rezept-planer.de"
 			socialshare-text="{{recipe.name}}"
-			socialshare-url="https://www.rezept-planer.de/#/sharedrecipe/{{recipe.id}}"
+			socialshare-url="https://www.rezept-planer.de/#/sharedrecipe/{{recipe._id}}"
 			socialshare-trigger="click" >
 			<i class="fa fa-twitter"></i> Twitter
 		</button>
@@ -33,7 +33,7 @@
 		  socialshare
 		  socialshare-provider="google+"
 			socialshare-text="{{recipe.name}}"
-			socialshare-url="https://www.rezept-planer.de/#/sharedrecipe/{{recipe.id}}"
+			socialshare-url="https://www.rezept-planer.de/#/sharedrecipe/{{recipe._id}}"
 		  socialshare-trigger="click">
 		  <i class="fa fa-google-plus"></i> Google+
 		</button>
@@ -42,7 +42,7 @@
 		  socialshare-provider="pinterest"
 			socialshare-media="https://www.rezept-planer.de/upload/{{recipe.imagePath}}"
 			socialshare-text="{{recipe.name}}"
-			socialshare-url="https://www.rezept-planer.de/#/sharedrecipe/{{recipe.id}}"
+			socialshare-url="https://www.rezept-planer.de/#/sharedrecipe/{{recipe._id}}"
 		  socialshare-trigger="click" >
 		  <i class="fa fa-pinterest"></i> Pinterest
 		</button>

@@ -202,6 +202,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
     .controller('RecipeDetailCtrl', ['$rootScope', '$scope', '$stateParams', '$uibModal', 'Tags', 'units', 'dishtypes', 'TAIngredients', 'TATags', 'isCordova', 'RecipeService', function ($rootScope, $scope, $stateParams, $uibModal, Tags, units, dishtypes, TAIngredients, TATags, isCordova, RecipeService) {
 			$scope.isCordova = isCordova;
 			
+			RecipeService.data.submitted = false;
 			$scope.submitted = RecipeService.data.submitted;
 			$scope.recipe = RecipeService.data.recipe;
 			$scope.factorAvailable = RecipeService.data.factorAvailable;
