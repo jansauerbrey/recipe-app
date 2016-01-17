@@ -296,3 +296,11 @@ a.navbar-sm-more:hover, a.navbar-sm-more:focus {
   margin-top: 4px;
 }
 
+.truncate {
+	margin-top: 15px;
+	float: left;
+  width: 60%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

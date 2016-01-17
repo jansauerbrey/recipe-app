@@ -19,7 +19,9 @@
 
   <div class="container">
     <state-loading-indicator></state-loading-indicator>
-    <div ng-include="'partials/navigation-directive.tpl.html'"></div>
+    <div ng-controller="NavbarController">
+    	<div ng-include="'partials/navigation-directive.tpl.html'"></div>
+		</div>
     <div ng-controller="AlertController">
     	<uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" dismiss-on-timeout="5000" close="alert.close()">{{ alert.msg }}</uib-alert>
 		</div>

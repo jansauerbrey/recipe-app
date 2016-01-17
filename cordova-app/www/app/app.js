@@ -39,6 +39,16 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
     })
 
 
+    .factory('navigationTitle', ['$state', function($state) {
+			var data = {title: ''};
+			return {
+      	getObject: function() {
+					return data;
+				}
+      };
+    }])
+
+
 
 // File Upload
 
@@ -69,6 +79,15 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 //---------------
 // Controllers
 //---------------
+
+
+// Navbar
+
+
+    .controller('NavbarController', ['$scope', 'navigationTitle', function ($scope, navigationTitle) {
+			$scope.navObject = navigationTitle.getObject();
+    }])
+    
 
 // Sidebar
 
@@ -356,7 +375,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
     ;
   }])
 
-    .run(['$rootScope', '$state', '$stateParams', '$http', 'UserService', 'BASE_URI', function($rootScope, $state, $stateParams, $http, UserService, BASE_URI) {
+    .run(['$rootScope', '$state', '$stateParams', '$http', 'UserService', 'navigationTitle', 'BASE_URI', function($rootScope, $state, $stateParams, $http, UserService, navigationTitle, BASE_URI) {
 			$rootScope.$state = $state;
 			$rootScope.$stateParams = $stateParams;
 			$rootScope.print = function(print){
@@ -375,6 +394,10 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 						event.preventDefault(); 
 						$state.go('user.home');
 					};	
+		    };
+		    if (toState.data && toState.data.title) {
+		    	var obj = navigationTitle.getObject();
+		    	obj.title = toState.data.title;
 		    };
      	});
      	
