@@ -296,10 +296,12 @@ a.navbar-sm-more:hover, a.navbar-sm-more:focus {
   margin-top: 4px;
 }
 
-.truncate {
+.title-truncated {
 	margin-top: 15px;
 	float: left;
-  width: 60%;
+  width: -moz-calc(100% - 140px);
+  width: -webkit-calc(100% - 140px);
+  width: calc(100% - 140px);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
