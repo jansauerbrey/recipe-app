@@ -277,3 +277,22 @@ a.navbar-sm-more:hover, a.navbar-sm-more:focus {
 .hover-ref-element:hover .hover-show-element {
 	display: inline;
 }
+
+.navbar-toggle-adj {
+	float: left;
+	margin-left: 15px;
+	padding-left: 7px;
+}
+
+.icon-bar-short {
+	background-color: #888;
+	border-radius: 1px;
+  display: block;
+	margin-left: 12px;
+	height: 2px;
+	width: 10px;
+}
+.navbar-toggle .icon-bar-short + .icon-bar-short {
+  margin-top: 4px;
+}
+

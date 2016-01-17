@@ -99,22 +99,25 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
         replace: true,
         templateUrl: "partials/navigation.sidebar.button.tpl.html",
         controller: function ($scope, $state) {
-          $scope.hideMobileNav = true;
-          $scope.goToParent = function goToParent() {
-			      // special case
-			      to = $state.$current;
-		        do{
-		          to = to.parent;
-		        }while(to.abstract)
-			      return $state.transitionTo(to, {}, { inherit: true, relative: $state.$current });
-			    };
-          $scope.navSidebar = function() {
-            var asideInstance = $aside.open({
-              templateUrl: 'partials/navigation.sidebar.tpl.html',
-              controller: 'NavSidebarController',
-              placement: 'left',
-              size: 'lg'
-            });
+          //$scope.hideMobileNav = true;
+          $scope.showBackNav = function() {
+          	return ($state.includes('user.recipes') && $state.$current.path.length>2);
+          }
+          $scope.onClick = function() {
+          	if (this.showBackNav()) {
+				      to = $state.$current;
+			        do{
+			          to = to.parent;
+			        }while(to.abstract)
+				      return $state.transitionTo(to, {}, { inherit: true, relative: $state.$current });
+          	} else{
+          		var asideInstance = $aside.open({
+	              templateUrl: 'partials/navigation.sidebar.tpl.html',
+	              controller: 'NavSidebarController',
+	              placement: 'left',
+	              size: 'lg'
+	            });
+          	}
           }
       	}
       };
