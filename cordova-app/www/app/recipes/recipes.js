@@ -146,6 +146,64 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
         }
         }])
 
+        .factory('RecipeListService', ['$rootScope', '$stateParams', '$uibModal', 'AlertService', 'Recipes', '$state', 'Favorites', 'UserService', 'Tags', function ($rootScope, $stateParams, $uibModal, AlertService, Recipes, $state, Favorites, UserService, Tags) {
+					
+					var data = {recipes: []};
+					
+          var containsObj = function(array, obj) {
+      			var i, l = array.length;
+      			for (i=0;i<array.length;i++)
+      			{
+        			if (angular.equals(array[i], obj)) return i;
+      			}
+      			return false;
+    			};
+    			
+          var setRecipes = function(recipes){
+						data.recipes = recipes;
+          };
+
+          var queryRecipes = function(){
+						var parent = data;
+          	var searchDate = new Date();
+						searchDate = $stateParams.new_recipe ? searchDate.setDate(searchDate.getDate() - 14) : new Date(2015,0,0);
+						var query = {'author': $stateParams.author, 'updated_at': searchDate, 'dishType': $stateParams.dishType, '_id': $stateParams.fav_recipe};
+						Recipes.query(query, function(response){
+							parent.recipes = response;
+						});
+          };
+					
+					var setFavorite = function(recipe){
+						var parent = data;
+						var index = containsObj(data.recipes, recipe);
+						Favorites.update({id: recipe._id}, {method: 'add'}, function(response){
+							UserService.updateFavoriteRecipes(response.favoriteRecipes);
+							parent.recipes[index].fav_recipe = true;
+						});
+					};
+					var unsetFavorite = function(recipe){
+						var parent = data;
+						var index = containsObj(data.recipes, recipe);
+						Favorites.update({id: recipe._id}, {method: 'delete'}, function(response){
+							UserService.updateFavoriteRecipes(response.favoriteRecipes);
+							parent.recipes[index].fav_recipe = false;
+						});
+					};
+					
+          return {
+          	getObject: function() {
+							return data;
+						},
+          	setRecipes: setRecipes,
+          	queryRecipes: queryRecipes,
+          	setFavorite: setFavorite,
+          	unsetFavorite: unsetFavorite
+        	}
+					
+        }])
+        
+
+
 
 //---------------
 // Controllers
@@ -161,9 +219,11 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
     }])
 
 
-    .controller('RecipeListController', ['$scope', '$stateParams', 'recipes', 'tags', 'user', function ($scope, $stateParams, recipes, tags, user) {
+
+    .controller('RecipeListController', ['$scope', '$stateParams', '$uibModal', 'RecipeListService', 'tags', 'user', 'Favorites', 'UserService',
+    			function ($scope, $stateParams, $uibModal, RecipeListService, tags, user, Favorites, UserService) {
       $scope.user = user;
-      $scope.recipes = recipes;
+      $scope.data = RecipeListService.getObject();
       $scope.tags = tags;
 
       // parameters for search
@@ -195,8 +255,31 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
         });
         return match;
       }
+      
+      $scope.switchFavorite = function(recipe) {
+      	if(recipe.fav_recipe) {
+      		RecipeListService.unsetFavorite(recipe);
+      	} else {
+      		RecipeListService.setFavorite(recipe);
+      	}
+      }
+      
+      
+      $scope.share = function(recipe) {
+        var modalShare = $uibModal.open({
+          animation: true,
+          templateUrl: 'partials/recipes.share.tpl.html',
+          controller: 'ModalShareControllerRecipes',
+          size: 'xs',
+          resolve: {
+            recipe: function(){
+              return recipe;
+            }
+          }
+        });
 
-
+      }
+      
     }])
 
     .controller('RecipeDetailCtrl', ['$rootScope', '$scope', '$stateParams', '$uibModal', 'Tags', 'units', 'dishtypes', 'TAIngredients', 'TATags', 'isCordova', 'RecipeService', 'navigationTitle', function ($rootScope, $scope, $stateParams, $uibModal, Tags, units, dishtypes, TAIngredients, TATags, isCordova, RecipeService, navigationTitle) {
@@ -352,7 +435,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
     }])
     
     
-    .controller('RecipeDetailActionSidebarCtrl', ['$rootScope', '$scope', '$uibModal', 'RecipeService', '$modalInstance', function ($rootScope, $scope, $uibModal, RecipeService, $modalInstance) {
+    .controller('RecipeDetailActionSidebarController', ['$rootScope', '$scope', '$uibModal', 'RecipeService', '$modalInstance', function ($rootScope, $scope, $uibModal, RecipeService, $modalInstance) {
 			
 			$scope.submitted = RecipeService.data.submitted;
 			$scope.recipe = RecipeService.data.recipe;
@@ -413,7 +496,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
       $scope.recipeDetailsView = function() {
             var asideInstance = $aside.open({
               template: '<div ng-click="closeSidebar()" ng-include="\'partials/recipes.view.links.tpl.html\'"></div>',
-              controller: 'RecipeDetailActionSidebarCtrl',
+              controller: 'RecipeDetailActionSidebarController',
               placement: 'right',
               size: 'sm'
             });
@@ -422,7 +505,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
       $scope.recipeDetailsEdit = function() {
             var asideInstance = $aside.open({
               template: '<div ng-click="closeSidebar()" ng-include="\'partials/recipes.edit.links.tpl.html\'"></div>',
-              controller: 'RecipeDetailActionSidebarCtrl',
+              controller: 'RecipeDetailActionSidebarController',
               placement: 'right',
               size: 'sm'
             });
@@ -431,7 +514,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
       $scope.recipeDetailsAdd = function() {
             var asideInstance = $aside.open({
               template: '<div ng-click="closeSidebar()" ng-include="\'partials/recipes.add.links.tpl.html\'"></div>',
-              controller: 'RecipeDetailActionSidebarCtrl',
+              controller: 'RecipeDetailActionSidebarController',
               placement: 'right',
               size: 'sm'
             });
@@ -461,11 +544,13 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 					}
 				},
 				resolve: {
-					recipes: ['Recipes', '$stateParams', function(Recipes, $stateParams){
+					recipes: ['Recipes', '$stateParams', 'RecipeListService', function(Recipes, $stateParams, RecipeListService){
 						var searchDate = new Date();
 						searchDate = $stateParams.new_recipe ? searchDate.setDate(searchDate.getDate() - 14) : new Date(2015,0,0);
 						var query = {'author': $stateParams.author, 'updated_at': searchDate, 'dishType': $stateParams.dishType, '_id': $stateParams.fav_recipe};
-						return Recipes.query(query).$promise;
+						return Recipes.query(query, function(response) {
+							RecipeListService.setRecipes(response);
+						}).$promise;
 					}],
 					user: function(UserService){
 						return UserService.getCurrentLoginUser();
@@ -549,36 +634,15 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 					};
 					
 			obj.views['actionnavigation-xs@'] = {
-		    		template: '<button type="button" class="navbar-toggle actionbutton" ng-click="recipeDetailsEdit()"><i class="glyphicon glyphicon-floppy-disk"></i></button>',
-						controller: 'ActionSidebarRecipeController'
+		    		template: '<button type="button" class="navbar-toggle actionbutton" ng-click="update()"><i class="glyphicon glyphicon-floppy-disk"></i></button>',
+						controller: 'RecipeDetailActionsCtrl'
 					};
 					
 			obj.views['actionnavigation-sm@'] = {
-		    		template: '<a ng-click="recipeDetailsEdit()" class="navbar-sm-more"><span class="glyphicon glyphicon-floppy-disk" style="padding-right: 10px;"></span>Save</a>',
-						controller: 'ActionSidebarRecipeController' 
+		    		template: '<a ng-click="update()" class="navbar-sm-more"><span class="glyphicon glyphicon-floppy-disk" style="padding-right: 10px;"></span>Save</a>',
+						controller: 'RecipeDetailActionsCtrl' 
 					};
 			return obj;
-			/*{
-				url: '/edit',
-				views: {
-	    		'main@user.recipes.breakfast.details': {
-		    		templateUrl: 'partials/recipes.edit.form.tpl.html',
-						controller: 'RecipeDetailCtrl'
-					},
-					'sidelinks@user.recipes.breakfast.details': {
-		    		templateUrl: 'partials/recipes.edit.links.tpl.html',
-						controller: 'RecipeDetailActionsCtrl'
-					},
-					'actionnavigation-xs@': {
-		    		template: '<button type="button" class="navbar-toggle actionbutton" ng-click="recipeDetailsEdit()"><i class="glyphicon glyphicon-floppy-disk"></i></button>',
-						controller: 'ActionSidebarRecipeController'
-					},
-					'actionnavigation-sm@': {
-		    		template: '<a ng-click="recipeDetailsEdit()" class="navbar-sm-more"><span class="glyphicon glyphicon-floppy-disk" style="padding-right: 10px;"></span>Save</a>',
-						controller: 'ActionSidebarRecipeController' 
-					}
-				}
- 			};*/
 		}
 		
 		function getRecipeScheduleAddState(){
@@ -817,12 +881,12 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 						controller: 'RecipeDetailActionsCtrl'
 					},
 					'actionnavigation-xs@': {
-		    		template: '<button type="button" class="navbar-toggle actionbutton" ng-click="recipeDetailsAdd()"><i class="glyphicon glyphicon-floppy-disk"></i></button>',
-						controller: 'ActionSidebarRecipeController'
+		    		template: '<button type="button" class="navbar-toggle actionbutton" ng-click="save()"><i class="glyphicon glyphicon-floppy-disk"></i></button>',
+						controller: 'RecipeDetailActionsCtrl'
 					},
 					'actionnavigation-sm@': {
-		    		template: '<a ng-click="recipeDetailsAdd()" class="navbar-sm-more"><span class="glyphicon glyphicon-floppy-disk" style="padding-right: 10px;"></span>Save</a>',
-						controller: 'ActionSidebarRecipeController' 
+		    		template: '<a ng-click="save()" class="navbar-sm-more"><span class="glyphicon glyphicon-floppy-disk" style="padding-right: 10px;"></span>Save</a>',
+						controller: 'RecipeDetailActionsCtrl' 
 					}
 				}
   		})
@@ -889,6 +953,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 				}
 				
  			})
+		.state('anon.recipes.details.view.edit', getRecipeDetailEditState('@anon.recipes.details'))
     ;
     
     modalStateProvider
@@ -906,6 +971,8 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
       .state('user.recipes.my.details.view.scheduleadd', getRecipeScheduleAddState())
       .state('user.recipes.new.details.view.scheduleadd', getRecipeScheduleAddState())
       .state('user.recipes.favorites.details.view.scheduleadd', getRecipeScheduleAddState())
+      
+      .state('anon.recipes.details.view.scheduleadd', getRecipeScheduleAddState())
       
       .state('user.recipes.breakfast.scheduleadd', getRecipeScheduleAddState())
       .state('user.recipes.appetizer.scheduleadd', getRecipeScheduleAddState())

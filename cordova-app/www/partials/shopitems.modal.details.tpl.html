@@ -1,5 +1,6 @@
   <div class="modal-header">
-    <h4 class="modal-title"><strong>{{item.ingredient.name.de}}</strong></h4>
+    <h4 class="modal-title"><strong>Shopping: </strong>{{item.ingredient.name.de}}</h4>
+    <button type="button" class="close" ng-click="close()"><span aria-hidden="true">×</span></button>
   </div>
   <div class="modal-body">
   	<div class="row">
@@ -30,5 +31,5 @@
 	  </div>
   </div>
   <div class="modal-footer">
-    <button ng-click="close()" class="btn btn-default btn-lg">close</button>
+    <button ng-click="close()" class="btn btn-default">close</button>
   </div>

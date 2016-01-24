@@ -1,5 +1,6 @@
   <div class="modal-header">
     <h4 class="modal-title"><strong>Add new ingredient:</strong></h4>
+    <button type="button" class="close" ng-click="cancel()"><span aria-hidden="true">×</span></button>
   </div>
   <div class="modal-body">
   	<form name="addForm">
@@ -37,5 +38,4 @@
 	</form>
   <div class="modal-footer">
     <button ng-click="ok(addForm.$valid)" class="btn btn-primary">add</button>
-    <button ng-click="cancel()" class="btn btn-default">cancel</button>
   </div>

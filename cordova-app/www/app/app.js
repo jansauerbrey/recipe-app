@@ -302,6 +302,31 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 	})
 	
 	
+	
+		
+//---------------
+// Filter
+//---------------
+	
+	
+	.filter('timeFilter', function() {
+
+    var conversions = {
+      'ss': angular.identity,
+      'mm': function(value) { return value * 60; },
+      'hh': function(value) { return value * 3600; }
+    };
+
+    return function(value, unit) {
+      var totalSeconds = conversions[unit || 'ss'](value),
+          hh = Math.floor(totalSeconds / 3600),
+          mm = Math.floor((totalSeconds % 3600) / 60);
+
+      hh = (hh > 0)? hh: '';
+			format = (hh == '')? 'mm min' : 'hhh mmm';
+      return format.replace(/hh/, hh).replace(/mm/, mm);
+    };
+  })
 
 
 		

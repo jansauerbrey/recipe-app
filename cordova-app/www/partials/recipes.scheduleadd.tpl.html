@@ -1,5 +1,6 @@
   <div class="modal-header">
     <h4 class="modal-title"><strong>Scheduling:</strong> {{newrecipe.name}}</h4>
+    <button type="button" class="close" ng-click="cancel()"><span aria-hidden="true">×</span></button>
   </div>
   <div class="modal-body">
     <div class="form-group">
@@ -23,5 +24,4 @@
   </div>
   <div class="modal-footer">
     <button ng-click="ok()" class="btn btn-primary">OK</button>
-    <button ng-click="cancel()" class="btn btn-default">cancel</button>
   </div>

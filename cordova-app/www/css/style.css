@@ -306,3 +306,129 @@ a.navbar-sm-more:hover, a.navbar-sm-more:focus {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.tiles {
+	padding: 5px 5px 0px 0px;
+	display: inline-block;
+}
+
+.tiles .thumbnail{
+	padding: 5px 10px;
+	margin-bottom: 0px;
+}
+
+.tiles > div > span {
+	padding-left: 10px;
+}
+
+.recipe-list {
+	background-color: #fff;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	display: block;
+	line-height: 1.42857;
+	margin-bottom: 10px;
+	padding: 4px;
+	transition: border 0.2s ease-in-out 0s;
+}
+
+.recipe-list .caption {
+    color: #333;
+    padding: 9px;
+    display: inline-block;
+}
+
+@media (max-width: 767px) {
+	.recipe-list > a {
+    display: inline-block;
+    vertical-align: top;
+    width: 100px;
+    height: 100px;
+    overflow: hidden;
+	}
+	.recipe-list > a > img {
+    width: auto;
+    max-width: auto;
+    height: 100%;
+    position: relative;
+    left: -25%;
+	}
+  .recipe-list > .caption {
+    padding: 3px 0px 0px 9px;
+	  width: -moz-calc(100% - 150px);
+	  width: -webkit-calc(100% - 150px);
+	  width: calc(100% - 150px);
+	}
+  .recipe-list > div {
+    display: inline-block;
+	}
+}
+
+@media (min-width: 768px) {
+  .recipe-list > div > a > h4 {
+	  width: -moz-calc(100% - 40px);
+	  width: -webkit-calc(100% - 40px);
+	  width: calc(100% - 40px);
+	  height: 40px;
+	}
+	.recipe-list > a > img, .recipe-list > img {
+		max-width: 100%;
+	}
+	
+	.recipe-list .caption {
+		  width: -moz-calc(100% - 50px);
+		  width: -webkit-calc(100% - 50px);
+		  width: calc(100% - 50px);
+	}
+}
+
+@media (max-width: 767px) {
+	.modal-dialog {
+		margin: 0px;
+		height: 100%;
+	}
+	.modal-content {
+		border: 0px;
+		border-radius: 0px;
+		height: 100%;
+	}
+	.modal-body {
+		position: absolute;
+		bottom: 50px;
+		top: 50px;
+		overflow: auto;
+		width: 100%;
+	}
+	.modal-header {
+		position: fixed;
+		top: 0;
+		padding: 12px 15px 11px 15px;
+		width: 100%;
+		background-color: #f8f8f8;
+	}
+	.modal-header .close{
+		position: relative;
+		right: 5px;
+		top: 4px;
+	}
+	.modal-header > h4 {
+		display: inline-block;
+		margin: 0px;
+		float: left;
+	  width: -moz-calc(100% - 20px);
+	  width: -webkit-calc(100% - 20px);
+	  width: calc(100% - 20px);
+	  white-space: nowrap;
+	  overflow: hidden;
+	  text-overflow: ellipsis;
+	}
+	.modal-footer {
+		position: fixed;
+		bottom: 0;
+		padding: 7px 15px;
+		height: 50px;
+		width: 100%;
+		background-color: #f8f8f8;
+	}
+	
+}
