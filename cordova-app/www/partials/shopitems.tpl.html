@@ -51,7 +51,7 @@
 	      <div ng-repeat="item in frequentshopitems">
 	        <a class="list-group-item col-sm-6 col-md-6 col-lg-3" style="height: 150px; text-align: center;" ui-sref="user.shopitems.view.add({ingredient: item.ingredient, unit: item.unit})">
 	          <div><img style="width: 80px; height: 80px;" ng-src="{{item.ingredient.rewe_img_link_sm}}"></img></div>
-	          <div>{{item.ingredient.name.de}} ({{item.unit.name.de}})</div>
+	          <div>{{item.ingredient.name_translated}} ({{item.unit.name_translated}})</div>
 	        </a>
 	      </div>
       </div>
