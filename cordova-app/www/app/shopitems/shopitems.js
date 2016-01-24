@@ -39,6 +39,8 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
 						    } else {
 						      var order = 99999;
 						    }
+						    response[i].ingredient.name_translated = response[i].ingredient.name[user.settings.preferredLanguage];
+						    response[i].unit.name_translated = response[i].unit.name[user.settings.preferredLanguage];
 						    var obj = {ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed, details: [], amount: 0};
 						    var index = containsObj(uniqueIngredientsTemp, obj);
 						    if ( index === false) {

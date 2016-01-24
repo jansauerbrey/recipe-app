@@ -11,7 +11,7 @@ var auth = require('../auth/auth.js');
 /* GET /ingredients listing. */
 router.get('/ingredients/', auth.verify, function(req, res, next) {
   var searchTerm = new RegExp(req.query.search, 'i');
-  var language = (!req.query.language) ? 'en' : req.query.language;
+  var language = req.query.language ? req.query.language : req._user.settings.spokenLanguages;
   var query ={};
   if (language === 'de') {
     query = {'name.de': searchTerm};
@@ -32,7 +32,7 @@ router.get('/ingredients/', auth.verify, function(req, res, next) {
 /* GET /recipe listing. */
 router.get('/recipes/', auth.verify, function(req, res, next) {
   var searchTerm = new RegExp(req.query.search, 'i');
-  var query = {'name': searchTerm};
+  var query = {'name': searchTerm, language: {'$in': req._user.settings.spokenLanguages}};
   Recipe.find(query).populate('author', 'fullname').limit(10).exec( function (err, recipes) {
     if (err) return next(err);
     res.json(recipes);

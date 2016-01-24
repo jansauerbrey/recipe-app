@@ -22,8 +22,8 @@
 		        <tbody>
 		          <tr ng-repeat="item in value | orderBy: ['order', 'ingredient.category','ingredient.subcategory','ingredient.subsubcategory','ingredient.name.de']">
 		            <td style="width: 30px;"><button class="btn btn-default" ng-click="complete(item)"><span class="glyphicon" ng-class="{'glyphicon-none': !item.completed, 'glyphicon-ok': item.completed}"></span></button></td>
-		            <td ng-class="{'item-checked': item.completed}">{{item.ingredient.name.de}}</td>
-		            <td ng-class="{'item-checked': item.completed}" style="width: 100px;">{{item.amount | number}} {{item.unit.name.de}}</td>
+		            <td ng-class="{'item-checked': item.completed}">{{item.ingredient.name_translated}}</td>
+		            <td ng-class="{'item-checked': item.completed}" style="width: 100px;">{{item.amount | number}} {{item.unit.name_translated}}</td>
 		            <td>
 		            	<button class="btn btn-default pull-right" ng-click="shopitemDetails(item)" role="button">
 		            		<span class="glyphicon glyphicon-question-sign"></span>
