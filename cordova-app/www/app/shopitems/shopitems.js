@@ -39,20 +39,22 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
 						    } else {
 						      var order = 99999;
 						    }
-						    response[i].ingredient.name_translated = response[i].ingredient.name[user.settings.preferredLanguage];
-						    response[i].unit.name_translated = response[i].unit.name[user.settings.preferredLanguage];
-						    var obj = {ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed, details: [], amount: 0};
-						    var index = containsObj(uniqueIngredientsTemp, obj);
-						    if ( index === false) {
-						      uniqueIngredientsTemp.push({ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed, details: [], amount: 0});
-						      obj.details.push(response[i]);
-						      obj.amount = response[i].amount;
-						      uniqueIngredients.push(obj);
-						    }
-						    else {
-						      uniqueIngredients[index].details.push(response[i]);
-						      uniqueIngredients[index].amount = response[i].amount + uniqueIngredients[index].amount;
-						    }
+						    if (response[i].ingredient && response[i].unit && response[i].amount) { // check if item is complete
+							    response[i].ingredient.name_translated = response[i].ingredient.name[user.settings.preferredLanguage];
+							    response[i].unit.name_translated = response[i].unit.name[user.settings.preferredLanguage];
+							    var obj = {ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed, details: [], amount: 0};
+							    var index = containsObj(uniqueIngredientsTemp, obj);
+							    if ( index === false) {
+							      uniqueIngredientsTemp.push({ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed, details: [], amount: 0});
+							      obj.details.push(response[i]);
+							      obj.amount = response[i].amount;
+							      uniqueIngredients.push(obj);
+							    }
+							    else {
+							      uniqueIngredients[index].details.push(response[i]);
+							      uniqueIngredients[index].amount = response[i].amount + uniqueIngredients[index].amount;
+							    }
+							  }
 						  }
 						 	deferred.resolve(uniqueIngredients);
 		        	data.shopitems = uniqueIngredients;
