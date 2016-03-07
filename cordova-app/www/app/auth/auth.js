@@ -325,9 +325,9 @@ angular.module('app.auth', ['ui.router'])
 // Token Interceptor
 //---------------
 
-   .config(function ($httpProvider) {
+   .config(['$httpProvider', function ($httpProvider) {
        $httpProvider.interceptors.push('TokenInterceptor');
-   })
+   }])
 
 //---------------
 // Routes

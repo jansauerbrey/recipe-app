@@ -20,7 +20,7 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
       		
     			var data = {shopitems: [], alerts: [], autoupdate: true, pauseAutoupdate: 0};
     			var containsObj = function(array, obj) {
-      			var i, l = array.length;
+      			var i;
       			for (i=0;i<array.length;i++)
       			{
         			if (angular.equals(array[i], obj)) return i;
@@ -426,7 +426,7 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
 
     .controller('ActionSidebarShopitemsController', ['$scope', '$aside', 'units', function ($scope, $aside, units) {
       $scope.shopitemsActions = function() {
-            var asideInstance = $aside.open({
+            $aside.open({
               template: '<div ng-click="closeSidebar()" ng-include="\'partials/shopitems.links.tpl.html\'"></div>',
               controller: 'ShopitemsActionSidebarController',
               placement: 'right',

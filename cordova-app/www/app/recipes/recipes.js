@@ -151,7 +151,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 					var data = {recipes: []};
 					
           var containsObj = function(array, obj) {
-      			var i, l = array.length;
+      			var i;
       			for (i=0;i<array.length;i++)
       			{
         			if (angular.equals(array[i], obj)) return i;
@@ -266,7 +266,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
       
       
       $scope.share = function(recipe) {
-        var modalShare = $uibModal.open({
+        $uibModal.open({
           animation: true,
           templateUrl: 'partials/recipes.share.tpl.html',
           controller: 'ModalShareControllerRecipes',
@@ -324,7 +324,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 			}
       
       $scope.share = function() {
-        var modalShare = $uibModal.open({
+        $uibModal.open({
           animation: true,
           templateUrl: 'partials/recipes.share.tpl.html',
           controller: 'ModalShareControllerRecipes',
@@ -419,7 +419,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 		  };
 
       $scope.share = function() {
-        var modalShare = $uibModal.open({
+        $uibModal.open({
           animation: true,
           templateUrl: 'partials/recipes.share.tpl.html',
           controller: 'ModalShareControllerRecipes',
@@ -465,7 +465,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 		  };
 
       $scope.share = function() {
-        var modalShare = $uibModal.open({
+        $uibModal.open({
           animation: true,
           templateUrl: 'partials/recipes.share.tpl.html',
           controller: 'ModalShareControllerRecipes',
@@ -494,7 +494,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
      
      
       $scope.recipeDetailsView = function() {
-            var asideInstance = $aside.open({
+            $aside.open({
               template: '<div ng-click="closeSidebar()" ng-include="\'partials/recipes.view.links.tpl.html\'"></div>',
               controller: 'RecipeDetailActionSidebarController',
               placement: 'right',
@@ -503,7 +503,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
           }
           
       $scope.recipeDetailsEdit = function() {
-            var asideInstance = $aside.open({
+            $aside.open({
               template: '<div ng-click="closeSidebar()" ng-include="\'partials/recipes.edit.links.tpl.html\'"></div>',
               controller: 'RecipeDetailActionSidebarController',
               placement: 'right',
@@ -512,7 +512,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
           }
           
       $scope.recipeDetailsAdd = function() {
-            var asideInstance = $aside.open({
+            $aside.open({
               template: '<div ng-click="closeSidebar()" ng-include="\'partials/recipes.add.links.tpl.html\'"></div>',
               controller: 'RecipeDetailActionSidebarController',
               placement: 'right',
@@ -552,12 +552,12 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 							RecipeListService.setRecipes(response);
 						}).$promise;
 					}],
-					user: function(UserService){
+					user: ['UserService', function(UserService){
 						return UserService.getCurrentLoginUser();
-					},
-					tags: function(Tags){
+					}],
+					tags: ['Tags', function(Tags){
 						return Tags.query().$promise;
-					}
+					}]
 				},
 				data: {
 		      title: title
@@ -582,12 +582,12 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 						}).$promise;
 						return recipe;
 					}],
-					units: function(Units){
+					units: ['Units', function(Units){
 						return Units.query().$promise;
-					},
-					dishtypes: function(DishTypes){
+					}],
+					dishtypes: ['DishTypes', function(DishTypes){
 						return DishTypes.query().$promise;
-					}
+					}]
 				}
 			};	
 		}
@@ -859,12 +859,12 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 							return recipe;
 						}
 					}],
-					units: function(Units){
+					units: ['Units', function(Units){
 						return Units.query().$promise;
-					},
-					dishtypes: function(DishTypes){
+					}],
+					dishtypes: ['DishTypes', function(DishTypes){
 						return DishTypes.query().$promise;
-					}
+					}]
 				}
 			})
   		.state('user.recipes.details.view', getRecipeDetailViewState())
