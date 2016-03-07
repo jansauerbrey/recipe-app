@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /app/
+Disallow: /css/
+Disallow: /dist/
+Disallow: /img/
+Disallow: /lib/
+Disallow: /partials/
