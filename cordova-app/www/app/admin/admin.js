@@ -71,9 +71,9 @@ angular.module('app.admin', ['ui.router'])
         		templateUrl: 'partials/admin.user.tpl.html',
         		controller: 'AdminUserCtrl',
 			resolve: {
-				users: function(Users){
+				users: ['Users', function(Users){
 					return Users.query().$promise;
-				}
+				}]
 			},
 			data: {
 	      title: 'Users'

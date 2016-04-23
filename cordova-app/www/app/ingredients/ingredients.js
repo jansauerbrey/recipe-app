@@ -96,9 +96,9 @@ angular.module('app.ingredients', ['ui.router'])
         		templateUrl: 'partials/ingredients.tpl.html',
         		controller: 'IngredientsController',
 			resolve: {
-				ingredients: function(Ingredients){
+				ingredients:['Ingredients', function(Ingredients){
 					return Ingredients.query().$promise;
-				}
+				}]
 			},
 			data: {
         			name: 'Ingredients',
@@ -116,9 +116,9 @@ angular.module('app.ingredients', ['ui.router'])
 					}).$promise;
 					return ingredient;
 				}],
-				categories: function(Categories){
+				categories: ['Categories', function(Categories){
 					return Categories.query().$promise;
-				}
+				}]
 			}
      		})
       		.state('admin.ingredients.add', {
@@ -126,13 +126,13 @@ angular.module('app.ingredients', ['ui.router'])
         		templateUrl: 'partials/ingredients.add.tpl.html',
         		controller: 'IngredientDetailCtrl',
 			resolve: {
-				ingredient: function(Ingredients){
+				ingredient: ['Ingredients', function(Ingredients){
 					var ingredient = new Ingredients();
 					return ingredient;
-				},
-				categories: function(Categories){
+				}],
+				categories: ['Categories', function(Categories){
 					return Categories.query().$promise;
-				}
+				}]
 			}
       		})
     ;

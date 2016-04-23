@@ -428,7 +428,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
      	});
      	
      	$rootScope.$on('$stateChangeSuccess', function() {
-   			//document.body.scrollTop = document.documentElement.scrollTop = 0;
+   			document.body.scrollTop = document.documentElement.scrollTop = 0;
 			});
     }])
 

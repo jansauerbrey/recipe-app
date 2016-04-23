@@ -455,18 +455,18 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
 					'main': {templateUrl: 'partials/shopitems.layout.tpl.html'}
 				},
 				resolve: {
-					shopitems: function(ShopitemService){
+					shopitems: ['ShopitemService', function(ShopitemService){
 						ShopitemService.data.autoupdate = true; //TODO: set with user settings instead
 						return ShopitemService.retrieveShopitems().then( function(data){
 								return data;
 							});
-					},
-					frequentshopitems: function(Frequentshopitems){
+					}],
+					frequentshopitems: ['Frequentshopitems', function(Frequentshopitems){
 						return Frequentshopitems.query().$promise;
-					},
-					units: function(Units){
+					}],
+					units: ['Units', function(Units){
 						return Units.query().$promise;
-					}
+					}]
 				},
 				data: {	
 		      title: 'Shopping'
@@ -505,9 +505,9 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
 					unit: undefined
 				},
 		    resolve: {
-					units: function(Units){
+					units: ['Units', function(Units){
 						return Units.query().$promise;
-					}
+					}]
 		    }
       })
     ;

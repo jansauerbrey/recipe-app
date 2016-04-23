@@ -290,10 +290,10 @@ angular.module('app.schedules', ['ui.router', 'modalstate'])
       	}
 			},
 			resolve: {
-				schedules: function(SchedulesService){
+				schedules: ['SchedulesService', function(SchedulesService){
 						SchedulesService.selectPeriod();
 						return SchedulesService.update();
-				}
+				}]
 			},
 			data: {
 	      title: 'Schedules'
