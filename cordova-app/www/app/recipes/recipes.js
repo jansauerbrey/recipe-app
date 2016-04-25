@@ -772,16 +772,16 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 		.state('user.recipes.breads.details', getRecipeDetailState())
 		.state('user.recipes.breads.details.view', getRecipeDetailViewState())
 		.state('user.recipes.breads.details.view.edit', getRecipeDetailEditState('@user.recipes.breads.details'))
-		.state('user.recipes.eveningsnacks', getDishtypeState('Evening Snacks', '/eveningsnacks', {
+		.state('user.recipes.snacks', getDishtypeState('Snacks', '/snacks', {
 					dishType: '5668a3b36faed8e960d4f213',
 					author: undefined,
 					new_recipe: undefined,
 					fav_recipe: undefined
 			})
 		)
-		.state('user.recipes.eveningsnacks.details', getRecipeDetailState())
-		.state('user.recipes.eveningsnacks.details.view', getRecipeDetailViewState())
-		.state('user.recipes.eveningsnacks.details.view.edit', getRecipeDetailEditState('@user.recipes.eveningsnacks.details'))
+		.state('user.recipes.snacks.details', getRecipeDetailState())
+		.state('user.recipes.snacks.details.view', getRecipeDetailViewState())
+		.state('user.recipes.snacks.details.view.edit', getRecipeDetailEditState('@user.recipes.snacks.details'))
 		.state('user.recipes.other', getDishtypeState('Other Recipes', '/other', {
 					dishType: '5629f52a2b9118f35b96c2ca',
 					author: undefined,
@@ -965,7 +965,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
       .state('user.recipes.sidedisches.details.view.scheduleadd', getRecipeScheduleAddState())
       .state('user.recipes.desserts.details.view.scheduleadd', getRecipeScheduleAddState())
       .state('user.recipes.breads.details.view.scheduleadd', getRecipeScheduleAddState())
-      .state('user.recipes.eveningsnacks.details.view.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.snacks.details.view.scheduleadd', getRecipeScheduleAddState())
       .state('user.recipes.other.details.view.scheduleadd', getRecipeScheduleAddState())
       .state('user.recipes.all.details.view.scheduleadd', getRecipeScheduleAddState())
       .state('user.recipes.my.details.view.scheduleadd', getRecipeScheduleAddState())
@@ -982,7 +982,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
       .state('user.recipes.sidedisches.scheduleadd', getRecipeScheduleAddState())
       .state('user.recipes.desserts.scheduleadd', getRecipeScheduleAddState())
       .state('user.recipes.breads.scheduleadd', getRecipeScheduleAddState())
-      .state('user.recipes.eveningsnacks.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.snacks.scheduleadd', getRecipeScheduleAddState())
       .state('user.recipes.other.scheduleadd', getRecipeScheduleAddState())
       .state('user.recipes.all.scheduleadd', getRecipeScheduleAddState())
       .state('user.recipes.my.scheduleadd', getRecipeScheduleAddState())
