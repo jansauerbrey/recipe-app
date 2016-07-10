@@ -14,17 +14,15 @@
     Default icon should work, but cordova don't overwrite
     the default on all densities
     -->
-    <plugin name="cordova-plugin-whitelist" version="1" />
+    <plugin name="cordova-plugin-whitelist" version="1.2.2" />
     <access origin="file:///" />
     <access origin="https://www.rezept-planer.de" subdomains="false" />
     <access origin="https://d9gkwhfwam31p.cloudfront.net" subdomains="false" />
-    <allow-intent href="http://helsinki.sby.eu/*" />
     <allow-intent href="mailto:info@rezept-planer.de" />
     <preference name="SplashScreenDelay" value="3000" />
     <preference name="DisallowOverscroll" value="true"/>
     <platform name="android">
         <preference name="android-minSdkVersion" value="17" />
-        
 		    <!-- Icon -->
 		    <icon src="res/android/rezept-planer-icon_36.png" density="ldpi" />
 		    <icon src="res/android/rezept-planer-icon_48.png" density="mdpi" />
