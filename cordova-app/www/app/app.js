@@ -16,7 +16,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 
 // Navigation
 
-    .factory('navigationMenu', function($state) {
+    .factory('navigationMenu', ['$state', function($state) {
 	var states = [];     
 	var stateslist = $state.get();
         angular.forEach(stateslist, function (state) {
@@ -36,7 +36,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
         return {
             states: states
         };
-    })
+    }])
 
 
     .factory('navigationTitle', ['$state', function($state) {
@@ -117,7 +117,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
         restrict: "E",
         replace: true,
         templateUrl: "partials/navigation.sidebar.button.tpl.html",
-        controller: function ($scope, $state) {
+        controller: [ '$scope', '$state', function($scope, $state) {
           //$scope.hideMobileNav = true;
           $scope.showBackNav = function() {
           	return ($state.includes('user.recipes') && $state.$current.path.length>2);
@@ -130,7 +130,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 			        }while(to.abstract)
 				      return $state.transitionTo(to, {}, { inherit: true, relative: $state.$current });
           	} else{
-          		var asideInstance = $aside.open({
+			$aside.open({
 	              templateUrl: 'partials/navigation.sidebar.tpl.html',
 	              controller: 'NavSidebarController',
 	              placement: 'left',
@@ -138,7 +138,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 	            });
           	}
           }
-      	}
+      	}]
       };
     }])
     
@@ -191,10 +191,10 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
         link: function(scope, element, attrs) {
             element.bind('click', function() {
             		if (scope.$parent.schedule && scope.$parent.schedule.recipe && scope.$parent.schedule.recipe.name){
-            			var recipeName = scope.$parent.schedule.recipe.name;
+            			//var recipeName = scope.$parent.schedule.recipe.name;
                   var message =  "Are you sure to delete the recipe "+scope.$parent.schedule.recipe.name+" from schedule?";
             		} else if (scope.$parent.recipe && scope.$parent.recipe.name){
-            			var recipeName = scope.$parent.recipe.name;
+            			//var recipeName = scope.$parent.recipe.name;
                 	var message =  "Are you sure to delete the recipe "+scope.$parent.recipe.name+"?";
             		} else {
             			var message =  attrs.ngReallyMessage || "Are you sure?";
@@ -231,7 +231,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
     }])
     
     
-	.directive('ngImageUpload', function (httpPostFactory) {
+	.directive('ngImageUpload', ['httpPostFactory', function (httpPostFactory) {
 	    return {
 	        restrict: 'A',
 	        scope: true,
@@ -248,9 +248,9 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 	
 	        }
 	    };
-	})
+	}])
 
-	.directive('cameraButton', function(httpPostFactory) {
+	.directive('cameraButton', ['httpPostFactory', function(httpPostFactory) {
 	  return {
 			restrict: 'A',
 			scope: true,
@@ -277,9 +277,9 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 				});
 	    }
 	  };
-	})
+	}])
 
-	.directive('stateLoadingIndicator', function($rootScope) {
+	.directive('stateLoadingIndicator', ['$rootScope', function($rootScope) {
 	  return {
 	    restrict: 'E',
 	    template: "<div ng-show='isStateLoading' class='loading-indicator overlay'>" +
@@ -299,7 +299,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 	      });
 	    }
 	  };
-	})
+	}])
 	
 	
 	
@@ -400,18 +400,19 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
     ;
   }])
 
-    .run(['$rootScope', '$state', '$stateParams', '$http', 'UserService', 'navigationTitle', 'BASE_URI', function($rootScope, $state, $stateParams, $http, UserService, navigationTitle, BASE_URI) {
+    .run(['$rootScope', '$state', '$stateParams', '$http', 'UserService', 'navigationTitle', 'BASE_URI',
+	function($rootScope, $state, $stateParams, $http, UserService, navigationTitle, BASE_URI) {
 			$rootScope.$state = $state;
 			$rootScope.$stateParams = $stateParams;
 			$rootScope.print = function(print){
 		  	window.print();
 			};
 		
-			$rootScope.$on("$stateChangeStart", function(event, toState, toStateParams, fromState, fromStateParams) {
+			$rootScope.$on('$stateChangeStart', function(event, toState, toStateParams, fromState, fromStateParams) {
         $rootScope.previousState = fromState ? fromState : {};
         $rootScope.previousState.name = fromState.name ? fromState.name : 'user.home';
         $rootScope.previousStateParams = fromStateParams ? fromStateParams : {};
-        var authorised;
+        //var authorised;
         var authenticated = UserService.isAuthenticated();
 		    if (authenticated === true) {
 					$http.get(BASE_URI+'api/user/check');

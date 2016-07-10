@@ -20,7 +20,7 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
       		
     			var data = {shopitems: [], alerts: [], autoupdate: true, pauseAutoupdate: 0};
     			var containsObj = function(array, obj) {
-      			var i, l = array.length;
+      			var i;
       			for (i=0;i<array.length;i++)
       			{
         			if (angular.equals(array[i], obj)) return i;
@@ -426,7 +426,7 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
 
     .controller('ActionSidebarShopitemsController', ['$scope', '$aside', 'units', function ($scope, $aside, units) {
       $scope.shopitemsActions = function() {
-            var asideInstance = $aside.open({
+            $aside.open({
               template: '<div ng-click="closeSidebar()" ng-include="\'partials/shopitems.links.tpl.html\'"></div>',
               controller: 'ShopitemsActionSidebarController',
               placement: 'right',
@@ -455,18 +455,18 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
 					'main': {templateUrl: 'partials/shopitems.layout.tpl.html'}
 				},
 				resolve: {
-					shopitems: function(ShopitemService){
+					shopitems: ['ShopitemService', function(ShopitemService){
 						ShopitemService.data.autoupdate = true; //TODO: set with user settings instead
 						return ShopitemService.retrieveShopitems().then( function(data){
 								return data;
 							});
-					},
-					frequentshopitems: function(Frequentshopitems){
+					}],
+					frequentshopitems: ['Frequentshopitems', function(Frequentshopitems){
 						return Frequentshopitems.query().$promise;
-					},
-					units: function(Units){
+					}],
+					units: ['Units', function(Units){
 						return Units.query().$promise;
-					}
+					}]
 				},
 				data: {	
 		      title: 'Shopping'
@@ -505,9 +505,9 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
 					unit: undefined
 				},
 		    resolve: {
-					units: function(Units){
+					units: ['Units', function(Units){
 						return Units.query().$promise;
-					}
+					}]
 		    }
       })
     ;

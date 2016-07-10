@@ -174,7 +174,7 @@ angular.module('app.schedules', ['ui.router', 'modalstate'])
       }
 
       $scope.scheduleEdit = function(lineItem) {
-	      var modalEditSchedule = $uibModal.open({
+	      $uibModal.open({
 	        animation: true,
 	        templateUrl: 'partials/schedules.edit.tpl.html',
 	        controller: 'ModalScheduleEditController',
@@ -290,10 +290,10 @@ angular.module('app.schedules', ['ui.router', 'modalstate'])
       	}
 			},
 			resolve: {
-				schedules: function(SchedulesService){
+				schedules: ['SchedulesService', function(SchedulesService){
 						SchedulesService.selectPeriod();
 						return SchedulesService.update();
-				}
+				}]
 			},
 			data: {
 	      title: 'Schedules'

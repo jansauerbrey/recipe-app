@@ -71,9 +71,9 @@ angular.module('app.dishtypes', ['ui.router'])
         		templateUrl: 'partials/dishtypes.tpl.html',
         		controller: 'DishTypesController',
 			resolve: {
-				dishtypes: function(DishTypes){
+				dishtypes: ['DishTypes', function(DishTypes){
 					return DishTypes.query().$promise;
-				}
+				}]
 			},
 			data: {
   			name: 'Dish types',
@@ -98,10 +98,10 @@ angular.module('app.dishtypes', ['ui.router'])
         		templateUrl: 'partials/dishtypes.add.tpl.html',
         		controller: 'DishTypeDetailCtrl',
 			resolve: {
-				dishtype: function(DishTypes){
+				dishtype: ['DishTypes', function(DishTypes){
 					var dishtype = new DishTypes();
 					return dishtype;
-				}
+				}]
 			}
       		})
     ;

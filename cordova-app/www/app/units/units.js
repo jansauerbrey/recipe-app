@@ -71,9 +71,9 @@ angular.module('app.units', ['ui.router'])
         		templateUrl: 'partials/units.tpl.html',
         		controller: 'UnitsController',
 			resolve: {
-				units: function(Units){
+				units: ['Units', function(Units){
 					return Units.query().$promise;
-				}
+				}]
 			},
 			data: {
         			name: 'Units',
@@ -98,10 +98,10 @@ angular.module('app.units', ['ui.router'])
         		templateUrl: 'partials/units.add.tpl.html',
         		controller: 'UnitDetailCtrl',
 			resolve: {
-				unit: function(Units){
+				unit: ['Units', function(Units){
 					var unit = new Units();
 					return unit;
-				}
+				}]
 			}
       		})
     ;

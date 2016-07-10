@@ -151,7 +151,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 					var data = {recipes: []};
 					
           var containsObj = function(array, obj) {
-      			var i, l = array.length;
+      			var i;
       			for (i=0;i<array.length;i++)
       			{
         			if (angular.equals(array[i], obj)) return i;
@@ -266,7 +266,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
       
       
       $scope.share = function(recipe) {
-        var modalShare = $uibModal.open({
+        $uibModal.open({
           animation: true,
           templateUrl: 'partials/recipes.share.tpl.html',
           controller: 'ModalShareControllerRecipes',
@@ -324,7 +324,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 			}
       
       $scope.share = function() {
-        var modalShare = $uibModal.open({
+        $uibModal.open({
           animation: true,
           templateUrl: 'partials/recipes.share.tpl.html',
           controller: 'ModalShareControllerRecipes',
@@ -419,7 +419,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 		  };
 
       $scope.share = function() {
-        var modalShare = $uibModal.open({
+        $uibModal.open({
           animation: true,
           templateUrl: 'partials/recipes.share.tpl.html',
           controller: 'ModalShareControllerRecipes',
@@ -465,7 +465,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 		  };
 
       $scope.share = function() {
-        var modalShare = $uibModal.open({
+        $uibModal.open({
           animation: true,
           templateUrl: 'partials/recipes.share.tpl.html',
           controller: 'ModalShareControllerRecipes',
@@ -494,7 +494,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
      
      
       $scope.recipeDetailsView = function() {
-            var asideInstance = $aside.open({
+            $aside.open({
               template: '<div ng-click="closeSidebar()" ng-include="\'partials/recipes.view.links.tpl.html\'"></div>',
               controller: 'RecipeDetailActionSidebarController',
               placement: 'right',
@@ -503,7 +503,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
           }
           
       $scope.recipeDetailsEdit = function() {
-            var asideInstance = $aside.open({
+            $aside.open({
               template: '<div ng-click="closeSidebar()" ng-include="\'partials/recipes.edit.links.tpl.html\'"></div>',
               controller: 'RecipeDetailActionSidebarController',
               placement: 'right',
@@ -512,7 +512,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
           }
           
       $scope.recipeDetailsAdd = function() {
-            var asideInstance = $aside.open({
+            $aside.open({
               template: '<div ng-click="closeSidebar()" ng-include="\'partials/recipes.add.links.tpl.html\'"></div>',
               controller: 'RecipeDetailActionSidebarController',
               placement: 'right',
@@ -552,12 +552,12 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 							RecipeListService.setRecipes(response);
 						}).$promise;
 					}],
-					user: function(UserService){
+					user: ['UserService', function(UserService){
 						return UserService.getCurrentLoginUser();
-					},
-					tags: function(Tags){
+					}],
+					tags: ['Tags', function(Tags){
 						return Tags.query().$promise;
-					}
+					}]
 				},
 				data: {
 		      title: title
@@ -582,12 +582,12 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 						}).$promise;
 						return recipe;
 					}],
-					units: function(Units){
+					units: ['Units', function(Units){
 						return Units.query().$promise;
-					},
-					dishtypes: function(DishTypes){
+					}],
+					dishtypes: ['DishTypes', function(DishTypes){
 						return DishTypes.query().$promise;
-					}
+					}]
 				}
 			};	
 		}
@@ -772,16 +772,16 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 		.state('user.recipes.breads.details', getRecipeDetailState())
 		.state('user.recipes.breads.details.view', getRecipeDetailViewState())
 		.state('user.recipes.breads.details.view.edit', getRecipeDetailEditState('@user.recipes.breads.details'))
-		.state('user.recipes.eveningsnacks', getDishtypeState('Evening Snacks', '/eveningsnacks', {
+		.state('user.recipes.snacks', getDishtypeState('Snacks', '/snacks', {
 					dishType: '5668a3b36faed8e960d4f213',
 					author: undefined,
 					new_recipe: undefined,
 					fav_recipe: undefined
 			})
 		)
-		.state('user.recipes.eveningsnacks.details', getRecipeDetailState())
-		.state('user.recipes.eveningsnacks.details.view', getRecipeDetailViewState())
-		.state('user.recipes.eveningsnacks.details.view.edit', getRecipeDetailEditState('@user.recipes.eveningsnacks.details'))
+		.state('user.recipes.snacks.details', getRecipeDetailState())
+		.state('user.recipes.snacks.details.view', getRecipeDetailViewState())
+		.state('user.recipes.snacks.details.view.edit', getRecipeDetailEditState('@user.recipes.snacks.details'))
 		.state('user.recipes.other', getDishtypeState('Other Recipes', '/other', {
 					dishType: '5629f52a2b9118f35b96c2ca',
 					author: undefined,
@@ -859,12 +859,12 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 							return recipe;
 						}
 					}],
-					units: function(Units){
+					units: ['Units', function(Units){
 						return Units.query().$promise;
-					},
-					dishtypes: function(DishTypes){
+					}],
+					dishtypes: ['DishTypes', function(DishTypes){
 						return DishTypes.query().$promise;
-					}
+					}]
 				}
 			})
   		.state('user.recipes.details.view', getRecipeDetailViewState())
@@ -965,7 +965,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
       .state('user.recipes.sidedisches.details.view.scheduleadd', getRecipeScheduleAddState())
       .state('user.recipes.desserts.details.view.scheduleadd', getRecipeScheduleAddState())
       .state('user.recipes.breads.details.view.scheduleadd', getRecipeScheduleAddState())
-      .state('user.recipes.eveningsnacks.details.view.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.snacks.details.view.scheduleadd', getRecipeScheduleAddState())
       .state('user.recipes.other.details.view.scheduleadd', getRecipeScheduleAddState())
       .state('user.recipes.all.details.view.scheduleadd', getRecipeScheduleAddState())
       .state('user.recipes.my.details.view.scheduleadd', getRecipeScheduleAddState())
@@ -982,7 +982,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
       .state('user.recipes.sidedisches.scheduleadd', getRecipeScheduleAddState())
       .state('user.recipes.desserts.scheduleadd', getRecipeScheduleAddState())
       .state('user.recipes.breads.scheduleadd', getRecipeScheduleAddState())
-      .state('user.recipes.eveningsnacks.scheduleadd', getRecipeScheduleAddState())
+      .state('user.recipes.snacks.scheduleadd', getRecipeScheduleAddState())
       .state('user.recipes.other.scheduleadd', getRecipeScheduleAddState())
       .state('user.recipes.all.scheduleadd', getRecipeScheduleAddState())
       .state('user.recipes.my.scheduleadd', getRecipeScheduleAddState())
