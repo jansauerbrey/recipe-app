@@ -435,12 +435,17 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
     }])
     
     
-    .controller('RecipeDetailActionSidebarController', ['$rootScope', '$scope', '$uibModal', 'RecipeService', '$modalInstance', function ($rootScope, $scope, $uibModal, RecipeService, $modalInstance) {
+    .controller('RecipeDetailActionSidebarController', ['$rootScope', '$scope', '$uibModal', 'RecipeService', '$modalInstance', 'isCordova', function ($rootScope, $scope, $uibModal, RecipeService, $modalInstance, isCordova) {
+			$scope.isCordova = isCordova;
 			
 			$scope.submitted = RecipeService.data.submitted;
 			$scope.recipe = RecipeService.data.recipe;
 			$scope.allowEdit = RecipeService.data.allowEdit;
 			$scope.userExists = RecipeService.data.userExists;
+			$scope.printingAvailable = cordova.plugins.printer.isAvailable( function (isAvailable) { 
+					return isAvailable;
+				}
+			);
 			
       
 			$scope.favorite = function() {
@@ -476,10 +481,40 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
             }
           }
         });
-
-
       }
       
+
+
+	var options = {
+	  message: 'Great recipe on https://www.rezeptr-planer.de', // not supported on some apps (Facebook, Instagram)
+	  subject: $scope.recipe.name, // fi. for email
+	  url: 'https://www.rezept-planer.de/#/sharedrecipe/' + $scope.recipe._id,
+	}
+
+	var onSuccess = function(result) {
+	  console.log("Share completed? " + result.completed); // On Android apps mostly return false even while it's true
+	  console.log("Shared to app: " + result.app); // On Android result.app is currently empty. On iOS it's empty when sharing is cancelled (result.completed=false)
+	}
+
+	var onError = function(msg) {
+	  console.log("Sharing failed with message: " + msg);
+	}
+
+	$scope.shareInApp = function() {
+		window.plugins.socialsharing.shareWithOptions(options, onSuccess, onError);
+	}
+
+
+
+
+
+	$scope.printRecipe = function() {
+		var page =  document.getElementById('section-to-print');
+
+		cordova.plugins.printer.print(page, 'Recipe.html', function () {
+		    alert('printing finished or canceled')
+		});
+	}
       
       $scope.closeSidebar = function(){
         $modalInstance.dismiss('cancel');
