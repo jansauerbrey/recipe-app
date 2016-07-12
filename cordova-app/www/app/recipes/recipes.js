@@ -488,7 +488,6 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 	var options = {
 	  message: 'I recommend ' + $scope.recipe.name, // not supported on some apps (Facebook, Instagram)
 	  subject: $scope.recipe.name, // fi. for email
-	  files: ['https://www.rezept-planer.de/upload/' + $scope.recipe.imagePath], // an array of filenames either locally or remotely
 	  url: 'https://www.rezept-planer.de/#/sharedrecipe/' + $scope.recipe._id,
 	}
 
