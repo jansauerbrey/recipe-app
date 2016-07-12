@@ -435,7 +435,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
     }])
     
     
-    .controller('RecipeDetailActionSidebarController', ['$rootScope', '$scope', '$uibModal', 'RecipeService', '$modalInstance', 'isCordova', function ($rootScope, $scope, $uibModal, RecipeService, $modalInstance, isCordova) {
+    .controller('RecipeDetailActionSidebarController', ['$rootScope', '$scope', '$uibModal', 'RecipeService', '$modalInstance', 'isCordova', 'AlertService', function ($rootScope, $scope, $uibModal, RecipeService, $modalInstance, isCordova, AlertService) {
 			$scope.isCordova = isCordova;
 			
 			$scope.submitted = RecipeService.data.submitted;
@@ -486,18 +486,20 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 
 
 	var options = {
-	  message: 'Great recipe on https://www.rezeptr-planer.de', // not supported on some apps (Facebook, Instagram)
+	  message: 'I recommend ' + $scope.recipe.name, // not supported on some apps (Facebook, Instagram)
 	  subject: $scope.recipe.name, // fi. for email
+	  files: ['https://www.rezept-planer.de/upload/' + $scope.recipe.imagePath], // an array of filenames either locally or remotely
 	  url: 'https://www.rezept-planer.de/#/sharedrecipe/' + $scope.recipe._id,
 	}
 
 	var onSuccess = function(result) {
-	  console.log("Share completed? " + result.completed); // On Android apps mostly return false even while it's true
-	  console.log("Shared to app: " + result.app); // On Android result.app is currently empty. On iOS it's empty when sharing is cancelled (result.completed=false)
+		if(result.completed) {
+			AlertService.add('success', 'Recipe shared with ' + result.app);
+		}
 	}
 
 	var onError = function(msg) {
-	  console.log("Sharing failed with message: " + msg);
+		AlertService.add('danger', 'Error while sharing: ' + msg);
 	}
 
 	$scope.shareInApp = function() {
