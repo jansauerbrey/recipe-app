@@ -3,7 +3,7 @@
 	    <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" dismiss-on-timeout="5000" close="closeAlert($index)">{{alert.msg}}</uib-alert> 
 	    <h3 style="margin-bottom: 30px;" class="hidden-xs">Shopitems</h3>
 		</div>
-    <div class="col-xs-12 col-sm-7 col-md-7 col-lg-5">
+    <div id="section-to-print" class="col-xs-12 col-sm-7 col-md-7 col-lg-5">
 		  <div class="well" ng-hide="shopitems.length>0">No ingredients on the shopping list at the moment.</div>
     	<uib-accordion class="table-panel" close-others="false">
 		    <uib-accordion-group ng-repeat="(key, value) in shopitems | orderBy: 'order' | groupBy: 'ingredient.category'" panel-class="panel-primary" is-open="true">
@@ -16,20 +16,20 @@
 		          <th style="width: 30px;"></th>
 		          <th>Ingredient</th>
 		          <th style="width: 100px;">Amount</th>
-		          <th style="width: 30px;"></th>
-		          <th class="hidden-xs" style="width: 30px;"></th>
+		          <th class="hidden-print" style="width: 30px;"></th>
+		          <th class="hidden-xs hidden-print" style="width: 30px;"></th>
 		        </thead>
 		        <tbody>
 		          <tr ng-repeat="item in value | orderBy: ['order', 'ingredient.category','ingredient.subcategory','ingredient.subsubcategory','ingredient.name.de']">
 		            <td style="width: 30px;"><button class="btn btn-default" ng-click="complete(item)"><span class="glyphicon" ng-class="{'glyphicon-none': !item.completed, 'glyphicon-ok': item.completed}"></span></button></td>
 		            <td ng-class="{'item-checked': item.completed}">{{item.ingredient.name_translated}}</td>
 		            <td ng-class="{'item-checked': item.completed}" style="width: 100px;">{{item.amount | number}} {{item.unit.name_translated}}</td>
-		            <td>
+		            <td class="hidden-print">
 		            	<button class="btn btn-default pull-right" ng-click="shopitemDetails(item)" role="button">
 		            		<span class="glyphicon glyphicon-question-sign"></span>
 		            	</button>
 		            </td>
-		            <td class="hidden-xs" style="width: 30px;">
+		            <td class="hidden-xs hidden-print" style="width: 30px;">
 		            	<button class="btn btn-default pull-right hidden-xs" ng-really-click="remove(item)" role="button">
 		            		<span class="glyphicon glyphicon-trash"></span>
 		            	</button>

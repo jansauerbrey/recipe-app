@@ -509,7 +509,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 
 
 
-	$scope.printRecipe = function() {
+	$scope.printInApp = function() {
 		var page =  document.getElementById('section-to-print');
 
 		cordova.plugins.printer.print(page, 'Recipe.html', function () {

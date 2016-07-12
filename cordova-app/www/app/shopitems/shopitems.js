@@ -315,7 +315,8 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
 
 
 
-    .controller('ShopitemsActionSidebarController', ['$scope', '$uibModal', 'ShopitemService', 'units', '$uibModalInstance', function ($scope, $uibModal, ShopitemService, units, $uibModalInstance) {
+    .controller('ShopitemsActionSidebarController', ['$scope', '$uibModal', 'ShopitemService', 'units', '$uibModalInstance', 'isCordova',  function ($scope, $uibModal, ShopitemService, units, $uibModalInstance, isCordova) {
+	$scope.isCordova = isCordova;
 
       $scope.units = units;
       $scope.autoupdate = ShopitemService.data.autoupdate;
@@ -325,7 +326,19 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
       	$scope.autoupdate = ShopitemService.data.autoupdate;
       });
       
-      
+	$scope.printingAvailable = cordova.plugins.printer.isAvailable( function (isAvailable) {
+			return isAvailable;
+		}
+	);
+
+
+	$scope.printInApp = function() {
+		var page =  document.getElementById('section-to-print');
+
+		cordova.plugins.printer.print(page, 'Shopitems.html', function () {
+			alert('printing finished or canceled')
+		});
+	}
 
       $scope.addShopitem = function(item) {
       	ShopitemService.addShopitem(item);
