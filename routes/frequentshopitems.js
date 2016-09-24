@@ -41,9 +41,12 @@ router.get('/', auth.verify, function(req, res, next) {
 					Unit.populate(ingredients, {path: "unit"}, function(err, response){
 						var frequentshopitems = [];
 						for(i=0;i<response.length;i++){
-							frequentshopitems.push({ingredient: response[i].ingredient.toObject(), unit: response[i].unit.toObject()});
-					    frequentshopitems[i].ingredient.name_translated = frequentshopitems[i].ingredient.name[req._user.settings.preferredLanguage];
-					    frequentshopitems[i].unit.name_translated = frequentshopitems[i].unit.name[req._user.settings.preferredLanguage];
+							if(response[i] != undefined && response[i].ingredient != undefined && response[i].unit != undefined){
+								console.log(response[i]);
+								frequentshopitems.push({ingredient: response[i].ingredient.toObject(), unit: response[i].unit.toObject()});
+					    			frequentshopitems[i].ingredient.name_translated = frequentshopitems[i].ingredient.name[req._user.settings.preferredLanguage];
+					    			frequentshopitems[i].unit.name_translated = frequentshopitems[i].unit.name[req._user.settings.preferredLanguage];
+							}
 			      }
 						res.json(frequentshopitems);
 				});
