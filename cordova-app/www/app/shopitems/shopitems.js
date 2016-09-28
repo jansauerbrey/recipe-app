@@ -501,7 +501,7 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
 						controller: 'ActionSidebarShopitemsController'
 					},
 					'actionnavigation-sm@': {
-		    		template: '<a ng-click="shopitemsActions()" class="navbar-sm-more"><span class="glyphicon glyphicon-plus" style="padding-right: 10px;"></span>More</a>',
+		    		template: '<a ng-click="shopitemsActions()" class="navbar-sm-more"><span class="glyphicon glyphicon-plus padding-right-10"></span>More</a>',
 						controller: 'ActionSidebarShopitemsController' 
 					}
 				}

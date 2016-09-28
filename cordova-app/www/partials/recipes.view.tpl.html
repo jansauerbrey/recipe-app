@@ -2,13 +2,13 @@
 	<img ng-src="https://www.rezept-planer.de/upload/{{recipe.imagePath}}" spinkit-image-preloader='double-bounce-spinner'></img>
 </div>
 <div class="col-xs-12 col-sm-7 padding-xs-off">
-	<div class="col-xs-12" style="padding: 0px; margin-bottom: 10px;">
+	<div class="col-xs-12 padding-off margin-bottom-10">
       		<p class="text-muted text-uppercase"><small>{{recipe.author.fullname}}</small></p>
 		<h3 class="hidden-xs">{{recipe.name}}</h3>
       		<p class="text-info text-uppercase"><small>{{recipe.dishType.name_translated}}</small></p>
-		<span ng-repeat="tag in recipe.tags" class="label label-default" style="margin: 2px; display: inline-block;">{{tag.text}}</span>
+		<span ng-repeat="tag in recipe.tags" class="label label-default recipe-tags">{{tag.text}}</span>
 	</div>
-	<div class="col-xs-12" style="padding: 0px; margin-bottom: 10px;">
+	<div class="col-xs-12 padding-off margin-bottom-10">
 		<div class="tiles" ng-show="userExists&&recipe.fav_recipe">
 			<div class="thumbnail"><i class="glyphicon" ng-class="{'glyphicon-heart': recipe.fav_recipe===true, 'glyphicon-heart-empty': recipe.fav_recipe===false}"></i><span ng-show="recipe.fav_recipe">Favorite</span><span ng-hide="recipe.fav_recipe">Regular</span></div>
 		</div>
@@ -32,7 +32,7 @@
 		</div>
 	</div>
 </div>
-<div class="col-xs-12" style="padding: 0px;">
+<div class="col-xs-12 padding-off">
 	<table class="table table-striped">
 		<thead>
 			<th>Amount</th>
@@ -56,11 +56,11 @@
 		</tbody>
 	</table>
 </div>
-<div class="col-xs-12" style="padding: 0px;">
+<div class="col-xs-12 padding-off">
 	<label class="control-label">Instructions:</label>
-	<p style="white-space: pre-line;">{{recipe.instructions}}</p>
+	<p class="recipe-instructions">{{recipe.instructions}}</p>
 </div>
-<div class="col-xs-12 col-sm-6 padding-xs-off" style="padding-left: 0px;">
+<div class="col-xs-12 col-sm-6 padding-xs-off padding-left-off">
 	<table class="table table-striped">
 		<tbody>
 			<tr>
@@ -82,7 +82,7 @@
 		</tbody>
 	</table>
 </div>
-<div class="col-xs-12 col-sm-6 padding-xs-off" style="padding-right: 0px;">
+<div class="col-xs-12 col-sm-6 padding-xs-off padding-right-off">
 	<table class="table table-striped">
 		<tbody>
 			<tr>

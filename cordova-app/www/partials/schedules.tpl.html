@@ -1,14 +1,14 @@
   <div class="row">
     <div class="col-xs-12">
       	<uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" dismiss-on-timeout="5000" close="closeAlert($index)">{{alert.msg}}</uib-alert>
-      <h3 style="margin-bottom: 30px;" class="hidden-xs">Schedules</h3>
+      <h3 class="hidden-xs margin-bottom-30">Schedules</h3>
     </div>
     <div class="col-xs-12 col-sm-7 col-md-7 col-lg-8">
     	<div class="hidden-sm hidden-md hidden-lg well">
-    		<div class="my-datepicker" style="margin: auto;">
+    		<div class="my-datepicker margin-auto">
 	      	<uib-datepicker ng-model="activeDate" multi-select="selectedDates" select-range="true" starting-day="1" ng-change="updateSchedules(selectedDates)" show-weeks="false" ng-required="true"></uib-datepicker>
-	      	<div style="padding-top: 10px;">
-	      		<button class="hidden-sm btn btn-default" ng-click="selectWeek(-8)" role="button" style="margin-right: 5px;">Last week</button>
+	      	<div class="padding-top-10">
+	      		<button class="hidden-sm btn btn-default margin-right-5" ng-click="selectWeek(-8)" role="button">Last week</button>
 	      		<button class="btn btn-default" ng-click="selectWeek(-1)" role="button">This week</button>
 	      		<button class="btn btn-default pull-right" ng-click="selectWeek(6)" role="button">Next week</button>
 	      	</div>
@@ -17,7 +17,7 @@
 	    <div ng-repeat="schedules in schedulesArray | orderBy: 'date'" class="panel panel-primary">
 	      <!-- Default panel contents -->
 	      <div class="panel-heading panel-header-schedules">
-	      	<div style="padding-top: 6px; float: left"><strong>{{schedules.date | date:'EEEE dd.MM.yyyy'}}</strong></div>
+	      	<div class="schedules-title"><strong>{{schedules.date | date:'EEEE dd.MM.yyyy'}}</strong></div>
           <button class="btn btn-default pull-right" ui-sref="user.schedules.add({date: schedules.date})" role="button">
           	<span class="glyphicon glyphicon-plus"></span>
           </button>
@@ -26,14 +26,14 @@
 	      <table class="table table-striped" ng-show="schedules.schedule">
 	        <tbody>
 	          <tr ng-repeat="schedule in schedules.schedule">
-	            <td style="width: 100px;"><div style="padding: 5px;">{{schedule.factor}} persons</div></td>
-	            <td><a  ui-sref="user.recipes.details.view({id: schedule.recipe._id, factor: schedule.factor})"><div style="padding: 5px;"><strong>{{schedule.recipe.name}}</strong></div></a></td>
+	            <td class="schedules-item"><div class="padding-5">{{schedule.factor}} persons</div></td>
+	            <td><a  ui-sref="user.recipes.details.view({id: schedule.recipe._id, factor: schedule.factor})"><div class="padding-5"><strong>{{schedule.recipe.name}}</strong></div></a></td>
 	            <td>
 	            	<button class="btn btn-default pull-right" ng-click="scheduleEdit(schedule)" role="button">
 	            		<span class="glyphicon glyphicon-pencil"></span>
 	            	</button>
 	            </td>
-	            <td class="hidden-xs" style="width: 30px;">
+	            <td class="hidden-xs schedules-item-button">
 	            	<button class="btn btn-default pull-right" ng-really-click="remove(schedule, $parent.$index)" role="button">
 	            		<span class="glyphicon glyphicon-trash"></span>
 	            	</button>
@@ -41,15 +41,15 @@
 	          </tr>
 	        </tbody>
 	      </table>
-	      <p ng-hide="schedules.schedule.length>0" class="text-muted" style="padding:5px 10px;">No recipes scheduled for this day.</p>
+	      <p ng-hide="schedules.schedule.length>0" class="text-muted schedules-item-missing">No recipes scheduled for this day.</p>
 	    </div>
 	  </div>
     <div class="hidden-xs col-sm-5 col-md-5 col-lg-4">
-    	<div class="well" style="position: fixed;">
-    		<div class="my-datepicker" style="margin: auto;">
+    	<div class="well schedules-selector">
+    		<div class="my-datepicker margin-auto">
 	      	<uib-datepicker ng-model="activeDate" multi-select="selectedDates" select-range="true" starting-day="1" ng-change="updateSchedules(selectedDates)" show-weeks="false" ng-required="true"></uib-datepicker>
-	      	<div style="padding-top: 10px;">
-	      		<button class="hidden-sm btn btn-default" ng-click="selectWeek(-1)" role="button" style="margin-right: 5px;">Last week</button>
+	      	<div class="padding-top-10">
+	      		<button class="hidden-sm btn btn-default margin-right-5" ng-click="selectWeek(-1)" role="button">Last week</button>
 	      		<button class="btn btn-default" ng-click="selectWeek(0)" role="button">This week</button>
 	      		<button class="btn btn-default pull-right" ng-click="selectWeek(1)" role="button">Next week</button>
 	      	</div>

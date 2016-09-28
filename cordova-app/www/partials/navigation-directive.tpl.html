@@ -1,13 +1,13 @@
 <div class="row">
-<nav class="navbar navbar-default navbar-fixed-top" style="padding:0;" role="navigation">
+<nav class="navbar navbar-default navbar-fixed-top navbar-padding" role="navigation">
 <div class="container">
   <div class="navbar-header">
   	<div><navsidebar></navsidebar></div>
     <div class="beta-tag">&nbsp;BETA&nbsp;</div>
-    <a class="navbar-brand hidden-xs" ui-sref="user.home" access="User" style="padding: 5px 15px;">
+    <a class="navbar-brand hidden-xs navbar-padding-button" ui-sref="user.home" access="User">
       <img alt="Brand" src="img/icon.png">
     </a>
-    <a class="navbar-brand hidden-xs" ui-sref="anon.startpage" access="NoUser" style="padding: 5px 15px;">
+    <a class="navbar-brand hidden-xs navbar-padding-button" ui-sref="anon.startpage" access="NoUser">
       <img alt="Brand" src="img/icon.png">
     </a>
 		<h4 class="visible-xs title-truncated">{{navObject.title}}</h4>
@@ -16,44 +16,47 @@
   <div class="collapse navbar-collapse">
     <ul class="nav navbar-nav">
       <li ng-class="{active: $state.includes('user.recipes')}" access="User">
-        <a ui-sref="user.recipes"><span class="glyphicon glyphicon-cutlery" style="padding-right: 10px;"></span>Recipes</a>
+        <a ui-sref="user.recipes"><span class="glyphicon glyphicon-cutlery navbar-padding-right-button"></span>Recipes</a>
       </li>
       <li ng-class="{active: $state.includes('user.schedules')}" access="User">
-        <a ui-sref="user.schedules"><span class="glyphicon glyphicon-calendar" style="padding-right: 10px;"></span>Schedules</a>
+        <a ui-sref="user.schedules"><span class="glyphicon glyphicon-calendar  navbar-padding-right-button"></span>Schedules</a>
       </li>
       <li ng-class="{active: $state.includes('user.shopitems')}" access="User">
-        <a ui-sref="user.shopitems.view"><span class="glyphicon glyphicon-shopping-cart" style="padding-right: 10px;"></span>Shopping</a>
+        <a ui-sref="user.shopitems.view"><span class="glyphicon glyphicon-shopping-cart navbar-padding-right-button"></span>Shopping</a>
       </li>
       <li ng-class="{active: $state.includes('user.settings')}" access="User">
-        <a ui-sref="user.settings"><span class="glyphicon glyphicon-cog" style="padding-right: 10px;"></span>Settings</a>
+        <a ui-sref="user.settings"><span class="glyphicon glyphicon-cog navbar-padding-right-button"></span>Settings</a>
       </li>
-      <li class="hidden-xs" uib-dropdown is-open="othersIsOpen" style="cursor: pointer;" ng-class="{active: $state.includes('admin')}" access="Admin">
+      <li class="hidden-xs pointer" uib-dropdown is-open="othersIsOpen" ng-class="{active: $state.includes('admin')}" access="Admin">
       <a class="dropdown-toggle" uib-dropdown-toggle access="Admin">Admin <span class="caret"></span></a>
         <ul class="dropdown-menu" role="menu">       	
 		      <li ng-class="{active: $state.includes('admin.units')}" access="Admin">
-		        <a ui-sref="admin.units.list"><span class="glyphicon glyphicon-scale" style="padding-right: 10px;"></span>Units</a>
+		        <a ui-sref="admin.units.list"><span class="glyphicon glyphicon-scale navbar-padding-right-button"></span>Units</a>
 		      </li>
 		      <li ng-class="{active: $state.includes('admin.ingredients')}" access="Admin">
-		        <a ui-sref="admin.ingredients.list"><span class="glyphicon glyphicon-apple" style="padding-right: 10px;"></span>Ingredients</a>
+		        <a ui-sref="admin.ingredients.list"><span class="glyphicon glyphicon-apple navbar-padding-right-button"></span>Ingredients</a>
+		      </li>
+		      <li ng-class="{active: $state.includes('admin.tags')}" access="Admin">
+		        <a ui-sref="admin.tags.list"><span class="glyphicon glyphicon-tags navbar-padding-right-button"></span>Tags</a>
 		      </li>
 		      <li ng-class="{active: $state.includes('admin.dishtypes')}" access="Admin">
-		        <a ui-sref="admin.dishtypes.list"><span class="glyphicon glyphicon-grain" style="padding-right: 10px;"></span>Dish types</a>
+		        <a ui-sref="admin.dishtypes.list"><span class="glyphicon glyphicon-grain navbar-padding-right-button"></span>Dish types</a>
 		      </li>
 		      <li ng-class="{active: $state.includes('admin.user')}" access="Admin">
-		        <a ui-sref="admin.user"><span class="glyphicon glyphicon-user" style="padding-right: 10px;"></span>Users</a>
+		        <a ui-sref="admin.user"><span class="glyphicon glyphicon-user navbar-padding-right-button"></span>Users</a>
 		      </li>
         </ul>
       </li>
     </ul>
 		<ul class="nav navbar-nav navbar-right">
       <li ng-class="{active: $state.includes('user.logout')}" access="User">
-        <a ui-sref="user.logout"><span class="glyphicon glyphicon-log-out" style="padding-right: 10px;"></span>Logout</a>
+        <a ui-sref="user.logout"><span class="glyphicon glyphicon-log-out navbar-padding-right-button"></span>Logout</a>
       </li>
       <li ng-class="{active: $state.includes('anon.user.login')}" access="NoUser">
-        <a ui-sref="anon.user.login"><span class="glyphicon glyphicon-log-in" style="padding-right: 10px;"></span>Login</a>
+        <a ui-sref="anon.user.login"><span class="glyphicon glyphicon-log-in navbar-padding-right-button"></span>Login</a>
       </li>
       <li ng-class="{active: $state.includes('anon.user.register')}" access="NoUser">
-        <a ui-sref="anon.user.register"><span class="glyphicon glyphicon-edit" style="padding-right: 10px;"></span>Register</a>
+        <a ui-sref="anon.user.register"><span class="glyphicon glyphicon-edit navbar-padding-right-button"></span>Register</a>
       </li>
   		<li ui-view="actionnavigation-sm" class="visible-sm"></li>
     </ul>

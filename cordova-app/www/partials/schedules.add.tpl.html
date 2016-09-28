@@ -23,13 +23,13 @@
 				</div>
 	    </div>
 	    
-	    <div class="row" style="margin-top: 20px;">
+	    <div class="row list-top-margin">
 	      <div ng-repeat="randomRecipe in randomRecipes" class="col-xs-6 col-sm-4 col-md-4 col-lg-4" ng-class="{'hidden-xs': $last}">
           <a ng-click="selectRecipe(randomRecipe)">
           <div class="thumbnail">
             <img ng-src="https://www.rezept-planer.de/upload/{{randomRecipe.imagePath}}" spinkit-image-preloader='double-bounce-spinner'></img>
             <div class="caption">
-	      			<p style="margin: 0px;">{{randomRecipe.name | limitTo: 50}}</p>
+	      			<p class="margin-off">{{randomRecipe.name | limitTo: 50}}</p>
 	    			</div>
           </div>
         </a>
