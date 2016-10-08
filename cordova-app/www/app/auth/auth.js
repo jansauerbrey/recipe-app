@@ -15,29 +15,42 @@ angular.module('app.auth', ['ui.router'])
         }])
 
 		.factory('UserService', [ '$localStorage', '$injector', function($localStorage, $injector){
-        var currentUser,
-            createUser = function(data){
-                currentUser = data;
-                $localStorage.user = data;
+        var data = {currentUser: {},
+        			currentUserCopy: {},
+        			languageOptions: [{id: 'en', name: 'English'}, {id: 'de', name: 'Deutsch'},{id: 'fi', name: 'Suomi'}],
+        			weekdayOptions: [{id: 0, name: 'Sunday'},
+															{id: 1, name: 'Monday'},
+															{id: 2, name: 'Tueasday'},
+															{id: 3, name: 'Wednesday'},
+															{id: 4, name: 'Thursday'},
+															{id: 5, name: 'Friday'},
+															{id: 6, name: 'Saturday'}]
+						},
+            createUser = function(userData){
+                data.currentUser = userData;
+                data.currentUserCopy = angular.copy(data.currentUser);
+                $localStorage.user = userData;
             },
             getCurrentLoginUser = function(){
-                return currentUser;
+                return data.currentUser;
             },
             deleteCurrentUser = function(){
-                currentUser = undefined;
+                delete data.currentUser;
+                delete data.currentUserCopy;
                 delete $localStorage.user;
             },
             isAuthenticated = function() {
-                return (currentUser !== undefined);
+              return (angular.isObject(data.currentUser) && ("_id" in data.currentUser));
             },
             getToken = function() {
-                if (currentUser !== undefined){
-                    return currentUser.token;
+                if (data.currentUser && data.currentUser.token){
+                    return data.currentUser.token;
                 }
             },
             authorize = function (requiresLogin, requiredPermissions, permissionType) {
 							var result = 0,
 							user = getCurrentLoginUser(),
+							authenticated = isAuthenticated(),
 							loweredPermissions = [],
 							hasPermission = true,
 							permission, i;
@@ -45,13 +58,13 @@ angular.module('app.auth', ['ui.router'])
 							permissionType = permissionType || 0;
 							if (requiresLogin === true && user === undefined) {
 								result = 1;
-							} else if ((requiresLogin === true && user !== undefined) &&
+							} else if ((requiresLogin === true && authenticated === true) &&
 								(requiredPermissions === undefined || requiredPermissions.length === 0)) {
 								// Login is required but no specific permissions are specified.
 								result = 0;
 							} else if (requiredPermissions) {
 								// fill NoUser info to user in case there is no user
-								if (user === undefined){
+								if (authenticated === false){
 							  	user = {permissions: ['NoUser']};
 								}
 								loweredPermissions = [];
@@ -82,19 +95,23 @@ angular.module('app.auth', ['ui.router'])
 							return result;
 						},
             updateFavoriteRecipes = function(favRecipes) {
-                if (currentUser !== undefined){
-	                currentUser.favoriteRecipes = favRecipes;
+                if (data.currentUser !== undefined){
+	                data.currentUser.favoriteRecipes = favRecipes;
+	                data.currentUserCopy = angular.copy(data.currentUser);
 	                $localStorage.user.favoriteRecipes = favRecipes;
                 }
             },
-            updateUserSettings = function(userSettings, callback) {
-                if (currentUser !== undefined){
-                	var User = $injector.get('User');
-                	User.update({id: currentUser._id}, userSettings, function(response){
-                		for (var attrname in response) { currentUser[attrname] = response[attrname]; }
-                		callback(currentUser);
-									});
-                }
+            updateUserSettings = function(callback) {
+              if (data.currentUser !== undefined){
+              	var User = $injector.get('User');
+              	User.update({id: data.currentUser._id}, {fullname: data.currentUserCopy.fullname, settings: data.currentUserCopy.settings}, function(response){
+              		for (var attrname in response) {
+              			data.currentUser[attrname] = response[attrname];
+              		}
+	                data.currentUserCopy = angular.copy(data.currentUser);
+              		callback();
+								});
+              }
             };
 
             if ($localStorage.user){
@@ -102,6 +119,7 @@ angular.module('app.auth', ['ui.router'])
             }
 
 			return {
+				data: data,
 				createUser: createUser,
 				getCurrentLoginUser: getCurrentLoginUser,
 				deleteCurrentUser: deleteCurrentUser,
@@ -114,8 +132,8 @@ angular.module('app.auth', ['ui.router'])
 		}])
 
 
-    .factory('AuthenticationService', [ '$http', '$localStorage', '$state', '$rootScope', 'UserService', 'BASE_URI', 'AlertService',
-    	function($http, $localStorage, $state, $rootScope, UserService, BASE_URI, AlertService) {
+    .factory('AuthenticationService', [ '$http', '$localStorage', '$state', '$stateParams', '$rootScope', 'UserService', 'BASE_URI', 'AlertService',
+    	function($http, $localStorage, $state, $stateParams, $rootScope, UserService, BASE_URI, AlertService) {
     	var logIn = function(username, password, autologin) {
         if (username !== undefined && password !== undefined) {
         	$http.post(BASE_URI+'api/user/login', {username: username, password: password, autologin: autologin}).success(function(data) {
@@ -192,7 +210,7 @@ angular.module('app.auth', ['ui.router'])
 		}])
 
 
-    .factory('TokenInterceptor', ['$q', 'UserService', '$injector', function ($q, UserService, $injector) {
+    .factory('TokenInterceptor', ['$q', 'UserService', '$injector', 'AlertService', function ($q, UserService, $injector, AlertService) {
         return {
             request: function (config) {
                 config.headers = config.headers || {};
@@ -219,8 +237,9 @@ angular.module('app.auth', ['ui.router'])
             responseError: function(rejection) {
                 if (rejection != null && rejection.status === 401) {
                     UserService.deleteCurrentUser();
-		    var stateService = $injector.get('$state');
-                    stateService.go('accessdenied');
+                    AlertService.add('danger', 'Access denied!');
+		    						var $state = $injector.get('$state');
+                    $state.go('anon.startpage');
                 }
 
                 return $q.reject(rejection);
@@ -238,8 +257,11 @@ angular.module('app.auth', ['ui.router'])
 
 // Auth
 		
-		.controller('UserAuthenticationController', ['$scope', 'Users', 'AuthenticationService',
-			function UserAuthenticationController($scope, Users, AuthenticationService) {
+		.controller('UserAuthenticationController', ['$scope', 'Users', 'AuthenticationService', 'UserService',
+			function UserAuthenticationController($scope, Users, AuthenticationService, UserService) {
+			
+			$scope.languageOptions = UserService.data.languageOptions;
+			$scope.weekdayOptions = UserService.data.weekdayOptions;
 			
 			$scope.user = new Users();
 			$scope.logIn = function logIn() {
@@ -281,29 +303,31 @@ angular.module('app.auth', ['ui.router'])
     
 	.controller('UserSettingsController', ['$scope', '$state', 'UserService', 'AlertService',
 		function UserSettingsController($scope, $state, UserService, AlertService) {
-			
-		$scope.user = UserService.getCurrentLoginUser();
+		
+		$scope.languageOptions = UserService.data.languageOptions;
+		$scope.weekdayOptions = UserService.data.weekdayOptions;
+		
+		// copy current user settings and link to data in factory
+    UserService.data.currentUserCopy = angular.copy(UserService.data.currentUser);
+		$scope.user = UserService.data.currentUserCopy;
 		
 		$scope.updateUserSettings = function updateUserSettings() {
-			var userSettings = {fullname: $scope.user.fullname, email: $scope.user.email, settings: $scope.user.settings};
-			UserService.updateUserSettings(userSettings, function(response){
-				$scope.user = UserService.getCurrentLoginUser();
+			UserService.updateUserSettings(function(){
 				AlertService.add('success', 'Settings successfully updated.');
-				$state.go('user.settings.view');
+				$state.go('user.settings');
 			});
 		}
 		
 	}])
 
 
-
 //---------------
 // Token Interceptor
 //---------------
 
-   .config(function ($httpProvider) {
+   .config(['$httpProvider', function ($httpProvider) {
        $httpProvider.interceptors.push('TokenInterceptor');
-   })
+   }])
 
 //---------------
 // Routes
@@ -321,7 +345,7 @@ angular.module('app.auth', ['ui.router'])
 				}
 			})
 			.state('anon.user.confirm', {
-				url: '/user/confirm/:token',
+				url: '/confirm/:token',
 				controller: 'UserConfirmEmailController',
 				data: {
 		      title: 'Confirm Email'
@@ -337,7 +361,12 @@ angular.module('app.auth', ['ui.router'])
 			})
 			.state('user.logout', {
 				url: '/user/logout',
-				controller: 'UserLogoutController',
+				views: {
+					'main': {
+						template: '<div class="loading-indicator overlay"><div class="loading-indicator-body"><div class="spinner"><double-bounce-spinner></double-bounce-spinner></div></div></div>',
+					controller: 'UserLogoutController'
+					}
+				},
 				data: {
 		      title: 'Logout'
 				}
@@ -359,22 +388,32 @@ angular.module('app.auth', ['ui.router'])
 				}
 			})
 			.state('user.settings', {
-				abstract: true,
 				url: '/user/settings',
-				template: '<ui-view />',
+				views: {
+	    		'main': {
+						templateUrl: 'partials/user.settings.view.tpl.html',
+						controller: 'UserSettingsController'
+					},
+					'actionnavigation-xs@': {
+		    		template: '<button type="button" class="navbar-toggle actionbutton" ui-sref="user.settings.edit"><i class="glyphicon glyphicon-pencil"></i></button>'
+					}
+				},
 				data: {
 					title: 'User settings'
 				}
 			})
-			.state('user.settings.view', {
-				url: '/view',
-				templateUrl: 'partials/user.settings.view.tpl.html',
-				controller: 'UserSettingsController'
-			})
 			.state('user.settings.edit', {
 				url: '/edit',
-				templateUrl: 'partials/user.settings.edit.tpl.html',
-				controller: 'UserSettingsController'
+				views: {
+	    		'main@user': {
+						templateUrl: 'partials/user.settings.edit.tpl.html',
+						controller: 'UserSettingsController'
+					},
+					'actionnavigation-xs@': {
+		    		template: '<button type="button" class="navbar-toggle actionbutton" ng-click="updateUserSettings()"><i class="glyphicon glyphicon-floppy-disk"></i></button>',
+						controller: 'UserSettingsController'
+					}
+				}
 			})
     ;
   }])

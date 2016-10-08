@@ -1,5 +1,6 @@
 <div class="row">
 <div class="col-xs-12">
+<h3 style="margin-bottom: 30px;" class="hidden-xs">User registration</h3>
 <form class="form-horizontal" role="form">
 		<div class="form-group">
 			<label for="inputUsername" class="col-sm-4 control-label">Username</label>
@@ -35,6 +36,18 @@
 			<label for="inputFullname" class="col-sm-4 control-label">Fullname</label>
 			<div class="col-sm-4">
 				<input type="text" class="form-control" id="inputFullname" placeholder="Fullname" ng-model="user.fullname">
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-4 control-label">Preferred language:</label>
+			<div class="col-sm-4">
+				<select name="preferredLanguage" ng-options="languageOption.id as languageOption.name for languageOption in languageOptions | orderBy: 'name'" ng-model="user.settings.preferredLanguage" ng-required="true" class="form-control"></select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-4 control-label">Spoken languages:</label>
+			<div class="col-sm-4">
+				<select multiple name="spokenLanguages" ng-options="languageOption.id as languageOption.name for languageOption in languageOptions | orderBy: 'name'" ng-model="user.settings.spokenLanguages" ng-required="true" class="form-control"></select>
 			</div>
 		</div>
 		<div class="form-group">

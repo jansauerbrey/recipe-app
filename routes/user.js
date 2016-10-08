@@ -24,8 +24,14 @@ router.get('/info', auth.verify, function(req, res, next) {
 });
 
 /* PUT /user/info */
-router.put('/info', auth.verify, function(req, res, next) {
-	var userInfo = {fullname: req.body.fullname, email: req.body.email, settings: req.body.settings};
+router.put('/info/:id', auth.verify, function(req, res, next) {
+  var fullname = req.body.fullname || '';
+  var settings = req.body.settings || '';
+	
+  if (fullname == '' || settings == '') {
+      return res.send(401);
+  }
+	var userInfo = {fullname: req.body.fullname, settings: req.body.settings};
   User.findByIdAndUpdate(req._user.id, userInfo, { 'new': true}).select('username fullname email is_admin settings favoriteRecipes').exec( function (err, user) {
 	  if (err) return next(err);
 	  res.json(user);
@@ -62,7 +68,7 @@ router.get('/check', auth.verify, function(req, res, next) {
 });
 
 /* LOGIN */
-router.post('/login', function(req, res) {
+router.post('/login', function(req, res, next) {
     //verify credential (use POST)
     var username = req.body.username.toLowerCase() || '';
     var password = req.body.password || '';
@@ -88,27 +94,29 @@ router.post('/login', function(req, res) {
             return res.sendStatus(401);
         }
 
+        console.log(user);
         user.comparePassword(password, function(isMatch) {
             if (!isMatch) {
                 console.log("Attempt failed to login with " + user.username);
                 return res.sendStatus(401);
             }
  
-            var userData = {id: user._id, username: user.username, is_admin: user.is_admin, autologin: autologin};
+            var userDataForRedis = {id: user._id, username: user.username, is_admin: user.is_admin, autologin: autologin};
+            var userData = user;
             var expiration = 300; // 5 minutes
 
             if (autologin === true) {
               expiration = 60*60*24*30; //30 days
             }
 
-            auth.createAndStoreToken(userData, expiration, function(err, token) {
+            auth.createAndStoreToken(userDataForRedis, expiration, function(err, token) {
                 if (err) {
                     console.log(err);
                     return res.sendStatus(400);
                 }
 
                 //Send back token
-                return res.json({token: token, is_admin: user.is_admin, fullname: user.fullname, _id: user._id, username: user.username, settings: user.settings});
+                return res.json({token: token, is_admin: userData.is_admin, email: userData.email, fullname: userData.fullname, _id: userData._id, username: userData.username, settings: userData.settings});
             });
         });
     });
@@ -122,7 +130,7 @@ router.get('/logout', auth.verify, function(req, res) {
 
 
 /* REGISTER */
-router.post('/register', function(req, res) {
+router.post('/register', function(req, res, next) {
 	var username = req.body.username || '';
 	var username_lower = username.toLowerCase();
 	var password = req.body.password || '';
@@ -130,13 +138,27 @@ router.post('/register', function(req, res) {
 	var email = req.body.email || '';
 	var emailConfirmation = req.body.emailConfirmation || '';
 	var fullname = req.body.fullname || '';
+	var preferredLanguage = req.body.settings.preferredLanguage  || 'en';
+	var spokenLanguages = req.body.settings.spokenLanguages || ['en'];
 	
 	if (username == '' || password == '' || password != passwordConfirmation || email == '' || fullname == '' || email != emailConfirmation) {
 	    return res.sendStatus(400);
 	}
 	
 	
-	var userData = {username: username, username_lower: username_lower, password: password, emailNotConfirmed:email, fullname:fullname};
+	var userData = {username: username,
+									username_lower: username_lower,
+									password: password,
+									emailNotConfirmed:email,
+									fullname:fullname,
+									settings: {
+										preferredLanguage: preferredLanguage,
+										spokenLanguages: spokenLanguages,
+										autoupdate: true,
+										preferredWeekStartDay: 1,
+										categoryOrder: ["Obst \u0026 Gem\xFCse","Fr\xFChst\xFCck","Servicetheke","Nahrungsmittel","Weitere Bereiche","Drogerie","Baby \u0026 Kind","K\xFChlprodukte","S\xFCssigkeiten","Getr\xE4nke","Haushalt","Tiefk\xFChl"]
+										}
+									};
 	
 	
 	tokenHelper.createToken(function(err, token) {
@@ -156,9 +178,9 @@ router.post('/register', function(req, res) {
 	      else {
 	      	var mailOptions = {
 						from: 'rezept-planer.de <admin@rezept-planer.de>', // sender address
-						to: user.email, // list of receivers
+						to: email, // list of receivers
 						subject: 'Confirm Email', // Subject line
-						text: 'Please, use the following link to confirm your email address:\n\nhttps://rezept-planer.de/#/user/confirm/'+userData.emailConfirmationToken+'\n\nYour rezept-planer.de Team', // plaintext body
+						text: 'Please, use the following link to confirm your email address:\n\nhttps://www.rezept-planer.de/#/user/confirm/'+userData.emailConfirmationToken+'\n\nYour rezept-planer.de Team', // plaintext body
 					};
 					transporter.sendMail(mailOptions, function(err, info){
 						if (err) return next(err);
@@ -166,7 +188,7 @@ router.post('/register', function(req, res) {
 						return res.sendStatus(200);
 					});
 	      }
-	    }
+	    });
 		});
 	});
 });
@@ -228,7 +250,7 @@ router.post('/forgot', function(req, res) {
 					from: 'rezept-planer.de <admin@rezept-planer.de>', // sender address
 					to: user.email, // list of receivers
 					subject: 'Reset Password', // Subject line
-					text: 'Please, use the following link to reset your password:\n\nhttps://rezept-planer.de/#/user/reset/'+user.resetPasswordToken+'\n\nYour rezept-planer.de Team', // plaintext body
+					text: 'Please, use the following link to reset your password:\n\nhttps://www.rezept-planer.de/#/user/reset/'+user.resetPasswordToken+'\n\nYour rezept-planer.de Team', // plaintext body
 				};
 				transporter.sendMail(mailOptions, function(error, info){
 					if(error){

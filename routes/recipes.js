@@ -10,9 +10,11 @@ var auth = require('../auth/auth.js');
 router.get('/', auth.verify, function(req, res, next) {
     //console.log("start");
   var preferredLanguage = (req._user.settings && req._user.settings.preferredLanguage) ? req._user.settings.preferredLanguage : 'en';
+  
+  //TO BE DELETED: first part of if clause
   if (Object.keys(req.query).length === 0) {
     //console.log("load recipes");
-    Recipe.find({}, 'author updated_at dishType').populate('dishType', 'name.'+preferredLanguage+' order imagePath').lean().exec( function (err, recipes) {
+    Recipe.find({}, 'author updated_at dishType').populate('dishType', 'identifier name.'+preferredLanguage+' order imagePath').lean().exec( function (err, recipes) {
       //console.log(err);
       if (err) return next(err);
       //console.log(recipes);
@@ -37,6 +39,10 @@ router.get('/', auth.verify, function(req, res, next) {
     if (req.query._id) {
       req.query._id = {'$in': req._user.favoriteRecipes};
     };
+    if (req.query.author == 'self') {
+      req.query.author = req._user._id;
+    };
+    req.query.language = {'$in': req._user.settings.spokenLanguages};
     Recipe.find(req.query).populate(['tags']).populate('author', 'fullname').lean().exec( function (err, recipes) {
       if (err) return next(err);
       var newIndicatorDate = new Date();
@@ -49,6 +55,59 @@ router.get('/', auth.verify, function(req, res, next) {
     });
   }
 });
+
+
+/* GET /recipes count. */
+router.get('/count', auth.verify, function(req, res, next) {
+    
+    Recipe.aggregate([{
+    		$match: {
+    			language: {'$in': req._user.settings.spokenLanguages}
+    		}
+    	},{
+        $group : {
+           _id : "$dishType",
+           count: { $sum: 1 }
+        }
+    },{$project:
+  		{	dishType: '$_id',
+  			count: 1,
+  			_id: 0
+  		}
+    }]).exec( function (err, recipes) {
+    	Recipe.populate(recipes, {path: "dishType", select: 'identifier imagePath'}, function(err, response){
+		    if (err) return next(err);
+		    var finalResponse = {};
+	      response.forEach(function(item) {
+	       	finalResponse[item.dishType.identifier] = item.count;
+	      });
+	      Recipe.count({language: {'$in': req._user.settings.spokenLanguages}}).exec(function(err, count){
+		    	if (err) return next(err);
+		    	finalResponse.all = count;
+		    	
+		      Recipe.count({author: req._user.id, language: {'$in': req._user.settings.spokenLanguages}}).exec(function(err, count){
+			    	if (err) return next(err);
+			    	finalResponse.my = count;
+			    	
+				    var updatedAtDate = new Date();
+		      	updatedAtDate.setDate(updatedAtDate.getDate() - 14);
+			      Recipe.count({updated_at: {'$gt': updatedAtDate}, language: {'$in': req._user.settings.spokenLanguages}}).exec(function(err, count){
+				    	if (err) return next(err);
+				    	finalResponse.new = count;
+				    	
+				      Recipe.count({_id: {'$in': req._user.favoriteRecipes}, language: {'$in': req._user.settings.spokenLanguages}}).exec(function(err, count){
+					    	if (err) return next(err);
+					    	finalResponse.favorites = count;
+					    	
+					    	res.json(finalResponse);
+				      });
+			      });
+		      });
+		      
+	      });
+	    });
+	  });
+	});
 
 /* POST /recipes */
 router.post('/', auth.verify, function(req, res, next) {

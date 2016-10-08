@@ -16,7 +16,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 
 // Navigation
 
-    .factory('navigationMenu', function($state) {
+    .factory('navigationMenu', ['$state', function($state) {
 	var states = [];     
 	var stateslist = $state.get();
         angular.forEach(stateslist, function (state) {
@@ -36,7 +36,17 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
         return {
             states: states
         };
-    })
+    }])
+
+
+    .factory('navigationTitle', ['$state', function($state) {
+			var data = {title: ''};
+			return {
+      	getObject: function() {
+					return data;
+				}
+      };
+    }])
 
 
 
@@ -70,6 +80,15 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 // Controllers
 //---------------
 
+
+// Navbar
+
+
+    .controller('NavbarController', ['$scope', 'navigationTitle', function ($scope, navigationTitle) {
+			$scope.navObject = navigationTitle.getObject();
+    }])
+    
+
 // Sidebar
 
     .controller('NavSidebarController', ['$scope', '$uibModalInstance', function ($scope, $uibModalInstance) {
@@ -93,23 +112,33 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 // Directives
 //---------------
 
-    .directive('navsidebar', ['$aside', 'navigationMenu', 'UserService', function ($aside, navigationMenu, UserService) {
+    .directive('navsidebar', ['$aside', 'UserService', function ($aside, UserService) {
       return {
         restrict: "E",
         replace: true,
         templateUrl: "partials/navigation.sidebar.button.tpl.html",
-        controller:  function ($scope) {
-          $scope.hideMobileNav = true;
-          $scope.navSidebar = function() {
-            var asideInstance = $aside.open({
-              templateUrl: 'partials/navigation.sidebar.tpl.html',
-              controller: 'NavSidebarController',
-              placement: 'left',
-              size: 'lg'
-            });
+        controller: [ '$scope', '$state', function($scope, $state) {
+          //$scope.hideMobileNav = true;
+          $scope.showBackNav = function() {
+          	return ($state.includes('user.recipes') && $state.$current.path.length>2);
           }
-
-        }
+          $scope.onClick = function() {
+          	if (this.showBackNav()) {
+				      to = $state.$current;
+			        do{
+			          to = to.parent;
+			        }while(to.abstract)
+				      return $state.transitionTo(to, {}, { inherit: true, relative: $state.$current });
+          	} else{
+			$aside.open({
+	              templateUrl: 'partials/navigation.sidebar.tpl.html',
+	              controller: 'NavSidebarController',
+	              placement: 'left',
+	              size: 'lg'
+	            });
+          	}
+          }
+      	}]
       };
     }])
     
@@ -162,10 +191,10 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
         link: function(scope, element, attrs) {
             element.bind('click', function() {
             		if (scope.$parent.schedule && scope.$parent.schedule.recipe && scope.$parent.schedule.recipe.name){
-            			var recipeName = scope.$parent.schedule.recipe.name;
+            			//var recipeName = scope.$parent.schedule.recipe.name;
                   var message =  "Are you sure to delete the recipe "+scope.$parent.schedule.recipe.name+" from schedule?";
             		} else if (scope.$parent.recipe && scope.$parent.recipe.name){
-            			var recipeName = scope.$parent.recipe.name;
+            			//var recipeName = scope.$parent.recipe.name;
                 	var message =  "Are you sure to delete the recipe "+scope.$parent.recipe.name+"?";
             		} else {
             			var message =  attrs.ngReallyMessage || "Are you sure?";
@@ -202,7 +231,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
     }])
     
     
-	.directive('ngImageUpload', function (httpPostFactory) {
+	.directive('ngImageUpload', ['httpPostFactory', function (httpPostFactory) {
 	    return {
 	        restrict: 'A',
 	        scope: true,
@@ -219,9 +248,9 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 	
 	        }
 	    };
-	})
+	}])
 
-	.directive('cameraButton', function(httpPostFactory) {
+	.directive('cameraButton', ['httpPostFactory', function(httpPostFactory) {
 	  return {
 			restrict: 'A',
 			scope: true,
@@ -248,9 +277,9 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 				});
 	    }
 	  };
-	})
+	}])
 
-	.directive('stateLoadingIndicator', function($rootScope) {
+	.directive('stateLoadingIndicator', ['$rootScope', function($rootScope) {
 	  return {
 	    restrict: 'E',
 	    template: "<div ng-show='isStateLoading' class='loading-indicator overlay'>" +
@@ -270,9 +299,34 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 	      });
 	    }
 	  };
-	})
+	}])
 	
 	
+	
+		
+//---------------
+// Filter
+//---------------
+	
+	
+	.filter('timeFilter', function() {
+
+    var conversions = {
+      'ss': angular.identity,
+      'mm': function(value) { return value * 60; },
+      'hh': function(value) { return value * 3600; }
+    };
+
+    return function(value, unit) {
+      var totalSeconds = conversions[unit || 'ss'](value),
+          hh = Math.floor(totalSeconds / 3600),
+          mm = Math.floor((totalSeconds % 3600) / 60);
+
+      hh = (hh > 0)? hh: '';
+			format = (hh == '')? 'mm min' : 'hhh mmm';
+      return format.replace(/hh/, hh).replace(/mm/, mm);
+    };
+  })
 
 
 		
@@ -312,7 +366,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 		.state('user', {
 			abstract: true,
 			views: {'root':
-				{template: '<ui-view />'}
+				{template: '<div ui-view="main"></div>'}
 			},
 			data: {
 				requiresLogin: true,
@@ -336,7 +390,9 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
     })
     .state('user.home', {
 			url: '/home',
-			templateUrl: 'partials/home.tpl.html',
+			views: {'main':
+				{templateUrl: 'partials/home.tpl.html'}
+			},
 			data: {
 	      title: 'Home'
 			}
@@ -344,24 +400,30 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
     ;
   }])
 
-    .run(['$rootScope', '$state', '$stateParams', '$http', 'UserService', 'BASE_URI', function($rootScope, $state, $stateParams, $http, UserService, BASE_URI) {
+    .run(['$rootScope', '$state', '$stateParams', '$http', 'UserService', 'navigationTitle', 'BASE_URI',
+	function($rootScope, $state, $stateParams, $http, UserService, navigationTitle, BASE_URI) {
 			$rootScope.$state = $state;
 			$rootScope.$stateParams = $stateParams;
 			$rootScope.print = function(print){
 		  	window.print();
 			};
 		
-			$rootScope.$on("$stateChangeStart", function(event, toState, toStateParams, fromState, fromStateParams) {
+			$rootScope.$on('$stateChangeStart', function(event, toState, toStateParams, fromState, fromStateParams) {
         $rootScope.previousState = fromState ? fromState : {};
         $rootScope.previousState.name = fromState.name ? fromState.name : 'user.home';
         $rootScope.previousStateParams = fromStateParams ? fromStateParams : {};
-        var authorised;
-		    if (UserService.getCurrentLoginUser() !== undefined) {
+        //var authorised;
+        var authenticated = UserService.isAuthenticated();
+		    if (authenticated === true) {
 					$http.get(BASE_URI+'api/user/check');
 					if (toState.name == 'anon.startpage') {
 						event.preventDefault(); 
 						$state.go('user.home');
 					};	
+		    };
+		    if (toState.data && toState.data.title) {
+		    	var obj = navigationTitle.getObject();
+		    	obj.title = toState.data.title;
 		    };
      	});
      	

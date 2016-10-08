@@ -31,7 +31,7 @@ router.get('/', auth.verify, function(req, res, next) {
 						ingredient: "$_id.ingredient",
 						unit: "$_id.unit"
 					}
-				}
+				}	
     	], function (err, result) {
         if (err) {
             console.log(err);
@@ -39,7 +39,16 @@ router.get('/', auth.verify, function(req, res, next) {
         }
 				Ingredient.populate(result, {path: "ingredient"}, function(err, ingredients){
 					Unit.populate(ingredients, {path: "unit"}, function(err, response){
-						res.json(response);
+						var frequentshopitems = [];
+						for(i=0;i<response.length;i++){
+							if(response[i] != undefined && response[i].ingredient != undefined && response[i].unit != undefined){
+								console.log(response[i]);
+								frequentshopitems.push({ingredient: response[i].ingredient.toObject(), unit: response[i].unit.toObject()});
+					    			frequentshopitems[i].ingredient.name_translated = frequentshopitems[i].ingredient.name[req._user.settings.preferredLanguage];
+					    			frequentshopitems[i].unit.name_translated = frequentshopitems[i].unit.name[req._user.settings.preferredLanguage];
+							}
+			      }
+						res.json(frequentshopitems);
 				});
 				});
     });

@@ -8,13 +8,16 @@
       </li>
       <li class="divider" style="border-bottom: 1px solid #eee;"></li>
       <li ng-class="{active: $state.includes('user.recipes')}" access="User">
-        <a ui-sref="user.recipes.dishtypes"><span class="glyphicon glyphicon-cutlery" style="padding-right: 10px;"></span>Recipes</a>
+        <a ui-sref="user.recipes"><span class="glyphicon glyphicon-cutlery" style="padding-right: 10px;"></span>Recipes</a>
       </li>
       <li ng-class="{active: $state.includes('user.schedules')}" access="User">
         <a ui-sref="user.schedules"><span class="glyphicon glyphicon-calendar" style="padding-right: 10px;"></span>Schedules</a>
       </li>
       <li ng-class="{active: $state.includes('user.shopitems')}" access="User">
         <a ui-sref="user.shopitems.view"><span class="glyphicon glyphicon-shopping-cart" style="padding-right: 10px;"></span>Shopping</a>
+      </li>
+      <li ng-class="{active: $state.includes('user.settings')}" access="User">
+        <a ui-sref="user.settings"><span class="glyphicon glyphicon-cog" style="padding-right: 10px;"></span>Settings</a>
       </li>
       <li class="divider" style="border-bottom: 1px solid #eee;" access="User"></li>
       <li ng-class="{active: $state.includes('admin.units')}" access="Admin">

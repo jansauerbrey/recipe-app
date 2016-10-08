@@ -15,7 +15,8 @@ var IngredientSchema = new mongoose.Schema({
   rewe_img_link_sm: String,
   rewe_img_link_md: String,
   author: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
-  updated_at: { type: Date, default: Date.now }
+  updated_at: { type: Date, default: Date.now },
+  cat: {type: mongoose.Schema.Types.ObjectId, ref: 'Category'}
 });
 
 module.exports = mongoose.model('Ingredient', IngredientSchema);

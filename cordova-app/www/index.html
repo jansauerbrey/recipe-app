@@ -1,11 +1,16 @@
 <!DOCTYPE html>
-<html ng-app="app">
+<html ng-app="app" lang="en">
 <head>
-  <meta charset="utf-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://www.rezept-planer.de data: gap: https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>RecipeApp</title>
+  <meta name="description" content="Browse, collect and organize your recipes, cooking schedules and shopping lists in the ultimative Recipe Planner." />
+  <meta property="og:title" content="Recipe Planner" />
+  <meta property="og:type" content="Cooking Tool" />
+  <meta property="og:url" content="https://www.rezept-planer.de/" />
+  <meta property="og:image" content="http://www.rezept-planer.de/img/icon.png" />
+  <title>Recipe Planner</title>
   <base href="" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="lib/font-awesome/css/font-awesome.min.css">
   <link rel="stylesheet" href="dist/css/ng-tags-input.min.css">
@@ -17,16 +22,31 @@
 </head>
 <body>
 
+  <div ng-if="false" class="loading-indicator overlay ng-hide">
+      <div class="loading-indicator-body">
+        <div class="spinner">
+          <double-bounce-spinner>
+            <div class="double-bounce-spinner">
+              <div class="double-bounce1"></div>
+              <div class="double-bounce2"></div>
+            </div>
+          </double-bounce-spinner>
+        </div>
+      </div>
+  </div>
+
   <div class="container">
     <state-loading-indicator></state-loading-indicator>
-    <div ng-include="'partials/navigation-directive.tpl.html'"></div>
+    <div ng-controller="NavbarController">
+    	<div ng-include="'partials/navigation-directive.tpl.html'"></div>
+		</div>
     <div ng-controller="AlertController">
-    	<uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" dismiss-on-timeout="5000" close="alert.close()">{{ alert.msg }}</uib-alert>
+    	<uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" dismiss-on-timeout="5000" close="alert.close()" ng-cloak>{{alert.msg}}</uib-alert>
 		</div>
     <div ui-view="root"></div>
     <div class="navbar navbar-inverse navbar-fixed-bottom hidden-xs" role="navigation">
       <div class="container">
-        <div class="navbar-text pull-left">&copy; Jan Sauerbrey 2015</div>
+        <div class="navbar-text pull-left">&copy; Jan Sauerbrey 2016</div>
         <ul class="nav navbar-nav navbar-right">
           <li>
             <a ui-sref="impressum">Impressum</a>
@@ -38,32 +58,39 @@
 
 
 <!-- Libraries -->
-<script src="cordova.js"></script>
-<script src="lib/angular/angular.min.js"></script>
-<script src="lib/angular/angular-resource.min.js"></script>
-<script src="lib/angular/angular-touch.min.js"></script>
-<script src="lib/angular/angular-animate.min.js"></script>
-<script src="dist/js/ui-bootstrap-tpls.min.js"></script>
-<script src="dist/js/angular-filter.min.js"></script>
-<script src="dist/js/ng-tags-input.min.js"></script>
-<script src="dist/js/ngStorage.min.js"></script>
-<script src="dist/js/angular-aside.min.js"></script>
-<script src="dist/js/angular-ui-router.min.js"></script>
-<script src="dist/js/angular-spinkit.min.js"></script>
-<script src="dist/js/angular-socialshare.min.js"></script>
-<script src="dist/js/gm.datepickerMultiSelect.min.js"></script>
-<script src="dist/js/ng-sortable.min.js"></script>
-<script src="dist/js/modalstate.min.js"></script>
-<script src="app/app.js"></script>
-<script src="app/services/alert.js"></script>
-<script src="app/auth/auth.js"></script>
-<script src="app/recipes/recipes.js"></script>
-<script src="app/schedules/schedules.js"></script>
-<script src="app/shopitems/shopitems.js"></script>
-<script src="app/dishtypes/dishtypes.js"></script>
-<script src="app/units/units.js"></script>
-<script src="app/ingredients/ingredients.js"></script>
-<script src="app/admin/admin.js"></script>
-  
+<script src="cordova.js" defer></script>
+<script src="lib/angular/angular.min.js" defer></script>
+<script src="lib/angular/angular-resource.min.js" defer></script>
+<script src="lib/angular/angular-touch.min.js" defer></script>
+<script src="lib/angular/angular-animate.min.js" defer></script>
+<script src="dist/js/ui-bootstrap-tpls.min.js" defer></script>
+<script src="dist/js/angular-filter.min.js" defer></script>
+<script src="dist/js/ng-tags-input.min.js" defer></script>
+<script src="dist/js/ngStorage.min.js" defer></script>
+<script src="dist/js/angular-aside.min.js" defer></script>
+<script src="dist/js/angular-ui-router.min.js" defer></script>
+<script src="dist/js/angular-spinkit.min.js" defer></script>
+<script src="dist/js/angular-socialshare.min.js" defer></script>
+<script src="dist/js/gm.datepickerMultiSelect.min.js" defer></script>
+<script src="dist/js/ng-sortable.min.js" defer></script>
+<script src="dist/js/modalstate.min.js" defer></script>
+
+
+<script src="app/recipeApp.min.js" defer></script>
+
+<!--
+<script src="app/app.min.js" defer></script>
+<script src="app/services/alert.min.js" defer></script>
+<script src="app/auth/auth.min.js" defer></script>
+<script src="app/recipes/recipes.min.js" defer></script>
+<script src="app/schedules/schedules.min.js" defer></script>
+<script src="app/shopitems/shopitems.min.js" defer></script>
+<script src="app/dishtypes/dishtypes.min.js" defer></script>
+<script src="app/units/units.min.js" defer></script>
+<script src="app/ingredients/ingredients.min.js" defer></script>
+<script src="app/admin/admin.min.js" defer></script>
+-->
+
+<noscript>Your browser does not support JavaScript!</noscript>
 </body>
 </html>

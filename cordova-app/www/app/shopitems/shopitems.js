@@ -20,7 +20,7 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
       		
     			var data = {shopitems: [], alerts: [], autoupdate: true, pauseAutoupdate: 0};
     			var containsObj = function(array, obj) {
-      			var i, l = array.length;
+      			var i;
       			for (i=0;i<array.length;i++)
       			{
         			if (angular.equals(array[i], obj)) return i;
@@ -39,18 +39,22 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
 						    } else {
 						      var order = 99999;
 						    }
-						    var obj = {ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed, details: [], amount: 0};
-						    var index = containsObj(uniqueIngredientsTemp, obj);
-						    if ( index === false) {
-						      uniqueIngredientsTemp.push({ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed, details: [], amount: 0});
-						      obj.details.push(response[i]);
-						      obj.amount = response[i].amount;
-						      uniqueIngredients.push(obj);
-						    }
-						    else {
-						      uniqueIngredients[index].details.push(response[i]);
-						      uniqueIngredients[index].amount = response[i].amount + uniqueIngredients[index].amount;
-						    }
+						    if (response[i].ingredient && response[i].unit && response[i].amount) { // check if item is complete
+							    response[i].ingredient.name_translated = response[i].ingredient.name[user.settings.preferredLanguage];
+							    response[i].unit.name_translated = response[i].unit.name[user.settings.preferredLanguage];
+							    var obj = {ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed, details: [], amount: 0};
+							    var index = containsObj(uniqueIngredientsTemp, obj);
+							    if ( index === false) {
+							      uniqueIngredientsTemp.push({ingredient:response[i].ingredient, unit:response[i].unit, order: order, completed: response[i].completed, details: [], amount: 0});
+							      obj.details.push(response[i]);
+							      obj.amount = response[i].amount;
+							      uniqueIngredients.push(obj);
+							    }
+							    else {
+							      uniqueIngredients[index].details.push(response[i]);
+							      uniqueIngredients[index].amount = response[i].amount + uniqueIngredients[index].amount;
+							    }
+							  }
 						  }
 						 	deferred.resolve(uniqueIngredients);
 		        	data.shopitems = uniqueIngredients;
@@ -311,7 +315,8 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
 
 
 
-    .controller('shopitemsActionSidebarCtrl', ['$scope', '$uibModal', 'ShopitemService', 'units', '$uibModalInstance', function ($scope, $uibModal, ShopitemService, units, $uibModalInstance) {
+    .controller('ShopitemsActionSidebarController', ['$scope', '$uibModal', 'ShopitemService', 'units', '$uibModalInstance', 'isCordova',  function ($scope, $uibModal, ShopitemService, units, $uibModalInstance, isCordova) {
+	$scope.isCordova = isCordova;
 
       $scope.units = units;
       $scope.autoupdate = ShopitemService.data.autoupdate;
@@ -321,7 +326,19 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
       	$scope.autoupdate = ShopitemService.data.autoupdate;
       });
       
-      
+	$scope.printingAvailable = cordova.plugins.printer.isAvailable( function (isAvailable) {
+			return isAvailable;
+		}
+	);
+
+
+	$scope.printInApp = function() {
+		var page =  document.getElementById('section-to-print');
+
+		cordova.plugins.printer.print(page, 'Shopitems.html', function () {
+			alert('printing finished or canceled')
+		});
+	}
 
       $scope.addShopitem = function(item) {
       	ShopitemService.addShopitem(item);
@@ -422,9 +439,9 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
 
     .controller('ActionSidebarShopitemsController', ['$scope', '$aside', 'units', function ($scope, $aside, units) {
       $scope.shopitemsActions = function() {
-            var asideInstance = $aside.open({
+            $aside.open({
               template: '<div ng-click="closeSidebar()" ng-include="\'partials/shopitems.links.tpl.html\'"></div>',
-              controller: 'ShopitemsActionSidebarCtrl',
+              controller: 'ShopitemsActionSidebarController',
               placement: 'right',
               size: 'sm',
 		          resolve: {
@@ -447,22 +464,24 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
 			.state('user.shopitems', {
 				abstract: true,
 				url: "/shopitems",
-				templateUrl: 'partials/shopitems.layout.tpl.html',
+				views: {
+					'main': {templateUrl: 'partials/shopitems.layout.tpl.html'}
+				},
 				resolve: {
-					shopitems: function(ShopitemService){
+					shopitems: ['ShopitemService', function(ShopitemService){
 						ShopitemService.data.autoupdate = true; //TODO: set with user settings instead
 						return ShopitemService.retrieveShopitems().then( function(data){
 								return data;
 							});
-					},
-					frequentshopitems: function(Frequentshopitems){
+					}],
+					frequentshopitems: ['Frequentshopitems', function(Frequentshopitems){
 						return Frequentshopitems.query().$promise;
-					},
-					units: function(Units){
+					}],
+					units: ['Units', function(Units){
 						return Units.query().$promise;
-					}
+					}]
 				},
-				data: {
+				data: {	
 		      title: 'Shopping'
 				}
 			})
@@ -499,9 +518,9 @@ angular.module('app.shopitems', ['ui.router', 'modalstate'])
 					unit: undefined
 				},
 		    resolve: {
-					units: function(Units){
+					units: ['Units', function(Units){
 						return Units.query().$promise;
-					}
+					}]
 		    }
       })
     ;

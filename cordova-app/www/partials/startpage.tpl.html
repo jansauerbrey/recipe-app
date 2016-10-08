@@ -1,6 +1,34 @@
-<div class="jumbotron" access="NoUser">
-  <h1>Rezept Planer</h1>
-  <p>Die Seite rezept-planer.de bietet die Möglichkeit eigene Rezepte anzulegen, zu planen und automatisch einkaufslisten zu erhalten.</p>
-  <p class="text-danger">Aktuell befindet sich diese Seite noch in der Beta-Phase und ist nur für einen ausgewählten Personenkreis freigeschaltet. Solltest du Interesse haben, dann kontaktier mich einfach. Meine Kontaktinfos findest du im Impressum.</p>
-  <p>Damit diese Seite funktioniert, solltest du (insb. bei der App) folgender CA (<a ng-click="openLink('http://helsinki.sby.eu/crl/sby.eu.crt')" style="cursor: pointer;">link</a>) vertrauen, da die genutzten Zertifikate seblbst signiert sind.</p>
+<div class="jumbotron">
+  <h1>Recipe Planner</h1>
+  <p>Browse, collect and organize your recipes, cooking schedules and shopping lists in the ultimative Recipe Planner.</p>
+  <button type="button" ui-sref="anon.user.register" class="btn btn-success">Sign up today</button>
 </div>
+  <div class="row" style="margin-top: 20px;">
+    <div class="col-xs-12 col-sm-4">
+      <div class="thumbnail">
+        <img ng-src="img/view1.jpg"></img>
+        <div class="caption">
+          <h3>Recipes</h3>
+          <p>View all your recipes and discover new recipes created by other users. Mark favorite recipes and share cooking inspirations with your friends. Explore new recipes as well as find specific recipes via category and ta search.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-xs-12 col-sm-4">
+      <div class="thumbnail">
+        <img ng-src="img/view2.jpg"></img>
+        <div class="caption">
+          <h3>Schedule</h3>
+          <p>Plan your recipes and add them to individual days in the future. Number of persons will be used to calculate amount for shopping list. All ingredients will be added to the shopping list for easy shopping without hassle.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-xs-12 col-sm-4">
+      <div class="thumbnail">
+        <img ng-src="img/view3.jpg"></img>
+        <div class="caption">
+          <h3>Shopping</h3>
+          <p>View all necessary ingredients of items added automatically through scheduling or added manually. Overview gives the posibillity to quickly add most frequent added items. Shoping list will stay in sync accross devices.</p>
+        </div>
+      </div>
+    </div>
+  </div>

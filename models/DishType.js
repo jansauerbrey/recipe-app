@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 
 var DishTypeSchema = new mongoose.Schema({
+  identifier: String,
   name: {
 	en: String,
 	de: String,
