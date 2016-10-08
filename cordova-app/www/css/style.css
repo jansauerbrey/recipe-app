@@ -1,3 +1,5 @@
+.nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
+
 .move.ng-enter,
 .move.ng-leave
     {
@@ -444,4 +446,123 @@ a.navbar-sm-more:hover, a.navbar-sm-more:focus {
     left: 0;
     top: 0;
   }
+}
+
+.startpage-buttons {
+    margin-top: 30px;
+}
+.list-top-margin {
+    margin-top: 20px;
+}
+
+.navbar-padding {
+    padding: 0;
+}
+.navbar-padding-button {
+    padding: 5px 15px;
+}
+.navbar-padding-right-button {
+    padding-right: 10px;
+}
+.pointer {
+    cursor: pointer;
+}
+.img-thumbnail {
+    width: 60px;
+    height: 60px;
+}
+.navbar-sidebar {
+    width: 200px;
+}
+.padding-right-off {
+    padding-right: 0;
+}
+.padding-left-off {
+    padding-left: 0;
+}
+.padding-off {
+    padding: 0;
+}
+.padding-5 {
+    padding: 5px;
+}
+.padding-top-10 {
+    padding-top: 10px;
+}
+.margin-bottom-5 {
+    margin-bottom: 5px;
+}
+.margin-bottom-10 {
+    margin-bottom: 10px;
+}
+.margin-bottom-20 {
+    margin-bottom: 20px;
+}
+.margin-bottom-30 {
+    margin-bottom: 30px;
+}
+.margin-bottom-100 {
+    margin-bottom: 100px;
+}
+.margin-right-5 {
+    margin-right: 5px;
+}
+.margin-right-10 {
+    margin-right: 10px;
+}
+.margin-off {
+    margin: 0;
+}
+.margin-auto {
+    margin: auto;
+}
+.margin-top-off {
+    margin-top: 0;
+}
+.margin-top-10 {
+    margin-top: 10px;
+}
+.schedule-date {
+    display: inline-block;
+    min-height: 290px;
+}
+.recipe-tags {
+    margin: 2px; display: inline-block;
+}
+.recipe-instructions {
+    white-space: pre-line;
+}
+.schedules-title {
+    padding-top: 6px;
+    float: left;
+}
+.schedules-item {
+    width: 100px;
+}
+.schedules-item-button {
+    width: 30px;
+}
+.schedules-item-missing {
+    padding:5px 10px;
+}
+.schedules-selector {
+    position: fixed;
+}
+.schedules-item-name {
+    min-width: 80px;
+}
+.frequentshopitem {
+    height: 150px;
+    text-align: center;
+}
+.frequentshopitem-img {
+    height: 80px;
+    width: 80px;
+}
+.settings-categories {
+    margin-top: 3px;
+    margin-right: 5px;
+}
+.navbar-divider {
+    border-bottom: 1px solid #eee;
 }

@@ -11,28 +11,6 @@ router.get('/', auth.verify, function(req, res, next) {
     //console.log("start");
   var preferredLanguage = (req._user.settings && req._user.settings.preferredLanguage) ? req._user.settings.preferredLanguage : 'en';
   
-  //TO BE DELETED: first part of if clause
-  if (Object.keys(req.query).length === 0) {
-    //console.log("load recipes");
-    Recipe.find({}, 'author updated_at dishType').populate('dishType', 'identifier name.'+preferredLanguage+' order imagePath').lean().exec( function (err, recipes) {
-      //console.log(err);
-      if (err) return next(err);
-      //console.log(recipes);
-      var newIndicatorDate = new Date();
-      newIndicatorDate.setDate(newIndicatorDate.getDate() - 14);
-      for(i=0;i<recipes.length;i++){
-				recipes[i].new_recipe = (new Date(recipes[i].updated_at) > newIndicatorDate) ? true : false;
-					if (recipes[i].dishType && recipes[i].dishType.name) {
-					recipes[i].dishType.name_translated = recipes[i].dishType.name[preferredLanguage];
-					recipes[i].dishType.name = undefined;
-				}
-				//console.log(req._user);
-				//console.log('recipes[i]._id: ' + recipes[i]._id);
-				recipes[i].fav_recipe = (req._user.favoriteRecipes && req._user.favoriteRecipes.indexOf(recipes[i]._id) > -1) ? true : false;
-      }
-      res.json(recipes);
-    });
-  } else {
     if (req.query.updated_at) {
       req.query.updated_at = {'$gt': req.query.updated_at};
     };
@@ -53,7 +31,6 @@ router.get('/', auth.verify, function(req, res, next) {
       }
       res.json(recipes);
     });
-  }
 });
 
 
@@ -108,6 +85,31 @@ router.get('/count', auth.verify, function(req, res, next) {
 	    });
 	  });
 	});
+
+
+
+/* GET /recipes count. */
+router.get('/counttags', auth.verify, function(req, res, next) {
+    
+    Recipe.aggregate([
+        {$match: { language: {'$in': req._user.settings.spokenLanguages} }},
+        {$project: { _id: 0, tags: 1 } },
+        {$unwind: "$tags" },
+        {$group: { _id: "$tags", count: { $sum: 1 } }},
+        {$project: { _id: 0,tags: "$_id", count: 1 } },
+        {$sort: { count: -1 } }
+      ]).exec( function (err, tags) {
+    	Recipe.populate(tags, {path: "tags"}, function(err, response){
+          if (err) return next(err);
+          var finalResponse = [];
+          response.forEach(function(item) {
+            finalResponse.push({_id: item.tags._id, text: item.tags.text, author: item.tags.author, updated_at: item.tags.updated_at, count: item.count});
+          });
+          res.json(finalResponse);
+        });
+      });
+});
+
 
 /* POST /recipes */
 router.post('/', auth.verify, function(req, res, next) {

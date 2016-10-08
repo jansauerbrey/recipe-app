@@ -12,8 +12,8 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
           });
         }])
 
-        .factory('Tags', ['$resource', 'BASE_URI', function($resource, BASE_URI){
-          return $resource(BASE_URI+'api/tags/:id', null, {
+        .factory('TagsSelected', ['$resource', 'BASE_URI', function($resource, BASE_URI){
+          return $resource(BASE_URI+'api/tags/selected/:id', null, {
             'update': { method:'PUT' }
           });
         }])
@@ -591,8 +591,8 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 					user: ['UserService', function(UserService){
 						return UserService.getCurrentLoginUser();
 					}],
-					tags: ['Tags', function(Tags){
-						return Tags.query().$promise;
+					tags: ['TagsSelected', function(TagsSelected){
+						return TagsSelected.query().$promise;
 					}]
 				},
 				data: {
@@ -646,7 +646,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 						controller: 'ActionSidebarRecipeController'
 					},
 					'actionnavigation-sm@': {
-		    		template: '<a ng-click="recipeDetailsView()" class="navbar-sm-more"><span class="glyphicon glyphicon-plus" style="padding-right: 10px;"></span>More</a>',
+		    		template: '<a ng-click="recipeDetailsView()" class="navbar-sm-more"><span class="glyphicon glyphicon-plus padding-right-10"></span>More</a>',
 						controller: 'ActionSidebarRecipeController' 
 					}
 				}
@@ -675,7 +675,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 					};
 					
 			obj.views['actionnavigation-sm@'] = {
-		    		template: '<a ng-click="update()" class="navbar-sm-more"><span class="glyphicon glyphicon-floppy-disk" style="padding-right: 10px;"></span>Save</a>',
+		    		template: '<a ng-click="update()" class="navbar-sm-more"><span class="glyphicon glyphicon-floppy-disk padding-right-10"></span>Save</a>',
 						controller: 'RecipeDetailActionsCtrl' 
 					};
 			return obj;
@@ -921,7 +921,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 						controller: 'RecipeDetailActionsCtrl'
 					},
 					'actionnavigation-sm@': {
-		    		template: '<a ng-click="save()" class="navbar-sm-more"><span class="glyphicon glyphicon-floppy-disk" style="padding-right: 10px;"></span>Save</a>',
+		    		template: '<a ng-click="save()" class="navbar-sm-more"><span class="glyphicon glyphicon-floppy-disk padding-right-10"></span>Save</a>',
 						controller: 'RecipeDetailActionsCtrl' 
 					}
 				}
@@ -983,7 +983,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 						controller: 'ActionSidebarRecipeController'
 					},
 					'actionnavigation-sm@': {
-		    		template: '<a ng-click="recipeDetailsView()" class="navbar-sm-more"><span class="glyphicon glyphicon-plus" style="padding-right: 10px;"></span>More</a>',
+		    		template: '<a ng-click="recipeDetailsView()" class="navbar-sm-more"><span class="glyphicon glyphicon-plus padding-right-10"></span>More</a>',
 						controller: 'ActionSidebarRecipeController' 
 					}
 				}

@@ -1,35 +1,35 @@
   <div class="row">
     <div class="col-xs-12">
 	    <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" dismiss-on-timeout="5000" close="closeAlert($index)">{{alert.msg}}</uib-alert> 
-	    <h3 style="margin-bottom: 30px;" class="hidden-xs">Shopitems</h3>
+	    <h3 class="hidden-xs margin-bottom-30">Shopitems</h3>
 		</div>
     <div id="section-to-print" class="col-xs-12 col-sm-7 col-md-7 col-lg-5">
 		  <div class="well" ng-hide="shopitems.length>0">No ingredients on the shopping list at the moment.</div>
     	<uib-accordion class="table-panel" close-others="false">
-		    <uib-accordion-group ng-repeat="(key, value) in shopitems | orderBy: 'order' | groupBy: 'ingredient.category'" panel-class="panel-primary" is-open="true">
+                    <div uib-accordion-group ng-repeat="(key, value) in shopitems | orderBy: 'order' | groupBy: 'ingredient.category'" class="panel-primary" is-open="true">
 		      <!-- Default panel contents -->
 		      <uib-accordion-heading><strong>{{key}}</strong><span class="badge pull-right">{{(value | filter: {completed: false}).length}} / {{value.length}}</span></uib-accordion-heading>
 		
 		      <!-- Table -->
 		      <table class="table table-striped">
 		        <thead class="hidden-xs">
-		          <th style="width: 30px;"></th>
+		          <th class="schedules-item-button"></th>
 		          <th>Ingredient</th>
-		          <th style="width: 100px;">Amount</th>
-		          <th class="hidden-print" style="width: 30px;"></th>
-		          <th class="hidden-xs hidden-print" style="width: 30px;"></th>
+		          <th class="schedules-item">Amount</th>
+		          <th class="hidden-print schedules-item-button"></th>
+		          <th class="hidden-xs hidden-print schedules-item-button"></th>
 		        </thead>
 		        <tbody>
 		          <tr ng-repeat="item in value | orderBy: ['order', 'ingredient.category','ingredient.subcategory','ingredient.subsubcategory','ingredient.name.de']">
-		            <td style="width: 30px;"><button class="btn btn-default" ng-click="complete(item)"><span class="glyphicon" ng-class="{'glyphicon-none': !item.completed, 'glyphicon-ok': item.completed}"></span></button></td>
+		            <td class="schedules-item-button"><button class="btn btn-default" ng-click="complete(item)"><span class="glyphicon" ng-class="{'glyphicon-none': !item.completed, 'glyphicon-ok': item.completed}"></span></button></td>
 		            <td ng-class="{'item-checked': item.completed}">{{item.ingredient.name_translated}}</td>
-		            <td ng-class="{'item-checked': item.completed}" style="width: 100px;">{{item.amount | number}} {{item.unit.name_translated}}</td>
+		            <td ng-class="{'item-checked': item.completed}" class="schedules-item">{{item.amount | number}} {{item.unit.name_translated}}</td>
 		            <td class="hidden-print">
 		            	<button class="btn btn-default pull-right" ng-click="shopitemDetails(item)" role="button">
 		            		<span class="glyphicon glyphicon-question-sign"></span>
 		            	</button>
 		            </td>
-		            <td class="hidden-xs hidden-print" style="width: 30px;">
+		            <td class="hidden-xs hidden-print schedules-item-button">
 		            	<button class="btn btn-default pull-right hidden-xs" ng-really-click="remove(item)" role="button">
 		            		<span class="glyphicon glyphicon-trash"></span>
 		            	</button>
@@ -37,20 +37,20 @@
 		          </tr>
 		        </tbody>
 		      </table>
-		    </uib-accordion-group>
+		    </div>
 		  </uib-accordion>
 	  </div>
     <div class="hidden-xs col-sm-5 col-md-5 col-lg-7">
     	<div class="list-group">
 	      <div>
-	        <a class="list-group-item col-sm-6 col-md6 col-lg-3" style="height: 150px; text-align: center;" ui-sref="user.shopitems.view.add">
-	          <div><img style="width: 80px; height: 80px;" ng-src="upload/plus.png"></img></div>
+	        <a class="list-group-item col-sm-6 col-md6 col-lg-3 frequentshopitem" ui-sref="user.shopitems.view.add">
+	          <div><img class="frequentshopitem-img" ng-src="upload/plus.png"></img></div>
 	          <div>Add Ingredient</div>
 	        </a>
 	      </div>
 	      <div ng-repeat="item in frequentshopitems">
-	        <a class="list-group-item col-sm-6 col-md-6 col-lg-3" style="height: 150px; text-align: center;" ui-sref="user.shopitems.view.add({ingredient: item.ingredient, unit: item.unit})">
-	          <div><img style="width: 80px; height: 80px;" ng-src="{{item.ingredient.rewe_img_link_sm}}"></img></div>
+	        <a class="list-group-item col-sm-6 col-md-6 col-lg-3 frequentshopitem" ui-sref="user.shopitems.view.add({ingredient: item.ingredient, unit: item.unit})">
+	          <div><img class="frequentshopitem-img" ng-src="{{item.ingredient.rewe_img_link_sm}}"></img></div>
 	          <div>{{item.ingredient.name_translated}} ({{item.unit.name_translated}})</div>
 	        </a>
 	      </div>

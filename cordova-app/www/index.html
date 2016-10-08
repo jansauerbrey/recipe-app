@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html ng-app="app" lang="en">
+<html ng-app="app" ng-csp lang="en">
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://www.rezept-planer.de data: gap: https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -17,7 +17,9 @@
   <link rel="stylesheet" href="dist/css/ng-tags-input.bootstrap.min.css">
   <link rel="stylesheet" href="dist/css/angular-aside.min.css">
   <link rel="stylesheet" href="dist/css/angular-spinkit.min.css">
+  <link rel="stylesheet" href="dist/css/ui-bootstrap-csp.css">
   <link rel="stylesheet" href="dist/css/ng-sortable.min.css">
+  <link rel="stylesheet" href="css/angular-csp.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -71,25 +73,25 @@
 <script src="dist/js/angular-ui-router.min.js" defer></script>
 <script src="dist/js/angular-spinkit.min.js" defer></script>
 <script src="dist/js/angular-socialshare.min.js" defer></script>
-<script src="dist/js/gm.datepickerMultiSelect.min.js" defer></script>
+<script src="dist/js/gm.datepickerMultiSelect.js" defer></script>
 <script src="dist/js/ng-sortable.min.js" defer></script>
 <script src="dist/js/modalstate.min.js" defer></script>
 
-
-<script src="app/recipeApp.min.js" defer></script>
-
 <!--
+<script src="app/recipeApp.min.js" defer></script>
+-->
+
 <script src="app/app.min.js" defer></script>
 <script src="app/services/alert.min.js" defer></script>
 <script src="app/auth/auth.min.js" defer></script>
-<script src="app/recipes/recipes.min.js" defer></script>
+<script src="app/recipes/recipes.js" defer></script>
 <script src="app/schedules/schedules.min.js" defer></script>
 <script src="app/shopitems/shopitems.min.js" defer></script>
 <script src="app/dishtypes/dishtypes.min.js" defer></script>
 <script src="app/units/units.min.js" defer></script>
+<script src="app/tags/tags.min.js" defer></script>
 <script src="app/ingredients/ingredients.min.js" defer></script>
 <script src="app/admin/admin.min.js" defer></script>
--->
 
 <noscript>Your browser does not support JavaScript!</noscript>
 </body>
