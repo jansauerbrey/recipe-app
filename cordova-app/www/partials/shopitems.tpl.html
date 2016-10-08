@@ -6,7 +6,7 @@
     <div id="section-to-print" class="col-xs-12 col-sm-7 col-md-7 col-lg-5">
 		  <div class="well" ng-hide="shopitems.length>0">No ingredients on the shopping list at the moment.</div>
     	<uib-accordion class="table-panel" close-others="false">
-		    <uib-accordion-group ng-repeat="(key, value) in shopitems | orderBy: 'order' | groupBy: 'ingredient.category'" panel-class="panel-primary" is-open="true">
+                    <div uib-accordion-group ng-repeat="(key, value) in shopitems | orderBy: 'order' | groupBy: 'ingredient.category'" class="panel-primary" is-open="true">
 		      <!-- Default panel contents -->
 		      <uib-accordion-heading><strong>{{key}}</strong><span class="badge pull-right">{{(value | filter: {completed: false}).length}} / {{value.length}}</span></uib-accordion-heading>
 		
@@ -37,7 +37,7 @@
 		          </tr>
 		        </tbody>
 		      </table>
-		    </uib-accordion-group>
+		    </div>
 		  </uib-accordion>
 	  </div>
     <div class="hidden-xs col-sm-5 col-md-5 col-lg-7">
