@@ -2,16 +2,16 @@
 <nav class="navbar navbar-default navbar-fixed-top navbar-padding" role="navigation">
 <div class="container">
   <div class="navbar-header">
-  	<div><navsidebar></navsidebar></div>
-        <div class="beta-tag" ng-show="showBeta">&nbsp;BETA&nbsp;</div>
+    <div><navsidebar></navsidebar></div>
+    <div class="beta-tag" ng-show="showBeta">&nbsp;BETA&nbsp;</div>
     <a class="navbar-brand hidden-xs navbar-padding-button" ui-sref="user.home" access="User">
       <img alt="Brand" src="img/icon.png">
     </a>
     <a class="navbar-brand hidden-xs navbar-padding-button" ui-sref="anon.startpage" access="NoUser">
       <img alt="Brand" src="img/icon.png">
     </a>
-		<h4 class="visible-xs title-truncated">{{navObject.title}}</h4>
-  	<div ui-view="actionnavigation-xs"></div>
+    <h4 class="visible-xs title-truncated">{{navObject.title}}</h4>
+    <div ui-view="actionnavigation-xs"></div>
   </div>
   <div class="collapse navbar-collapse">
     <ul class="nav navbar-nav">
