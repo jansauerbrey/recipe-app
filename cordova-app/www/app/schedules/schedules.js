@@ -154,6 +154,8 @@ angular.module('app.schedules', ['ui.router', 'modalstate'])
       
 			$scope.activeDate = SchedulesService.data.activeDate;
       SchedulesService.setActiveDate();
+
+      $scope.datepickerOptions = {startingDay: 1, showWeeks: false};
       
       $scope.selectSevenDays = function(date){
       	SchedulesService.selectPeriod(date, 7);
@@ -229,6 +231,8 @@ angular.module('app.schedules', ['ui.router', 'modalstate'])
       $scope.newrecipe = $stateParams.recipe ? $stateParams.recipe : undefined;
       $scope.factor = ($stateParams.recipe && $stateParams.recipe.yield) ? $stateParams.recipe.yield : undefined;
       $scope.randomRecipes = randomRecipes;
+
+      $scope.datepickerOptions = {startingDay: 1, showWeeks: true};
       
       $scope.GetRecipes = function($viewValue){
         return TARecipes.search({search: $viewValue})

@@ -1,0 +1,5 @@
+<div class="uib-datepicker" ng-switch="datepickerMode" role="application" ng-keydown="keydown($event)">
+    <div uib-daypicker ng-switch-when="day" tabindex="0" template-url="partials/multi.day.tpl.html"></div>
+    <div uib-monthpicker ng-switch-when="month" tabindex="0"></div>
+    <div uib-yearpicker ng-switch-when="year" tabindex="0"></div>
+</div>
