@@ -49,6 +49,14 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
     }])
 
 
+    .factory('subdomain', ['$location', function ($location) {
+      var host = $location.host();
+      if (host.indexOf('.') < 0) 
+        return null;
+      else
+        return host.split('.')[0];
+    }])
+
 
 // File Upload
 
@@ -84,8 +92,9 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 // Navbar
 
 
-    .controller('NavbarController', ['$scope', 'navigationTitle', function ($scope, navigationTitle) {
+    .controller('NavbarController', ['$scope', 'navigationTitle', 'subdomain', function ($scope, navigationTitle, subdomain) {
 			$scope.navObject = navigationTitle.getObject();
+			$scope.showBeta = subdomain == "beta" ? true : false;
     }])
     
 
