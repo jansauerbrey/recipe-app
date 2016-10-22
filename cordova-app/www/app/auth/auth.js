@@ -144,7 +144,7 @@ angular.module('app.auth', ['ui.router'])
 						UserService.createUser(data);
 	      		$state.go("user.home");
 					}).error(function(err){
-						AlertService.add('danger', 'Network or certificate error');
+						AlertService.add('info', 'If you have registered succesfully, please check your email to confirm your email address.');
 					});
         } else {
 					AlertService.add('danger', ' Please fill out username and password.');

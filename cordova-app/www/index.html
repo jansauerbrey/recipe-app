@@ -43,7 +43,7 @@
     	<div ng-include="'partials/navigation-directive.tpl.html'"></div>
 		</div>
     <div ng-controller="AlertController">
-    	<uib-alert ng-repeat="alert in alerts" ng-class="'alert- + alert.type" dismiss-on-timeout="5000" close="alert.close()" ng-cloak>{{alert.msg}}</uib-alert>
+    	<div uib-alert ng-repeat="alert in alerts" ng-class="'alert-' + alert.type" dismiss-on-timeout="5000" close="alert.close()" ng-cloak>{{alert.msg}}</div>
     </div>
     <div ui-view="root"></div>
     <div class="navbar navbar-inverse navbar-fixed-bottom hidden-xs" role="navigation">
