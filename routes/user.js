@@ -177,7 +177,7 @@ router.post('/register', function(req, res, next) {
 	      }
 	      else {
 	      	var mailOptions = {
-						from: 'rezept-planer.de <admin@rezept-planer.de>', // sender address
+						from: 'rezept-planer.de <info@rezept-planer.de>', // sender address
 						to: email, // list of receivers
 						subject: 'Confirm Email', // Subject line
 						text: 'Please, use the following link to confirm your email address:\n\nhttps://www.rezept-planer.de/#/user/confirm/'+userData.emailConfirmationToken+'\n\nYour rezept-planer.de Team', // plaintext body
@@ -185,8 +185,25 @@ router.post('/register', function(req, res, next) {
 					transporter.sendMail(mailOptions, function(err, info){
 						if (err) return next(err);
 						console.log('Message sent: ' + info.response);
-						return res.sendStatus(200);
+
+
+
+
+					      	var mailOptions = {
+							from: 'rezept-planer.de <info@rezept-planer.de>', // sender address
+							to: 'admin@rezept-planer.de', // list of receivers
+							subject: 'New User', // Subject line
+							text: 'New user has registered:\n\n'+JSON.stringify(userData)+'\n\nYour rezept-planer.de Team', // plaintext body
+						};
+						transporter.sendMail(mailOptions, function(err, info){
+							if (err) return next(err);
+							console.log('Message sent: ' + info.response);
+							return res.sendStatus(200);
+						});
 					});
+
+
+
 	      }
 	    });
 		});
