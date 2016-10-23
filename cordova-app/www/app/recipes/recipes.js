@@ -375,7 +375,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 
     }])
     
-    .controller('ModalShareControllerRecipes', ['$scope', '$modalInstance', '$filter', 'recipe', function ($scope, $modalInstance, $filter, recipe) {
+    .controller('ModalShareControllerRecipes', ['$scope', '$uibModalInstance', '$filter', 'recipe', function ($scope, $uibModalInstance, $filter, recipe) {
       $scope.recipe = recipe;
       
       var hashtagArray = [];
@@ -385,7 +385,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
       $scope.hashtags = hashtagArray.join(", ")
      
       $scope.cancel = function(){
-        $modalInstance.dismiss('cancel');
+        $uibModalInstance.dismiss('cancel');
       }
 
     }])
@@ -435,18 +435,21 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
     }])
     
     
-    .controller('RecipeDetailActionSidebarController', ['$rootScope', '$scope', '$uibModal', 'RecipeService', '$modalInstance', 'isCordova', 'AlertService', function ($rootScope, $scope, $uibModal, RecipeService, $modalInstance, isCordova, AlertService) {
+    .controller('RecipeDetailActionSidebarController', ['$rootScope', '$scope', '$uibModal', 'RecipeService', '$uibModalInstance', 'isCordova', 'AlertService', function ($rootScope, $scope, $uibModal, RecipeService, $uibModalInstance, isCordova, AlertService) {
 			$scope.isCordova = isCordova;
 			
 			$scope.submitted = RecipeService.data.submitted;
 			$scope.recipe = RecipeService.data.recipe;
 			$scope.allowEdit = RecipeService.data.allowEdit;
 			$scope.userExists = RecipeService.data.userExists;
-			$scope.printingAvailable = cordova.plugins.printer.isAvailable( function (isAvailable) { 
-					return isAvailable;
-				}
-			);
-			
+			if($scope.isCordova === true){ 
+				$scope.printingAvailable = cordova.plugins.printer.isAvailable( function (isAvailable) { 
+						return isAvailable;
+					}
+				);
+			} else {
+				$scope.printingAvailable = false;
+			}
       
 			$scope.favorite = function() {
 		    RecipeService.setFavorite();
@@ -518,7 +521,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
 	}
       
       $scope.closeSidebar = function(){
-        $modalInstance.dismiss('cancel');
+        $uibModalInstance.dismiss('cancel');
       }
 
     }])
