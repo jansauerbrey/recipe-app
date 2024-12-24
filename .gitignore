@@ -2,59 +2,38 @@
 node_modules/
 package-lock.json
 
-# Environment
+# Environment variables
 .env
-.env.local
-.env.*.local
-
-# IDE
-.idea/
-.vscode/
-*.sublime-project
-*.sublime-workspace
 
 # Logs
-logs/
+logs
 *.log
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
 # Runtime data
-pids/
+pids
 *.pid
 *.seed
 *.pid.lock
 
-# Testing
-coverage/
-.nyc_output/
+# Optional npm cache directory
+.npm
 
-# Build output
-dist/
-build/
-*.min.js.map
+# Optional eslint cache
+.eslintcache
 
-# Mobile
-cordova-app/platforms/
-cordova-app/plugins/
-cordova-app/www/lib/
-cordova-app/www/*.apk
+# Optional REPL history
+.node_repl_history
 
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+# Output of 'npm pack'
+*.tgz
 
-# Temporary files
-*.swp
-*.swo
-*~
+# Yarn Integrity file
+.yarn-integrity
 
-# Upload directory
-uploads/
-!uploads/.gitkeep
+# dotenv environment variables file
+.env
+
+# IDE files
+.idea/
+.vscode/

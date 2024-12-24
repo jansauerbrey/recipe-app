@@ -1,8 +1,19 @@
+require('dotenv').config();
 var redis = require('redis');
 var auth = require('./auth');
 
 const redisClient = redis.createClient({
-    url: 'redis://localhost:6379'
+    url: process.env.REDIS_URI || 'redis://localhost:6379',
+    socket: {
+        connectTimeout: 10000,
+        reconnectStrategy: (retries) => {
+            if (retries > 10) {
+                console.error('Redis connection failed after 10 retries');
+                return new Error('Redis connection failed');
+            }
+            return Math.min(retries * 100, 3000);
+        }
+    }
 });
 
 // Connect to Redis
@@ -10,7 +21,21 @@ const redisClient = redis.createClient({
     redisClient.on('error', function(err) {
         console.error('Redis Client Error', err);
     });
-    await redisClient.connect();
+
+    redisClient.on('connect', function() {
+        console.log('Redis client connected');
+    });
+
+    redisClient.on('reconnecting', function() {
+        console.log('Redis client reconnecting');
+    });
+
+    try {
+        await redisClient.connect();
+    } catch (err) {
+        console.error('Redis connection error:', err);
+        process.exit(1);
+    }
 })();
 
 /*

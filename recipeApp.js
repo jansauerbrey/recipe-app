@@ -4,15 +4,27 @@
  * Handles API endpoints for recipe management, meal planning, and shopping lists
  */
 
+// Load environment variables
+require('dotenv').config();
+
 // Core dependencies
 var express = require('express');
 var path = require('path');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var helmet = require('helmet');
+var rateLimit = require('express-rate-limit');
 
 // Authentication middleware
 var auth = require('./auth/auth');
+
+// Configure rate limiter
+const limiter = rateLimit({
+  windowMs: process.env.RATE_LIMIT_WINDOW_MS || 900000, // 15 minutes
+  max: process.env.RATE_LIMIT_MAX_REQUESTS || 100, // Limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.'
+});
 
 // Route handlers for different features
 
@@ -31,12 +43,11 @@ var typeahead = require('./routes/typeahead');
 var upload = require('./routes/upload');
 var randomitems = require('./routes/randomitems');
 
-var PORT = 3000;
+var PORT = process.env.PORT || 3000;
 
 // Database connection
 var mongoose = require('mongoose');
-// Updated MongoDB connection for newer Mongoose version
-mongoose.connect('mongodb://127.0.0.1:27018/recipeApp')
+mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB connection successful'))
   .catch(err => console.log('MongoDB connection error:', err));
 mongoose.set('debug', true)
@@ -50,24 +61,62 @@ app.disable("X-powered-by") // Security: Hide Express
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'cordova-app/www/')));
+// Security middleware
+app.use(helmet());
+app.use(helmet.contentSecurityPolicy({
+  directives: {
+    defaultSrc: ["'self'"],
+    styleSrc: ["'self'", "'unsafe-inline'"],
+    scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+    imgSrc: ["'self'", "data:", "blob:"],
+  }
+}));
+
+// Apply rate limiting to all requests
+app.use(limiter);
+
+// Request size limits
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ extended: false, limit: '10mb' }));
+
+app.use(logger(process.env.NODE_ENV === 'development' ? 'dev' : 'combined'));
+app.use(cookieParser(process.env.SESSION_SECRET));
+app.use(express.static(path.join(__dirname, 'cordova-app/www/'), {
+  maxAge: '1d',
+  etag: true
+}));
 
 
-//app.get('/', function(req, res, next) {
-//  res.render('index', { title: 'Recipe App' });
-//});
-
-// CORS middleware for API endpoints
-// Enables cross-origin requests for the API
+// CORS middleware with more secure configuration
 app.all('/api/*', function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
+  // In production, replace * with specific origin
+  const allowedOrigins = process.env.NODE_ENV === 'production' 
+    ? ['https://yourdomain.com'] 
+    : ['http://localhost:3000', 'http://127.0.0.1:3000'];
+    
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
+  
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
   res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Credentials", "true");
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
   return next();
+});
+
+// Security headers middleware
+app.use((req, res, next) => {
+  res.header("X-XSS-Protection", "1; mode=block");
+  res.header("X-Frame-Options", "DENY");
+  res.header("X-Content-Type-Options", "nosniff");
+  res.header("Referrer-Policy", "strict-origin-same-origin");
+  next();
 });
 
 app.use('/api/admin', admin);
