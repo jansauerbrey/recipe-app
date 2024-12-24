@@ -1,64 +1,50 @@
-//Express
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs').promises;
+const sharp = require('sharp');
+const { v4: uuidv4 } = require('uuid');
+const auth = require('../auth/auth.js');
 
-//File upload
-var fs = require('fs'); 
-var multiparty = require('multiparty'); 
-var path = require('path'); 
-var uuid = require('uuid');
+// Configure multer for handling file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ 
+    storage: storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB limit
+    }
+});
 
-/// Include ImageMagick
-var im = require('imagemagick-stream');
+// Ensure upload directory exists
+const uploadDir = path.join(__dirname, '../upload/');
+fs.mkdir(uploadDir, { recursive: true }).catch(console.error);
 
-var auth = require('../auth/auth.js');
+router.post('/', auth.verify, upload.single('file'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).send('No file uploaded');
+        }
 
-router.post('/', auth.verify, function(req, res, next){    
-    var fileName = '';
-    var size = '';
-    var tempPath;
-    var destPath = '';
-    var extension;
-    var imageName;
-    var destPath = '';
-    var inputStream;
-    var outputStream;
+        const extension = path.extname(req.file.originalname);
+        const imageName = uuidv4() + extension;
+        const destPath = path.join(uploadDir, imageName);
 
-    var form = new multiparty.Form();
-    
-    form.on('error', function(err){
-      console.log('Error parsing form: ' + err.stack);
-    });
+        // Process image with sharp
+        await sharp(req.file.buffer)
+            .resize(400, 266, {
+                fit: 'cover',
+                position: 'center'
+            })
+            .jpeg({ quality: 90, progressive: true })
+            .toFile(destPath);
 
-    form.on('part', function(part){
-      if(!part.filename){
-        return;
-      }
-      size = part.byteCount;
-      fileName = part.filename;
-    });
-
-    form.on('file', function(name, file){
-      tempPath = file.path;
-      extension = file.path.substring(file.path.lastIndexOf('.'));
-      imageName = uuid.v4() + extension;
-      destPath = path.join(__dirname, '../upload/', imageName);
-      inputStream = fs.createReadStream(tempPath);
-      outputStream = fs.createWriteStream(destPath);
-      var resize = im().autoOrient().resize('400x266^').gravity('center').crop('400x266+0+0').op('interlace', 'plane').quality(90);
-      inputStream.pipe(resize).pipe(outputStream);
-      outputStream.on('finish', function(){
-        fs.unlinkSync(tempPath);
-        console.log('Uploaded: ', fileName, size);
+        console.log('Uploaded:', req.file.originalname, req.file.size);
         res.send(imageName);
-      });
-    });
-
-    form.on('close', function(){
-      console.log('Uploaded!!');
-    });
-
-    form.parse(req);
+    } catch (error) {
+        console.error('Upload error:', error);
+        res.status(500).send('Error processing upload');
+    }
 });
 
 

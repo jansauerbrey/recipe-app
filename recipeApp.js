@@ -36,11 +36,7 @@ var PORT = 3000;
 // Database connection
 var mongoose = require('mongoose');
 // Updated MongoDB connection for newer Mongoose version
-mongoose.connect('mongodb://127.0.0.1/recipeApp', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useCreateIndex: true
-})
+mongoose.connect('mongodb://127.0.0.1:27018/recipeApp')
   .then(() => console.log('MongoDB connection successful'))
   .catch(err => console.log('MongoDB connection error:', err));
 mongoose.set('debug', true)
@@ -187,6 +183,6 @@ function onListening() {
   var addr = server.address();
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr
-    : 'port ' + addr.PORT;
+    : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
