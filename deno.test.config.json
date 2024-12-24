@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "types": [
+      "./types.d.ts",
+      "./src/test/deno.d.ts",
+      "./src/test/std.d.ts",
+      "./src/test/oak.d.ts",
+      "./src/test/jwt.d.ts",
+      "./src/test/mongo.d.ts"
+    ]
+  },
+  "lint": {
+    "include": ["src/"],
+    "rules": {
+      "tags": ["recommended"]
+    }
+  },
+  "test": {
+    "include": ["src/test/**/*.test.ts"],
+    "exclude": ["node_modules"]
+  },
+  "fmt": {
+    "include": ["src/test/"],
+    "options": {
+      "useTabs": false,
+      "lineWidth": 100,
+      "indentWidth": 2,
+      "singleQuote": true
+    }
+  }
+}
