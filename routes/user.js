@@ -10,9 +10,9 @@ var tokenHelper = require('../auth/tokenHelper.js');
 var nodemailer = require('nodemailer');
 // create reusable transporter object using SMTP transport
 var transporter = nodemailer.createTransport({
-    host: '10.10.10.231',
-    port: 25,
-    tls:{rejectUnauthorized: false}
+    host: 'localhost',
+    port: 1025,  // Default port for Mailhog
+    ignoreTLS: true
 });
 
 /* GET /user/info. */
@@ -145,93 +145,112 @@ router.post('/register', function(req, res, next) {
 	    return res.sendStatus(400);
 	}
 	
+	var userData = {
+		username: username,
+		username_lower: username_lower,
+		password: password,
+		emailNotConfirmed: email,
+		fullname: fullname,
+		settings: {
+			preferredLanguage: preferredLanguage,
+			spokenLanguages: spokenLanguages,
+			autoupdate: true,
+			preferredWeekStartDay: 1,
+			categoryOrder: ["Obst \u0026 Gem\xFCse","Fr\xFChst\xFCck","Servicetheke","Nahrungsmittel","Weitere Bereiche","Drogerie","Baby \u0026 Kind","K\xFChlprodukte","S\xFCssigkeiten","Getr\xE4nke","Haushalt","Tiefk\xFChl"]
+		}
+	};
 	
-	var userData = {username: username,
-									username_lower: username_lower,
-									password: password,
-									emailNotConfirmed:email,
-									fullname:fullname,
-									settings: {
-										preferredLanguage: preferredLanguage,
-										spokenLanguages: spokenLanguages,
-										autoupdate: true,
-										preferredWeekStartDay: 1,
-										categoryOrder: ["Obst \u0026 Gem\xFCse","Fr\xFChst\xFCck","Servicetheke","Nahrungsmittel","Weitere Bereiche","Drogerie","Baby \u0026 Kind","K\xFChlprodukte","S\xFCssigkeiten","Getr\xE4nke","Haushalt","Tiefk\xFChl"]
-										}
-									};
-	
-	
-	tokenHelper.createToken(function(err, token) {
-		if (err) callback(err);
-		userData.emailConfirmationToken = token;
-		User.create(userData, function(err) {
-	    if (err) return next(err);
-	    User.count(function(err, counter) {
-	      if (err) return next(err);
-	      if (counter == 1) {
-	        User.update({username: username}, {is_admin:true, is_activated: true}, function(err, nbRow) {
-	          if (err) return next(err);
-	          console.log('First user created as an Admin');
-	          return res.sendStatus(200);
-	        });
-	      }
-	      else {
-	      	var mailOptions = {
-						from: 'rezept-planer.de <info@rezept-planer.de>', // sender address
-						to: email, // list of receivers
-						subject: 'Confirm Email', // Subject line
-						text: 'Please, use the following link to confirm your email address:\n\nhttps://www.rezept-planer.de/#/user/confirm/'+userData.emailConfirmationToken+'\n\nYour rezept-planer.de Team', // plaintext body
-					};
-					transporter.sendMail(mailOptions, function(err, info){
-						if (err) return next(err);
-						console.log('Message sent: ' + info.response);
-
-
-
-
-					      	var mailOptions = {
-							from: 'rezept-planer.de <info@rezept-planer.de>', // sender address
-							to: 'admin@rezept-planer.de', // list of receivers
-							subject: 'New User', // Subject line
-							text: 'New user has registered:\n\n'+JSON.stringify(userData)+'\n\nYour rezept-planer.de Team', // plaintext body
-						};
-						transporter.sendMail(mailOptions, function(err, info){
-							if (err) return next(err);
-							console.log('Message sent: ' + info.response);
+	// First check if username already exists (case-insensitive)
+	User.findOne({ username_lower: username_lower }, function(err, existingUser) {
+		if (err) {
+			console.error('Registration error:', err);
+			return res.status(400).json({
+				error: 'Registration failed. Please try again.'
+			});
+		}
+		
+		if (existingUser) {
+			return res.status(400).json({
+				error: 'Username already exists (case-insensitive). Please choose a different username.'
+			});
+		}
+		
+		// If username is unique, create token and proceed with user creation
+		tokenHelper.createToken(function(err, token) {
+			if (err) {
+				console.error('Token creation error:', err);
+				return res.status(400).json({
+					error: 'Registration failed. Please try again.'
+				});
+			}
+			
+			userData.emailConfirmationToken = token;
+			
+			// Create the user
+			User.create(userData, function(err) {
+				if (err) {
+					console.error('User creation error:', err);
+					if (err.code === 11000) {
+						// Extract the duplicate key field from the error message
+						const field = err.message.match(/index: ([^\s]+)/)[1];
+						const value = err.message.match(/{ ([^:]+): "([^"]+)"/)[2];
+						return res.status(400).json({
+							error: `Username "${value.trim()}" is already taken. Please choose a different username.`
+						});
+					}
+					return res.status(400).json({
+						error: 'Registration failed. Please try again.'
+					});
+				}
+				
+				// Check if this is the first user
+				User.count(function(err, counter) {
+					if (err) {
+						return next(err);
+					}
+					
+					if (counter == 1) {
+						// First user becomes admin
+						User.update({username: username}, {is_admin: true, is_activated: true}, function(err, nbRow) {
+							if (err) {
+								return next(err);
+							}
+							console.log('First user created as an Admin');
 							return res.sendStatus(200);
 						});
-					});
-
-
-
-	      }
-	    });
+					} else {
+						// Auto-activate the account for development
+						User.update({username: username}, {is_activated: true, email: email}, function(err, nbRow) {
+							if (err) {
+								return next(err);
+							}
+							console.log('User account auto-activated');
+							return res.sendStatus(200);
+						});
+					}
+				});
+			});
 		});
 	});
 });
 
-
-
 /* CONFIRM EMAIL ADDRESS */
 router.get('/confirm/:token', function(req, res, next) {
-
-		User.findOne({emailConfirmationToken: req.params.token}, function (err, user) {
+	User.findOne({emailConfirmationToken: req.params.token}, function (err, user) {
+		if (err) return next(err);
+		if (user == undefined) {
+			console.log("User undefined");
+			return res.sendStatus(401);
+		}
+		user.is_activated = true;
+		user.email = user.emailNotConfirmed;
+		user.emailConfirmationToken = null;
+		user.save(user, function (err, updatedUser) {
 			if (err) return next(err);
-			if (user == undefined) {
-				console.log("User undefined");
-				return res.sendStatus(401);
-			}
-			user.is_activated = true;
-			user.email = user.emailNotConfirmed;
-			user.emailConfirmationToken = null;
-			user.save(user, function (err, updatedUser) {
-				if (err) return next(err);
-				return res.sendStatus(200);
-			});
+			return res.sendStatus(200);
 		});
+	});
 });
-
-
 
 /* RESET PASSWORD */
 router.post('/forgot', function(req, res) {
@@ -281,10 +300,8 @@ router.post('/forgot', function(req, res) {
 	});
 });
 
-
 /* RESET PASSWORD FINAL */
 router.put('/reset/:token', function(req, res, next) {
-
     var password = req.body.password || '';
     var passwordConfirmation = req.body.passwordConfirmation || '';
 
@@ -292,11 +309,8 @@ router.put('/reset/:token', function(req, res, next) {
         return res.sendStatus(400);
     }
 
-	// { resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() }
     User.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() }}, function (err, user) {
-	//return res.json(user);
-
-	if (err) {
+        if (err) {
             console.log(err);
             return res.sendStatus(401);
         }
@@ -311,19 +325,17 @@ router.put('/reset/:token', function(req, res, next) {
             return res.sendStatus(401);
         }
 
-	user.password = req.body.password;
-	user.resetPasswordToken = undefined;
-	user.resetPasswordExpires = Date.now();
-	var userToUpdate = new User(user);
-	userToUpdate.isNew = false;
-	
-	userToUpdate.save(user, function (err, user) {
-    		if (err) return next(err);
-		return res.sendStatus(200);
-	});
+        user.password = req.body.password;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = Date.now();
+        var userToUpdate = new User(user);
+        userToUpdate.isNew = false;
+        
+        userToUpdate.save(user, function (err, user) {
+            if (err) return next(err);
+            return res.sendStatus(200);
+        });
     });
 });
-
-
 
 module.exports = router;
