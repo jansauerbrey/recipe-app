@@ -10,7 +10,8 @@ require('dotenv').config();
 // Core dependencies
 var express = require('express');
 var path = require('path');
-var logger = require('morgan');
+const { logger, requestLogger, errorLogger } = require('./config/logger');
+const { globalErrorHandler } = require('./config/errorHandler');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var helmet = require('helmet');
@@ -84,7 +85,8 @@ app.use('/api/', apiLimiter);
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: false, limit: '10mb' }));
 
-app.use(logger(process.env.NODE_ENV === 'development' ? 'dev' : 'combined'));
+// Logging middleware
+app.use(requestLogger);
 app.use(cookieParser(process.env.SESSION_SECRET));
 app.use(express.static(path.join(__dirname, 'cordova-app/www/'), {
   maxAge: '1d',
@@ -147,29 +149,11 @@ app.use(function(req, res, next) {
   next(err);
 });
 
-// error handlers
+// Error logging middleware
+app.use(errorLogger);
 
-// development error handler
-// will print stacktrace
-if (app.get('env') === 'development') {
-  app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.render('error', {
-      message: err.message,
-      error: err
-    });
-  });
-}
-
-// production error handler
-// no stacktraces leaked to user
-app.use(function(err, req, res, next) {
-  res.status(err.status || 500);
-  res.render('error', {
-    message: err.message,
-    error: {}
-  });
-});
+// Global error handler
+app.use(globalErrorHandler);
 
 
 module.exports = app;
