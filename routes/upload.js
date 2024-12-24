@@ -6,7 +6,7 @@ var router = express.Router();
 var fs = require('fs'); 
 var multiparty = require('multiparty'); 
 var path = require('path'); 
-var uuid = require('node-uuid');
+var uuid = require('uuid');
 
 /// Include ImageMagick
 var im = require('imagemagick-stream');

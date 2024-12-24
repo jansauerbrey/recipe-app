@@ -29,7 +29,9 @@
 }
 
 body { padding-top: 60px;
-       padding-bottom: 60px; }
+       padding-bottom: 60px;
+       font-size: 14px;
+ }
 
 .item-checked {
   text-decoration: line-through;
@@ -565,4 +567,7 @@ a.navbar-sm-more:hover, a.navbar-sm-more:focus {
 }
 .navbar-divider {
     border-bottom: 1px solid #eee;
+}
+.navbar {
+    font-size: 14px;
 }
