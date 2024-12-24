@@ -1,5 +1,5 @@
-import { Context } from "oak";
-import { parse } from "std/yaml/mod.ts";
+import { Context } from "https://deno.land/x/oak@v12.6.1/mod.ts";
+import { parse } from "https://deno.land/std@0.208.0/yaml/mod.ts";
 import { ValidationError } from "../../types/errors.ts";
 
 // Read OpenAPI spec
