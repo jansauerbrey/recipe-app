@@ -19,11 +19,13 @@ var rateLimit = require('express-rate-limit');
 // Authentication middleware
 var auth = require('./auth/auth');
 
-// Configure rate limiter
-const limiter = rateLimit({
+// Configure API rate limiter
+const apiLimiter = rateLimit({
   windowMs: process.env.RATE_LIMIT_WINDOW_MS || 900000, // 15 minutes
-  max: process.env.RATE_LIMIT_MAX_REQUESTS || 100, // Limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.'
+  max: process.env.RATE_LIMIT_MAX_REQUESTS || 1000, // Limit each IP to 1000 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 // Route handlers for different features
@@ -69,11 +71,14 @@ app.use(helmet.contentSecurityPolicy({
     styleSrc: ["'self'", "'unsafe-inline'"],
     scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
     imgSrc: ["'self'", "data:", "blob:"],
+    connectSrc: ["'self'", "https://www.rezept-planer.de"],
+    formAction: ["'self'"],
+    frameAncestors: ["'none'"]
   }
 }));
 
-// Apply rate limiting to all requests
-app.use(limiter);
+// Apply rate limiting only to API routes
+app.use('/api/', apiLimiter);
 
 // Request size limits
 app.use(bodyParser.json({ limit: '10mb' }));
