@@ -1,563 +1,178 @@
-# RecipeApp
+# Recipe App API
 
-A comprehensive recipe management and meal planning application that helps users organize recipes, plan meals in advance, and automatically generate shopping lists. The application supports multiple languages (English, German, and Finnish) for ingredients and provides both web and mobile interfaces.
+A modern recipe management API built with Deno and Oak, featuring comprehensive API documentation, request/response validation, and robust authentication.
 
 ## Features
 
-- **User Management**
-  - User registration and authentication with JWT tokens
-  - Redis-based session management for better scalability
-  - Multi-language interface preferences
-  - Customizable user settings (language, week start day)
-  - Email verification system with token-based confirmation
-  - Secure password reset functionality
-  - Admin user management
+- 🔐 JWT-based authentication with role-based access control
+- 📚 OpenAPI/Swagger documentation
+- ✅ Request/response validation against OpenAPI schemas
+- 🚦 Rate limiting protection
+- 📁 File upload handling with validation
+- 🔄 Auto-generated TypeScript types from OpenAPI spec
+- 🛡️ Security headers and CORS configuration
+- 🗃️ MongoDB integration with typed repositories
+- 🧱 Clean architecture with separation of concerns
 
-- **Recipe Management**
-  - Store and manage recipes with detailed information including:
-    - Name and cooking instructions
-    - Preparation, cooking, and waiting times
-    - Nutritional information (calories, carbs, fat, protein)
-    - Serving size with adjustable portions
-    - Multi-language ingredient support
-    - Measurement unit conversions
-    - Recipe categorization by dish types
-    - Custom tags for flexible organization
-    - Image upload and management
-  - Favorite recipes functionality
-  - Recipe search with typeahead suggestions
+## Getting Started
 
-- **Meal Planning**
-  - Plan meals for multiple days in advance
-  - Flexible schedule management
-  - Adjustable serving sizes per scheduled meal
-  - Automatic shopping list generation
-  - Week start day customization
-  - Calendar view for meal plans
-  - Schedule overview and management
+### Prerequisites
 
-- **Shopping List**
-  - Automatic generation from meal plans
-  - Smart ingredient aggregation
-  - Support for frequent shopping items
-  - Categorized shopping lists
-  - Multi-language ingredient display
-  - Custom category ordering
-  - Random items suggestions
-  - Optional REWE supermarket integration
+- Deno 1.37 or higher
+- MongoDB 5.0 or higher
+- Node.js 18+ (for legacy Cordova app)
 
-- **Multi-Platform Support**
-  - Responsive web interface
-  - Mobile app (Cordova-based) for iOS and Android
-  - Offline functionality in mobile app
-  - Cross-device synchronization
+### Quick Start
 
-## Architecture
-
-### Backend Components
-
-```
-recipe-app/
-├── auth/                   # Authentication system
-│   ├── auth.js            # JWT authentication middleware
-│   ├── redisHelper.js     # Redis session management
-│   └── tokenHelper.js     # Token generation and validation
-│
-├── models/                 # MongoDB data models
-│   ├── User.js            # User accounts and preferences
-│   ├── Recipe.js          # Core recipe management
-│   ├── Ingredient.js      # Multi-language ingredients
-│   ├── Schedule.js        # Meal planning system
-│   ├── Shopitem.js        # Shopping list management
-│   └── [Other Models]     # Supporting data structures
-│
-├── routes/                 # API endpoints
-│   ├── recipes.js         # Recipe CRUD operations
-│   ├── schedules.js       # Meal planning operations
-│   ├── shopitems.js       # Shopping list management
-│   ├── user.js            # User authentication
-│   └── [Other Routes]     # Additional functionality
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/recipe-app.git
+cd recipe-app
 ```
 
-### Frontend Structure
-
-```
-cordova-app/
-├── www/                   # Web application
-│   ├── app/              # AngularJS modules
-│   │   ├── recipes/      # Recipe management
-│   │   ├── schedules/    # Meal planning
-│   │   ├── shopitems/    # Shopping lists
-│   │   └── [Others]      # Additional features
-│   ├── css/              # Application styles
-│   ├── lib/              # Frontend dependencies
-│   └── partials/         # Angular templates
-│
-└── res/                  # Mobile resources
-    ├── android/          # Android assets
-    ├── ios/              # iOS assets
-    └── img/              # Shared images
+2. Run the setup script:
+```bash
+./setup.sh
 ```
 
-## Technical Stack
+The setup script will:
+- Check Deno installation and version
+- Create and configure .env file
+- Set up upload directory
+- Cache dependencies
+- Generate TypeScript types from OpenAPI spec
+- Validate environment configuration
+- Format code and run linter
 
-### Backend
-- **Node.js + Express**: RESTful API server
-- **MongoDB + Mongoose**: Data persistence with schemas
-- **Redis**: Session management and caching
-- **JWT**: Stateless authentication
-- **Nodemailer**: Email notifications
-- **Multer**: File upload handling
-
-### Frontend
-- **AngularJS**: Single-page application
-- **Bootstrap**: Responsive UI framework
-- **Cordova**: Mobile platform wrapper
-- **Angular UI Router**: Application routing
-- **UI Bootstrap**: Angular components
-- **Font Awesome**: Icon library
-
-### Development Tools
-- **Nodemon**: Development server
-- **MongoDB**: Local database
-- **Redis**: Session store
-- **Mailhog**: Email testing
-- **PM2**: Process management
-- **Nginx**: Reverse proxy
-
-## API Documentation
-
-### Authentication Endpoints
-
-```
-POST /api/user/register
-- Register a new user
-- Body: {
-    "username": "johndoe",
-    "password": "securepass",
-    "passwordConfirmation": "securepass",
-    "email": "john@example.com",
-    "emailConfirmation": "john@example.com",
-    "fullname": "John Doe",
-    "settings": {
-      "preferredLanguage": "en",
-      "spokenLanguages": ["en", "de"]
-    }
-  }
-- Response: 200 OK or 400 with error message
-
-POST /api/user/login
-- Authenticate user and get token
-- Body: {
-    "username": "johndoe",
-    "password": "securepass",
-    "autologin": false
-  }
-- Response: {
-    "token": "jwt-token-string",
-    "is_admin": false,
-    "email": "john@example.com",
-    "fullname": "John Doe",
-    "_id": "user-id",
-    "username": "johndoe",
-    "settings": {
-      "preferredLanguage": "en",
-      "spokenLanguages": ["en", "de"],
-      "preferredWeekStartDay": 1
-    }
-  }
-
-GET /api/user/logout
-- Invalidate current token
-- Headers: Authorization: AUTH [token]
-- Response: 200 OK
-
-POST /api/user/forgot
-- Request password reset
-- Body: { "username": "johndoe" }
-- Response: 200 OK
-
-PUT /api/user/reset/:token
-- Reset password using token
-- Body: {
-    "password": "newpass",
-    "passwordConfirmation": "newpass"
-  }
-- Response: 200 OK
+3. Start the development server:
+```bash
+deno task dev
 ```
 
-### Recipe Management
+### Manual Installation
 
-```
-GET /api/recipes
-- List all recipes
-- Query params: ?page=1&limit=10
-- Response: [{
-    "_id": "recipe-id",
-    "name": "Spaghetti Carbonara",
-    "instructions": "1. Boil pasta...",
-    "cookTime": 20,
-    "prepTime": 10,
-    "totalTime": 30,
-    "yield": 4,
-    "ingredients": [{
-      "ingredient": {
-        "_id": "ingredient-id",
-        "name": {
-          "en": "Spaghetti",
-          "de": "Spaghetti",
-          "fi": "Spagetti"
-        }
-      },
-      "unit": {
-        "_id": "unit-id",
-        "name": {
-          "en": "grams",
-          "de": "Gramm",
-          "fi": "grammaa"
-        }
-      },
-      "qty": 400
-    }],
-    "dishType": {
-      "_id": "dishtype-id",
-      "name": "Pasta"
-    },
-    "tags": ["italian", "pasta", "quick"],
-    "author": "user-id",
-    "imagePath": "/uploads/carbonara.jpg"
-  }]
+If you prefer to set up manually:
 
-POST /api/recipes
-- Create new recipe
-- Headers: Authorization: AUTH [token]
-- Body: {
-    "name": "Spaghetti Carbonara",
-    "instructions": "1. Boil pasta...",
-    "cookTime": 20,
-    "prepTime": 10,
-    "yield": 4,
-    "ingredients": [{
-      "ingredient": "ingredient-id",
-      "unit": "unit-id",
-      "qty": 400
-    }],
-    "dishType": "dishtype-id",
-    "tags": ["italian", "pasta", "quick"]
-  }
-- Response: { created recipe object }
-
-GET /api/recipes/:id
-- Get recipe details
-- Response: { recipe object }
-
-PUT /api/recipes/:id
-- Update recipe
-- Headers: Authorization: AUTH [token]
-- Body: { updated recipe fields }
-- Response: { updated recipe object }
-
-DELETE /api/recipes/:id
-- Delete recipe
-- Headers: Authorization: AUTH [token]
-- Response: 200 OK
+1. Create and configure .env file:
+```bash
+cp .env.example .env
 ```
 
-### Meal Planning
-
-```
-GET /api/schedules
-- Get meal schedule
-- Query params: ?startDate=2024-01-01&endDate=2024-01-07
-- Headers: Authorization: AUTH [token]
-- Response: [{
-    "_id": "schedule-id",
-    "date": "2024-01-01T12:00:00Z",
-    "recipe": {
-      "_id": "recipe-id",
-      "name": "Spaghetti Carbonara",
-      "yield": 4
-    },
-    "factor": 1.5,
-    "author": "user-id"
-  }]
-
-POST /api/schedules
-- Add recipe to schedule
-- Headers: Authorization: AUTH [token]
-- Body: {
-    "date": "2024-01-01T12:00:00Z",
-    "recipe": "recipe-id",
-    "factor": 1.5
-  }
-- Response: { created schedule object }
-
-PUT /api/schedules/:id
-- Update scheduled meal
-- Headers: Authorization: AUTH [token]
-- Body: {
-    "date": "2024-01-01T12:00:00Z",
-    "factor": 2
-  }
-- Response: { updated schedule object }
-
-DELETE /api/schedules/:id
-- Remove meal from schedule
-- Headers: Authorization: AUTH [token]
-- Response: 200 OK
+2. Install dependencies and generate types:
+```bash
+deno cache app.ts
+deno task generate-types
 ```
 
-### Shopping List Management
-
-```
-GET /api/shopitems
-- Get shopping list
-- Headers: Authorization: AUTH [token]
-- Response: [{ shopping items }]
-
-POST /api/shopitems
-- Add item to shopping list
-- Headers: Authorization: AUTH [token]
-- Body: {
-    "ingredient": "ingredient-id",
-    "unit": "unit-id",
-    "qty": 500
-  }
-- Response: { created item object }
-
-PUT /api/shopitems/:id
-- Update shopping item
-- Headers: Authorization: AUTH [token]
-- Body: {
-    "qty": 750,
-    "checked": true
-  }
-- Response: { updated item object }
-
-DELETE /api/shopitems/:id
-- Remove item from list
-- Headers: Authorization: AUTH [token]
-- Response: 200 OK
-
-GET /api/shopitems/generate
-- Generate shopping list from schedule
-- Query params: ?startDate=2024-01-01&endDate=2024-01-07
-- Headers: Authorization: AUTH [token]
-- Response: [{
-    "ingredient": {
-      "_id": "ingredient-id",
-      "name": {
-        "en": "Spaghetti",
-        "de": "Spaghetti",
-        "fi": "Spagetti"
-      },
-      "category": "Pasta"
-    },
-    "unit": {
-      "_id": "unit-id",
-      "name": {
-        "en": "grams",
-        "de": "Gramm",
-        "fi": "grammaa"
-      }
-    },
-    "qty": 600,
-    "recipes": ["Spaghetti Carbonara", "Pasta Alfredo"]
-  }]
+3. Validate your configuration:
+```bash
+deno task validate-env
 ```
 
-### Ingredient Management
+### Development Commands
 
-```
-GET /api/ingredients
-- List all ingredients
-- Query params: ?language=en
-- Response: [{
-    "_id": "ingredient-id",
-    "name": {
-      "en": "Spaghetti",
-      "de": "Spaghetti",
-      "fi": "Spagetti"
-    },
-    "category": "Pasta",
-    "subcategory": "Long Pasta",
-    "author": "user-id"
-  }]
+```bash
+# Start development server
+deno task dev
 
-POST /api/ingredients
-- Create new ingredient
-- Headers: Authorization: AUTH [token]
-- Body: {
-    "name": {
-      "en": "Spaghetti",
-      "de": "Spaghetti",
-      "fi": "Spagetti"
-    },
-    "category": "Pasta",
-    "subcategory": "Long Pasta"
-  }
-- Response: { created ingredient object }
+# Start production server
+deno task start
 
-PUT /api/ingredients/:id
-- Update ingredient
-- Headers: Authorization: AUTH [token]
-- Body: { updated ingredient fields }
-- Response: { updated ingredient object }
+# Generate API types from OpenAPI spec
+deno task generate-types
+
+# Validate environment configuration
+deno task validate-env
+
+# Format code
+deno task fmt
+
+# Run linter
+deno task lint
+
+# Build project (validates env, generates types, formats, and lints)
+deno task build
 ```
 
-### Recipe Organization
+### API Documentation
 
+Access the Swagger UI documentation at:
 ```
-GET /api/tags
-- List all recipe tags
-- Response: [{
-    "_id": "tag-id",
-    "name": "italian"
-  }]
-
-GET /api/dishtypes
-- List all dish types
-- Response: [{
-    "_id": "dishtype-id",
-    "name": "Pasta"
-  }]
-
-GET /api/units
-- List measurement units
-- Query params: ?language=en
-- Response: [{
-    "_id": "unit-id",
-    "name": {
-      "en": "grams",
-      "de": "Gramm",
-      "fi": "grammaa"
-    }
-  }]
-
-GET /api/categories
-- List shopping categories
-- Response: [{
-    "_id": "category-id",
-    "name": "Pasta",
-    "order": 1
-  }]
+http://localhost:3000/api-docs
 ```
 
-### Search and Suggestions
+## Project Structure
 
 ```
-GET /api/typeahead/ingredients
-- Get ingredient suggestions
-- Query params: ?q=spag&language=en
-- Response: [{
-    "_id": "ingredient-id",
-    "name": {
-      "en": "Spaghetti"
-    }
-  }]
-
-GET /api/typeahead/recipes
-- Get recipe suggestions
-- Query params: ?q=carb
-- Response: [{
-    "_id": "recipe-id",
-    "name": "Spaghetti Carbonara"
-  }]
-
-GET /api/randomitems
-- Get random recipe suggestions
-- Query params: ?limit=5
-- Response: [{
-    "_id": "recipe-id",
-    "name": "Spaghetti Carbonara",
-    "imagePath": "/uploads/carbonara.jpg"
-  }]
+├── src/
+│   ├── business/           # Business logic layer
+│   │   └── services/       # Service implementations
+│   ├── data/              # Data access layer
+│   │   └── repositories/   # MongoDB repositories
+│   ├── presentation/      # Presentation layer
+│   │   ├── controllers/   # Request handlers
+│   │   ├── middleware/    # Custom middleware
+│   │   └── routes/        # Route definitions
+│   ├── types/            # TypeScript types and interfaces
+│   └── openapi/          # OpenAPI documentation
+├── scripts/              # Build and utility scripts
+└── cordova-app/         # Legacy Cordova mobile app
 ```
 
-### File Management
+## Authentication
+
+The API uses JWT tokens for authentication. Include the token in the Authorization header:
 
 ```
-POST /api/upload
-- Upload recipe image
-- Headers: Authorization: AUTH [token]
-- Body: FormData with 'image' field
-- Response: {
-    "filepath": "/uploads/carbonara.jpg"
-  }
+Authorization: AUTH <token>
 ```
 
-## Development Setup
+## API Endpoints
 
-1. Install system requirements:
-   ```bash
-   # Install MongoDB
-   sudo apt-get install mongodb
+### Authentication
 
-   # Install Redis
-   sudo apt-get install redis-server
+- POST /api/user/login - Authenticate user
+- GET /api/user/check - Validate token
 
-   # Install Node.js dependencies
-   npm install
-   ```
+### Recipes
 
-2. Configure services:
-   - MongoDB running on default port (27017)
-   - Redis server active on port 6379
-   - Mailhog for email testing (port 1025)
+- GET /api/recipes - List user recipes
+- POST /api/recipes - Create recipe
+- GET /api/recipes/{id} - Get recipe details
+- PUT /api/recipes/{id} - Update recipe
+- DELETE /api/recipes/{id} - Delete recipe
 
-3. Start development server:
-   ```bash
-   npm run dev
-   ```
+## Recent Improvements
 
-4. Access the application:
-   - Web interface: http://localhost:3000
-   - API endpoints: http://localhost:3000/api
+1. **API Documentation**
+   - Added OpenAPI/Swagger documentation
+   - JSDoc comments for better IDE integration
+   - Auto-generated TypeScript types
 
-## Mobile Development
+2. **Authentication & Security**
+   - Split authentication middleware into separate concerns
+   - Added role-based authorization
+   - Implemented rate limiting
+   - Added security headers
 
-1. Install Cordova globally:
-   ```bash
-   npm install -g cordova
-   ```
+3. **Validation**
+   - Request/response validation against OpenAPI schemas
+   - File upload validation
+   - Error handling improvements
 
-2. Setup mobile platforms:
-   ```bash
-   cd cordova-app
-   cordova platform add ios
-   cordova platform add android
-   ```
+4. **Code Quality**
+   - Proper TypeScript types for MongoDB
+   - Improved error handling
+   - Better separation of concerns
 
-3. Build applications:
-   ```bash
-   # Build for all platforms
-   cordova build
+## Contributing
 
-   # Platform specific builds
-   cordova build ios
-   cordova build android
-   ```
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-The MIT License (MIT)
-
-Copyright (c) 2015-2016 Jan Sauerbrey
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

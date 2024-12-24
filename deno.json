@@ -1,0 +1,51 @@
+{
+  "tasks": {
+    "dev": "deno run --allow-net --allow-read --allow-env --allow-write app.ts",
+    "start": "deno run --allow-net --allow-read --allow-env --allow-write app.ts",
+    "test": "deno test --allow-net --allow-read --allow-env",
+    "fmt": "deno fmt",
+    "lint": "deno lint",
+    "generate-types": "deno run --allow-read --allow-write scripts/generate-types.ts",
+    "validate-env": "deno run --allow-read --allow-env scripts/validate-env.ts",
+    "build": "deno task validate-env && deno task generate-types && deno task fmt && deno task lint",
+    "prestart": "deno task validate-env",
+    "predev": "deno task validate-env"
+  },
+  "imports": {
+    "app/": "./",
+    "src/": "./src/",
+    "oak": "https://deno.land/x/oak@v12.6.1/mod.ts",
+    "oak/": "https://deno.land/x/oak@v12.6.1/",
+    "std/": "https://deno.land/std@0.208.0/",
+    "cors": "https://deno.land/x/cors@v1.2.2/mod.ts",
+    "mongo": "https://deno.land/x/mongo@v0.32.0/mod.ts",
+    "bcrypt": "https://deno.land/x/bcrypt@v0.4.1/mod.ts",
+    "djwt": "https://deno.land/x/djwt@v3.0.1/mod.ts",
+    "dotenv": "https://deno.land/std@0.208.0/dotenv/mod.ts",
+    "http/": "https://deno.land/std@0.208.0/http/"
+  },
+  "compilerOptions": {
+    "strict": true,
+    "lib": ["dom", "esnext", "deno.ns"],
+    "noImplicitAny": false
+  },
+  "fmt": {
+    "files": {
+      "include": ["src/"]
+    },
+    "options": {
+      "useTabs": false,
+      "lineWidth": 100,
+      "indentWidth": 2,
+      "singleQuote": true
+    }
+  },
+  "lint": {
+    "files": {
+      "include": ["src/"]
+    },
+    "rules": {
+      "tags": ["recommended"]
+    }
+  }
+}
