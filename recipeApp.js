@@ -1,10 +1,20 @@
+/**
+ * Main application entry point for the Recipe App
+ * Sets up Express server, database connection, routes, and middleware
+ * Handles API endpoints for recipe management, meal planning, and shopping lists
+ */
+
+// Core dependencies
 var express = require('express');
 var path = require('path');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
+// Authentication middleware
 var auth = require('./auth/auth');
+
+// Route handlers for different features
 
 var admin = require('./routes/admin');
 var user = require('./routes/user');
@@ -23,19 +33,22 @@ var randomitems = require('./routes/randomitems');
 
 var PORT = 3000;
 
+// Database connection
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://127.0.0.1/recipeApp', function(err) {
-    if(err) {
-        console.log('connection error', err);
-    } else {
-        console.log('connection successful');
-    }
-});
+// Updated MongoDB connection for newer Mongoose version
+mongoose.connect('mongodb://127.0.0.1/recipeApp', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useCreateIndex: true
+})
+  .then(() => console.log('MongoDB connection successful'))
+  .catch(err => console.log('MongoDB connection error:', err));
 mongoose.set('debug', true)
 
 
+// Initialize Express application
 var app = express();
-app.disable("X-powered-by")
+app.disable("X-powered-by") // Security: Hide Express
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -45,13 +58,15 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-//app.use(express.static(path.join(__dirname, 'cordova-app/www/')));
+app.use(express.static(path.join(__dirname, 'cordova-app/www/')));
 
 
 //app.get('/', function(req, res, next) {
 //  res.render('index', { title: 'Recipe App' });
 //});
 
+// CORS middleware for API endpoints
+// Enables cross-origin requests for the API
 app.all('/api/*', function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
