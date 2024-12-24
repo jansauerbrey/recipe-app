@@ -8,22 +8,34 @@ import { swaggerMiddleware } from "./src/presentation/middleware/swagger.middlew
 import { validateRequest, validateResponse } from "./src/presentation/middleware/validation.middleware.ts";
 
 // Import layers
-import { UserRepository, RecipeRepository } from "src/data/mod.ts";
-import { UserService, RecipeService } from "src/business/mod.ts";
-import { initializeRoutes } from "src/presentation/routes/mod.ts";
-import { Dependencies } from "src/types/mod.ts";
-import { getConfig, AppConfig } from "src/types/env.ts";
+import { UserRepository, RecipeRepository } from "./src/data/mod.ts";
+import { UserService, RecipeService } from "./src/business/mod.ts";
+import { initializeRoutes } from "./src/presentation/routes/mod.ts";
+import { Dependencies } from "./src/types/mod.ts";
+import { getConfig, AppConfig } from "./src/types/env.ts";
 
-async function bootstrap() {
+export async function createApp() {
   // Load environment variables
-  const env = await load();
+  const env = await load({ 
+    envPath: ".env",
+    export: true,
+    allowEmptyValues: true 
+  });
   const appConfig: AppConfig = getConfig();
+  console.log("Loaded environment variables:", {
+    MONGODB_URI: Deno.env.get("MONGODB_URI"),
+    MONGO_DB_NAME: Deno.env.get("MONGO_DB_NAME")
+  });
 
   // Initialize MongoDB connection
   const client = new MongoClient();
   try {
+    console.log("Connecting to MongoDB with URI:", appConfig.MONGODB_URI);
     await client.connect(appConfig.MONGODB_URI);
     console.log("MongoDB connection successful");
+    // List all databases to verify connection
+    const databases = await client.listDatabases();
+    console.log("Available databases:", databases);
   } catch (err) {
     console.error("MongoDB connection error:", err);
     Deno.exit(1);
@@ -86,25 +98,6 @@ async function bootstrap() {
     await next();
   });
 
-  // Static file serving
-  app.use(async (ctx, next) => {
-    try {
-      if (ctx.request.url.pathname.startsWith("/upload/")) {
-        await ctx.send({
-          root: Deno.cwd(),
-          path: ctx.request.url.pathname,
-        });
-      } else {
-        await ctx.send({
-          root: `${Deno.cwd()}/cordova-app/www`,
-          index: "index.html",
-        });
-      }
-    } catch {
-      await next();
-    }
-  });
-
   // Error handling middleware
   app.use(async (ctx, next) => {
     try {
@@ -125,10 +118,6 @@ async function bootstrap() {
   const router = new Router();
   await initializeRoutes(router, dependencies);
 
-  // Add validation middleware
-  app.use(validateRequest());
-  app.use(validateResponse());
-
   // Register router middleware
   app.use(router.routes());
   app.use(router.allowedMethods({
@@ -137,10 +126,36 @@ async function bootstrap() {
     methodNotAllowed: () => new Response(null, { status: 200 })
   }));
 
-  // Start server
-  console.log(`Server running on port ${appConfig.PORT}`);
-  await app.listen({ port: appConfig.PORT });
+  // Add validation middleware after routes
+  app.use(validateRequest());
+  app.use(validateResponse());
+
+  // Static file serving (after API routes)
+  app.use(async (ctx, next) => {
+    try {
+      if (ctx.request.url.pathname.startsWith("/upload/")) {
+        await ctx.send({
+          root: Deno.cwd(),
+          path: ctx.request.url.pathname,
+        });
+      } else {
+        await ctx.send({
+          root: `${Deno.cwd()}/cordova-app/www`,
+          index: "index.html",
+        });
+      }
+    } catch {
+      await next();
+    }
+  });
+
+  return app;
 }
 
-// Bootstrap application
-bootstrap().catch(console.error);
+// Start server if this is the main module
+if (import.meta.main) {
+  const app = await createApp();
+  const port = Number(Deno.env.get("PORT") || 3000);
+  console.log(`Server running on port ${port}`);
+  await app.listen({ port });
+}
