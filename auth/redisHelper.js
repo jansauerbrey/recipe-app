@@ -1,10 +1,17 @@
 var redis = require('redis');
-var redisClient = redis.createClient();
 var auth = require('./auth');
 
-redisClient.on('error', function(err) {
-	throw err;
+const redisClient = redis.createClient({
+    url: 'redis://localhost:6379'
 });
+
+// Connect to Redis
+(async () => {
+    redisClient.on('error', function(err) {
+        console.error('Redis Client Error', err);
+    });
+    await redisClient.connect();
+})();
 
 /*
 * Stores a token with user data for a ttl period of time
@@ -13,7 +20,7 @@ redisClient.on('error', function(err) {
 * ttl: Number - Time to Live in seconds (default: 24Hours)
 * callback: Function
 */
-exports.setTokenWithData = function(token, data, ttl, callback) {
+exports.setTokenWithData = async function(token, data, ttl, callback) {
 	if (token == null) throw new Error('Token is null');
 	if (data != null && typeof data !== 'object') throw new Error('data is not an Object');
 
@@ -24,15 +31,12 @@ exports.setTokenWithData = function(token, data, ttl, callback) {
 	if (timeToLive != null && typeof timeToLive !== 'number') throw new Error('TimeToLive is not a Number');
 
 
-	redisClient.setex(token, timeToLive, JSON.stringify(userData), function(err, reply) {
-		if (err) callback(err);
-
-		if (reply) {
-			callback(null, true);
-		} else {
-			callback(new Error('Token not set in redis'));
-		}
-	});
+	try {
+		await redisClient.setEx(token, timeToLive, JSON.stringify(userData));
+		callback(null, true);
+	} catch (err) {
+		callback(err);
+	}
 	
 };
 
@@ -41,43 +45,46 @@ exports.setTokenWithData = function(token, data, ttl, callback) {
 * token: String - token used as the key in redis
 * callback: Function - returns data
 */
-exports.getDataByToken = function(token, callback) {
+exports.getDataByToken = async function(token, callback) {
 	if (token == null) callback(new Error('Token is null'));
 
-	redisClient.get(token, function(err, userData) {
-		if (err) callback(err);
-
+	try {
+		const userData = await redisClient.get(token);
 		if (userData != null) callback(null, JSON.parse(userData));
 		else callback(new Error('Token Not Found'));
-	});
+	} catch (err) {
+		callback(err);
+	}
 };
 
 /*
 * Renew a token by updating the entry in redis
 * callback(null, true) if successfuly updated
 */
-exports.renewToken = function(token, ttl, callback) {
+exports.renewToken = async function(token, ttl, callback) {
 	if (token == null) callback(new Error('Token is null'));
 
-	redisClient.expire(token, ttl, function(err, reply) {
-		if (err) callback(err);
-
+	try {
+		const reply = await redisClient.expire(token, ttl);
 		if (reply) callback(null, true);
 		else callback(new Error('Token not found'));
-	});
+	} catch (err) {
+		callback(err);
+	}
 };
 
 /*
 * Expires a token by deleting the entry in redis
 * callback(null, true) if successfuly deleted
 */
-exports.expireToken = function(token, callback) {
+exports.expireToken = async function(token, callback) {
 	if (token == null) callback(new Error('Token is null'));
 
-	redisClient.del(token, function(err, reply) {
-		if (err) callback(err);
-		/*if (reply) console.log(err);
-		if (reply) callback(null, true);*/
-		if (!reply) callback(new Error('Token not found'));
-	});
+	try {
+		const reply = await redisClient.del(token);
+		if (reply) callback(null, true);
+		else callback(new Error('Token not found'));
+	} catch (err) {
+		callback(err);
+	}
 };
