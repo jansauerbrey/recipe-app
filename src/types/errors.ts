@@ -77,6 +77,17 @@ export class RateLimitError extends AppError {
   resetTime?: Date;
 }
 
+// Payload size errors
+export class PayloadTooLargeError extends AppError {
+  constructor(message = 'Request payload too large', limit?: number) {
+    super(
+      limit ? `${message}. Maximum size is ${limit} bytes` : message,
+      413,
+      'PAYLOAD_TOO_LARGE',
+    );
+  }
+}
+
 // Helper function to determine if an error is operational
 export function isOperationalError(error: Error): boolean {
   if (error instanceof AppError) {
