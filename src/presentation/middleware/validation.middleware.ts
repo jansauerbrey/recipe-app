@@ -47,20 +47,22 @@ interface OpenAPISpec {
   };
 }
 
-let openApiSpec: OpenAPISpec | null = null;
+let cachedSpec: OpenAPISpec | null = null;
 
 /**
  * Load and parse the OpenAPI specification file
  */
 async function loadOpenApiSpec(): Promise<OpenAPISpec> {
-  if (openApiSpec) return openApiSpec;
+  if (cachedSpec) {
+    return cachedSpec;
+  }
 
   try {
     const yamlContent = await Deno.readTextFile(
       join(Deno.cwd(), 'src', 'openapi', 'openapi.yaml'),
     );
-    openApiSpec = parse(yamlContent) as OpenAPISpec;
-    return openApiSpec;
+    cachedSpec = parse(yamlContent) as OpenAPISpec;
+    return cachedSpec;
   } catch (error: unknown) {
     throw new Error(
       `Failed to load OpenAPI spec: ${error instanceof Error ? error.message : String(error)}`
@@ -94,68 +96,57 @@ export const validateRequest: AppMiddleware = async (
   ctx: Context,
   next: () => Promise<unknown>,
 ): Promise<void> => {
-  try {
-    const spec = await loadOpenApiSpec();
-    const path = ctx.request.url.pathname;
-    const method = ctx.request.method.toLowerCase();
+  const spec = await loadOpenApiSpec();
+  const path = ctx.request.url.pathname;
+  const method = ctx.request.method.toLowerCase();
 
-    const pathObj = spec.paths[path];
-    if (!pathObj || !pathObj[method]) {
-      await next();
-      return;
-    }
+  const pathObj = spec.paths[path];
+  if (!pathObj || !pathObj[method]) {
+    await next();
+    return;
+  }
 
-    const operation = pathObj[method];
+  const operation = pathObj[method];
 
-    // Validate parameters
-    if (operation.parameters) {
-      for (const param of operation.parameters) {
-        if (param.required) {
-          const value = getParameterValue(ctx as RouterContext<string>, param);
-          if (!value) {
-            throw new ValidationError(
-              `Missing required ${param.in} parameter: ${param.name}`
-            );
-          }
-        }
-      }
-    }
-
-    // Validate request body
-    if (operation.requestBody?.required) {
-      const contentType = ctx.request.headers.get('content-type') ?? 'application/json';
-      const bodySchema = operation.requestBody.content[contentType]?.schema;
-
-      if (bodySchema) {
-        try {
-          const body = ctx.request.body();
-          const value = await body.value;
-          if (!value) {
-            throw new ValidationError(
-              'Missing required request body'
-            );
-          }
-          // TODO: Add schema validation when needed
-        } catch (error: unknown) {
+  // Validate parameters
+  if (operation.parameters) {
+    for (const param of operation.parameters) {
+      if (param.required) {
+        const value = getParameterValue(ctx as RouterContext<string>, param);
+        if (!value) {
           throw new ValidationError(
-            `Invalid request body: ${error instanceof Error ? error.message : String(error)}`
+            `Missing required ${param.in} parameter: ${param.name}`
           );
         }
       }
     }
+  }
 
-    await next();
-  } catch (error: unknown) {
-    if (error instanceof ValidationError) {
-      ctx.response.status = error.statusCode;
-      ctx.response.body = { error: error.message };
-    } else {
-      ctx.response.status = Status.InternalServerError;
-      ctx.response.body = {
-        error: `Validation error: ${error instanceof Error ? error.message : String(error)}`,
-      };
+  // Validate request body
+  if (operation.requestBody?.required) {
+    const contentType = ctx.request.headers.get('content-type') ?? 'application/json';
+    const bodySchema = operation.requestBody.content[contentType]?.schema;
+
+    if (bodySchema) {
+      try {
+        const body = ctx.request.body();
+        const value = await body.value;
+        if (!value) {
+          throw new ValidationError('Missing required request body');
+        }
+        // TODO: Add schema validation when needed
+      } catch (error: unknown) {
+        if (error instanceof ValidationError) {
+          throw error;
+        }
+        throw new ValidationError(
+          `Invalid request body: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
     }
   }
+
+  await next();
 };
 
 /**
@@ -165,36 +156,27 @@ export const validateResponse: AppMiddleware = async (
   ctx: Context,
   next: () => Promise<unknown>,
 ): Promise<void> => {
-  try {
-    await next();
+  await next();
 
-    const spec = await loadOpenApiSpec();
-    const path = ctx.request.url.pathname;
-    const method = ctx.request.method.toLowerCase();
+  const spec = await loadOpenApiSpec();
+  const path = ctx.request.url.pathname;
+  const method = ctx.request.method.toLowerCase();
 
-    const pathObj = spec.paths[path];
-    if (!pathObj || !pathObj[method]) {
-      return;
+  const pathObj = spec.paths[path];
+  if (!pathObj || !pathObj[method]) {
+    return;
+  }
+
+  const operation = pathObj[method];
+  const responseSpec = operation.responses[ctx.response.status.toString()];
+
+  if (responseSpec?.content) {
+    const contentType = ctx.response.headers.get('content-type') ?? 'application/json';
+    const schema = responseSpec.content[contentType]?.schema;
+
+    if (schema && !ctx.response.body && ctx.response.status !== Status.NoContent) {
+      throw new ValidationError('Missing response body');
     }
-
-    const operation = pathObj[method];
-    const responseSpec = operation.responses[ctx.response.status.toString()];
-
-    if (responseSpec?.content) {
-      const contentType = ctx.response.headers.get('content-type') ?? 'application/json';
-      const schema = responseSpec.content[contentType]?.schema;
-
-      if (schema && !ctx.response.body && ctx.response.status !== Status.NoContent) {
-        throw new ValidationError(
-          'Missing response body'
-        );
-      }
-      // TODO: Add schema validation when needed
-    }
-  } catch (error: unknown) {
-    ctx.response.status = Status.InternalServerError;
-    ctx.response.body = {
-      error: `Response validation error: ${error instanceof Error ? error.message : String(error)}`,
-    };
+    // TODO: Add schema validation when needed
   }
 };

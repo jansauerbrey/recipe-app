@@ -1,65 +1,101 @@
-import { Context } from 'oak';
-import { create, verify } from 'djwt';
-import { getConfig } from '../../../types/env.ts';
-import { AuthenticationError, TokenExpiredError, InvalidTokenError } from '../../../types/errors.ts';
+import { create, verify, Payload } from 'https://deno.land/x/djwt@v3.0.1/mod.ts';
+import { Context } from 'https://deno.land/x/oak@v12.6.1/mod.ts';
+import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
+import { AuthenticationError, TokenExpiredError } from '../../../types/errors.ts';
+import { AppMiddleware } from '../../../types/middleware.ts';
 
-interface JWTPayload {
-  sub: string; // user id
+const JWT_SECRET = Deno.env.get('JWT_SECRET') || 'your-secret-key';
+const JWT_ALGORITHM = 'HS256';
+const TOKEN_EXPIRY = '24h';
+
+interface TokenPayload extends Payload {
+  userId: string;
   role: string;
-  exp: number;
+  exp?: number;
 }
 
-const JWT_SECRET = new TextEncoder().encode(getConfig().JWT_SECRET);
+async function getKey(): Promise<CryptoKey> {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(JWT_SECRET);
+  return await crypto.subtle.importKey(
+    'raw',
+    keyData,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign', 'verify']
+  );
+}
 
-export async function validateToken(ctx: Context) {
-  const authHeader = ctx.request.headers.get('Authorization');
-  if (!authHeader) {
-    throw new AuthenticationError('No authorization token provided');
-  }
+/**
+ * Generate a JWT token for a user
+ */
+export async function generateToken(userId: string, role: string): Promise<string> {
+  const payload: TokenPayload = {
+    userId,
+    role,
+    exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours
+    iss: 'recipe-app',
+  };
 
-  const [type, token] = authHeader.split(' ');
-  if (!token || (type !== 'Bearer' && type !== 'AUTH')) {
-    throw new InvalidTokenError();
-  }
+  const key = await getKey();
+  return await create({ alg: JWT_ALGORITHM, typ: 'JWT' }, payload, key);
+}
 
+/**
+ * Verify and decode a JWT token
+ */
+export async function verifyToken(token: string): Promise<{ userId: string; role: string }> {
   try {
-    const payload = await verify(token, JWT_SECRET) as JWTPayload;
+    const key = await getKey();
+    const payload = await verify(token, key) as TokenPayload;
     
-    // Check if token is expired
-    if (payload.exp < Date.now() / 1000) {
-      throw new TokenExpiredError();
+    if (!payload.userId || !payload.role) {
+      throw new AuthenticationError('Invalid token payload');
     }
 
-    // Add user info to context state
-    ctx.state.user = {
-      id: payload.sub,
+    return {
+      userId: payload.userId,
       role: payload.role,
     };
   } catch (error) {
-    if (error instanceof TokenExpiredError) {
-      throw error;
+    if (error instanceof Error && error.message.includes('expired')) {
+      throw new TokenExpiredError();
     }
-    throw new InvalidTokenError();
+    throw new AuthenticationError('Invalid token');
   }
 }
 
-// Helper to generate JWT token
-export async function generateToken(userId: string, role: string): Promise<string> {
-  const payload: JWTPayload = {
-    sub: userId,
-    role,
-    exp: Math.floor(Date.now() / 1000) + (60 * 60), // 1 hour expiration
-  };
+/**
+ * Middleware to validate JWT tokens
+ */
+export function validateToken(): AppMiddleware {
+  return async (ctx: Context, next: () => Promise<unknown>): Promise<void> => {
+    const authHeader = ctx.request.headers.get('Authorization');
+    if (!authHeader) {
+      ctx.response.status = Status.Unauthorized;
+      ctx.response.body = { error: 'No authorization header' };
+      return;
+    }
 
-  const header = {
-    alg: 'HS256',
-    typ: 'JWT',
-  };
+    const [type, token] = authHeader.split(' ');
+    if (type !== 'Bearer' || !token) {
+      ctx.response.status = Status.Unauthorized;
+      ctx.response.body = { error: 'Invalid authorization format' };
+      return;
+    }
 
-  try {
-    const token = await create(header, payload, JWT_SECRET);
-    return `AUTH ${token}`;
-  } catch (error) {
-    throw new AuthenticationError('Failed to generate token');
-  }
+    try {
+      const payload = await verifyToken(token);
+      ctx.state.user = payload;
+      await next();
+    } catch (error) {
+      if (error instanceof TokenExpiredError) {
+        ctx.response.status = Status.Unauthorized;
+        ctx.response.body = { error: 'Token expired' };
+      } else {
+        ctx.response.status = Status.Unauthorized;
+        ctx.response.body = { error: 'Invalid token' };
+      }
+    }
+  };
 }
