@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.rezeptplaner.app',
-  appName: 'Recipe Planner',
+  appId: 'de.sby.recipeapp',
+  appName: 'Rezept Planer',
   webDir: 'public',
   server: {
     androidScheme: 'https',
@@ -15,11 +15,11 @@ const config: CapacitorConfig = {
       keystorePath: 'release.keystore',
       keystoreAlias: 'recipe-planner',
     },
-    minWebViewVersion: 22,
+    minWebViewVersion: 17,
   },
   plugins: {
     SplashScreen: {
-      launchShowDuration: 2000,
+      launchShowDuration: 3000,
       backgroundColor: '#FFFFFF',
       androidScaleType: 'CENTER_CROP',
       showSpinner: true,
