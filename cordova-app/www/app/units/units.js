@@ -58,51 +58,51 @@ angular.module('app.units', ['ui.router'])
   .config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
 
     $stateProvider	
-		.state('admin.units', {
-			abstract: true,
-			url: '/units',
-			template: "<ui-view />",
-			data: {
-	      title: 'Units'
-			}
-		})
-		.state('admin.units.list', {
-			url: '/list',
+    .state('admin.units', {
+      abstract: true,
+      url: '/units',
+      template: "<ui-view />",
+      data: {
+        title: 'Units'
+      }
+    })
+    .state('admin.units.list', {
+      url: '/list',
         		templateUrl: 'partials/units.tpl.html',
         		controller: 'UnitsController',
-			resolve: {
-				units: ['Units', function(Units){
-					return Units.query().$promise;
-				}]
-			},
-			data: {
+      resolve: {
+        units: ['Units', function(Units){
+          return Units.query().$promise;
+        }]
+      },
+      data: {
         			name: 'Units',
         			icon: 'glyphicon glyphicon-scale'
-			}
+      }
       		})
       		.state('admin.units.edit', {
-			url: '/edit/:id',
+      url: '/edit/:id',
         		templateUrl: 'partials/units.details.tpl.html',
         		controller: 'UnitDetailCtrl',
-			resolve: {
-				unit: ['Units', '$stateParams', function(Units, $stateParams){
-					var unit = Units.get({'id': $stateParams.id}, function(response) {
-						return response;
-					}).$promise;
-					return unit;
-				}]
-			}
+      resolve: {
+        unit: ['Units', '$stateParams', function(Units, $stateParams){
+          var unit = Units.get({'id': $stateParams.id}, function(response) {
+            return response;
+          }).$promise;
+          return unit;
+        }]
+      }
      		})
       		.state('admin.units.add', {
-			url: '/add',
+      url: '/add',
         		templateUrl: 'partials/units.add.tpl.html',
         		controller: 'UnitDetailCtrl',
-			resolve: {
-				unit: ['Units', function(Units){
-					var unit = new Units();
-					return unit;
-				}]
-			}
+      resolve: {
+        unit: ['Units', function(Units){
+          var unit = new Units();
+          return unit;
+        }]
+      }
       		})
     ;
   }])

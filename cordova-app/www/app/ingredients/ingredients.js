@@ -83,57 +83,57 @@ angular.module('app.ingredients', ['ui.router'])
   .config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
 
     $stateProvider	
-		.state('admin.ingredients', {
-			abstract: true,
-			url: '/ingredients',
-			template: "<ui-view />",
-			data: {
-	      title: 'Ingredients'
-			}
-		})
+    .state('admin.ingredients', {
+      abstract: true,
+      url: '/ingredients',
+      template: "<ui-view />",
+      data: {
+        title: 'Ingredients'
+      }
+    })
       		.state('admin.ingredients.list', {
-			url: '/list',
+      url: '/list',
         		templateUrl: 'partials/ingredients.tpl.html',
         		controller: 'IngredientsController',
-			resolve: {
-				ingredients:['Ingredients', function(Ingredients){
-					return Ingredients.query().$promise;
-				}]
-			},
-			data: {
+      resolve: {
+        ingredients:['Ingredients', function(Ingredients){
+          return Ingredients.query().$promise;
+        }]
+      },
+      data: {
         			name: 'Ingredients',
         			icon: 'glyphicon glyphicon-apple'
-			}
+      }
       		})
       		.state('admin.ingredients.edit', {
-			url: '/edit/:id',
+      url: '/edit/:id',
         		templateUrl: 'partials/ingredients.details.tpl.html',
         		controller: 'IngredientDetailCtrl',
-			resolve: {
-				ingredient: ['Ingredients', '$stateParams', function(Ingredients, $stateParams){
-					var ingredient = Ingredients.get({'id': $stateParams.id}, function(response) {
-						return response;
-					}).$promise;
-					return ingredient;
-				}],
-				categories: ['Categories', function(Categories){
-					return Categories.query().$promise;
-				}]
-			}
+      resolve: {
+        ingredient: ['Ingredients', '$stateParams', function(Ingredients, $stateParams){
+          var ingredient = Ingredients.get({'id': $stateParams.id}, function(response) {
+            return response;
+          }).$promise;
+          return ingredient;
+        }],
+        categories: ['Categories', function(Categories){
+          return Categories.query().$promise;
+        }]
+      }
      		})
       		.state('admin.ingredients.add', {
-			url: '/add',
+      url: '/add',
         		templateUrl: 'partials/ingredients.add.tpl.html',
         		controller: 'IngredientDetailCtrl',
-			resolve: {
-				ingredient: ['Ingredients', function(Ingredients){
-					var ingredient = new Ingredients();
-					return ingredient;
-				}],
-				categories: ['Categories', function(Categories){
-					return Categories.query().$promise;
-				}]
-			}
+      resolve: {
+        ingredient: ['Ingredients', function(Ingredients){
+          var ingredient = new Ingredients();
+          return ingredient;
+        }],
+        categories: ['Categories', function(Categories){
+          return Categories.query().$promise;
+        }]
+      }
       		})
     ;
   }])

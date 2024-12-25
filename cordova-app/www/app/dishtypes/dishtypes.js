@@ -58,51 +58,51 @@ angular.module('app.dishtypes', ['ui.router'])
   .config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
 
     $stateProvider	
-		.state('admin.dishtypes', {
-			abstract: true,
-			url: '/dishtypes',
-			template: "<ui-view />",
-			data: {
-	      title: 'Dish types'
-			}
-		})
-		.state('admin.dishtypes.list', {
-			url: '/list',
+    .state('admin.dishtypes', {
+      abstract: true,
+      url: '/dishtypes',
+      template: "<ui-view />",
+      data: {
+        title: 'Dish types'
+      }
+    })
+    .state('admin.dishtypes.list', {
+      url: '/list',
         		templateUrl: 'partials/dishtypes.tpl.html',
         		controller: 'DishTypesController',
-			resolve: {
-				dishtypes: ['DishTypes', function(DishTypes){
-					return DishTypes.query().$promise;
-				}]
-			},
-			data: {
+      resolve: {
+        dishtypes: ['DishTypes', function(DishTypes){
+          return DishTypes.query().$promise;
+        }]
+      },
+      data: {
   			name: 'Dish types',
   			icon: 'glyphicon glyphicon-grain'
-			}
+      }
       		})
       		.state('admin.dishtypes.edit', {
-			url: '/edit/:id',
+      url: '/edit/:id',
         		templateUrl: 'partials/dishtypes.details.tpl.html',
         		controller: 'DishTypeDetailCtrl',
-			resolve: {
-				dishtype: ['DishTypes', '$stateParams', function(DishTypes, $stateParams){
-					var dishtype = DishTypes.get({'id': $stateParams.id}, function(response) {
-						return response;
-					}).$promise;
-					return dishtype;
-				}]
-			}
+      resolve: {
+        dishtype: ['DishTypes', '$stateParams', function(DishTypes, $stateParams){
+          var dishtype = DishTypes.get({'id': $stateParams.id}, function(response) {
+            return response;
+          }).$promise;
+          return dishtype;
+        }]
+      }
      		})
       		.state('admin.dishtypes.add', {
-			url: '/add',
+      url: '/add',
         		templateUrl: 'partials/dishtypes.add.tpl.html',
         		controller: 'DishTypeDetailCtrl',
-			resolve: {
-				dishtype: ['DishTypes', function(DishTypes){
-					var dishtype = new DishTypes();
-					return dishtype;
-				}]
-			}
+      resolve: {
+        dishtype: ['DishTypes', function(DishTypes){
+          var dishtype = new DishTypes();
+          return dishtype;
+        }]
+      }
       		})
     ;
   }])

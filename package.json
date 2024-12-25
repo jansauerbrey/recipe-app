@@ -3,6 +3,7 @@
   "version": "1.0.1",
   "private": true,
   "scripts": {
+    "prepare": "husky",
     "start": "deno run --allow-net --allow-read --allow-env app.ts",
     "build": "npm run clean && npm run build:web",
     "build:web": "cd public && npm run build",
@@ -10,8 +11,8 @@
     "cap:sync": "cap sync",
     "cap:open:android": "cap open android",
     "cap:build:android": "cap build android",
-    "lint": "eslint . --ext .ts,.js",
-    "lint:fix": "eslint . --ext .ts,.js --fix",
+    "lint": "eslint \"**/*.{ts,js}\"",
+    "lint:fix": "eslint \"**/*.{ts,js}\" --fix",
     "test": "./test.sh",
     "version:patch": "npm version patch",
     "version:minor": "npm version minor",
@@ -47,10 +48,20 @@
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
     "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.11",
+    "prettier": "^3.4.2",
     "typescript": "^5.0.0"
   },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
+  },
+  "lint-staged": {
+    "*.{js,ts}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }

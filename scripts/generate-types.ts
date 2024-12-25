@@ -1,5 +1,5 @@
-import { parse } from "https://deno.land/std@0.208.0/yaml/mod.ts";
-import { join } from "https://deno.land/std@0.208.0/path/mod.ts";
+import { parse } from 'https://deno.land/std@0.208.0/yaml/mod.ts';
+import { join } from 'https://deno.land/std@0.208.0/path/mod.ts';
 
 interface Schema {
   type: string;
@@ -27,34 +27,34 @@ function generateType(name: string, schema: Schema, spec: OpenAPISpec): string {
   }
 
   switch (schema.type) {
-    case 'object':
-      const properties = Object.entries(schema.properties || {})
-        .map(([key, value]) => {
-          const isRequired = schema.required?.includes(key);
-          const typeDeclaration = generateType(key, value, spec);
-          return `  ${key}${isRequired ? '' : '?'}: ${typeDeclaration};`;
-        })
-        .join('\n');
-      return `{\n${properties}\n}`;
+  case 'object':
+    const properties = Object.entries(schema.properties || {})
+      .map(([key, value]) => {
+        const isRequired = schema.required?.includes(key);
+        const typeDeclaration = generateType(key, value, spec);
+        return `  ${key}${isRequired ? '' : '?'}: ${typeDeclaration};`;
+      })
+      .join('\n');
+    return `{\n${properties}\n}`;
 
-    case 'array':
-      if (schema.items) {
-        const itemType = generateType('item', schema.items, spec);
-        return `${itemType}[]`;
-      }
-      return 'any[]';
+  case 'array':
+    if (schema.items) {
+      const itemType = generateType('item', schema.items, spec);
+      return `${itemType}[]`;
+    }
+    return 'any[]';
 
-    case 'string':
-      return 'string';
+  case 'string':
+    return 'string';
 
-    case 'number':
-      return 'number';
+  case 'number':
+    return 'number';
 
-    case 'boolean':
-      return 'boolean';
+  case 'boolean':
+    return 'boolean';
 
-    default:
-      return 'any';
+  default:
+    return 'any';
   }
 }
 

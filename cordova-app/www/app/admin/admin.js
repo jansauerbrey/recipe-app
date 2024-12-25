@@ -55,29 +55,29 @@ angular.module('app.admin', ['ui.router'])
   .config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
 
     $stateProvider
-		.state('admin', {
-			abstract: true,
-			views: {'root':
+    .state('admin', {
+      abstract: true,
+      views: {'root':
         { template: "<ui-view />" }
       },
-			data: {
-				requiresLogin: true,
+      data: {
+        requiresLogin: true,
         requiredPermissions: ['Admin'],
-	      title: 'Admin'
-			}
-		})
+        title: 'Admin'
+      }
+    })
     .state('admin.user', {
-			url: '/admin/user',
+      url: '/admin/user',
         		templateUrl: 'partials/admin.user.tpl.html',
         		controller: 'AdminUserCtrl',
-			resolve: {
-				users: ['Users', function(Users){
-					return Users.query().$promise;
-				}]
-			},
-			data: {
-	      title: 'Users'
-			}
+      resolve: {
+        users: ['Users', function(Users){
+          return Users.query().$promise;
+        }]
+      },
+      data: {
+        title: 'Users'
+      }
     })
     ;
   }])
