@@ -1,5 +1,5 @@
-import { Context } from "oak";
-import { RateLimitError } from "../../../types/errors.ts";
+import { Context } from 'oak';
+import { RateLimitError } from '../../../types/errors.ts';
 
 interface RateLimitConfig {
   windowMs: number;  // Time window in milliseconds
@@ -30,10 +30,10 @@ export function rateLimit(config: Partial<RateLimitConfig> = {}) {
   const options: RateLimitConfig = { ...defaultConfig, ...config };
 
   return async function(ctx: Context, next: () => Promise<void>) {
-    const ip = ctx.request.headers.get("x-forwarded-for") || 
-               ctx.request.headers.get("x-real-ip") ||
-               ctx.request.headers.get("cf-connecting-ip") ||
-               "unknown";
+    const ip = ctx.request.headers.get('x-forwarded-for') || 
+               ctx.request.headers.get('x-real-ip') ||
+               ctx.request.headers.get('cf-connecting-ip') ||
+               'unknown';
     const now = Date.now();
 
     // Get or create rate limit data for this IP
@@ -50,14 +50,14 @@ export function rateLimit(config: Partial<RateLimitConfig> = {}) {
     data.count++;
 
     // Set rate limit headers
-    ctx.response.headers.set("X-RateLimit-Limit", options.max.toString());
-    ctx.response.headers.set("X-RateLimit-Remaining", Math.max(0, options.max - data.count).toString());
-    ctx.response.headers.set("X-RateLimit-Reset", Math.ceil(data.resetTime / 1000).toString());
+    ctx.response.headers.set('X-RateLimit-Limit', options.max.toString());
+    ctx.response.headers.set('X-RateLimit-Remaining', Math.max(0, options.max - data.count).toString());
+    ctx.response.headers.set('X-RateLimit-Reset', Math.ceil(data.resetTime / 1000).toString());
 
     // Check if rate limit exceeded
     if (data.count > options.max) {
       const retryAfter = Math.ceil((data.resetTime - now) / 1000);
-      ctx.response.headers.set("Retry-After", retryAfter.toString());
+      ctx.response.headers.set('Retry-After', retryAfter.toString());
       throw new RateLimitError();
     }
 

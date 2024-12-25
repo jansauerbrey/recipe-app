@@ -1,7 +1,7 @@
-import { Context } from "oak";
-import { create, verify } from "djwt";
-import { getConfig } from "../../../types/env.ts";
-import { AuthenticationError, TokenExpiredError, InvalidTokenError } from "../../../types/errors.ts";
+import { Context } from 'oak';
+import { create, verify } from 'djwt';
+import { getConfig } from '../../../types/env.ts';
+import { AuthenticationError, TokenExpiredError, InvalidTokenError } from '../../../types/errors.ts';
 
 interface JWTPayload {
   sub: string; // user id
@@ -12,13 +12,13 @@ interface JWTPayload {
 const JWT_SECRET = new TextEncoder().encode(getConfig().JWT_SECRET);
 
 export async function validateToken(ctx: Context) {
-  const authHeader = ctx.request.headers.get("Authorization");
+  const authHeader = ctx.request.headers.get('Authorization');
   if (!authHeader) {
-    throw new AuthenticationError("No authorization token provided");
+    throw new AuthenticationError('No authorization token provided');
   }
 
-  const [type, token] = authHeader.split(" ");
-  if (!token || (type !== "Bearer" && type !== "AUTH")) {
+  const [type, token] = authHeader.split(' ');
+  if (!token || (type !== 'Bearer' && type !== 'AUTH')) {
     throw new InvalidTokenError();
   }
 
@@ -52,14 +52,14 @@ export async function generateToken(userId: string, role: string): Promise<strin
   };
 
   const header = {
-    alg: "HS256",
-    typ: "JWT",
+    alg: 'HS256',
+    typ: 'JWT',
   };
 
   try {
     const token = await create(header, payload, JWT_SECRET);
     return `AUTH ${token}`;
   } catch (error) {
-    throw new AuthenticationError("Failed to generate token");
+    throw new AuthenticationError('Failed to generate token');
   }
 }

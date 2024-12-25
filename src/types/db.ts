@@ -1,5 +1,5 @@
-import { MongoClient, Database, Collection } from "mongo";
-import { User, Recipe } from "./mod.ts";
+import { MongoClient, Database, Collection } from 'mongo';
+import { User, Recipe } from './mod.ts';
 
 export interface DBCollections {
   users: Collection<User>;
@@ -18,8 +18,8 @@ export interface MongoConnection {
 // Helper function to get typed collections
 export function getCollections(db: Database): DBCollections {
   return {
-    users: db.collection<User>("users"),
-    recipes: db.collection<Recipe>("recipes"),
+    users: db.collection<User>('users'),
+    recipes: db.collection<Recipe>('recipes'),
   };
 }
 
@@ -45,13 +45,13 @@ export async function createIndexes(collections: DBCollections): Promise<void> {
         key: { userId: 1 },
       },
       {
-        key: { title: "text", description: "text" },
+        key: { title: 'text', description: 'text' },
       },
       {
         key: { tags: 1 },
       },
       {
-        key: { "ingredients.name": 1 },
+        key: { 'ingredients.name': 1 },
       },
       {
         key: { createdAt: -1 },
