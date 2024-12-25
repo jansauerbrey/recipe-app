@@ -158,7 +158,7 @@ export async function createApp() {
         });
       } else {
         await ctx.send({
-          root: `${Deno.cwd()}/cordova-app/www`,
+          root: `${Deno.cwd()}/public`,
           index: 'index.html',
         });
       }
