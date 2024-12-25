@@ -1,78 +1,86 @@
-'use strict';
+angular.module('app.admin', ['ui.router'])
 
-angular.module('recipeApp.admin', ['ngRoute'])
-  .config(['$routeProvider', function($routeProvider) {
-    $routeProvider.when('/admin', {
-      templateUrl: 'partials/admin.user.tpl.html',
-      controller: 'AdminCtrl'
-    });
-  }])
-  .controller('AdminCtrl', ['$scope', '$http', '$location', 'alertService',
-    function($scope, $http, $location, alertService) {
-      $scope.users = [];
-      $scope.order = 'username';
-      $scope.reverse = false;
-      $scope.loading = true;
-      $scope.error = null;
+//---------------
+// Services
+//---------------
 
-      // Load users
-      $http.get('/api/admin/users')
-        .then(function(response) {
-          $scope.users = response.data;
-          $scope.loading = false;
-        })
-        .catch(function(error) {
-          $scope.error = error.data?.error || 'Failed to load users';
-          $scope.loading = false;
-          alertService.error($scope.error);
+
+        .factory('Users', ['$resource', 'BASE_URI', function($resource, BASE_URI){
+          return $resource(BASE_URI+'api/admin/user/:id', null, {
+            'update': { method:'PUT' }
+          });
+        }])
+
+//---------------
+// Controllers
+//---------------
+
+
+// Admin
+
+    .controller('AdminUserCtrl', ['$scope', '$state', 'users', 'Users', function ($scope, $state, users, Users) {
+      $scope.users = users;
+
+      $scope.remove = function(user){
+        Users.remove({id: user._id}, function(){
+          $scope.users.splice($scope.users.indexOf(user), 1);
         });
+      }
 
-      $scope.setOrder = function(order) {
-        if ($scope.order === order) {
-          $scope.reverse = !$scope.reverse;
-        } else {
-          $scope.order = order;
-          $scope.reverse = false;
-        }
-      };
+      $scope.activate = function(user){
+        $scope.users[$scope.users.indexOf(user)].is_activated = true;
+        Users.update({id: user._id}, {is_activated: true}, function(){
+        });
+      }
 
-      $scope.editUser = function(user) {
-        $scope.selectedUser = angular.copy(user);
-      };
+      $scope.makeAdmin = function(user){
+        $scope.users[$scope.users.indexOf(user)].is_admin = true;
+        Users.update({id: user._id}, {is_admin: true}, function(){
+        });
+      }
 
-      $scope.saveUser = function(user) {
-        if (!user.username) {
-          alertService.error('Username is required');
-          return;
-        }
+      $scope.removeAdmin = function(user){
+        $scope.users[$scope.users.indexOf(user)].is_admin = false;
+        Users.update({id: user._id}, {is_admin: false}, function(){
+        });
+      }
 
-        $http.put('/api/admin/users/' + user._id, user)
-          .then(function() {
-            const index = $scope.users.findIndex(item => item._id === user._id);
-            if (index !== -1) {
-              $scope.users[index] = user;
-            }
-            $scope.selectedUser = null;
-            alertService.success('User updated successfully');
-          })
-          .catch(function(error) {
-            alertService.error(error.data?.error || 'Failed to update user');
-          });
-      };
+    }])
 
-      $scope.deleteUser = function(user) {
-        if (!confirm('Are you sure you want to delete this user?')) {
-          return;
-        }
 
-        $http.delete('/api/admin/users/' + user._id)
-          .then(function() {
-            $scope.users = $scope.users.filter(item => item._id !== user._id);
-            alertService.success('User deleted successfully');
-          })
-          .catch(function(error) {
-            alertService.error(error.data?.error || 'Failed to delete user');
-          });
-      };
-    }
-  ]);
+//---------------
+// Routes
+//---------------
+
+  .config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
+
+    $stateProvider
+    .state('admin', {
+      abstract: true,
+      views: {'root':
+        { template: "<ui-view />" }
+      },
+      data: {
+        requiresLogin: true,
+        requiredPermissions: ['Admin'],
+        title: 'Admin'
+      }
+    })
+    .state('admin.user', {
+      url: '/admin/user',
+        		templateUrl: 'partials/admin.user.tpl.html',
+        		controller: 'AdminUserCtrl',
+      resolve: {
+        users: ['Users', function(Users){
+          return Users.query().$promise;
+        }]
+      },
+      data: {
+        title: 'Users'
+      }
+    })
+    ;
+  }])
+;
+
+
