@@ -21,11 +21,11 @@ jobs:
       - name: Install dependencies
         run: |
           npm ci
-          npm install -g eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
+          npm install eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin --save-dev
       
       - name: Run ESLint
         run: |
-          npm run lint || true  # Continue even if linting fails for now
+          npx eslint . --ext .ts,.js
 
   test:
     needs: lint
