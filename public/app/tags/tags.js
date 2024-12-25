@@ -1,111 +1,95 @@
-angular.module('app.tags', ['ui.router'])
+'use strict';
 
-//---------------
-// Services
-//---------------
-
-
-  .factory('Tags', ['$resource', 'BASE_URI', function($resource, BASE_URI){
-    return $resource(BASE_URI+'api/tags/:id', null, {
-      'update': { method:'PUT' }
+angular.module('recipeApp.tags', ['ngRoute'])
+  .config(['$routeProvider', function($routeProvider) {
+    $routeProvider.when('/tags', {
+      templateUrl: 'partials/tags.tpl.html',
+      controller: 'TagsCtrl'
     });
   }])
+  .controller('TagsCtrl', ['$scope', '$http', '$location', 'alertService',
+    function($scope, $http, $location, alertService) {
+      $scope.tags = [];
+      $scope.order = 'name';
+      $scope.reverse = false;
+      $scope.loading = true;
+      $scope.error = null;
 
+      // Load tags
+      $http.get('/api/tags')
+        .then(function(response) {
+          $scope.tags = response.data;
+          $scope.loading = false;
+        })
+        .catch(function(error) {
+          $scope.error = error.data?.error || 'Failed to load tags';
+          $scope.loading = false;
+          alertService.error($scope.error);
+        });
 
-//---------------
-// Controllers
-//---------------
-
-
-// Tags
-
-  .controller('TagsController', ['$scope', 'tags', function ($scope, tags) {
-    $scope.tags = tags;
-  }])
-
-  .controller('TagDetailCtrl', ['$scope', '$stateParams', 'tag', 'Tags', '$state', function ($scope, $stateParams, tag, Tags, $state) {
-    $scope.tag = tag;
-
-    $scope.update = function(){
-      Tags.update({id: $scope.tag._id}, $scope.tag, function(){
-        $state.go('admin.tags.list');
-      });
-    };
-
-    $scope.remove = function(){
-      Tags.remove({id: $scope.tag._id}, function(){
-        $state.go('admin.tags.list');
-      });
-    };
-
-    $scope.save = function(){
-      if(!$scope.newtag || $scope.newtag.length < 1) return;
-      const tag_new = new Tags({ text: $scope.newtag.text });
-
-      tag_new.$save(function(){
-        $state.go('admin.tags.list');
-      });
-    };
-
-  }])
-
-
-
-//---------------
-// Routes
-//---------------
-
-  .config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
-
-    $stateProvider	
-      .state('admin.tags', {
-        abstract: true,
-        url: '/tags',
-        template: '<ui-view />',
-        data: {
-          title: 'Tags'
+      $scope.setOrder = function(order) {
+        if ($scope.order === order) {
+          $scope.reverse = !$scope.reverse;
+        } else {
+          $scope.order = order;
+          $scope.reverse = false;
         }
-      })
-      .state('admin.tags.list', {
-        url: '/list',
-        		templateUrl: 'partials/tags.tpl.html',
-        		controller: 'TagsController',
-        resolve: {
-          tags: ['Tags', function(Tags){
-            return Tags.query().$promise;
-          }]
-        },
-        data: {
-        			name: 'Tags',
-        			icon: 'glyphicon glyphicon-tags'
-        }
-      		})
-      		.state('admin.tags.edit', {
-        url: '/edit/:id',
-        		templateUrl: 'partials/tags.details.tpl.html',
-        		controller: 'TagDetailCtrl',
-        resolve: {
-          tag: ['Tags', '$stateParams', function(Tags, $stateParams){
-            const tag = Tags.get({'id': $stateParams.id}, function(response) {
-              return response;
-            }).$promise;
-            return tag;
-          }]
-        }
-     		})
-      		.state('admin.tags.add', {
-        url: '/add',
-        		templateUrl: 'partials/tags.add.tpl.html',
-        		controller: 'TagDetailCtrl',
-        resolve: {
-          tag: ['Tags', function(Tags){
-            const tag = new Tags();
-            return tag;
-          }]
-        }
-      		})
-    ;
-  }])
-;
+      };
 
+      $scope.addTag = function() {
+        if (!$scope.newTag?.name) {
+          alertService.error('Name is required');
+          return;
+        }
 
+        $http.post('/api/tags', $scope.newTag)
+          .then(function(response) {
+            $scope.tags.push(response.data);
+            $scope.newTag = {};
+            alertService.success('Tag added successfully');
+          })
+          .catch(function(error) {
+            alertService.error(error.data?.error || 'Failed to add tag');
+          });
+      };
+
+      $scope.editTag = function(tag) {
+        $scope.selectedTag = angular.copy(tag);
+      };
+
+      $scope.saveTag = function(tag) {
+        if (!tag.name) {
+          alertService.error('Name is required');
+          return;
+        }
+
+        $http.put('/api/tags/' + tag._id, tag)
+          .then(function() {
+            const index = $scope.tags.findIndex(item => item._id === tag._id);
+            if (index !== -1) {
+              $scope.tags[index] = tag;
+            }
+            $scope.selectedTag = null;
+            alertService.success('Tag updated successfully');
+          })
+          .catch(function(error) {
+            alertService.error(error.data?.error || 'Failed to update tag');
+          });
+      };
+
+      $scope.deleteTag = function(tag) {
+        if (!confirm('Are you sure you want to delete this tag?')) {
+          return;
+        }
+
+        $http.delete('/api/tags/' + tag._id)
+          .then(function() {
+            $scope.tags = $scope.tags.filter(item => item._id !== tag._id);
+            alertService.success('Tag deleted successfully');
+          })
+          .catch(function(error) {
+            alertService.error(error.data?.error || 'Failed to delete tag');
+          });
+      };
+    }
+  ]);
