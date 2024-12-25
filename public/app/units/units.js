@@ -1,95 +1,111 @@
-'use strict';
+angular.module('app.units', ['ui.router'])
 
-angular.module('recipeApp.units', ['ngRoute'])
-  .config(['$routeProvider', function($routeProvider) {
-    $routeProvider.when('/units', {
-      templateUrl: 'partials/units.tpl.html',
-      controller: 'UnitsCtrl'
-    });
-  }])
-  .controller('UnitsCtrl', ['$scope', '$http', '$location', 'alertService',
-    function($scope, $http, $location, alertService) {
-      $scope.units = [];
-      $scope.order = 'name';
-      $scope.reverse = false;
-      $scope.loading = true;
-      $scope.error = null;
+//---------------
+// Services
+//---------------
 
-      // Load units
-      $http.get('/api/units')
-        .then(function(response) {
-          $scope.units = response.data;
-          $scope.loading = false;
-        })
-        .catch(function(error) {
-          $scope.error = error.data?.error || 'Failed to load units';
-          $scope.loading = false;
-          alertService.error($scope.error);
+
+        .factory('Units', ['$resource', 'BASE_URI', function($resource, BASE_URI){
+          return $resource(BASE_URI+'api/units/:id', null, {
+            'update': { method:'PUT' }
+          });
+        }])
+
+
+//---------------
+// Controllers
+//---------------
+
+
+// Units
+
+    .controller('UnitsController', ['$scope', 'units', function ($scope, units) {
+      $scope.units = units;
+    }])
+
+    .controller('UnitDetailCtrl', ['$scope', '$stateParams', 'unit', 'Units', '$state', function ($scope, $stateParams, unit, Units, $state) {
+      $scope.unit = unit;
+
+      $scope.update = function(){
+        Units.update({id: $scope.unit._id}, $scope.unit, function(){
+          $state.go('admin.units.list');
         });
+      }
 
-      $scope.setOrder = function(order) {
-        if ($scope.order === order) {
-          $scope.reverse = !$scope.reverse;
-        } else {
-          $scope.order = order;
-          $scope.reverse = false;
-        }
-      };
+      $scope.remove = function(){
+        Units.remove({id: $scope.unit._id}, function(){
+          $state.go('admin.units.list');
+        });
+      }
 
-      $scope.addUnit = function() {
-        if (!$scope.newUnit?.name) {
-          alertService.error('Name is required');
-          return;
-        }
+      $scope.save = function(){
+        if(!$scope.newunit || $scope.newunit.length < 1) return;
+        var unit_new = new Units({ name: { en: $scope.newunit.name.en, de: $scope.newunit.name.de,  fi: $scope.newunit.name.fi} });
 
-        $http.post('/api/units', $scope.newUnit)
-          .then(function(response) {
-            $scope.units.push(response.data);
-            $scope.newUnit = {};
-            alertService.success('Unit added successfully');
-          })
-          .catch(function(error) {
-            alertService.error(error.data?.error || 'Failed to add unit');
-          });
-      };
+        unit_new.$save(function(){
+          $state.go('admin.units.list');
+        });
+      }
 
-      $scope.editUnit = function(unit) {
-        $scope.selectedUnit = angular.copy(unit);
-      };
+    }])
 
-      $scope.saveUnit = function(unit) {
-        if (!unit.name) {
-          alertService.error('Name is required');
-          return;
-        }
 
-        $http.put('/api/units/' + unit._id, unit)
-          .then(function() {
-            const index = $scope.units.findIndex(item => item._id === unit._id);
-            if (index !== -1) {
-              $scope.units[index] = unit;
-            }
-            $scope.selectedUnit = null;
-            alertService.success('Unit updated successfully');
-          })
-          .catch(function(error) {
-            alertService.error(error.data?.error || 'Failed to update unit');
-          });
-      };
 
-      $scope.deleteUnit = function(unit) {
-        if (!confirm('Are you sure you want to delete this unit?')) {
-          return;
-        }
+//---------------
+// Routes
+//---------------
 
-        $http.delete('/api/units/' + unit._id)
-          .then(function() {
-            $scope.units = $scope.units.filter(item => item._id !== unit._id);
-            alertService.success('Unit deleted successfully');
-          })
-          .catch(function(error) {
-            alertService.error(error.data?.error || 'Failed to delete unit');
-          });
-      };
-    }
-  ]);
+  .config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
+
+    $stateProvider	
+    .state('admin.units', {
+      abstract: true,
+      url: '/units',
+      template: "<ui-view />",
+      data: {
+        title: 'Units'
+      }
+    })
+    .state('admin.units.list', {
+      url: '/list',
+        		templateUrl: 'partials/units.tpl.html',
+        		controller: 'UnitsController',
+      resolve: {
+        units: ['Units', function(Units){
+          return Units.query().$promise;
+        }]
+      },
+      data: {
+        			name: 'Units',
+        			icon: 'glyphicon glyphicon-scale'
+      }
+      		})
+      		.state('admin.units.edit', {
+      url: '/edit/:id',
+        		templateUrl: 'partials/units.details.tpl.html',
+        		controller: 'UnitDetailCtrl',
+      resolve: {
+        unit: ['Units', '$stateParams', function(Units, $stateParams){
+          var unit = Units.get({'id': $stateParams.id}, function(response) {
+            return response;
+          }).$promise;
+          return unit;
+        }]
+      }
+     		})
+      		.state('admin.units.add', {
+      url: '/add',
+        		templateUrl: 'partials/units.add.tpl.html',
+        		controller: 'UnitDetailCtrl',
+      resolve: {
+        unit: ['Units', function(Units){
+          var unit = new Units();
+          return unit;
+        }]
+      }
+      		})
+    ;
+  }])
+;
+
+

@@ -2,44 +2,44 @@ angular.module('app.alert', [])
 
 // Alert Service
 
-  .factory('AlertService', function() {
-    let service = {
-        add: add,
-        closeAlert: closeAlert,
-        closeAlertIdx: closeAlertIdx,
-        clear: clear,
-        get: get
-      },
-      alerts = [];
+    .factory('AlertService', function() {
+        var service = {
+            add: add,
+            closeAlert: closeAlert,
+            closeAlertIdx: closeAlertIdx,
+            clear: clear,
+            get: get
+        },
+        alerts = [];
 
-    return service;
+        return service;
 
-    function add(type, msg) {
-      return alerts.push({
-        type: type,
-        msg: msg,
-        close: function() {
-          return closeAlert(this);
+        function add(type, msg) {
+            return alerts.push({
+                type: type,
+                msg: msg,
+                close: function() {
+                    return closeAlert(this);
+                }
+            });
         }
-      });
-    }
 
-    function closeAlert(alert) {
-      return closeAlertIdx(alerts.indexOf(alert));
-    }
+        function closeAlert(alert) {
+            return closeAlertIdx(alerts.indexOf(alert));
+        }
 
-    function closeAlertIdx(index) {
-      return alerts.splice(index, 1);
-    }
+        function closeAlertIdx(index) {
+            return alerts.splice(index, 1);
+        }
 
-    function clear(){
-      alerts = [];
-    }
+        function clear(){
+            alerts = [];
+        }
 
-    function get() {
-      return alerts;
-    }
-  })
+        function get() {
+            return alerts;
+        }
+    })
 
 
 
@@ -51,11 +51,11 @@ angular.module('app.alert', [])
 
 // Alerts
 
-  .controller('AlertController', ['$scope', 'AlertService', function ($scope, AlertService) {
+    .controller('AlertController', ['$scope', 'AlertService', function ($scope, AlertService) {
      
-    $scope.alerts = AlertService.get();
+      $scope.alerts = AlertService.get();
 
-  }])
+    }])
 
 
 ;

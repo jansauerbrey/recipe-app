@@ -1,95 +1,111 @@
-'use strict';
+angular.module('app.dishtypes', ['ui.router'])
 
-angular.module('recipeApp.dishtypes', ['ngRoute'])
-  .config(['$routeProvider', function($routeProvider) {
-    $routeProvider.when('/dishtypes', {
-      templateUrl: 'partials/dishtypes.tpl.html',
-      controller: 'DishTypesCtrl'
-    });
-  }])
-  .controller('DishTypesCtrl', ['$scope', '$http', '$location', 'alertService',
-    function($scope, $http, $location, alertService) {
-      $scope.dishTypes = [];
-      $scope.order = 'name';
-      $scope.reverse = false;
-      $scope.loading = true;
-      $scope.error = null;
+//---------------
+// Services
+//---------------
 
-      // Load dish types
-      $http.get('/api/dishtypes')
-        .then(function(response) {
-          $scope.dishTypes = response.data;
-          $scope.loading = false;
-        })
-        .catch(function(error) {
-          $scope.error = error.data?.error || 'Failed to load dish types';
-          $scope.loading = false;
-          alertService.error($scope.error);
+
+        .factory('DishTypes', ['$resource', 'BASE_URI', function($resource, BASE_URI){
+          return $resource(BASE_URI+'api/dishtypes/:id', null, {
+            'update': { method:'PUT' }
+          });
+        }])
+
+
+//---------------
+// Controllers
+//---------------
+
+
+// Dishtypes
+
+    .controller('DishTypesController', ['$scope', 'dishtypes', function ($scope, dishtypes) {
+      $scope.dishtypes = dishtypes;
+    }])
+
+    .controller('DishTypeDetailCtrl', ['$scope', '$stateParams', 'dishtype', 'DishTypes', '$state', function ($scope, $stateParams, dishtype, DishTypes, $state) {
+      $scope.dishtype = dishtype;
+
+      $scope.update = function(){
+        DishTypes.update({id: $scope.dishtype._id}, $scope.dishtype, function(){
+          $state.go('admin.dishtypes.list');
         });
+      }
 
-      $scope.setOrder = function(order) {
-        if ($scope.order === order) {
-          $scope.reverse = !$scope.reverse;
-        } else {
-          $scope.order = order;
-          $scope.reverse = false;
-        }
-      };
+      $scope.remove = function(){
+        DishTypes.remove({id: $scope.dishtype._id}, function(){
+          $state.go('admin.dishtypes.list');
+        });
+      }
 
-      $scope.addDishType = function() {
-        if (!$scope.newDishType?.name) {
-          alertService.error('Name is required');
-          return;
-        }
+      $scope.save = function(){
+        if(!$scope.newdishtype || $scope.newdishtype.length < 1) return;
+        var dishtype_new = new DishTypes({ name: { en: $scope.newdishtype.name.en, de: $scope.newdishtype.name.de,  fi: $scope.newdishtype.name.fi} , order: $scope.newdishtype.order, imagePath: $scope.newdishtype.imagePath});
 
-        $http.post('/api/dishtypes', $scope.newDishType)
-          .then(function(response) {
-            $scope.dishTypes.push(response.data);
-            $scope.newDishType = {};
-            alertService.success('Dish type added successfully');
-          })
-          .catch(function(error) {
-            alertService.error(error.data?.error || 'Failed to add dish type');
-          });
-      };
+        dishtype_new.$save(function(){
+          $state.go('admin.dishtypes.list');
+        });
+      }
 
-      $scope.editDishType = function(dishType) {
-        $scope.selectedDishType = angular.copy(dishType);
-      };
+    }])
 
-      $scope.saveDishType = function(dishType) {
-        if (!dishType.name) {
-          alertService.error('Name is required');
-          return;
-        }
 
-        $http.put('/api/dishtypes/' + dishType._id, dishType)
-          .then(function() {
-            const index = $scope.dishTypes.findIndex(item => item._id === dishType._id);
-            if (index !== -1) {
-              $scope.dishTypes[index] = dishType;
-            }
-            $scope.selectedDishType = null;
-            alertService.success('Dish type updated successfully');
-          })
-          .catch(function(error) {
-            alertService.error(error.data?.error || 'Failed to update dish type');
-          });
-      };
 
-      $scope.deleteDishType = function(dishType) {
-        if (!confirm('Are you sure you want to delete this dish type?')) {
-          return;
-        }
+//---------------
+// Routes
+//---------------
 
-        $http.delete('/api/dishtypes/' + dishType._id)
-          .then(function() {
-            $scope.dishTypes = $scope.dishTypes.filter(item => item._id !== dishType._id);
-            alertService.success('Dish type deleted successfully');
-          })
-          .catch(function(error) {
-            alertService.error(error.data?.error || 'Failed to delete dish type');
-          });
-      };
-    }
-  ]);
+  .config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
+
+    $stateProvider	
+    .state('admin.dishtypes', {
+      abstract: true,
+      url: '/dishtypes',
+      template: "<ui-view />",
+      data: {
+        title: 'Dish types'
+      }
+    })
+    .state('admin.dishtypes.list', {
+      url: '/list',
+        		templateUrl: 'partials/dishtypes.tpl.html',
+        		controller: 'DishTypesController',
+      resolve: {
+        dishtypes: ['DishTypes', function(DishTypes){
+          return DishTypes.query().$promise;
+        }]
+      },
+      data: {
+  			name: 'Dish types',
+  			icon: 'glyphicon glyphicon-grain'
+      }
+      		})
+      		.state('admin.dishtypes.edit', {
+      url: '/edit/:id',
+        		templateUrl: 'partials/dishtypes.details.tpl.html',
+        		controller: 'DishTypeDetailCtrl',
+      resolve: {
+        dishtype: ['DishTypes', '$stateParams', function(DishTypes, $stateParams){
+          var dishtype = DishTypes.get({'id': $stateParams.id}, function(response) {
+            return response;
+          }).$promise;
+          return dishtype;
+        }]
+      }
+     		})
+      		.state('admin.dishtypes.add', {
+      url: '/add',
+        		templateUrl: 'partials/dishtypes.add.tpl.html',
+        		controller: 'DishTypeDetailCtrl',
+      resolve: {
+        dishtype: ['DishTypes', function(DishTypes){
+          var dishtype = new DishTypes();
+          return dishtype;
+        }]
+      }
+      		})
+    ;
+  }])
+;
+
+
