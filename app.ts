@@ -11,6 +11,7 @@ import {
   validateResponse,
 } from './src/presentation/middleware/validation.middleware.ts';
 import { rateLimitMiddleware } from './src/presentation/middleware/rate-limit.middleware.ts';
+import { payloadLimitMiddleware } from './src/presentation/middleware/payload-limit.middleware.ts';
 import { AppMiddleware, AppState, createMiddleware } from './src/types/middleware.ts';
 import { AppError } from './src/types/errors.ts';
 
@@ -97,6 +98,9 @@ export async function createApp() {
 
   // Rate limiting middleware
   app.use(rateLimitMiddleware);
+
+  // Payload size limiting middleware
+  app.use(payloadLimitMiddleware);
 
   // Security headers middleware
   app.use(createMiddleware(async (ctx, next) => {
