@@ -1,6 +1,6 @@
 {
   "name": "recipeApp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "scripts": {
     "start": "deno run --allow-net --allow-read --allow-env app.ts",
@@ -9,10 +9,18 @@
     "clean": "rm -rf www/ && mkdir www",
     "cap:sync": "cap sync",
     "cap:open:android": "cap open android",
-    "cap:build:android": "cap build android"
+    "cap:build:android": "cap build android",
+    "lint": "eslint . --ext .ts,.js",
+    "lint:fix": "eslint . --ext .ts,.js --fix",
+    "test": "./test.sh",
+    "version:patch": "npm version patch",
+    "version:minor": "npm version minor",
+    "version:major": "npm version major",
+    "preversion": "npm run test",
+    "postversion": "git push && git push --tags"
   },
   "dependencies": {
-    "@capacitor/android": "^6.0.0",
+    "@capacitor/android": "^6.2.0",
     "@capacitor/core": "^6.0.0",
     "@capacitor/splash-screen": "^6.0.3",
     "bcrypt": "^5.1.1",
@@ -36,6 +44,13 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^6.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
     "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   }
 }
