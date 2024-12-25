@@ -41,14 +41,14 @@ export class RecipeController extends BaseController {
         await this.badRequest(ctx, err.message);
       } else if (err instanceof AppError) {
         switch (err.statusCode) {
-          case Status.BadRequest:
-            await this.badRequest(ctx, err.message);
-            break;
-          case Status.Unauthorized:
-            await this.unauthorized(ctx, err.message);
-            break;
-          default:
-            await this.internalServerError(ctx, err.message);
+        case Status.BadRequest:
+          await this.badRequest(ctx, err.message);
+          break;
+        case Status.Unauthorized:
+          await this.unauthorized(ctx, err.message);
+          break;
+        default:
+          await this.internalServerError(ctx, err.message);
         }
       } else {
         await this.internalServerError(ctx, 'Failed to create recipe');
@@ -74,11 +74,11 @@ export class RecipeController extends BaseController {
         await this.badRequest(ctx, err.message);
       } else if (err instanceof AppError) {
         switch (err.statusCode) {
-          case Status.BadRequest:
-            await this.badRequest(ctx, err.message);
-            break;
-          default:
-            await this.internalServerError(ctx, err.message);
+        case Status.BadRequest:
+          await this.badRequest(ctx, err.message);
+          break;
+        default:
+          await this.internalServerError(ctx, err.message);
         }
       } else {
         await this.internalServerError(ctx, 'Failed to get recipe');
@@ -100,11 +100,11 @@ export class RecipeController extends BaseController {
 
       if (err instanceof AppError) {
         switch (err.statusCode) {
-          case Status.Unauthorized:
-            await this.unauthorized(ctx, err.message);
-            break;
-          default:
-            await this.internalServerError(ctx, err.message);
+        case Status.Unauthorized:
+          await this.unauthorized(ctx, err.message);
+          break;
+        default:
+          await this.internalServerError(ctx, err.message);
         }
       } else {
         await this.internalServerError(ctx, 'Failed to list recipes');
@@ -133,11 +133,11 @@ export class RecipeController extends BaseController {
         await this.badRequest(ctx, err.message);
       } else if (err instanceof AppError) {
         switch (err.statusCode) {
-          case Status.BadRequest:
-            await this.badRequest(ctx, err.message);
-            break;
-          default:
-            await this.internalServerError(ctx, err.message);
+        case Status.BadRequest:
+          await this.badRequest(ctx, err.message);
+          break;
+        default:
+          await this.internalServerError(ctx, err.message);
         }
       } else {
         await this.internalServerError(ctx, 'Failed to update recipe');
@@ -163,11 +163,11 @@ export class RecipeController extends BaseController {
         await this.badRequest(ctx, err.message);
       } else if (err instanceof AppError) {
         switch (err.statusCode) {
-          case Status.BadRequest:
-            await this.badRequest(ctx, err.message);
-            break;
-          default:
-            await this.internalServerError(ctx, err.message);
+        case Status.BadRequest:
+          await this.badRequest(ctx, err.message);
+          break;
+        default:
+          await this.internalServerError(ctx, err.message);
         }
       } else {
         await this.internalServerError(ctx, 'Failed to delete recipe');

@@ -1,17 +1,17 @@
-import { Context } from "oak";
-import { AuthorizationError } from "../../../types/errors.ts";
+import { Context } from 'oak';
+import { AuthorizationError } from '../../../types/errors.ts';
 
 export function checkRole(allowedRoles: string[]) {
   return async function(ctx: Context, next: () => Promise<void>) {
     const user = ctx.state.user;
     
     if (!user || !user.role) {
-      throw new AuthorizationError("User role not found");
+      throw new AuthorizationError('User role not found');
     }
 
     if (!allowedRoles.includes(user.role)) {
       throw new AuthorizationError(
-        `Access denied. Required roles: ${allowedRoles.join(", ")}`
+        `Access denied. Required roles: ${allowedRoles.join(', ')}`
       );
     }
 
@@ -43,18 +43,18 @@ export function checkOwnership(getUserId: (ctx: Context) => string | Promise<str
     const user = ctx.state.user;
     
     if (!user) {
-      throw new AuthorizationError("User not found");
+      throw new AuthorizationError('User not found');
     }
 
     // Allow admins to bypass ownership check
-    if (user.role === "admin") {
+    if (user.role === 'admin') {
       return await next();
     }
 
     const resourceUserId = await Promise.resolve(getUserId(ctx));
     
     if (user.id !== resourceUserId) {
-      throw new AuthorizationError("You do not have permission to access this resource");
+      throw new AuthorizationError('You do not have permission to access this resource');
     }
 
     await next();
