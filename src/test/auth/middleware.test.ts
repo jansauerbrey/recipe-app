@@ -1,20 +1,13 @@
 import { assertEquals, assertExists } from 'https://deno.land/std@0.208.0/testing/asserts.ts';
-import { afterEach, beforeEach, describe, it } from 'https://deno.land/std@0.208.0/testing/bdd.ts';
 import { cleanupTest, setupTest } from '../test_utils.ts';
 import { createAuthHeader } from '../utils/helpers.ts';
 
-describe('Auth Middleware Tests', () => {
-  let testContext: any;
+Deno.test({
+  name: 'Auth Middleware - should pass with valid token',
+  async fn() {
+    const testContext = await setupTest();
 
-  beforeEach(async () => {
-    testContext = await setupTest();
-  });
-
-  afterEach(async () => {
-    await cleanupTest();
-  });
-
-  it('should pass with valid token', async () => {
+    try {
       const response = await fetch(
         `http://localhost:${testContext.port}/api/user/check`,
         {
@@ -26,9 +19,21 @@ describe('Auth Middleware Tests', () => {
       const body = await response.json();
       assertExists(body.user);
       assertEquals(body.user.id, testContext.testUserId);
-  });
+    } finally {
+      await testContext.server.close();
+      await cleanupTest();
+    }
+  },
+  sanitizeResources: false,
+  sanitizeOps: false,
+});
 
-  it('should reject missing auth header', async () => {
+Deno.test({
+  name: 'Auth Middleware - should reject missing auth header',
+  async fn() {
+    const testContext = await setupTest();
+
+    try {
       const response = await fetch(
         `http://localhost:${testContext.port}/api/user/check`,
       );
@@ -36,9 +41,21 @@ describe('Auth Middleware Tests', () => {
       assertEquals(response.status, 401);
       const body = await response.json();
       assertEquals(body.error, 'No authorization token provided');
-  });
+    } finally {
+      await testContext.server.close();
+      await cleanupTest();
+    }
+  },
+  sanitizeResources: false,
+  sanitizeOps: false,
+});
 
-  it('should reject invalid token', async () => {
+Deno.test({
+  name: 'Auth Middleware - should reject invalid token',
+  async fn() {
+    const testContext = await setupTest();
+
+    try {
       const response = await fetch(
         `http://localhost:${testContext.port}/api/user/check`,
         {
@@ -51,5 +68,11 @@ describe('Auth Middleware Tests', () => {
       assertEquals(response.status, 401);
       const body = await response.json();
       assertEquals(body.error, 'Invalid token');
-  });
+    } finally {
+      await testContext.server.close();
+      await cleanupTest();
+    }
+  },
+  sanitizeResources: false,
+  sanitizeOps: false,
 });
