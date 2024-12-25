@@ -1,235 +1,144 @@
-# Recipe App API
+# Recipe App
 
-A modern recipe management API built with Deno and Oak, featuring comprehensive API documentation, request/response validation, and robust authentication.
+![CI/CD Pipeline](https://github.com/[username]/recipe-app/workflows/CI%2FCD%20Pipeline/badge.svg)
+![Version](https://img.shields.io/github/package-json/v/[username]/recipe-app)
+
+A mobile recipe management application built with Capacitor.
 
 ## Features
 
-- 🔐 JWT-based authentication with role-based access control
-- 📚 OpenAPI/Swagger documentation
-- ✅ Request/response validation against OpenAPI schemas
-- 🚦 Rate limiting protection
-- 📁 File upload handling with validation
-- 🔄 Auto-generated TypeScript types from OpenAPI spec
-- 🛡️ Security headers and CORS configuration
-- 🗃️ MongoDB integration with typed repositories
-- 🧱 Clean architecture with separation of concerns
+- Recipe management
+- Shopping lists
+- Meal planning
+- Categories and tags
+- User authentication
+- Offline support
 
-## Getting Started
+## Development Setup
 
 ### Prerequisites
 
-- Deno 1.37 or higher
-- MongoDB 5.0 or higher
-- Node.js 18+
-- Android Studio (for Android app development)
+- Node.js >= 18.0.0
+- npm >= 9.0.0
+- Deno
+- Android Studio (for Android development)
 
-### Quick Start
+### Installation
 
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/recipe-app.git
+git clone https://github.com/[username]/recipe-app.git
 cd recipe-app
 ```
 
-2. Run the setup script:
-
-```bash
-./setup.sh
-```
-
-The setup script will:
-
-- Check Deno installation and version
-- Create and configure .env file
-- Set up upload directory
-- Cache dependencies
-- Generate TypeScript types from OpenAPI spec
-- Validate environment configuration
-- Format code and run linter
-
-3. Start the development server:
-
-```bash
-deno task dev
-```
-
-### Manual Installation
-
-If you prefer to set up manually:
-
-1. Create and configure .env file:
-
-```bash
-cp .env.example .env
-```
-
-2. Install dependencies and generate types:
-
-```bash
-deno cache app.ts
-deno task generate-types
-```
-
-3. Validate your configuration:
-
-```bash
-deno task validate-env
-```
-
-### Development Commands
-
-```bash
-# Start development server
-deno task dev
-
-# Start production server
-deno task start
-
-# Generate API types from OpenAPI spec
-deno task generate-types
-
-# Validate environment configuration
-deno task validate-env
-
-# Format code
-deno task fmt
-
-# Run linter
-deno task lint
-
-# Build project (validates env, generates types, formats, and lints)
-deno task build
-```
-
-### API Documentation
-
-Access the Swagger UI documentation at:
-
-```
-http://localhost:3000/api-docs
-```
-
-## Project Structure
-
-```
-├── src/
-│   ├── business/           # Business logic layer
-│   │   └── services/       # Service implementations
-│   ├── data/              # Data access layer
-│   │   └── repositories/   # MongoDB repositories
-│   ├── presentation/      # Presentation layer
-│   │   ├── controllers/   # Request handlers
-│   │   ├── middleware/    # Custom middleware
-│   │   └── routes/        # Route definitions
-│   ├── types/            # TypeScript types and interfaces
-│   └── openapi/          # OpenAPI documentation
-├── scripts/              # Build and utility scripts
-└── android/            # Native Android app (Capacitor)
-```
-
-## Authentication
-
-The API uses JWT tokens for authentication. Include the token in the Authorization header:
-
-```
-Authorization: AUTH <token>
-```
-
-## API Endpoints
-
-### Authentication
-
-- POST /api/user/login - Authenticate user
-- GET /api/user/check - Validate token
-
-### Recipes
-
-- GET /api/recipes - List user recipes
-- POST /api/recipes - Create recipe
-- GET /api/recipes/{id} - Get recipe details
-- PUT /api/recipes/{id} - Update recipe
-- DELETE /api/recipes/{id} - Delete recipe
-
-## Mobile App Development
-
-### Android App Setup
-
-1. Install dependencies:
+2. Install dependencies:
 
 ```bash
 npm install
 ```
 
-2. Build the web assets:
+3. Set up environment variables:
 
 ```bash
-npm run build
+cp .env.example .env
+# Edit .env with your configuration
 ```
 
-3. Sync Capacitor project:
+### Development Workflow
+
+1. Create a feature branch:
 
 ```bash
+git checkout -b feature/your-feature
+```
+
+2. Make your changes and test:
+
+```bash
+# Run tests
+npm test
+
+# Check code quality
+npm run lint
+
+# Fix linting issues
+npm run lint:fix
+```
+
+3. Commit your changes:
+
+```bash
+git add .
+git commit -m "describe your changes"
+git push origin feature/your-feature
+```
+
+4. Create a Pull Request to the main branch
+
+### Building the App
+
+Build debug APK:
+
+```bash
+# Sync Capacitor
 npm run cap:sync
-```
 
-4. Open in Android Studio:
-
-```bash
-npm run cap:open:android
-```
-
-5. Build APK:
-
-```bash
+# Build Android app
 npm run cap:build:android
 ```
 
-### Mobile Features
+The APK will be available at:
 
-- Native splash screen
-- Offline support
-- Native navigation
-- Secure HTTPS communication
-- Modern Android SDK support
+```
+android/app/build/outputs/apk/debug/app-debug.apk
+```
 
-## Recent Improvements
+## Deployment
 
-1. **Mobile App Migration**
-   - Migrated from Cordova to Capacitor
-   - Modern native Android implementation
-   - Improved performance and native features
-   - Better development workflow
+The deployment process is simple and automated:
 
-1. **API Documentation**
-   - Added OpenAPI/Swagger documentation
-   - JSDoc comments for better IDE integration
-   - Auto-generated TypeScript types
+1. When code is merged to main branch, the CI pipeline:
+   - Runs all tests
+   - Checks code quality
+   - Performs security scan
+   - Builds the APK
+   - Creates a new GitHub Release
+   - Uploads the APK to the release
 
-1. **Authentication & Security**
-   - Split authentication middleware into separate concerns
-   - Added role-based authorization
-   - Implemented rate limiting
-   - Added security headers
+2. To get the latest version:
+   - Go to the GitHub repository
+   - Click on "Releases"
+   - Download the latest app-debug.apk
 
-1. **Validation**
-   - Request/response validation against OpenAPI schemas
-   - File upload validation
-   - Error handling improvements
+3. To install on Android:
+   - Transfer the APK to your Android device
+   - Open the APK file on your device
+   - Follow the installation prompts
 
-1. **Code Quality**
-   - Proper TypeScript types for MongoDB
-   - Improved error handling
-   - Better separation of concerns
+## Version Management
 
-## Contributing
+The app uses semantic versioning:
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+```bash
+# For bug fixes
+npm run version:patch
 
-## License
+# For new features
+npm run version:minor
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+# For breaking changes
+npm run version:major
+```
+
+## Support
+
+For support and questions:
+
+1. Check existing issues or create a new one
+2. Review the documentation
+3. Contact the development team
+
+## Security
+
+To report security vulnerabilities, please use the GitHub Security Advisory feature.
