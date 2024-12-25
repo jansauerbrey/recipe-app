@@ -1,4 +1,4 @@
-declare module "std/fs/mod.ts" {
+declare module 'std/fs/mod.ts' {
   export interface WalkOptions {
     maxDepth?: number;
     includeFiles?: boolean;
@@ -24,7 +24,7 @@ declare module "std/fs/mod.ts" {
   export function remove(path: string, options?: { recursive?: boolean }): Promise<void>;
 }
 
-declare module "std/path/mod.ts" {
+declare module 'std/path/mod.ts' {
   export function join(...paths: string[]): string;
   export function dirname(path: string): string;
   export function basename(path: string): string;
@@ -36,7 +36,7 @@ declare module "std/path/mod.ts" {
   export const SEP: string;
 }
 
-declare module "std/flags/mod.ts" {
+declare module 'std/flags/mod.ts' {
   export interface ParseOptions {
     string?: string[];
     boolean?: string[];
@@ -45,7 +45,7 @@ declare module "std/flags/mod.ts" {
   export function parse(args: string[], options?: ParseOptions): Record<string, any>;
 }
 
-declare module "std/fmt/colors.ts" {
+declare module 'std/fmt/colors.ts' {
   export function green(str: string | number): string;
   export function red(str: string | number): string;
   export function yellow(str: string | number): string;
@@ -56,7 +56,7 @@ declare module "std/fmt/colors.ts" {
   export function underline(str: string): string;
 }
 
-declare module "std/testing/mod.ts" {
+declare module 'std/testing/mod.ts' {
   export interface TestDefinition {
     name: string;
     fn: () => Promise<void>;
@@ -87,7 +87,7 @@ declare module "std/testing/mod.ts" {
   export function test(name: string, fn: () => void | Promise<void>): Promise<TestResult>;
 }
 
-declare module "bdd" {
+declare module 'bdd' {
   export function describe(name: string, fn: () => void): void;
   export function it(name: string, fn: () => void | Promise<void>): void;
   export function beforeEach(fn: () => void | Promise<void>): void;
@@ -96,7 +96,7 @@ declare module "bdd" {
   export function afterAll(fn: () => void | Promise<void>): void;
 }
 
-declare module "testing/mod.ts" {
+declare module 'testing/mod.ts' {
   export interface TestDefinition {
     name: string;
     fn: () => Promise<void>;
@@ -127,7 +127,7 @@ declare module "testing/mod.ts" {
   export function test(name: string, fn: () => void | Promise<void>): Promise<TestResult>;
 }
 
-declare module "testing/asserts.ts" {
+declare module 'testing/asserts.ts' {
   type ErrorConstructor = new (...args: any[]) => Error;
 
   export function assertEquals(actual: unknown, expected: unknown, msg?: string): void;
@@ -149,8 +149,8 @@ declare interface ImportMeta {
 
 declare namespace Deno {
   export const test: {
-    (def: import("testing/mod.ts").TestDefinition): Promise<import("testing/mod.ts").TestResult>;
-    (name: string, fn: () => void | Promise<void>): Promise<import("testing/mod.ts").TestResult>;
+    (def: import('testing/mod.ts').TestDefinition): Promise<import('testing/mod.ts').TestResult>;
+    (name: string, fn: () => void | Promise<void>): Promise<import('testing/mod.ts').TestResult>;
   };
   export const args: string[];
   export const watchFs: (paths: string[]) => AsyncIterableIterator<{ kind: string; paths: string[]; }>;

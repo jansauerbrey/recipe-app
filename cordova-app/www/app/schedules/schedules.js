@@ -32,106 +32,106 @@ angular.module('app.schedules', ['ui.router', 'modalstate'])
           	data.activeDate = date;
           };
           
-		      var selectPeriod = function(date, days){
-		      	if (!date){
-		      		if (!data.activeDate) {
-		      			setActiveDate();
-		      		}
-		      		date = data.activeDate;
-		      	}
-		      	if (!days){
-		      		days = 7;
-		      	}
-		      	var selectedDates = [];
-						for(i=0;i<days;i++){
-							var tempDate = new Date(date.getTime());
-							tempDate.setDate(tempDate.getDate()+i);
-			      	tempDate.setHours(0, 0, 0, 0);
-							selectedDates.push(tempDate.getTime());
-						}
-						data.selectedDates = selectedDates;
-						$rootScope.$broadcast("selectedDatesUpdated");
-					};
-					
-							
-					var selectWeek = function(weekDelta){ //dayDelta should be user settings
-						var today = new Date();
-						var deltaWeekStart = today.getDay();
-						var userDelta = UserService.data.currentUser.settings.preferredWeekStartDay ? UserService.data.currentUser.settings.preferredWeekStartDay : 0;
-						if (deltaWeekStart < userDelta) {
-							today.setDate(today.getDate() - today.getDay() + userDelta - 7 + weekDelta*7);
-						} else {
-							today.setDate(today.getDate() - today.getDay() + userDelta + weekDelta*7); 
-						}
-						selectPeriod(today, 7);
-						update();
-					};
+          var selectPeriod = function(date, days){
+          	if (!date){
+          		if (!data.activeDate) {
+          			setActiveDate();
+          		}
+          		date = data.activeDate;
+          	}
+          	if (!days){
+          		days = 7;
+          	}
+          	var selectedDates = [];
+            for(i=0;i<days;i++){
+              var tempDate = new Date(date.getTime());
+              tempDate.setDate(tempDate.getDate()+i);
+            	tempDate.setHours(0, 0, 0, 0);
+              selectedDates.push(tempDate.getTime());
+            }
+            data.selectedDates = selectedDates;
+            $rootScope.$broadcast("selectedDatesUpdated");
+          };
+          
+              
+          var selectWeek = function(weekDelta){ //dayDelta should be user settings
+            var today = new Date();
+            var deltaWeekStart = today.getDay();
+            var userDelta = UserService.data.currentUser.settings.preferredWeekStartDay ? UserService.data.currentUser.settings.preferredWeekStartDay : 0;
+            if (deltaWeekStart < userDelta) {
+              today.setDate(today.getDate() - today.getDay() + userDelta - 7 + weekDelta*7);
+            } else {
+              today.setDate(today.getDate() - today.getDay() + userDelta + weekDelta*7); 
+            }
+            selectPeriod(today, 7);
+            update();
+          };
 
           	
-		      var retrieve = function(){
-		      	var deferred = $q.defer();
-		      	var startDateTemp = Math.min.apply(null, data.selectedDates);
-		      	var endDateTemp = Math.max.apply(null, data.selectedDates);
-		      	var startDate = new Date(startDateTemp);
-		      	startDate.setHours(0,0,0,0);
-		      	startDate = startDate.getTime();
-		      	var endDate = new Date(endDateTemp);
-		      	endDate.setDate(endDate.getDate() +1);
-		      	endDate.setHours(0,0,0,0);
-		      	endDate = endDate.getTime();
-		      	Schedules.query({startDate: startDate, endDate: endDate}, function(response){
-		      		var grouped = [];
-		      		for(i=0;i<data.selectedDates.length;i++){
-		      			var actualDay = new Date(data.selectedDates[i]);
-			          actualDay.setHours(0, 0, 0, 0);
-			          grouped[i] = {date: actualDay, schedule: []};
-		      		}
-		      		for(i=0;i<response.length;i++){
-		      			var actualDay = new Date(response[i].date);
-			          actualDay.setHours(0, 0, 0, 0);
-			          for (j=0;j<data.selectedDates.length;j++)
-		  					{
-		    					if (angular.equals(grouped[j].date, actualDay)	) {
-		    						grouped[j].schedule.push(response[i]);
-		    					}
-		  					} 
-		      		}
-							deferred.resolve(grouped);
-						});
-				    return deferred.promise;
-		      };
-		      
-		      var update = function(){
-		      	retrieve().then(function(response){
-		      		data.schedules = response;
-							$rootScope.$broadcast("schedulesUpdated");
-		      	});
-		      };
-		      
-		      
-		      var remove = function(lineItem, parentIndex){
-		        Schedules.remove({id: lineItem._id}, function(){
-		        	var index = data.schedules[parentIndex].schedule.indexOf(lineItem);
-		          data.schedules[parentIndex].schedule.splice(index, 1);
-							$rootScope.$broadcast("schedulesUpdated");
-		          var message = 'The recipe '+lineItem.recipe.name+' was successfully removed from schedule';
-			        AlertService.add('info', message);
-		        });
-		      };
-		      
-		      setActiveDate();
-		      
-		      
-		      return {
-		      	data: data,
-		      	setActiveDate: setActiveDate,
-		      	selectPeriod: selectPeriod,
-		      	selectWeek: selectWeek,
-		      	update: update,
+          var retrieve = function(){
+          	var deferred = $q.defer();
+          	var startDateTemp = Math.min.apply(null, data.selectedDates);
+          	var endDateTemp = Math.max.apply(null, data.selectedDates);
+          	var startDate = new Date(startDateTemp);
+          	startDate.setHours(0,0,0,0);
+          	startDate = startDate.getTime();
+          	var endDate = new Date(endDateTemp);
+          	endDate.setDate(endDate.getDate() +1);
+          	endDate.setHours(0,0,0,0);
+          	endDate = endDate.getTime();
+          	Schedules.query({startDate: startDate, endDate: endDate}, function(response){
+          		var grouped = [];
+          		for(i=0;i<data.selectedDates.length;i++){
+          			var actualDay = new Date(data.selectedDates[i]);
+                actualDay.setHours(0, 0, 0, 0);
+                grouped[i] = {date: actualDay, schedule: []};
+          		}
+          		for(i=0;i<response.length;i++){
+          			var actualDay = new Date(response[i].date);
+                actualDay.setHours(0, 0, 0, 0);
+                for (j=0;j<data.selectedDates.length;j++)
+      					{
+        					if (angular.equals(grouped[j].date, actualDay)	) {
+        						grouped[j].schedule.push(response[i]);
+        					}
+      					} 
+          		}
+              deferred.resolve(grouped);
+            });
+            return deferred.promise;
+          };
+          
+          var update = function(){
+          	retrieve().then(function(response){
+          		data.schedules = response;
+              $rootScope.$broadcast("schedulesUpdated");
+          	});
+          };
+          
+          
+          var remove = function(lineItem, parentIndex){
+            Schedules.remove({id: lineItem._id}, function(){
+            	var index = data.schedules[parentIndex].schedule.indexOf(lineItem);
+              data.schedules[parentIndex].schedule.splice(index, 1);
+              $rootScope.$broadcast("schedulesUpdated");
+              var message = 'The recipe '+lineItem.recipe.name+' was successfully removed from schedule';
+              AlertService.add('info', message);
+            });
+          };
+          
+          setActiveDate();
+          
+          
+          return {
+          	data: data,
+          	setActiveDate: setActiveDate,
+          	selectPeriod: selectPeriod,
+          	selectWeek: selectWeek,
+          	update: update,
             retrieve: retrieve,
             remove: remove
         	}
-		    }])
+        }])
 
 
 //---------------
@@ -142,17 +142,17 @@ angular.module('app.schedules', ['ui.router', 'modalstate'])
 
     .controller('SchedulesController', ['$scope', '$stateParams', '$uibModal', 'Schedules', 'schedules', 'SchedulesService', 'RandomRecipe', function ($scope, $stateParams, $uibModal, Schedules, schedules, SchedulesService, RandomRecipe) {
 
-			$scope.selectedDates = SchedulesService.data.selectedDates;
+      $scope.selectedDates = SchedulesService.data.selectedDates;
       $scope.$on("selectedDatesUpdated", function(){
       	$scope.selectedDates = SchedulesService.data.selectedDates;
       });
       
-			$scope.schedulesArray = SchedulesService.data.schedules;
+      $scope.schedulesArray = SchedulesService.data.schedules;
       $scope.$on("schedulesUpdated", function(){
       	$scope.schedulesArray = SchedulesService.data.schedules;
       });
       
-			$scope.activeDate = SchedulesService.data.activeDate;
+      $scope.activeDate = SchedulesService.data.activeDate;
       SchedulesService.setActiveDate();
 
       $scope.datepickerOptions = {startingDay: 1, showWeeks: false};
@@ -160,15 +160,15 @@ angular.module('app.schedules', ['ui.router', 'modalstate'])
       $scope.selectSevenDays = function(date){
       	SchedulesService.selectPeriod(date, 7);
       }
-			$scope.selectSevenDays($scope.activeDate);
+      $scope.selectSevenDays($scope.activeDate);
       
-			$scope.updateSchedules = function(){
-				SchedulesService.update();
-			}
-			
-			$scope.selectWeek = function(weekDelta){
-				SchedulesService.selectWeek(weekDelta);
-			}
+      $scope.updateSchedules = function(){
+        SchedulesService.update();
+      }
+      
+      $scope.selectWeek = function(weekDelta){
+        SchedulesService.selectWeek(weekDelta);
+      }
 
 
       $scope.remove = function(lineItem, parentIndex){
@@ -176,18 +176,18 @@ angular.module('app.schedules', ['ui.router', 'modalstate'])
       }
 
       $scope.scheduleEdit = function(lineItem) {
-	      $uibModal.open({
-	        animation: true,
-	        templateUrl: 'partials/schedules.edit.tpl.html',
-	        controller: 'ModalScheduleEditController',
-	        size: 'xs',
-	        resolve: {
-	            schedule: function(){
-	              return lineItem;
-	            }
-	        }
-	      });
-	
+        $uibModal.open({
+          animation: true,
+          templateUrl: 'partials/schedules.edit.tpl.html',
+          controller: 'ModalScheduleEditController',
+          size: 'xs',
+          resolve: {
+              schedule: function(){
+                return lineItem;
+              }
+          }
+        });
+  
       }
    	
     }])
@@ -201,7 +201,7 @@ angular.module('app.schedules', ['ui.router', 'modalstate'])
       $scope.remove = function(){
         Schedules.remove({id: schedule._id}, function(){
           var message = 'The recipe '+schedule.recipe.name+' was successfully removed from schedule';
-	        AlertService.add('info', message);
+          AlertService.add('info', message);
           SchedulesService.update();
           $uibModalInstance.close();
         });
@@ -286,22 +286,22 @@ angular.module('app.schedules', ['ui.router', 'modalstate'])
 
     $stateProvider
       		.state('user.schedules', {
-			url: '/schedules',
-			views: {
-				'main': {
-		      templateUrl: 'partials/schedules.tpl.html',
-		      controller: 'SchedulesController'
+      url: '/schedules',
+      views: {
+        'main': {
+          templateUrl: 'partials/schedules.tpl.html',
+          controller: 'SchedulesController'
       	}
-			},
-			resolve: {
-				schedules: ['SchedulesService', function(SchedulesService){
-						SchedulesService.selectPeriod();
-						return SchedulesService.update();
-				}]
-			},
-			data: {
-	      title: 'Schedules'
-			}
+      },
+      resolve: {
+        schedules: ['SchedulesService', function(SchedulesService){
+            SchedulesService.selectPeriod();
+            return SchedulesService.update();
+        }]
+      },
+      data: {
+        title: 'Schedules'
+      }
       		})
     ;
     
@@ -310,20 +310,20 @@ angular.module('app.schedules', ['ui.router', 'modalstate'])
       .state('user.schedules.add', {
       	url: '/add',
       	templateUrl: 'partials/schedules.add.tpl.html',
-		    controller: 'ModalScheduleAddController',
-				params: {
-					date: undefined,
-					recipe: undefined
-				},
-		    resolve: {
+        controller: 'ModalScheduleAddController',
+        params: {
+          date: undefined,
+          recipe: undefined
+        },
+        resolve: {
           randomRecipes: [ 'RandomRecipe', function(RandomRecipe){
-						var randomRecipes = RandomRecipe.query({'number': '3'}, function(response){
-							return response;
-						});
-						
-						return randomRecipes;
+            var randomRecipes = RandomRecipe.query({'number': '3'}, function(response){
+              return response;
+            });
+            
+            return randomRecipes;
           }]
-		    }
+        }
       })
     ;
     
