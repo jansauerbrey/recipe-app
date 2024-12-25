@@ -14,7 +14,7 @@ declare interface EnvConfig {
   MONGODB_URI: string;
   RATE_LIMIT_WINDOW_MS: string;
   RATE_LIMIT_MAX_REQUESTS: string;
-  ENVIRONMENT: "development" | "production";
+  ENVIRONMENT: 'development' | 'production';
   JWT_SECRET: string;
 }
 
@@ -24,6 +24,6 @@ declare interface RequestError extends Error {
 }
 
 // Extend Oak's Context state
-declare module "oak" {
+declare module 'oak' {
   interface State extends AppState {}
 }
