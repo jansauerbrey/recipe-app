@@ -15,7 +15,7 @@ Deno.test({
         // Send HTTP request
         const encoder = new TextEncoder();
         const request = encoder.encode(
-          `GET /api/user/check HTTP/1.1\r\n` +
+          'GET /api/user/check HTTP/1.1\r\n' +
             `Host: localhost:${testContext.port}\r\n` +
             'Connection: close\r\n\r\n',
         );

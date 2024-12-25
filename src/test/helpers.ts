@@ -1,7 +1,7 @@
-import { type Context } from "oak";
-import { create, verify } from "djwt";
+import { type Context } from 'oak';
+import { create, verify } from 'djwt';
 
-const TEST_SECRET = "test-secret-key";
+const TEST_SECRET = 'test-secret-key';
 
 export interface MockContext extends Omit<Context, 'request' | 'response' | 'state'> {
   request: {
@@ -36,7 +36,7 @@ export function createMockContext(options: {
 } = {}): MockContext {
   const headers = new Headers();
   if (options.token) {
-    headers.set("Authorization", `Bearer ${options.token}`);
+    headers.set('Authorization', `Bearer ${options.token}`);
   }
   if (options.headers) {
     Object.entries(options.headers).forEach(([key, value]) => {
@@ -46,16 +46,16 @@ export function createMockContext(options: {
 
   return {
     request: {
-      method: options.method || "GET",
-      url: new URL("http://localhost:8000"),
+      method: options.method || 'GET',
+      url: new URL('http://localhost:8000'),
       headers,
-      body: () => ({ type: "json", value: Promise.resolve({}) }),
+      body: () => ({ type: 'json', value: Promise.resolve({}) }),
     },
     response: {
       status: 200,
       body: null,
       headers: new Headers(),
-      type: "application/json",
+      type: 'application/json',
     },
     state: {},
     cookies: {
@@ -75,7 +75,7 @@ export function createMockContext(options: {
 
 export async function createTestToken(payload: { sub: string; role: string }): Promise<string> {
   const jwt = await create(
-    { alg: "HS256", typ: "JWT" },
+    { alg: 'HS256', typ: 'JWT' },
     {
       ...payload,
       exp: Date.now() / 1000 + 3600, // 1 hour from now
@@ -87,7 +87,7 @@ export async function createTestToken(payload: { sub: string; role: string }): P
 
 export async function createExpiredToken(payload: { sub: string; role: string }): Promise<string> {
   const jwt = await create(
-    { alg: "HS256", typ: "JWT" },
+    { alg: 'HS256', typ: 'JWT' },
     {
       ...payload,
       exp: Date.now() / 1000 - 3600, // 1 hour ago

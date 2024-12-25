@@ -1,4 +1,4 @@
-declare module "oak" {
+declare module 'oak' {
   export type Next = () => Promise<void>;
 
   export interface Context {

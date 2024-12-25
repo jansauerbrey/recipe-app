@@ -1,15 +1,15 @@
-import { type Context } from "oak";
-import { create, verify } from "djwt";
+import { type Context } from 'oak';
+import { create, verify } from 'djwt';
 
-const TEST_SECRET = new TextEncoder().encode("test-secret-key");
+const TEST_SECRET = new TextEncoder().encode('test-secret-key');
 
 async function getCryptoKey(): Promise<CryptoKey> {
   return await crypto.subtle.importKey(
-    "raw",
+    'raw',
     TEST_SECRET,
-    { name: "HMAC", hash: "SHA-256" },
+    { name: 'HMAC', hash: 'SHA-256' },
     true,
-    ["sign", "verify"]
+    ['sign', 'verify']
   );
 }
 
@@ -48,7 +48,7 @@ export function createMockContext(options: {
 } = {}): MockContext {
   const headers = new Headers();
   if (options.token) {
-    headers.set("Authorization", `Bearer ${options.token}`);
+    headers.set('Authorization', `Bearer ${options.token}`);
   }
   if (options.headers) {
     Object.entries(options.headers).forEach(([key, value]) => {
@@ -58,16 +58,16 @@ export function createMockContext(options: {
 
   return {
     request: {
-      method: options.method || "GET",
-      url: new URL("http://localhost:8000"),
+      method: options.method || 'GET',
+      url: new URL('http://localhost:8000'),
       headers,
-      body: () => ({ type: "json", value: Promise.resolve({}) }),
+      body: () => ({ type: 'json', value: Promise.resolve({}) }),
     },
     response: {
       status: 200,
       body: null,
       headers: new Headers(),
-      type: "application/json",
+      type: 'application/json',
     },
     state: {},
     cookies: {
@@ -89,7 +89,7 @@ export function createMockContext(options: {
 export async function createTestToken(payload: { sub: string; role: string }): Promise<string> {
   const key = await getCryptoKey();
   const jwt = await create(
-    { alg: "HS256", typ: "JWT" },
+    { alg: 'HS256', typ: 'JWT' },
     {
       ...payload,
       exp: Date.now() / 1000 + 3600, // 1 hour from now
@@ -102,7 +102,7 @@ export async function createTestToken(payload: { sub: string; role: string }): P
 export async function createExpiredToken(payload: { sub: string; role: string }): Promise<string> {
   const key = await getCryptoKey();
   const jwt = await create(
-    { alg: "HS256", typ: "JWT" },
+    { alg: 'HS256', typ: 'JWT' },
     {
       ...payload,
       exp: Date.now() / 1000 - 3600, // 1 hour ago
@@ -145,10 +145,10 @@ export function assertUUID(value: string) {
 
 export function assertError(error: unknown, expectedStatus: number, expectedMessage?: string) {
   if (!(error instanceof Error)) {
-    throw new Error("Expected an Error object");
+    throw new Error('Expected an Error object');
   }
   
-  if ("status" in error && typeof (error as any).status === "number") {
+  if ('status' in error && typeof (error as any).status === 'number') {
     if ((error as any).status !== expectedStatus) {
       throw new Error(`Expected status ${expectedStatus}, got ${(error as any).status}`);
     }
