@@ -1,84 +1,55 @@
-/// <reference lib="deno.ns" />
-/// <reference lib="dom" />
+import { assertEquals, assertExists } from 'https://deno.land/std@0.208.0/testing/asserts.ts';
+import { afterEach, beforeEach, describe, it } from 'https://deno.land/std@0.208.0/testing/bdd.ts';
+import { cleanupTest, setupTest } from '../test_utils.ts';
+import { createAuthHeader } from '../utils/helpers.ts';
 
-import { assertEquals, assertRejects } from "std/testing/asserts.ts";
-import { setupTest, cleanupTest } from "../test_utils.ts";
-import { createAuthContext, authTestData, type AuthContext } from "./test_helpers.ts";
+describe('Auth Middleware Tests', () => {
+  let testContext: any;
 
-// Type guard for user state
-function hasUser(state: Record<string, unknown>): state is { user: { id: string; role: string } } {
-  return state.user !== undefined && 
-    typeof (state.user as any).id === 'string' && 
-    typeof (state.user as any).role === 'string';
-}
+  beforeEach(async () => {
+    testContext = await setupTest();
+  });
 
-// Auth middleware implementation
-async function authMiddleware(ctx: AuthContext, next: () => Promise<void>) {
-  const authHeader = ctx.request.headers.get("Authorization");
-  if (!authHeader) {
-    throw new Error("No authorization header");
-  }
-
-  const [type, token] = authHeader.split(" ");
-  if (type !== "Bearer") {
-    throw new Error("Invalid authorization type");
-  }
-
-  if (token === authTestData.validToken) {
-    ctx.state.user = authTestData.users.regular;
-    await next();
-  } else {
-    throw new Error("Invalid token");
-  }
-}
-
-Deno.test({
-  name: "Auth Middleware Tests",
-  async fn(t) {
-    await setupTest();
-
-    await t.step("should pass with valid token", async () => {
-      const ctx = createAuthContext({ token: authTestData.validToken });
-
-      let nextCalled = false;
-      await authMiddleware(ctx, async () => {
-        nextCalled = true;
-      });
-
-      assertEquals(nextCalled, true);
-      if (!hasUser(ctx.state)) {
-        throw new Error("User not set in state");
-      }
-      const user = ctx.state.user;
-      if (!user) {
-        throw new Error("User not set in state");
-      }
-      assertEquals(user.id, "test-user-id");
-      assertEquals(user.role, "user");
-    });
-
-    await t.step("should reject missing auth header", async () => {
-      const ctx = createAuthContext();
-
-      await assertRejects(
-        () => authMiddleware(ctx, async () => {}),
-        Error,
-        "No authorization header"
-      );
-    });
-
-    await t.step("should reject invalid token", async () => {
-      const ctx = createAuthContext({ token: authTestData.invalidToken });
-
-      await assertRejects(
-        () => authMiddleware(ctx, async () => {}),
-        Error,
-        "Invalid token"
-      );
-    });
-
+  afterEach(async () => {
     await cleanupTest();
-  },
-  sanitizeResources: false,
-  sanitizeOps: false,
+  });
+
+  it('should pass with valid token', async () => {
+      const response = await fetch(
+        `http://localhost:${testContext.port}/api/user/check`,
+        {
+          headers: await createAuthHeader(testContext.testUserId!),
+        },
+      );
+
+      assertEquals(response.status, 200);
+      const body = await response.json();
+      assertExists(body.user);
+      assertEquals(body.user.id, testContext.testUserId);
+  });
+
+  it('should reject missing auth header', async () => {
+      const response = await fetch(
+        `http://localhost:${testContext.port}/api/user/check`,
+      );
+
+      assertEquals(response.status, 401);
+      const body = await response.json();
+      assertEquals(body.error, 'No authorization token provided');
+  });
+
+  it('should reject invalid token', async () => {
+      const response = await fetch(
+        `http://localhost:${testContext.port}/api/user/check`,
+        {
+          headers: {
+            Authorization: 'Bearer invalid-token',
+          },
+        },
+      );
+
+      assertEquals(response.status, 401);
+      const body = await response.json();
+      assertEquals(body.error, 'Invalid token');
+  });
 });

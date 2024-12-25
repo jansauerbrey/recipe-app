@@ -10,20 +10,16 @@ import {
 } from '../utils/helpers.ts';
 import { setupTest } from '../test_utils.ts';
 import { Recipe } from '../../types/mod.ts';
-import type { TestContext } from '../test_utils.ts';
 
 type TestRecipe = Omit<Recipe, 'id'> & { _id: string | ObjectId };
 
-describe('Recipe API Integration Tests', () => {
-  let testContext: TestContext;
-  let baseUrl: string;
-
-  it('should handle recipe lifecycle', async () => {
-    testContext = await setupTest();
-    baseUrl = `http://localhost:${testContext.port}/api`;
+describe('Recipe API - CRUD operations', () => {
+  it('should handle full CRUD lifecycle', async () => {
+    const testContext = await setupTest();
+    const baseUrl = `http://localhost:${testContext.port}/api`;
 
     try {
-      // POST /recipes - Create
+      // Create
       const recipe = createTestRecipe({
         userId: testContext.testUserId!,
       });
@@ -40,16 +36,15 @@ describe('Recipe API Integration Tests', () => {
       const createdRecipe = await assertSuccessResponse<TestRecipe>(createResponse, 201);
       assertExists(createdRecipe._id, 'Response should include recipe ID');
 
-      // GET /recipes - List
-      const listResponse = await fetch(`${baseUrl}/recipes`, {
+      // Read
+      const getResponse = await fetch(`${baseUrl}/recipes/${createdRecipe._id}`, {
         headers: await createAuthHeader(testContext.testUserId!),
       });
 
-      const recipes = await assertSuccessResponse<TestRecipe[]>(listResponse);
-      assertEquals(recipes.length, 1, 'Should return 1 recipe');
-      assertEquals(recipes[0]._id, createdRecipe._id);
+      const retrievedRecipe = await assertSuccessResponse<TestRecipe>(getResponse);
+      assertEquals(retrievedRecipe.title, recipe.title);
 
-      // PUT /recipes/:id - Update
+      // Update
       const updates = {
         title: 'Updated Recipe Title',
         description: 'Updated description',
@@ -68,7 +63,7 @@ describe('Recipe API Integration Tests', () => {
       assertEquals(updatedRecipe.title, updates.title);
       assertEquals(updatedRecipe.description, updates.description);
 
-      // DELETE /recipes/:id
+      // Delete
       const deleteResponse = await fetch(`${baseUrl}/recipes/${createdRecipe._id}`, {
         method: 'DELETE',
         headers: await createAuthHeader(testContext.testUserId!),
