@@ -1,10 +1,10 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
-var mongoose = require('mongoose');
-var DishType = require('../models/DishType.js');
+const mongoose = require('mongoose');
+const DishType = require('../models/DishType.js');
 
-var auth = require('../auth/auth.js');
+const auth = require('../auth/auth.js');
 
 /* GET /dishtypes listing. */
 router.get('/', auth.verify, function(req, res, next) {

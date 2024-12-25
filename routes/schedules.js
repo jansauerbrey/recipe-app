@@ -1,11 +1,11 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
-var mongoose = require('mongoose');
-var Schedule = require('../models/Schedule.js');
-var Shopitem = require('../models/Shopitem.js');
+const mongoose = require('mongoose');
+const Schedule = require('../models/Schedule.js');
+const Shopitem = require('../models/Shopitem.js');
 
-var auth = require('../auth/auth.js');
+const auth = require('../auth/auth.js');
 
 /* GET /schedules listing. */
 router.get('/', auth.verify, function(req, res, next) {
@@ -22,16 +22,16 @@ router.post('/', auth.verify, function(req, res, next) {
     if (err) return next(err);
     Schedule.findOne(schedule).populate('recipe').exec( function (err, schedulePop) {
       for(i=0;i<schedulePop.recipe.ingredients.length;i++){
-        var amount = 1;
+        let amount = 1;
         if(!schedulePop.recipe.ingredients[i].qty) {
           amount = 1/schedulePop.recipe.yield*schedulePop.factor;
         } else {
           amount = schedulePop.recipe.ingredients[i].qty/schedulePop.recipe.yield*schedulePop.factor;
         }
-        var expireDate = new Date(schedulePop.date);
+        const expireDate = new Date(schedulePop.date);
         expireDate.setDate(expireDate.getDate() + 1);
         console.log({expire_date: expireDate});
-        Shopitem.create({author: req._user.id, expire_date: expireDate, schedule: schedulePop, recipe: schedulePop.recipe, ingredient: schedulePop.recipe.ingredients[i].ingredient, unit: schedulePop.recipe.ingredients[i].unit, amount: amount})
+        Shopitem.create({author: req._user.id, expire_date: expireDate, schedule: schedulePop, recipe: schedulePop.recipe, ingredient: schedulePop.recipe.ingredients[i].ingredient, unit: schedulePop.recipe.ingredients[i].unit, amount: amount});
       }
       res.json(schedulePop);
     });
@@ -55,13 +55,13 @@ router.put('/:id', auth.verify, function(req, res, next) {
     });
     Schedule.findOne(schedule._id).populate('recipe').exec( function (err, schedulePop) {
       for(i=0;i<schedulePop.recipe.ingredients.length;i++){
-        var amount = 1;
+        let amount = 1;
         if(!schedulePop.recipe.ingredients[i].qty) {
           amount = 1/schedulePop.recipe.yield*schedulePop.factor;
         } else {
           amount = schedulePop.recipe.ingredients[i].qty/schedulePop.recipe.yield*schedulePop.factor;
         }
-        Shopitem.create({author: req._user.id, expire_date: schedulePop.date.setDate(schedulePop.date.getDate() + 1), schedule: schedulePop, recipe: schedulePop.recipe, ingredient: schedulePop.recipe.ingredients[i].ingredient, unit: schedulePop.recipe.ingredients[i].unit, amount: amount})
+        Shopitem.create({author: req._user.id, expire_date: schedulePop.date.setDate(schedulePop.date.getDate() + 1), schedule: schedulePop, recipe: schedulePop.recipe, ingredient: schedulePop.recipe.ingredients[i].ingredient, unit: schedulePop.recipe.ingredients[i].unit, amount: amount});
       }
       res.json(schedulePop);
     });

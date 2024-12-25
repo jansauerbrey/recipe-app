@@ -1,10 +1,10 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
-var mongoose = require('mongoose');
-var Ingredient = require('../models/Ingredient.js');
+const mongoose = require('mongoose');
+const Ingredient = require('../models/Ingredient.js');
 
-var auth = require('../auth/auth.js');
+const auth = require('../auth/auth.js');
 
 /* GET /ingredients listing. */
 router.get('/', auth.verify, function(req, res, next) {

@@ -1,11 +1,11 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
-var mongoose = require('mongoose');
-var Tag = require('../models/Tag.js');
-var Recipe = require('../models/Recipe.js');
+const mongoose = require('mongoose');
+const Tag = require('../models/Tag.js');
+const Recipe = require('../models/Recipe.js');
 
-var auth = require('../auth/auth.js');
+const auth = require('../auth/auth.js');
 
 /* GET /tags listing. */
 router.get('/', auth.verify, function(req, res, next) {
@@ -17,23 +17,23 @@ router.get('/', auth.verify, function(req, res, next) {
 
 /* GET /tags listing incl. recipe count. */
 router.get('/selected/', auth.verify, function(req, res, next) {
-    Recipe.aggregate([
-        {$match: { language: {'$in': req._user.settings.spokenLanguages} }},
-        {$project: { _id: 0, tags: 1 } },
-        {$unwind: "$tags" },
-        {$group: { _id: "$tags", count: { $sum: 1 } }},
-        {$project: { _id: 0,tags: "$_id", count: 1 } },
-        {$sort: { count: -1 } }
-      ]).exec( function (err, tags) {
-        Recipe.populate(tags, {path: "tags"}, function(err, response){
-          if (err) return next(err);
-          var finalResponse = [];
-          response.forEach(function(item) {
-            finalResponse.push({_id: item.tags._id, text: item.tags.text, author: item.tags.author, updated_at: item.tags.updated_at, count: item.count});
-          });
-          res.json(finalResponse);
-        });
+  Recipe.aggregate([
+    {$match: { language: {'$in': req._user.settings.spokenLanguages} }},
+    {$project: { _id: 0, tags: 1 } },
+    {$unwind: '$tags' },
+    {$group: { _id: '$tags', count: { $sum: 1 } }},
+    {$project: { _id: 0,tags: '$_id', count: 1 } },
+    {$sort: { count: -1 } }
+  ]).exec( function (err, tags) {
+    Recipe.populate(tags, {path: 'tags'}, function(err, response){
+      if (err) return next(err);
+      const finalResponse = [];
+      response.forEach(function(item) {
+        finalResponse.push({_id: item.tags._id, text: item.tags.text, author: item.tags.author, updated_at: item.tags.updated_at, count: item.count});
       });
+      res.json(finalResponse);
+    });
+  });
 });
 
 /* POST /tags */

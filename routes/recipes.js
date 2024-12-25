@@ -1,15 +1,15 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
-var mongoose = require('mongoose');
-var Recipe = require('../models/Recipe.js');
+const mongoose = require('mongoose');
+const Recipe = require('../models/Recipe.js');
 
-var auth = require('../auth/auth.js');
+const auth = require('../auth/auth.js');
 
 /* GET /recipes listing. */
 router.get('/', auth.verify, function (req, res, next) {
   //console.log("start");
-  var preferredLanguage = (req._user.settings && req._user.settings.preferredLanguage)
+  const preferredLanguage = (req._user.settings && req._user.settings.preferredLanguage)
     ? req._user.settings.preferredLanguage
     : 'en';
 
@@ -26,7 +26,7 @@ router.get('/', auth.verify, function (req, res, next) {
   Recipe.find(req.query).populate(['tags']).populate('author', 'fullname').lean().exec(
     function (err, recipes) {
       if (err) return next(err);
-      var newIndicatorDate = new Date();
+      const newIndicatorDate = new Date();
       newIndicatorDate.setDate(newIndicatorDate.getDate() - 14);
       for (i = 0; i < recipes.length; i++) {
         recipes[i].new_recipe = (new Date(recipes[i].updated_at) > newIndicatorDate) ? true : false;
@@ -57,7 +57,7 @@ router.get('/count', auth.verify, function (req, res, next) {
       { path: 'dishType', select: 'identifier imagePath' },
       function (err, response) {
         if (err) return next(err);
-        var finalResponse = {};
+        const finalResponse = {};
         response.forEach(function (item) {
           finalResponse[item.dishType.identifier] = item.count;
         });
@@ -73,7 +73,7 @@ router.get('/count', auth.verify, function (req, res, next) {
               if (err) return next(err);
               finalResponse.my = count;
 
-              var updatedAtDate = new Date();
+              const updatedAtDate = new Date();
               updatedAtDate.setDate(updatedAtDate.getDate() - 14);
               Recipe.count({
                 updated_at: { '$gt': updatedAtDate },
@@ -112,7 +112,7 @@ router.get('/counttags', auth.verify, function (req, res, next) {
   ]).exec(function (err, tags) {
     Recipe.populate(tags, { path: 'tags' }, function (err, response) {
       if (err) return next(err);
-      var finalResponse = [];
+      const finalResponse = [];
       response.forEach(function (item) {
         finalResponse.push({
           _id: item.tags._id,
@@ -130,7 +130,7 @@ router.get('/counttags', auth.verify, function (req, res, next) {
 /* POST /recipes */
 router.post('/', auth.verify, function (req, res, next) {
   req.body.author = req._user.id;
-  var recipe = new Recipe(req.body);
+  const recipe = new Recipe(req.body);
   recipe.save(function (err, recipe) {
     if (err) return next(err);
     res.json(recipe);
@@ -140,7 +140,7 @@ router.post('/', auth.verify, function (req, res, next) {
 /* GET /recipes/id */
 router.get('/:id', auth.loadUser, function (req, res, next) {
   console.log('accessing recipe id: ', req.params.id);
-  var preferredLanguage = (req._user && req._user.settings && req._user.settings.preferredLanguage)
+  const preferredLanguage = (req._user && req._user.settings && req._user.settings.preferredLanguage)
     ? req._user.settings.preferredLanguage
     : 'en';
   Recipe.findById(req.params.id).populate(['tags', 'ingredients.ingredient', 'ingredients.unit'])
@@ -148,7 +148,7 @@ router.get('/:id', auth.loadUser, function (req, res, next) {
       function (err, recipe) {
         if (err) return next(err);
         recipe.dishType.name_translated = recipe.dishType.name[preferredLanguage];
-        var newIndicatorDate = new Date();
+        const newIndicatorDate = new Date();
         newIndicatorDate.setDate(newIndicatorDate.getDate() - 14);
         recipe.new_recipe = (new Date(recipe.updated_at) > newIndicatorDate) ? true : false;
         recipe.fav_recipe = (req._user && req._user.favoriteRecipes &&
@@ -162,7 +162,7 @@ router.get('/:id', auth.loadUser, function (req, res, next) {
 
 /* PUT /recipes/:id */
 router.put('/:id', auth.verify, function (req, res, next) {
-  var preferredLanguage = (req._user.settings && req._user.settings.preferredLanguage)
+  const preferredLanguage = (req._user.settings && req._user.settings.preferredLanguage)
     ? req._user.settings.preferredLanguage
     : 'en';
   Recipe.findById(req.params.id).populate('author', 'fullname').exec(function (err, recipe) {
