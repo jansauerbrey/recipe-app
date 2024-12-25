@@ -1,5 +1,6 @@
 import { Context } from 'https://deno.land/x/oak@v12.6.1/mod.ts';
 import { PayloadTooLargeError } from '../../types/errors.ts';
+import { AppMiddleware } from '../../types/middleware.ts';
 
 interface PayloadLimitConfig {
   json?: number; // JSON payload limit in bytes
@@ -26,12 +27,15 @@ const ROUTE_SPECIFIC_LIMITS: Record<string, PayloadLimitConfig> = {
   },
 };
 
-export const payloadLimitMiddleware = async (
+/**
+ * Middleware to limit payload size based on content type and route
+ */
+export const payloadLimitMiddleware: AppMiddleware = async (
   ctx: Context,
   next: () => Promise<unknown>,
-) => {
-  const contentType = ctx.request.headers.get('content-type')?.toLowerCase() || '';
-  const contentLength = parseInt(ctx.request.headers.get('content-length') || '0', 10);
+): Promise<void> => {
+  const contentType = ctx.request.headers.get('content-type')?.toLowerCase() ?? '';
+  const contentLength = parseInt(ctx.request.headers.get('content-length') ?? '0', 10);
 
   // Get route-specific limits or default limits
   const routeLimits = ROUTE_SPECIFIC_LIMITS[ctx.request.url.pathname] || DEFAULT_LIMITS;
@@ -71,7 +75,7 @@ export const payloadLimitMiddleware = async (
       const form = formData as unknown as FormData;
       for (const value of form.values()) {
         if (typeof value === 'string') {
-          totalSize += value.length;
+          totalSize += new TextEncoder().encode(value).length;
         } else if (value instanceof File) {
           totalSize += value.size;
         }

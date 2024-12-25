@@ -1,109 +1,142 @@
-import { assertEquals, assertRejects } from 'https://deno.land/std@0.208.0/assert/mod.ts';
-import { Context } from 'https://deno.land/x/oak@v12.6.1/mod.ts';
+import { assertEquals } from 'https://deno.land/std@0.208.0/assert/mod.ts';
+import { Context, State } from 'https://deno.land/x/oak@v12.6.1/mod.ts';
 import { PayloadTooLargeError } from '../../../types/errors.ts';
 import { payloadLimitMiddleware } from '../../../presentation/middleware/payload-limit.middleware.ts';
 
+interface MockRequestBody {
+  type: string;
+  value: FormData;
+}
+
+interface MockRequest {
+  method: string;
+  headers: Headers;
+  url: URL;
+  body?: () => MockRequestBody;
+}
+
+// Create a more complete mock context type
+type TestState = Record<string, unknown>;
+type TestContext = Omit<Context<TestState>, 'request'> & {
+  request: MockRequest;
+  response: {
+    headers: Headers;
+  };
+  state: TestState;
+};
+
+const createMockContext = (
+  method: string,
+  contentType: string,
+  contentLength: number,
+  path = '/api/test',
+  withFormData = false,
+): TestContext => {
+  const ctx = {
+    request: {
+      method,
+      headers: new Headers({
+        'content-type': contentType,
+        'content-length': contentLength.toString(),
+      }),
+      url: new URL(`http://localhost${path}`),
+      ...(withFormData && {
+        body: () => ({
+          type: 'form-data',
+          value: new FormData(),
+        }),
+      }),
+    },
+    response: {
+      headers: new Headers(),
+    },
+    state: {},
+    app: {},
+    cookies: new Map(),
+    isUpgradable: false,
+    respond: () => Promise.resolve(),
+    upgrade: () => {
+      throw new Error('Not implemented');
+    },
+    assert: () => undefined,
+    throw: () => undefined,
+  } as unknown as TestContext;
+
+  return ctx;
+};
+
+const assertPayloadError = async (fn: () => Promise<void>): Promise<void> => {
+  try {
+    await fn();
+    throw new Error('Expected PayloadTooLargeError');
+  } catch (error: unknown) {
+    if (!(error instanceof PayloadTooLargeError)) {
+      throw new Error(`Expected PayloadTooLargeError but got ${error instanceof Error ? error.constructor.name : typeof error}`);
+    }
+    assertEquals(error instanceof PayloadTooLargeError, true);
+  }
+};
+
 Deno.test('Payload Limit Middleware', async (t) => {
   await t.step('should allow requests within JSON limit', async () => {
-    const mockCtx = {
-      request: {
-        method: 'POST',
-        headers: new Headers({
-          'content-type': 'application/json',
-          'content-length': '1024', // 1KB
-        }),
-        url: new URL('http://localhost/api/test'),
-      },
-    } as unknown as Context;
+    const mockCtx = createMockContext('POST', 'application/json', 1024);
+    const mockNext = (): Promise<void> => Promise.resolve();
 
-    await payloadLimitMiddleware(mockCtx, () => Promise.resolve());
+    await payloadLimitMiddleware(mockCtx as unknown as Context<State>, mockNext);
   });
 
   await t.step('should block JSON requests exceeding limit', async () => {
-    const mockCtx = {
-      request: {
-        method: 'POST',
-        headers: new Headers({
-          'content-type': 'application/json',
-          'content-length': (200 * 1024).toString(), // 200KB (exceeds 100KB limit)
-        }),
-        url: new URL('http://localhost/api/test'),
-      },
-    } as unknown as Context;
+    const mockCtx = createMockContext('POST', 'application/json', 200 * 1024); // 200KB (exceeds 100KB limit)
+    const mockNext = (): Promise<void> => Promise.resolve();
 
-    await assertRejects(
-      () => payloadLimitMiddleware(mockCtx, () => Promise.resolve()),
-      PayloadTooLargeError,
-    );
+    await assertPayloadError(async () => {
+      await payloadLimitMiddleware(mockCtx as unknown as Context<State>, mockNext);
+    });
   });
 
   await t.step('should allow requests within form limit', async () => {
-    const mockCtx = {
-      request: {
-        method: 'POST',
-        headers: new Headers({
-          'content-type': 'multipart/form-data',
-          'content-length': (400 * 1024).toString(), // 400KB
-        }),
-        url: new URL('http://localhost/api/test'),
-        body: () => ({
-          type: 'form-data',
-          value: new FormData(),
-        }),
-      },
-    } as unknown as Context;
+    const mockCtx = createMockContext('POST', 'multipart/form-data', 400 * 1024, '/api/test', true);
+    const mockNext = (): Promise<void> => Promise.resolve();
 
-    await payloadLimitMiddleware(mockCtx, () => Promise.resolve());
+    await payloadLimitMiddleware(mockCtx as unknown as Context<State>, mockNext);
   });
 
   await t.step('should block form requests exceeding limit', async () => {
-    const mockCtx = {
-      request: {
-        method: 'POST',
-        headers: new Headers({
-          'content-type': 'multipart/form-data',
-          'content-length': (600 * 1024).toString(), // 600KB (exceeds 500KB limit)
-        }),
-        url: new URL('http://localhost/api/test'),
-        body: () => ({
-          type: 'form-data',
-          value: new FormData(),
-        }),
-      },
-    } as unknown as Context;
+    const mockCtx = createMockContext('POST', 'multipart/form-data', 600 * 1024, '/api/test', true);
+    const mockNext = (): Promise<void> => Promise.resolve();
 
-    await assertRejects(
-      () => payloadLimitMiddleware(mockCtx, () => Promise.resolve()),
-      PayloadTooLargeError,
-    );
+    await assertPayloadError(async () => {
+      await payloadLimitMiddleware(mockCtx as unknown as Context<State>, mockNext);
+    });
   });
 
   await t.step('should allow requests with route-specific limits', async () => {
-    const mockCtx = {
-      request: {
-        method: 'POST',
-        headers: new Headers({
-          'content-type': 'application/json',
-          'content-length': (400 * 1024).toString(), // 400KB
-        }),
-        url: new URL('http://localhost/api/recipes'),
-      },
-    } as unknown as Context;
+    const mockCtx = createMockContext('POST', 'application/json', 400 * 1024, '/api/recipes');
+    const mockNext = (): Promise<void> => Promise.resolve();
 
-    await payloadLimitMiddleware(mockCtx, () => Promise.resolve());
+    await payloadLimitMiddleware(mockCtx as unknown as Context<State>, mockNext);
   });
 
   await t.step('should skip check for GET requests', async () => {
-    const mockCtx = {
-      request: {
-        method: 'GET',
-        headers: new Headers({
-          'content-length': (1024 * 1024 * 10).toString(), // 10MB
-        }),
-        url: new URL('http://localhost/api/test'),
-      },
-    } as unknown as Context;
+    const mockCtx = createMockContext('GET', 'application/json', 10 * 1024 * 1024);
+    const mockNext = (): Promise<void> => Promise.resolve();
 
-    await payloadLimitMiddleware(mockCtx, () => Promise.resolve());
+    await payloadLimitMiddleware(mockCtx as unknown as Context<State>, mockNext);
+  });
+
+  await t.step('should handle text content type', async () => {
+    const mockCtx = createMockContext('POST', 'text/plain', 40 * 1024); // Under 50KB limit
+    const mockNext = (): Promise<void> => Promise.resolve();
+
+    await payloadLimitMiddleware(mockCtx as unknown as Context<State>, mockNext);
+  });
+
+  await t.step('should block oversized text content', async () => {
+    const mockCtx = createMockContext('POST', 'text/plain', 60 * 1024); // Over 50KB limit
+    const mockNext = (): Promise<void> => Promise.resolve();
+
+    await assertPayloadError(async () => {
+      await payloadLimitMiddleware(mockCtx as unknown as Context<State>, mockNext);
+    });
   });
 });
