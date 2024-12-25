@@ -5,7 +5,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 //---------------
 
 
-//    .constant('BASE_URI', '/')
+  //    .constant('BASE_URI', '/')
   .constant('BASE_URI', 'https://www.rezept-planer.de/')
 
 
@@ -17,13 +17,13 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 // Navigation
 
   .factory('navigationMenu', ['$state', function($state) {
-    const states = [];     
+    const states = [];
     const stateslist = $state.get();
-    angular.forEach(stateslist, function (state) {
+    angular.forEach(stateslist, function(state) {
       if (state.data && state.data.name) {
         states.push({
           path: state.url,
-        						name: state.name,
+          name: state.name,
           label: state.data.name,
           icon: state.data.icon ? state.data.icon : null,
           panelright: state.data.panelright ? state.data.panelright : false,
@@ -40,18 +40,20 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 
 
   .factory('navigationTitle', ['$state', function($state) {
-    const data = {title: ''};
+    const data = {
+      title: ''
+    };
     return {
-      	getObject: function() {
+      getObject: function() {
         return data;
       }
     };
   }])
 
 
-  .factory('subdomain', ['$location', function ($location) {
+  .factory('subdomain', ['$location', function($location) {
     const host = $location.host();
-    if (host.indexOf('.') < 0) 
+    if (host.indexOf('.') < 0)
       return null;
     else
       return host.split('.')[0];
@@ -60,23 +62,25 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 
 // File Upload
 
-  .factory('httpPostFactory', [ '$http', 'BASE_URI', function ($http, BASE_URI) {
-    return function (file, data, callback) {
+  .factory('httpPostFactory', ['$http', 'BASE_URI', function($http, BASE_URI) {
+    return function(file, data, callback) {
       $http({
-        url: BASE_URI+file,
+        url: BASE_URI + file,
         method: 'POST',
         data: data,
-        headers: {'Content-Type': undefined}
-      }).success(function (response) {
+        headers: {
+          'Content-Type': undefined
+        }
+      }).success(function(response) {
         callback(response);
       });
     };
   }])
 
 
-  .factory('isCordova', function () {
-    const app = document.URL.indexOf( 'http://' ) === -1 && document.URL.indexOf( 'https://' ) === -1;
-    if ( app ) {
+  .factory('isCordova', function() {
+    const app = document.URL.indexOf('http://') === -1 && document.URL.indexOf('https://') === -1;
+    if (app) {
       return true; // PhoneGap application
     } else {
       return false; // Web page
@@ -92,44 +96,44 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
 // Navbar
 
 
-  .controller('NavbarController', ['$scope', 'navigationTitle', 'subdomain', function ($scope, navigationTitle, subdomain) {
+  .controller('NavbarController', ['$scope', 'navigationTitle', 'subdomain', function($scope, navigationTitle, subdomain) {
     $scope.navObject = navigationTitle.getObject();
     $scope.showBeta = subdomain == 'beta' ? true : false;
   }])
-    
+
 
 // Sidebar
 
-  .controller('NavSidebarController', ['$scope', '$uibModalInstance', function ($scope, $uibModalInstance) {
-     
-    $scope.cancel = function(){
+  .controller('NavSidebarController', ['$scope', '$uibModalInstance', function($scope, $uibModalInstance) {
+
+    $scope.cancel = function() {
       $uibModalInstance.dismiss('cancel');
     };
 
   }])
-    
-  .controller('StartpageController', ['$scope', function ($scope) {
-     
-    $scope.openLink = function(link){
+
+  .controller('StartpageController', ['$scope', function($scope) {
+
+    $scope.openLink = function(link) {
       window.open(link);
     };
 
   }])
-    
+
 
 //---------------
 // Directives
 //---------------
 
-  .directive('navsidebar', ['$aside', 'UserService', function ($aside, UserService) {
+  .directive('navsidebar', ['$aside', 'UserService', function($aside, UserService) {
     return {
       restrict: 'E',
       replace: true,
       templateUrl: 'partials/navigation.sidebar.button.tpl.html',
-      controller: [ '$scope', '$state', function($scope, $state) {
+      controller: ['$scope', '$state', function($scope, $state) {
         //$scope.hideMobileNav = true;
         $scope.showBackNav = function() {
-          	return ($state.includes('user.recipes') && $state.$current.path.length>2);
+          return ($state.includes('user.recipes') && $state.$current.path.length > 2);
         };
         $scope.onClick = function() {
           if (this.showBackNav()) {
@@ -137,32 +141,35 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
             do {
               currentState = currentState.parent;
             } while (currentState.abstract);
-            return $state.transitionTo(currentState, {}, { inherit: true, relative: $state.$current });
-          	} else{
+            return $state.transitionTo(currentState, {}, {
+              inherit: true,
+              relative: $state.$current
+            });
+          } else {
             $aside.open({
               templateUrl: 'partials/navigation.sidebar.tpl.html',
               controller: 'NavSidebarController',
               placement: 'left',
               size: 'lg'
             });
-          	}
+          }
         };
-      	}]
+      }]
     };
   }])
-    
 
-  .directive('access', [ '$rootScope', 'UserService', function ($rootScope, UserService) {
+
+  .directive('access', ['$rootScope', 'UserService', function($rootScope, UserService) {
     return {
       restrict: 'A',
-      link: function (scope, element, attrs) {
-        var makeVisible = function () {
+      link: function(scope, element, attrs) {
+        var makeVisible = function() {
             element.removeClass('hidden');
           },
-          makeHidden = function () {
+          makeHidden = function() {
             element.addClass('hidden');
           },
-          determineVisibility = function (resetFirst) {
+          determineVisibility = function(resetFirst) {
             let result;
             if (resetFirst) {
               makeVisible();
@@ -195,7 +202,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
     return {
       restrict: 'A',
       scope: {
-        ngReallyClick:'&'
+        ngReallyClick: '&'
       },
       link: function(scope, element, attrs) {
         element.bind('click', function() {
@@ -207,53 +214,53 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
           } else {
             confirmMessage = attrs.ngReallyMessage || 'Are you sure?';
           }
-            		
-                
+
+
           const modalNgReally = $uibModal.open({
             animation: true,
             templateUrl: 'partials/ngreally.tpl.html',
-            controller: ['$scope', '$uibModalInstance', 'message', function ($scope, $uibModalInstance, message) {
-      							$scope.message = message;
-      							$scope.ok = function(){
+            controller: ['$scope', '$uibModalInstance', 'message', function($scope, $uibModalInstance, message) {
+              $scope.message = message;
+              $scope.ok = function() {
                 $uibModalInstance.close();
               };
-                    
-              $scope.cancel = function(){
+
+              $scope.cancel = function() {
                 $uibModalInstance.dismiss('cancel');
               };
             }],
             size: 'xs',
             resolve: {
-              message: function(){
+              message: function() {
                 return message;
               }
             }
           });
-        
-          modalNgReally.result.then(function(){
+
+          modalNgReally.result.then(function() {
             scope.ngReallyClick();
           });
         });
       }
     };
   }])
-    
-    
-  .directive('ngImageUpload', ['httpPostFactory', function (httpPostFactory) {
+
+
+  .directive('ngImageUpload', ['httpPostFactory', function(httpPostFactory) {
     return {
       restrict: 'A',
       scope: true,
-      link: function (scope, element, attr) {
-  
-        element.bind('change', function () {
+      link: function(scope, element, attr) {
+
+        element.bind('change', function() {
           const formData = new FormData();
           formData.append('file', element[0].files[0]);
-          httpPostFactory('api/upload', formData, function (callback) {
+          httpPostFactory('api/upload', formData, function(callback) {
             console.log(callback);
             scope.recipe.imagePath = callback;
           });
         });
-  
+
       }
     };
   }])
@@ -264,24 +271,27 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
       scope: true,
       link: function(scope, element, attrs) {
         element.bind('click', function() {
-          navigator.camera.getPicture(function (imageURI) {
+          navigator.camera.getPicture(function(imageURI) {
             window.resolveLocalFileSystemURL(imageURI, function(fileEntry) {
-           				fileEntry.file(function(file) {
-               					const reader = new FileReader();
-                  				reader.onloadend = function(e) {
-                        					const imgBlob = new Blob([ e.target.result ], { type: file.type } );
-                		const formData = new FormData();
-                      		formData.append('file', imgBlob, 'file.jpg');
-                         		httpPostFactory('api/upload', formData, function (callback) {
-                              		scope.recipe.imagePath = callback;
-                         		});
+              fileEntry.file(function(file) {
+                const reader = new FileReader();
+                reader.onloadend = function(e) {
+                  const imgBlob = new Blob([e.target.result], {
+                    type: file.type
+                  });
+                  const formData = new FormData();
+                  formData.append('file', imgBlob, 'file.jpg');
+                  httpPostFactory('api/upload', formData, function(callback) {
+                    scope.recipe.imagePath = callback;
+                  });
                 };
-                   				reader.readAsArrayBuffer(file);
-           				}, function(err){});
-            }, function(err){});
-          	}, function (err) {},
-          	{ quality: 50, destinationType: Camera.DestinationType.FILE_URI }
-          );
+                reader.readAsArrayBuffer(file);
+              }, function(err) {});
+            }, function(err) {});
+          }, function(err) {}, {
+            quality: 50,
+            destinationType: Camera.DestinationType.FILE_URI
+          });
         });
       }
     };
@@ -291,14 +301,14 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
     return {
       restrict: 'E',
       template: '<div ng-show=\'isStateLoading\' class=\'loading-indicator overlay\'>' +
-      '<div class=\'loading-indicator-body\'>' +
-      '<div class=\'spinner\'><double-bounce-spinner></double-bounce-spinner></div>' +
-      '</div>' +
-      '</div>',
+        '<div class=\'loading-indicator-body\'>' +
+        '<div class=\'spinner\'><double-bounce-spinner></double-bounce-spinner></div>' +
+        '</div>' +
+        '</div>',
       replace: true,
       link: function(scope, elem, attrs) {
         scope.isStateLoading = false;
-   			
+
         $rootScope.$on('$stateChangeStart', function() {
           scope.isStateLoading = true;
         });
@@ -308,21 +318,25 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
       }
     };
   }])
-  
-  
-  
-    
+
+
+
+
 //---------------
 // Filter
 //---------------
-  
-  
+
+
   .filter('timeFilter', function() {
 
     const conversions = {
       'ss': angular.identity,
-      'mm': function(value) { return value * 60; },
-      'hh': function(value) { return value * 3600; }
+      'mm': function(value) {
+        return value * 60;
+      },
+      'hh': function(value) {
+        return value * 3600;
+      }
     };
 
     return function(value, unit) {
@@ -337,25 +351,27 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
   })
 
 
-    
+
 //---------------
 // Routes
 //---------------
 
 
-  .config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
+  .config(['$stateProvider', '$urlRouterProvider', function($stateProvider, $urlRouterProvider) {
 
     $urlRouterProvider.otherwise('/');
 
     $stateProvider
       .state('anon', {
         abstract: true,
-        views: {'root':
-        {template: '<ui-view />'}
+        views: {
+          'root': {
+            template: '<ui-view />'
+          }
         },
-        data	: {
+        data: {
           requiresLogin: false,
-                 		requiredPermissions: ['NoUser']
+          requiredPermissions: ['NoUser']
         }
       })
       .state('anon.startpage', {
@@ -373,18 +389,22 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
       })
       .state('user', {
         abstract: true,
-        views: {'root':
-        {template: '<div ui-view="main"></div>'}
+        views: {
+          'root': {
+            template: '<div ui-view="main"></div>'
+          }
         },
         data: {
           requiresLogin: true,
-                 		requiredPermissions: ['User']
+          requiredPermissions: ['User']
         }
       })
       .state('impressum', {
         url: '/impressum',
-        views: {'root':
-        { templateUrl: 'partials/impressum.tpl.html'}
+        views: {
+          'root': {
+            templateUrl: 'partials/impressum.tpl.html'
+          }
         },
         data: {
           title: 'Impressum'
@@ -392,30 +412,33 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
       })
       .state('accessdenied', {
         url: '/access/denied',
-        views: {'root':
-        { templateUrl: 'partials/access.denied.tpl.html'}
+        views: {
+          'root': {
+            templateUrl: 'partials/access.denied.tpl.html'
+          }
         }
       })
       .state('user.home', {
         url: '/home',
-        views: {'main':
-        {templateUrl: 'partials/home.tpl.html'}
+        views: {
+          'main': {
+            templateUrl: 'partials/home.tpl.html'
+          }
         },
         data: {
           title: 'Home'
         }
-      })
-    ;
+      });
   }])
 
   .run(['$rootScope', '$state', '$stateParams', '$http', 'UserService', 'navigationTitle', 'BASE_URI',
     function($rootScope, $state, $stateParams, $http, UserService, navigationTitle, BASE_URI) {
       $rootScope.$state = $state;
       $rootScope.$stateParams = $stateParams;
-      $rootScope.print = function(print){
-      	window.print();
+      $rootScope.print = function(print) {
+        window.print();
       };
-    
+
       $rootScope.$on('$stateChangeStart', function(event, toState, toStateParams, fromState, fromStateParams) {
         $rootScope.previousState = fromState ? fromState : {};
         $rootScope.previousState.name = fromState.name ? fromState.name : 'user.home';
@@ -423,21 +446,22 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
         //var authorised;
         const authenticated = UserService.isAuthenticated();
         if (authenticated === true) {
-          $http.get(BASE_URI+'api/user/check');
+          $http.get(BASE_URI + 'api/user/check');
           if (toState.name == 'anon.startpage') {
-            event.preventDefault(); 
+            event.preventDefault();
             $state.go('user.home');
-          };	
+          };
         };
         if (toState.data && toState.data.title) {
-        	const obj = navigationTitle.getObject();
-        	obj.title = toState.data.title;
+          const obj = navigationTitle.getObject();
+          obj.title = toState.data.title;
         };
-     	});
-     	
-     	$rootScope.$on('$stateChangeSuccess', function() {
-   			document.body.scrollTop = document.documentElement.scrollTop = 0;
       });
-    }])
+
+      $rootScope.$on('$stateChangeSuccess', function() {
+        document.body.scrollTop = document.documentElement.scrollTop = 0;
+      });
+    }
+  ])
 
 ;
