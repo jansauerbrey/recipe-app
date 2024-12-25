@@ -1,11 +1,15 @@
-var mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-var TodoSchema = new mongoose.Schema({
-  name: String,
-  completed: Boolean,
-  note: String,
-  updated_at: { type: Date, default: Date.now },
+/**
+ * Todo Schema
+ * Simple task tracking model for recipe-related todos
+ * Supports task completion status and optional notes
+ */
+const TodoSchema = new mongoose.Schema({
+  name: String, // Task name/description
+  completed: { type: Boolean, default: false }, // Task completion status
+  note: String, // Additional notes or details
+  updated_at: { type: Date, default: Date.now }, // Last modification timestamp
 });
 
-module.exports = mongoose.model('Todo', TodoSchema);
-
+export default mongoose.model('Todo', TodoSchema);
