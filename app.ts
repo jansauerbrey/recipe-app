@@ -5,7 +5,6 @@ import { MongoClient } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
 import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
 
 // Import middleware
-import { swaggerMiddleware } from './src/presentation/middleware/swagger.middleware.ts';
 import {
   validateRequest,
   validateResponse,
@@ -13,7 +12,7 @@ import {
 import { rateLimitMiddleware } from './src/presentation/middleware/rate-limit.middleware.ts';
 import { payloadLimitMiddleware } from './src/presentation/middleware/payload-limit.middleware.ts';
 import { loggingMiddleware } from './src/presentation/middleware/logging.middleware.ts';
-import { AppMiddleware, AppState, createMiddleware } from './src/types/middleware.ts';
+import { AppState, createMiddleware } from './src/types/middleware.ts';
 import { AppError } from './src/types/errors.ts';
 
 // Import layers
@@ -23,30 +22,25 @@ import { initializeRoutes } from './src/presentation/routes/mod.ts';
 import { Dependencies } from './src/types/mod.ts';
 import { AppConfig, getConfig } from './src/types/env.ts';
 
-export async function createApp() {
+export async function createApp(): Promise<Application> {
   // Load environment variables
-  const env = await load({
+  await load({
     envPath: '.env',
     export: true,
     allowEmptyValues: true,
   });
+
   const appConfig: AppConfig = getConfig();
-  console.log('Loaded environment variables:', {
-    MONGODB_URI: Deno.env.get('MONGODB_URI'),
-    MONGO_DB_NAME: Deno.env.get('MONGO_DB_NAME'),
-  });
+  const logger = console;
 
   // Initialize MongoDB connection
   const client = new MongoClient();
   try {
-    console.log('Connecting to MongoDB with URI:', appConfig.MONGODB_URI);
+    logger.info('Connecting to MongoDB...', { uri: appConfig.MONGODB_URI });
     await client.connect(appConfig.MONGODB_URI);
-    console.log('MongoDB connection successful');
-    // List all databases to verify connection
-    const databases = await client.listDatabases();
-    console.log('Available databases:', databases);
+    logger.info('MongoDB connection successful');
   } catch (err) {
-    console.error('MongoDB connection error:', err);
+    logger.error('MongoDB connection error:', err);
     Deno.exit(1);
   }
 
@@ -174,6 +168,6 @@ export async function createApp() {
 if (import.meta.main) {
   const app = await createApp();
   const port = Number(Deno.env.get('PORT') || 3000);
-  console.log(`Server running on port ${port}`);
+  console.info(`Server running on port ${port}`);
   await app.listen({ port });
 }
