@@ -520,6 +520,10 @@
   "workspace": {
     "packageJson": {
       "dependencies": [
+        "npm:@capacitor/android@6",
+        "npm:@capacitor/cli@6",
+        "npm:@capacitor/core@6",
+        "npm:@capacitor/splash-screen@^6.0.3",
         "npm:bcrypt@^5.1.1",
         "npm:body-parser@^1.20.2",
         "npm:cookie-parser@^1.4.6",
@@ -536,6 +540,7 @@
         "npm:nodemailer@^6.9.7",
         "npm:redis@^4.6.11",
         "npm:sharp@~0.32.6",
+        "npm:typescript@5",
         "npm:uuid@^9.0.1",
         "npm:winston@^3.11.0"
       ]

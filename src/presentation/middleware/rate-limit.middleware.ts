@@ -56,21 +56,30 @@ class RateLimiter {
   }
 }
 
-// Default config: 100 requests per minute for authenticated users, 30 for unauthenticated
+// Default config: 100 requests per minute for authenticated users
 const defaultConfig: RateLimitConfig = {
   windowMs: 60 * 1000, // 1 minute
   max: 100, // 100 requests per minute
 };
 
+// Increased limit for unauthenticated users to handle static file requests
 const unauthenticatedConfig: RateLimitConfig = {
   windowMs: 60 * 1000, // 1 minute
-  max: 30, // 30 requests per minute
+  max: 200, // 200 requests per minute to accommodate static files
 };
 
 const authenticatedLimiter = new RateLimiter(defaultConfig);
 const unauthenticatedLimiter = new RateLimiter(unauthenticatedConfig);
 
 export const rateLimitMiddleware = async (ctx: Context, next: () => Promise<unknown>) => {
+  // Skip rate limiting for static files
+  const isStaticFile = ctx.request.url.pathname.match(
+    /\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$/,
+  );
+  if (isStaticFile) {
+    return await next();
+  }
+
   const isAuthenticated = ctx.state.user !== undefined;
   const limiter = isAuthenticated ? authenticatedLimiter : unauthenticatedLimiter;
 
