@@ -1,21 +1,27 @@
-var mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-var TagSchema = new mongoose.Schema({
-  text: { type: String, required: true },
-  author: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
-  updated_at: { type: Date, default: Date.now }
+/**
+ * Tag Schema
+ * Represents recipe tags for categorization and filtering
+ * Includes automatic cleanup of tag references when deleted
+ */
+const TagSchema = new mongoose.Schema({
+  text: { type: String, required: true }, // Tag text/name
+  author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Tag creator
+  updated_at: { type: Date, default: Date.now }, // Last modification
 });
 
-TagSchema.pre('remove', function(next) {
-  var tags = this;
-  tags.model('Recipe').update(
-    { tags: tags._id}, 
-    { $pull: { tags: tags._id } }, 
-    { multi: true }, 
-    next
-  );
-  next();
+// Remove tag references from recipes when tag is deleted
+TagSchema.pre('remove', async function (next) {
+  try {
+    await this.model('Recipe').updateMany(
+      { tags: this._id },
+      { $pull: { tags: this._id } },
+    );
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
-module.exports = mongoose.model('Tag', TagSchema);
-
+export default mongoose.model('Tag', TagSchema);
