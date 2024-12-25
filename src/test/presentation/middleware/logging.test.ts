@@ -3,48 +3,99 @@ import {
   assertExists,
   assertMatch,
 } from 'https://deno.land/std@0.208.0/assert/mod.ts';
-import { Context } from 'https://deno.land/x/oak@v12.6.1/mod.ts';
+import { Context, State } from 'https://deno.land/x/oak@v12.6.1/mod.ts';
 import { loggingMiddleware } from '../../../presentation/middleware/logging.middleware.ts';
-import { logger } from '../../../utils/logger.ts';
 import { AppError } from '../../../types/errors.ts';
+
+interface MockRequest {
+  method: string;
+  url: URL;
+  ip: string;
+  headers: Headers;
+}
+
+interface MockResponse {
+  status: number;
+  headers: Headers;
+}
+
+interface MockState extends State {
+  user?: {
+    id: string;
+  };
+}
+
+type MockContext = Pick<Context, 'request' | 'response' | 'state'> & {
+  request: MockRequest;
+  response: MockResponse;
+  state: MockState;
+};
 
 // Mock console.log and console.error to capture logs
 let logOutput: string[] = [];
 const originalLog = console.log;
 const originalError = console.error;
 
-function setupLogCapture() {
+function setupLogCapture(): void {
   logOutput = [];
   console.log = (msg: string) => logOutput.push(msg);
   console.error = (msg: string) => logOutput.push(msg);
 }
 
-function restoreConsole() {
+function restoreConsole(): void {
   console.log = originalLog;
   console.error = originalError;
+}
+
+function createMockContext(
+  method = 'GET',
+  path = '/test',
+  userId?: string,
+  status = 200,
+): MockContext {
+  return {
+    request: {
+      method,
+      url: new URL(`http://localhost${path}`),
+      ip: '127.0.0.1',
+      headers: new Headers({
+        'user-agent': 'test-agent',
+      }),
+    },
+    response: {
+      status,
+      headers: new Headers(),
+    },
+    state: userId ? { user: { id: userId } } : {},
+  } as MockContext;
+}
+
+async function assertErrorType<T extends Error>(
+  fn: () => Promise<void>,
+  errorType: new (...args: any[]) => T,
+  message?: string,
+): Promise<void> {
+  try {
+    await fn();
+    throw new Error('Expected function to throw');
+  } catch (error: unknown) {
+    if (!(error instanceof errorType)) {
+      throw new Error(`Expected ${errorType.name} but got ${error instanceof Error ? error.constructor.name : typeof error}`);
+    }
+    if (message) {
+      assertEquals((error as Error).message, message);
+    }
+  }
 }
 
 Deno.test('Logging Middleware', async (t) => {
   await t.step('should log successful requests', async () => {
     setupLogCapture();
 
-    const mockCtx = {
-      request: {
-        method: 'GET',
-        url: new URL('http://localhost/test'),
-        ip: '127.0.0.1',
-        headers: new Headers({
-          'user-agent': 'test-agent',
-        }),
-      },
-      response: {
-        status: 200,
-        headers: new Headers(),
-      },
-      state: {},
-    } as unknown as Context;
+    const mockCtx = createMockContext();
+    const mockNext = () => Promise.resolve() as Promise<unknown>;
 
-    await loggingMiddleware(mockCtx, () => Promise.resolve());
+    await loggingMiddleware(mockCtx as unknown as Context, mockNext);
 
     // Check request ID header
     const requestId = mockCtx.response.headers.get('X-Request-ID');
@@ -71,31 +122,14 @@ Deno.test('Logging Middleware', async (t) => {
   await t.step('should log errors with context', async () => {
     setupLogCapture();
 
-    const mockCtx = {
-      request: {
-        method: 'POST',
-        url: new URL('http://localhost/test'),
-        ip: '127.0.0.1',
-        headers: new Headers({
-          'user-agent': 'test-agent',
-        }),
-      },
-      response: {
-        status: 500,
-        headers: new Headers(),
-      },
-      state: {
-        user: { id: 'test-user' },
-      },
-    } as unknown as Context;
+    const mockCtx = createMockContext('POST', '/test', 'test-user', 400);
+    const mockNext = () => Promise.reject(new AppError('Test error', 400, 'TEST_ERROR')) as Promise<unknown>;
 
-    const error = new AppError('Test error', 400, 'TEST_ERROR');
-
-    try {
-      await loggingMiddleware(mockCtx, () => Promise.reject(error));
-    } catch {
-      // Expected error
-    }
+    await assertErrorType(
+      () => loggingMiddleware(mockCtx as unknown as Context, mockNext),
+      AppError,
+      'Test error'
+    );
 
     // Check logs
     assertEquals(logOutput.length, 2); // Debug log and error log
@@ -116,26 +150,35 @@ Deno.test('Logging Middleware', async (t) => {
   await t.step('should handle non-AppError errors', async () => {
     setupLogCapture();
 
-    const mockCtx = {
-      request: {
-        method: 'GET',
-        url: new URL('http://localhost/test'),
-        ip: '127.0.0.1',
-        headers: new Headers({
-          'user-agent': 'test-agent',
-        }),
-      },
-      response: {
-        status: 500,
-        headers: new Headers(),
-      },
-      state: {},
-    } as unknown as Context;
+    const mockCtx = createMockContext('GET', '/test');
+    const mockNext = () => Promise.reject(new Error('Unknown error')) as Promise<unknown>;
+
+    await assertErrorType(
+      () => loggingMiddleware(mockCtx as unknown as Context, mockNext),
+      Error,
+      'Unknown error'
+    );
+
+    // Check logs
+    const errorLog = JSON.parse(logOutput[logOutput.length - 1]);
+    assertEquals(errorLog.level, 'error');
+    assertEquals(errorLog.context.statusCode, 500);
+    assertEquals(errorLog.context.errorCode, 'INTERNAL_SERVER_ERROR');
+
+    restoreConsole();
+  });
+
+  await t.step('should handle non-Error objects', async () => {
+    setupLogCapture();
+
+    const mockCtx = createMockContext('GET', '/test');
+    const mockNext = () => Promise.reject('String error') as Promise<unknown>;
 
     try {
-      await loggingMiddleware(mockCtx, () => Promise.reject(new Error('Unknown error')));
-    } catch {
-      // Expected error
+      await loggingMiddleware(mockCtx as unknown as Context, mockNext);
+    } catch (error: unknown) {
+      assertEquals(typeof error, 'string');
+      assertEquals(error, 'String error');
     }
 
     // Check logs
