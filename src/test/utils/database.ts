@@ -12,8 +12,8 @@ export interface TestContext {
  */
 export async function createTestUser(): Promise<TestUser> {
   const client = new MongoClient();
+  const uri = Deno.env.get('MONGODB_URI') || 'mongodb://127.0.0.1:27018/recipe_app_test';
   const dbName = Deno.env.get('MONGO_DB_NAME') || 'recipe_app_test';
-  const uri = Deno.env.get('MONGODB_URI') || 'mongodb://localhost:27017';
 
   try {
     await client.connect(uri);
@@ -44,8 +44,8 @@ export async function createTestUser(): Promise<TestUser> {
  */
 export async function deleteTestUser(userId: string): Promise<void> {
   const client = new MongoClient();
+  const uri = Deno.env.get('MONGODB_URI') || 'mongodb://127.0.0.1:27018/recipe_app_test';
   const dbName = Deno.env.get('MONGO_DB_NAME') || 'recipe_app_test';
-  const uri = Deno.env.get('MONGODB_URI') || 'mongodb://localhost:27017';
 
   try {
     await client.connect(uri);
@@ -64,8 +64,8 @@ export async function deleteTestUser(userId: string): Promise<void> {
  */
 export async function setupTestDatabase(): Promise<TestContext> {
   const client = new MongoClient();
+  const uri = Deno.env.get('MONGODB_URI') || 'mongodb://127.0.0.1:27018/recipe_app_test';
   const dbName = Deno.env.get('MONGO_DB_NAME') || 'recipe_app_test';
-  const uri = Deno.env.get('MONGODB_URI') || 'mongodb://localhost:27017';
 
   try {
     await client.connect(uri);

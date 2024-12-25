@@ -14,11 +14,6 @@ Deno.test({
     const testUserId = 'test-user-123';
 
     try {
-      // Clean up any existing recipes
-      await testContext.mongoClient.database('recipe_app_test').collection('recipes').deleteMany(
-        {},
-      );
-
       const createTestRecipeData = (): Omit<Recipe, 'id' | 'createdAt' | 'updatedAt'> => ({
         title: 'Test Recipe',
         description: 'A test recipe description',
@@ -36,11 +31,12 @@ Deno.test({
 
       // Test: should create a new recipe
       {
-        await testContext.mongoClient.database('recipe_app_test').collection('recipes').deleteMany(
-          {},
-        );
+        await cleanupTest();
+        const newContext = await setupTest();
+        const newRepository = new RecipeRepository(newContext.mongoClient);
+        const newService = new RecipeService(newRepository);
         const recipeData = createTestRecipeData();
-        const recipe = await recipeService.createRecipe(recipeData);
+        const recipe = await newService.createRecipe(recipeData);
 
         assertEquals(recipe.title, recipeData.title);
         assertEquals(recipe.description, recipeData.description);
@@ -55,11 +51,15 @@ Deno.test({
 
       // Test: should validate required fields
       {
+        await cleanupTest();
+        const newContext = await setupTest();
+        const newRepository = new RecipeRepository(newContext.mongoClient);
+        const newService = new RecipeService(newRepository);
         const recipeData = createTestRecipeData();
         delete (recipeData as any).title;
 
         try {
-          await recipeService.createRecipe(recipeData);
+          await newService.createRecipe(recipeData);
           throw new Error('Expected ValidationError but got no error');
         } catch (error) {
           const err = error as AppError;
@@ -71,13 +71,17 @@ Deno.test({
 
       // Test: should validate ingredients
       {
+        await cleanupTest();
+        const newContext = await setupTest();
+        const newRepository = new RecipeRepository(newContext.mongoClient);
+        const newService = new RecipeService(newRepository);
         const recipeData = {
           ...createTestRecipeData(),
           ingredients: [{ name: '', amount: -1, unit: '' }],
         };
 
         try {
-          await recipeService.createRecipe(recipeData);
+          await newService.createRecipe(recipeData);
           throw new Error('Expected ValidationError but got no error');
         } catch (error) {
           const err = error as AppError;
@@ -89,12 +93,13 @@ Deno.test({
 
       // Test: should get recipe by id
       {
-        await testContext.mongoClient.database('recipe_app_test').collection('recipes').deleteMany(
-          {},
-        );
+        await cleanupTest();
+        const newContext = await setupTest();
+        const newRepository = new RecipeRepository(newContext.mongoClient);
+        const newService = new RecipeService(newRepository);
         const recipeData = createTestRecipeData();
-        const created = await recipeService.createRecipe(recipeData);
-        const recipe = await recipeService.getRecipeById(created._id);
+        const created = await newService.createRecipe(recipeData);
+        const recipe = await newService.getRecipeById(created._id);
 
         assertEquals(recipe?.title, recipeData.title);
         assertEquals(recipe?.description, recipeData.description);
@@ -106,8 +111,12 @@ Deno.test({
 
       // Test: should throw error for non-existent recipe
       {
+        await cleanupTest();
+        const newContext = await setupTest();
+        const newRepository = new RecipeRepository(newContext.mongoClient);
+        const newService = new RecipeService(newRepository);
         try {
-          await recipeService.getRecipeById('507f1f77bcf86cd799439011');
+          await newService.getRecipeById('507f1f77bcf86cd799439011');
           throw new Error('Expected ResourceNotFoundError but got no error');
         } catch (error) {
           const err = error as AppError;
@@ -119,16 +128,17 @@ Deno.test({
 
       // Test: should list user recipes
       {
-        await testContext.mongoClient.database('recipe_app_test').collection('recipes').deleteMany(
-          {},
-        );
-        const recipe1 = await recipeService.createRecipe(createTestRecipeData());
-        const recipe2 = await recipeService.createRecipe({
+        await cleanupTest();
+        const newContext = await setupTest();
+        const newRepository = new RecipeRepository(newContext.mongoClient);
+        const newService = new RecipeService(newRepository);
+        const recipe1 = await newService.createRecipe(createTestRecipeData());
+        const recipe2 = await newService.createRecipe({
           ...createTestRecipeData(),
           title: 'Another Recipe',
         });
 
-        const recipes = await recipeService.listUserRecipes(testUserId);
+        const recipes = await newService.listUserRecipes(testUserId);
 
         assertEquals(recipes.length, 2);
         assertEquals(recipes[0]._id, recipe1._id);
@@ -137,17 +147,22 @@ Deno.test({
 
       // Test: should return empty array for user with no recipes
       {
-        const recipes = await recipeService.listUserRecipes('nonexistent-user');
+        await cleanupTest();
+        const newContext = await setupTest();
+        const newRepository = new RecipeRepository(newContext.mongoClient);
+        const newService = new RecipeService(newRepository);
+        const recipes = await newService.listUserRecipes('nonexistent-user');
         assertEquals(recipes.length, 0);
       }
 
       // Test: should update recipe details
       {
-        await testContext.mongoClient.database('recipe_app_test').collection('recipes').deleteMany(
-          {},
-        );
-        const recipe = await recipeService.createRecipe(createTestRecipeData());
-        const updatedRecipe = await recipeService.updateRecipe(recipe._id, {
+        await cleanupTest();
+        const newContext = await setupTest();
+        const newRepository = new RecipeRepository(newContext.mongoClient);
+        const newService = new RecipeService(newRepository);
+        const recipe = await newService.createRecipe(createTestRecipeData());
+        const updatedRecipe = await newService.updateRecipe(recipe._id, {
           title: 'Updated Title',
           description: 'Updated description',
         });
@@ -160,13 +175,14 @@ Deno.test({
 
       // Test: should validate updated fields
       {
-        await testContext.mongoClient.database('recipe_app_test').collection('recipes').deleteMany(
-          {},
-        );
-        const recipe = await recipeService.createRecipe(createTestRecipeData());
+        await cleanupTest();
+        const newContext = await setupTest();
+        const newRepository = new RecipeRepository(newContext.mongoClient);
+        const newService = new RecipeService(newRepository);
+        const recipe = await newService.createRecipe(createTestRecipeData());
 
         try {
-          await recipeService.updateRecipe(recipe._id, {
+          await newService.updateRecipe(recipe._id, {
             ingredients: [{ name: '', amount: -1, unit: '' }],
           });
           throw new Error('Expected ValidationError but got no error');
@@ -180,8 +196,12 @@ Deno.test({
 
       // Test: should handle non-existent recipe
       {
+        await cleanupTest();
+        const newContext = await setupTest();
+        const newRepository = new RecipeRepository(newContext.mongoClient);
+        const newService = new RecipeService(newRepository);
         try {
-          await recipeService.updateRecipe('507f1f77bcf86cd799439011', {
+          await newService.updateRecipe('507f1f77bcf86cd799439011', {
             title: 'Updated Title',
           });
           throw new Error('Expected ResourceNotFoundError but got no error');
@@ -195,14 +215,15 @@ Deno.test({
 
       // Test: should delete recipe
       {
-        await testContext.mongoClient.database('recipe_app_test').collection('recipes').deleteMany(
-          {},
-        );
-        const recipe = await recipeService.createRecipe(createTestRecipeData());
-        await recipeService.deleteRecipe(recipe._id);
+        await cleanupTest();
+        const newContext = await setupTest();
+        const newRepository = new RecipeRepository(newContext.mongoClient);
+        const newService = new RecipeService(newRepository);
+        const recipe = await newService.createRecipe(createTestRecipeData());
+        await newService.deleteRecipe(recipe._id);
 
         try {
-          await recipeService.getRecipeById(recipe._id);
+          await newService.getRecipeById(recipe._id);
           throw new Error('Expected ResourceNotFoundError but got no error');
         } catch (error) {
           const err = error as AppError;
@@ -214,8 +235,12 @@ Deno.test({
 
       // Test: should throw error for non-existent recipe
       {
+        await cleanupTest();
+        const newContext = await setupTest();
+        const newRepository = new RecipeRepository(newContext.mongoClient);
+        const newService = new RecipeService(newRepository);
         try {
-          await recipeService.deleteRecipe('507f1f77bcf86cd799439011');
+          await newService.deleteRecipe('507f1f77bcf86cd799439011');
           throw new Error('Expected ResourceNotFoundError but got no error');
         } catch (error) {
           const err = error as AppError;

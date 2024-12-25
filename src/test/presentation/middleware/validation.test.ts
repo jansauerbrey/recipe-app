@@ -59,7 +59,7 @@ function createMockContext(
 }
 
 // Mock OpenAPI spec for testing
-globalThis.openApiSpec = {
+(globalThis as any).openApiSpec = {
   paths: {
     '/api/test': {
       post: {
