@@ -67,9 +67,14 @@ export class FileUploadError extends AppError {
 
 // Rate limiting errors
 export class RateLimitError extends AppError {
-  constructor() {
-    super('Too many requests', 429, 'RATE_LIMIT_ERROR');
+  constructor(message = 'Too many requests', resetTime?: Date) {
+    super(message, 429, 'RATE_LIMIT_ERROR');
+    if (resetTime) {
+      this.resetTime = resetTime;
+    }
   }
+
+  resetTime?: Date;
 }
 
 // Helper function to determine if an error is operational

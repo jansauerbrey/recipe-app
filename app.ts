@@ -10,6 +10,7 @@ import {
   validateRequest,
   validateResponse,
 } from './src/presentation/middleware/validation.middleware.ts';
+import { rateLimitMiddleware } from './src/presentation/middleware/rate-limit.middleware.ts';
 import { AppMiddleware, AppState, createMiddleware } from './src/types/middleware.ts';
 import { AppError } from './src/types/errors.ts';
 
@@ -93,6 +94,9 @@ export async function createApp() {
     preflightContinue: false,
     maxAge: 86400, // 24 hours
   }));
+
+  // Rate limiting middleware
+  app.use(rateLimitMiddleware);
 
   // Security headers middleware
   app.use(createMiddleware(async (ctx, next) => {
