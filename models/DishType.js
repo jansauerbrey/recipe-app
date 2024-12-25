@@ -1,17 +1,16 @@
-var mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-var DishTypeSchema = new mongoose.Schema({
+const DishTypeSchema = new mongoose.Schema({
   identifier: String,
   name: {
-	en: String,
-	de: String,
-	fi: String
-	},
+    en: String,
+    de: String,
+    fi: String,
+  },
   order: Number,
   imagePath: String,
-  author: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
+  author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   updated_at: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model('DishType', DishTypeSchema);
-
+export default mongoose.model('DishType', DishTypeSchema);
