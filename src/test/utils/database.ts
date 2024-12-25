@@ -1,9 +1,62 @@
 import { Collection, Database, MongoClient } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
+import { TestUser } from '../test_utils.ts';
 
 export interface TestContext {
   client: MongoClient;
   db: Database;
   userId: string;
+}
+
+/**
+ * Create a test user
+ */
+export async function createTestUser(): Promise<TestUser> {
+  const client = new MongoClient();
+  const dbName = Deno.env.get('MONGO_DB_NAME') || 'recipe_app_test';
+  const uri = Deno.env.get('MONGODB_URI') || 'mongodb://localhost:27017';
+
+  try {
+    await client.connect(uri);
+    const db = client.database(dbName);
+    const users = db.collection('users');
+
+    const testUser = {
+      username: 'jan',
+      password: '$2a$10$K8ZpdrjwzUWSTmtyM.SAHewu7Zxpq3kUXnv/DPZSM8k.DSrmSekxi',
+      role: 'user',
+    };
+
+    const result = await users.insertOne(testUser);
+    await client.close();
+
+    return {
+      ...testUser,
+      _id: result.toString(),
+    };
+  } catch (error) {
+    console.error('Failed to create test user:', error);
+    throw error;
+  }
+}
+
+/**
+ * Delete a test user
+ */
+export async function deleteTestUser(userId: string): Promise<void> {
+  const client = new MongoClient();
+  const dbName = Deno.env.get('MONGO_DB_NAME') || 'recipe_app_test';
+  const uri = Deno.env.get('MONGODB_URI') || 'mongodb://localhost:27017';
+
+  try {
+    await client.connect(uri);
+    const db = client.database(dbName);
+    const users = db.collection('users');
+    await users.deleteOne({ _id: userId });
+    await client.close();
+  } catch (error) {
+    console.error('Failed to delete test user:', error);
+    throw error;
+  }
 }
 
 /**
@@ -63,7 +116,7 @@ export async function cleanupTestDatabase(client: MongoClient): Promise<void> {
 /**
  * Create test data in database
  */
-export async function seedTestData(db: Database, userId: string) {
+export async function seedTestData(db: Database, userId: string): Promise<void> {
   try {
     // Create test recipes
     const recipes = db.collection('recipes');
@@ -96,7 +149,7 @@ export async function seedTestData(db: Database, userId: string) {
 /**
  * Utility function to wrap tests with database setup/cleanup
  */
-export function withTestDatabase(testFn: (context: TestContext) => Promise<void>) {
+export function withTestDatabase(testFn: (context: TestContext) => Promise<void>): () => Promise<void> {
   return async () => {
     const testContext = await setupTestDatabase();
     try {

@@ -5,10 +5,11 @@ import {
 import { Context } from 'https://deno.land/x/oak@v12.6.1/mod.ts';
 import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
 import { swaggerMiddleware } from '../../../presentation/middleware/swagger.middleware.ts';
-import { ResourceNotFoundError } from '../../../types/errors.ts';
 
 interface MockRequest {
+  method: string;
   url: URL;
+  headers: Headers;
 }
 
 interface MockResponse {
@@ -25,7 +26,9 @@ type MockContext = Pick<Context, 'request' | 'response'> & {
 function createMockContext(path: string): MockContext {
   return {
     request: {
+      method: 'GET',
       url: new URL(`http://localhost${path}`),
+      headers: new Headers(),
     },
     response: {
       status: Status.OK,
@@ -126,7 +129,7 @@ Deno.test('Swagger Middleware', async (t) => {
       assertEquals(mockCtx.response.status, Status.InternalServerError);
       assertExists(mockCtx.response.body);
       assertEquals(
-        (mockCtx.response.body as { error: string }).error.includes('Failed to parse'),
+        (mockCtx.response.body as { error: string }).error.includes('Swagger documentation error'),
         true
       );
     } finally {
@@ -145,7 +148,7 @@ Deno.test('Swagger Middleware', async (t) => {
       assertEquals(mockCtx.response.status, Status.InternalServerError);
       assertExists(mockCtx.response.body);
       assertEquals(
-        (mockCtx.response.body as { error: string }).error.includes('Invalid OpenAPI specification'),
+        (mockCtx.response.body as { error: string }).error.includes('Swagger documentation error'),
         true
       );
     } finally {
