@@ -1,93 +1,73 @@
-import { Recipe, IRecipeService, IRecipeRepository } from "../../types/mod.ts";
+import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
+import { RecipeRepository } from '../../data/repositories/recipe.repository.ts';
+import { Recipe, RecipeResponse } from '../../types/mod.ts';
+import { AppError } from '../../types/middleware.ts';
+
+export interface IRecipeService {
+  createRecipe(recipe: Omit<Recipe, 'id' | 'createdAt' | 'updatedAt'>): Promise<RecipeResponse>;
+  getRecipeById(id: string): Promise<RecipeResponse>;
+  listUserRecipes(userId: string): Promise<RecipeResponse[]>;
+  updateRecipe(id: string, updates: Partial<Recipe>): Promise<RecipeResponse>;
+  deleteRecipe(id: string): Promise<void>;
+}
 
 export class RecipeService implements IRecipeService {
-  constructor(private recipeRepository: IRecipeRepository) {}
+  constructor(private recipeRepository: RecipeRepository) {}
 
-  async createRecipe(recipeData: Omit<Recipe, "id" | "createdAt" | "updatedAt">): Promise<Recipe> {
-    // Validate recipe data
-    this.validateRecipe(recipeData);
-
-    // Create recipe
-    return await this.recipeRepository.create(recipeData);
+  async createRecipe(
+    recipe: Omit<Recipe, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<RecipeResponse> {
+    const createdRecipe = await this.recipeRepository.create(recipe);
+    const { id, ...rest } = createdRecipe;
+    return {
+      ...rest,
+      _id: id,
+    };
   }
 
-  async getRecipe(id: string): Promise<Recipe | null> {
-    return await this.recipeRepository.findById(id);
-  }
-
-  async updateRecipe(id: string, recipeData: Partial<Recipe>): Promise<Recipe> {
-    // Get existing recipe
-    const existingRecipe = await this.recipeRepository.findById(id);
-    if (!existingRecipe) {
-      throw new Error("Recipe not found");
-    }
-
-    // If updating core recipe data, validate it
-    if (recipeData.title || recipeData.ingredients || recipeData.instructions) {
-      this.validateRecipe({
-        ...existingRecipe,
-        ...recipeData,
-      });
-    }
-
-    // Update recipe
-    return await this.recipeRepository.update(id, recipeData);
-  }
-
-  async deleteRecipe(id: string): Promise<boolean> {
-    // Check if recipe exists first
+  async getRecipeById(id: string): Promise<RecipeResponse> {
     const recipe = await this.recipeRepository.findById(id);
     if (!recipe) {
-      return false;
+      throw new AppError(Status.NotFound, 'Recipe not found');
     }
-    return await this.recipeRepository.delete(id);
+    const { id: recipeId, ...rest } = recipe;
+    return {
+      ...rest,
+      _id: recipeId,
+    };
   }
 
-  async listRecipes(userId: string): Promise<Recipe[]> {
-    return await this.recipeRepository.findByUserId(userId);
+  async listUserRecipes(userId: string): Promise<RecipeResponse[]> {
+    const recipes = await this.recipeRepository.findByUserId(userId);
+    return recipes.map((recipe) => {
+      const { id, ...rest } = recipe;
+      return {
+        ...rest,
+        _id: id,
+      };
+    });
   }
 
-  private validateRecipe(recipe: Omit<Recipe, "id" | "createdAt" | "updatedAt">) {
-    // Title validation
-    if (!recipe.title || recipe.title.trim().length < 3) {
-      throw new Error("Recipe title must be at least 3 characters long");
+  async updateRecipe(id: string, updates: Partial<Recipe>): Promise<RecipeResponse> {
+    const recipe = await this.recipeRepository.findById(id);
+    if (!recipe) {
+      throw new AppError(Status.NotFound, 'Recipe not found');
     }
 
-    // Ingredients validation
-    if (!recipe.ingredients || recipe.ingredients.length === 0) {
-      throw new Error("Recipe must have at least one ingredient");
+    const updatedRecipe = await this.recipeRepository.update(id, updates);
+    const { id: recipeId, ...rest } = updatedRecipe;
+    return {
+      ...rest,
+      _id: recipeId,
+    };
+  }
+
+  async deleteRecipe(id: string): Promise<void> {
+    const recipe = await this.recipeRepository.findById(id);
+    if (!recipe) {
+      throw new AppError(Status.NotFound, 'Recipe not found');
     }
 
-    for (const ingredient of recipe.ingredients) {
-      if (!ingredient.name || ingredient.name.trim().length === 0) {
-        throw new Error("All ingredients must have a name");
-      }
-      if (ingredient.amount <= 0) {
-        throw new Error("Ingredient amounts must be greater than 0");
-      }
-      if (!ingredient.unit || ingredient.unit.trim().length === 0) {
-        throw new Error("All ingredients must have a unit");
-      }
-    }
-
-    // Instructions validation
-    if (!recipe.instructions || recipe.instructions.length === 0) {
-      throw new Error("Recipe must have at least one instruction");
-    }
-
-    for (const instruction of recipe.instructions) {
-      if (!instruction || instruction.trim().length === 0) {
-        throw new Error("Instructions cannot be empty");
-      }
-    }
-
-    // Tags validation
-    if (recipe.tags) {
-      for (const tag of recipe.tags) {
-        if (!tag || tag.trim().length === 0) {
-          throw new Error("Tags cannot be empty");
-        }
-      }
-    }
+    await this.recipeRepository.delete(id);
   }
 }
