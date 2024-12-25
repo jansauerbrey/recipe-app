@@ -1,7 +1,8 @@
 import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
 import * as jose from 'https://deno.land/x/jose@v4.14.4/index.ts';
 import { getConfig } from '../../types/env.ts';
-import { AppError, AppRouterContext, createMiddleware } from '../../types/middleware.ts';
+import { AppRouterContext, createMiddleware } from '../../types/middleware.ts';
+import { AuthenticationError } from '../../types/errors.ts';
 
 interface JWTPayload extends jose.JWTPayload {
   sub: string; // user id
@@ -94,9 +95,6 @@ export async function generateToken(userId: string, role: string): Promise<strin
       .sign(new TextEncoder().encode(JWT_SECRET));
     return `AUTH ${token}`;
   } catch (error) {
-    throw new AppError(
-      Status.InternalServerError,
-      'Failed to generate authentication token',
-    );
+    throw new AuthenticationError('Failed to generate authentication token');
   }
 }

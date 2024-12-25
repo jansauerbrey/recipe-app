@@ -1,202 +1,234 @@
-import {
-  assertEquals,
-  assertNotEquals,
-  assertRejects,
-} from 'https://deno.land/std@0.208.0/assert/mod.ts';
-import { afterEach, beforeEach, describe, it } from 'https://deno.land/std@0.208.0/testing/bdd.ts';
+import { assertEquals, assertNotEquals } from 'https://deno.land/std@0.208.0/assert/mod.ts';
 import { RecipeService } from '../../../business/services/recipe.service.ts';
 import { RecipeRepository } from '../../../data/repositories/recipe.repository.ts';
 import { cleanupTest, setupTest } from '../../test_utils.ts';
-import { ValidationError } from '../../../types/errors.ts';
+import { AppError } from '../../../types/errors.ts';
 import { Recipe } from '../../../types/mod.ts';
-import { AppError } from '../../../types/middleware.ts';
 
-describe('RecipeService', () => {
-  let recipeService: RecipeService;
-  let recipeRepository: RecipeRepository;
-  let client: any;
-  const testUserId = 'test-user-123';
-
-  beforeEach(async () => {
+Deno.test({
+  name: 'RecipeService Tests',
+  async fn() {
     const testContext = await setupTest();
-    client = testContext.mongoClient;
-    recipeRepository = new RecipeRepository(client);
-    recipeService = new RecipeService(recipeRepository);
-  });
+    const recipeRepository = new RecipeRepository(testContext.mongoClient);
+    const recipeService = new RecipeService(recipeRepository);
+    const testUserId = 'test-user-123';
 
-  afterEach(async () => {
-    await cleanupTest();
-  });
+    try {
+      // Clean up any existing recipes
+      await testContext.mongoClient.database('recipe_app_test').collection('recipes').deleteMany(
+        {},
+      );
 
-  const createTestRecipeData = (): Omit<Recipe, 'id' | 'createdAt' | 'updatedAt'> => ({
-    title: 'Test Recipe',
-    description: 'A test recipe description',
-    ingredients: [
+      const createTestRecipeData = (): Omit<Recipe, 'id' | 'createdAt' | 'updatedAt'> => ({
+        title: 'Test Recipe',
+        description: 'A test recipe description',
+        ingredients: [
+          {
+            name: 'Test Ingredient',
+            amount: 1,
+            unit: 'piece',
+          },
+        ],
+        instructions: ['Step 1: Test instruction'],
+        userId: testUserId,
+        tags: ['test'],
+      });
+
+      // Test: should create a new recipe
       {
-        name: 'Test Ingredient',
-        amount: 1,
-        unit: 'piece',
-      },
-    ],
-    instructions: ['Step 1: Test instruction'],
-    userId: testUserId,
-    tags: ['test'],
-  });
+        await testContext.mongoClient.database('recipe_app_test').collection('recipes').deleteMany(
+          {},
+        );
+        const recipeData = createTestRecipeData();
+        const recipe = await recipeService.createRecipe(recipeData);
 
-  describe('createRecipe', () => {
-    it('should create a new recipe', async () => {
-      const recipeData = createTestRecipeData();
-      const recipe = await recipeService.createRecipe(recipeData);
+        assertEquals(recipe.title, recipeData.title);
+        assertEquals(recipe.description, recipeData.description);
+        assertEquals(recipe.ingredients, recipeData.ingredients);
+        assertEquals(recipe.instructions, recipeData.instructions);
+        assertEquals(recipe.userId, recipeData.userId);
+        assertEquals(recipe.tags, recipeData.tags);
+        assertEquals(typeof recipe._id, 'string');
+        assertEquals(recipe.createdAt instanceof Date, true);
+        assertEquals(recipe.updatedAt instanceof Date, true);
+      }
 
-      assertEquals(recipe.title, recipeData.title);
-      assertEquals(recipe.description, recipeData.description);
-      assertEquals(recipe.ingredients, recipeData.ingredients);
-      assertEquals(recipe.instructions, recipeData.instructions);
-      assertEquals(recipe.userId, recipeData.userId);
-      assertEquals(recipe.tags, recipeData.tags);
-      assertEquals(typeof recipe._id, 'string');
-      assertEquals(recipe.createdAt instanceof Date, true);
-      assertEquals(recipe.updatedAt instanceof Date, true);
-    });
+      // Test: should validate required fields
+      {
+        const recipeData = createTestRecipeData();
+        delete (recipeData as any).title;
 
-    it('should validate required fields', async () => {
-      const recipeData = createTestRecipeData();
-      delete (recipeData as any).title;
-
-      await assertRejects(
-        async () => {
+        try {
           await recipeService.createRecipe(recipeData);
-        },
-        ValidationError,
-        'Title is required',
-      );
-    });
+          throw new Error('Expected ValidationError but got no error');
+        } catch (error) {
+          const err = error as AppError;
+          assertEquals(err.code, 'VALIDATION_ERROR');
+          assertEquals(err.statusCode, 400);
+          assertEquals(err.message, 'Title is required');
+        }
+      }
 
-    it('should validate ingredients', async () => {
-      const recipeData = {
-        ...createTestRecipeData(),
-        ingredients: [{ name: '', amount: -1, unit: '' }],
-      };
+      // Test: should validate ingredients
+      {
+        const recipeData = {
+          ...createTestRecipeData(),
+          ingredients: [{ name: '', amount: -1, unit: '' }],
+        };
 
-      await assertRejects(
-        async () => {
+        try {
           await recipeService.createRecipe(recipeData);
-        },
-        ValidationError,
-        'Invalid ingredient',
-      );
-    });
-  });
+          throw new Error('Expected ValidationError but got no error');
+        } catch (error) {
+          const err = error as AppError;
+          assertEquals(err.code, 'VALIDATION_ERROR');
+          assertEquals(err.statusCode, 400);
+          assertEquals(err.message, 'Invalid ingredient');
+        }
+      }
 
-  describe('getRecipeById', () => {
-    it('should get recipe by id', async () => {
-      const recipeData = createTestRecipeData();
-      const created = await recipeService.createRecipe(recipeData);
-      const recipe = await recipeService.getRecipeById(created._id);
+      // Test: should get recipe by id
+      {
+        await testContext.mongoClient.database('recipe_app_test').collection('recipes').deleteMany(
+          {},
+        );
+        const recipeData = createTestRecipeData();
+        const created = await recipeService.createRecipe(recipeData);
+        const recipe = await recipeService.getRecipeById(created._id);
 
-      assertEquals(recipe?.title, recipeData.title);
-      assertEquals(recipe?.description, recipeData.description);
-      assertEquals(recipe?.ingredients, recipeData.ingredients);
-      assertEquals(recipe?.instructions, recipeData.instructions);
-      assertEquals(recipe?.userId, recipeData.userId);
-      assertEquals(recipe?.tags, recipeData.tags);
-    });
+        assertEquals(recipe?.title, recipeData.title);
+        assertEquals(recipe?.description, recipeData.description);
+        assertEquals(recipe?.ingredients, recipeData.ingredients);
+        assertEquals(recipe?.instructions, recipeData.instructions);
+        assertEquals(recipe?.userId, recipeData.userId);
+        assertEquals(recipe?.tags, recipeData.tags);
+      }
 
-    it('should throw error for non-existent recipe', async () => {
-      await assertRejects(
-        async () => {
-          await recipeService.getRecipeById('nonexistent-id');
-        },
-        AppError,
-        'Recipe not found',
-      );
-    });
-  });
+      // Test: should throw error for non-existent recipe
+      {
+        try {
+          await recipeService.getRecipeById('507f1f77bcf86cd799439011');
+          throw new Error('Expected ResourceNotFoundError but got no error');
+        } catch (error) {
+          const err = error as AppError;
+          assertEquals(err.code, 'RESOURCE_NOT_FOUND');
+          assertEquals(err.statusCode, 404);
+          assertEquals(err.message, 'Recipe not found');
+        }
+      }
 
-  describe('listUserRecipes', () => {
-    it('should list user recipes', async () => {
-      const recipe1 = await recipeService.createRecipe(createTestRecipeData());
-      const recipe2 = await recipeService.createRecipe({
-        ...createTestRecipeData(),
-        title: 'Another Recipe',
-      });
+      // Test: should list user recipes
+      {
+        await testContext.mongoClient.database('recipe_app_test').collection('recipes').deleteMany(
+          {},
+        );
+        const recipe1 = await recipeService.createRecipe(createTestRecipeData());
+        const recipe2 = await recipeService.createRecipe({
+          ...createTestRecipeData(),
+          title: 'Another Recipe',
+        });
 
-      const recipes = await recipeService.listUserRecipes(testUserId);
+        const recipes = await recipeService.listUserRecipes(testUserId);
 
-      assertEquals(recipes.length, 2);
-      assertEquals(recipes[0]._id, recipe1._id);
-      assertEquals(recipes[1]._id, recipe2._id);
-    });
+        assertEquals(recipes.length, 2);
+        assertEquals(recipes[0]._id, recipe1._id);
+        assertEquals(recipes[1]._id, recipe2._id);
+      }
 
-    it('should return empty array for user with no recipes', async () => {
-      const recipes = await recipeService.listUserRecipes('nonexistent-user');
-      assertEquals(recipes.length, 0);
-    });
-  });
+      // Test: should return empty array for user with no recipes
+      {
+        const recipes = await recipeService.listUserRecipes('nonexistent-user');
+        assertEquals(recipes.length, 0);
+      }
 
-  describe('updateRecipe', () => {
-    it('should update recipe details', async () => {
-      const recipe = await recipeService.createRecipe(createTestRecipeData());
-      const updatedRecipe = await recipeService.updateRecipe(recipe._id, {
-        title: 'Updated Title',
-        description: 'Updated description',
-      });
+      // Test: should update recipe details
+      {
+        await testContext.mongoClient.database('recipe_app_test').collection('recipes').deleteMany(
+          {},
+        );
+        const recipe = await recipeService.createRecipe(createTestRecipeData());
+        const updatedRecipe = await recipeService.updateRecipe(recipe._id, {
+          title: 'Updated Title',
+          description: 'Updated description',
+        });
 
-      assertEquals(updatedRecipe.title, 'Updated Title');
-      assertEquals(updatedRecipe.description, 'Updated description');
-      assertEquals(updatedRecipe.ingredients, recipe.ingredients);
-      assertNotEquals(updatedRecipe.updatedAt, recipe.updatedAt);
-    });
+        assertEquals(updatedRecipe.title, 'Updated Title');
+        assertEquals(updatedRecipe.description, 'Updated description');
+        assertEquals(updatedRecipe.ingredients, recipe.ingredients);
+        assertNotEquals(updatedRecipe.updatedAt, recipe.updatedAt);
+      }
 
-    it('should validate updated fields', async () => {
-      const recipe = await recipeService.createRecipe(createTestRecipeData());
+      // Test: should validate updated fields
+      {
+        await testContext.mongoClient.database('recipe_app_test').collection('recipes').deleteMany(
+          {},
+        );
+        const recipe = await recipeService.createRecipe(createTestRecipeData());
 
-      await assertRejects(
-        async () => {
+        try {
           await recipeService.updateRecipe(recipe._id, {
             ingredients: [{ name: '', amount: -1, unit: '' }],
           });
-        },
-        ValidationError,
-        'Invalid ingredient',
-      );
-    });
+          throw new Error('Expected ValidationError but got no error');
+        } catch (error) {
+          const err = error as AppError;
+          assertEquals(err.code, 'VALIDATION_ERROR');
+          assertEquals(err.statusCode, 400);
+          assertEquals(err.message, 'Invalid ingredient');
+        }
+      }
 
-    it('should handle non-existent recipe', async () => {
-      await assertRejects(
-        async () => {
-          await recipeService.updateRecipe('nonexistent-id', {
+      // Test: should handle non-existent recipe
+      {
+        try {
+          await recipeService.updateRecipe('507f1f77bcf86cd799439011', {
             title: 'Updated Title',
           });
-        },
-        AppError,
-        'Recipe not found',
-      );
-    });
-  });
+          throw new Error('Expected ResourceNotFoundError but got no error');
+        } catch (error) {
+          const err = error as AppError;
+          assertEquals(err.code, 'RESOURCE_NOT_FOUND');
+          assertEquals(err.statusCode, 404);
+          assertEquals(err.message, 'Recipe not found');
+        }
+      }
 
-  describe('deleteRecipe', () => {
-    it('should delete recipe', async () => {
-      const recipe = await recipeService.createRecipe(createTestRecipeData());
-      await recipeService.deleteRecipe(recipe._id);
+      // Test: should delete recipe
+      {
+        await testContext.mongoClient.database('recipe_app_test').collection('recipes').deleteMany(
+          {},
+        );
+        const recipe = await recipeService.createRecipe(createTestRecipeData());
+        await recipeService.deleteRecipe(recipe._id);
 
-      await assertRejects(
-        async () => {
+        try {
           await recipeService.getRecipeById(recipe._id);
-        },
-        AppError,
-        'Recipe not found',
-      );
-    });
+          throw new Error('Expected ResourceNotFoundError but got no error');
+        } catch (error) {
+          const err = error as AppError;
+          assertEquals(err.code, 'RESOURCE_NOT_FOUND');
+          assertEquals(err.statusCode, 404);
+          assertEquals(err.message, 'Recipe not found');
+        }
+      }
 
-    it('should throw error for non-existent recipe', async () => {
-      await assertRejects(
-        async () => {
-          await recipeService.deleteRecipe('nonexistent-id');
-        },
-        AppError,
-        'Recipe not found',
-      );
-    });
-  });
+      // Test: should throw error for non-existent recipe
+      {
+        try {
+          await recipeService.deleteRecipe('507f1f77bcf86cd799439011');
+          throw new Error('Expected ResourceNotFoundError but got no error');
+        } catch (error) {
+          const err = error as AppError;
+          assertEquals(err.code, 'RESOURCE_NOT_FOUND');
+          assertEquals(err.statusCode, 404);
+          assertEquals(err.message, 'Recipe not found');
+        }
+      }
+    } finally {
+      await testContext.server.close();
+      await cleanupTest();
+    }
+  },
+  sanitizeResources: false,
+  sanitizeOps: false,
 });

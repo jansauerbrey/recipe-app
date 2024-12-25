@@ -4,70 +4,71 @@ export class AppError extends Error {
     message: string,
     public statusCode: number,
     public code: string,
-    public isOperational = true
+    public isOperational = true,
   ) {
     super(message);
-    Object.setPrototypeOf(this, AppError.prototype);
+    this.name = new.target.name;
+    Object.setPrototypeOf(this, new.target.prototype);
   }
 }
 
 // Authentication related errors
 export class AuthenticationError extends AppError {
-  constructor(message = "Authentication failed") {
-    super(message, 401, "AUTHENTICATION_ERROR");
+  constructor(message = 'Authentication failed') {
+    super(message, 401, 'AUTHENTICATION_ERROR');
   }
 }
 
 export class TokenExpiredError extends AuthenticationError {
   constructor() {
-    super("Token has expired");
+    super('Token has expired');
   }
 }
 
 export class InvalidTokenError extends AuthenticationError {
   constructor() {
-    super("Invalid token");
+    super('Invalid token');
   }
 }
 
 // Authorization related errors
 export class AuthorizationError extends AppError {
-  constructor(message = "Not authorized") {
-    super(message, 403, "AUTHORIZATION_ERROR");
+  constructor(message = 'Not authorized') {
+    super(message, 403, 'AUTHORIZATION_ERROR');
   }
 }
 
 // Resource related errors
 export class ResourceNotFoundError extends AppError {
   constructor(resource: string) {
-    super(`${resource} not found`, 404, "RESOURCE_NOT_FOUND");
+    super(`${resource} not found`, 404, 'RESOURCE_NOT_FOUND');
   }
 }
 
 export class ValidationError extends AppError {
   constructor(message: string) {
-    super(message, 400, "VALIDATION_ERROR");
+    super(message, 400, 'VALIDATION_ERROR');
   }
 }
 
 // Database related errors
 export class DatabaseError extends AppError {
   constructor(message: string) {
-    super(message, 500, "DATABASE_ERROR", false);
+    super(message, 500, 'DATABASE_ERROR', false);
   }
 }
 
 // File upload related errors
 export class FileUploadError extends AppError {
   constructor(message: string) {
-    super(message, 400, "FILE_UPLOAD_ERROR");
+    super(message, 400, 'FILE_UPLOAD_ERROR');
   }
 }
 
 // Rate limiting errors
 export class RateLimitError extends AppError {
   constructor() {
-    super("Too many requests", 429, "RATE_LIMIT_ERROR");
+    super('Too many requests', 429, 'RATE_LIMIT_ERROR');
   }
 }
 
@@ -89,15 +90,15 @@ export function toAppError(error: unknown): AppError {
     return new AppError(
       error.message,
       500,
-      "INTERNAL_SERVER_ERROR",
-      false
+      'INTERNAL_SERVER_ERROR',
+      false,
     );
   }
 
   return new AppError(
-    "An unexpected error occurred",
+    'An unexpected error occurred',
     500,
-    "INTERNAL_SERVER_ERROR",
-    false
+    'INTERNAL_SERVER_ERROR',
+    false,
   );
 }

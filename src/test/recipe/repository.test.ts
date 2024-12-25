@@ -1,11 +1,16 @@
-import { assertEquals, assertExists } from 'https://deno.land/std@0.208.0/testing/asserts.ts';
-import { describe, it } from 'https://deno.land/std@0.208.0/testing/bdd.ts';
+import {
+  assertEquals,
+  assertExists,
+  assertRejects,
+} from 'https://deno.land/std@0.208.0/testing/asserts.ts';
 import { RecipeRepository } from '../../data/repositories/recipe.repository.ts';
 import { createTestRecipe } from '../utils/factories.ts';
-import { setupTest } from '../test_utils.ts';
+import { cleanupTest, setupTest } from '../test_utils.ts';
+import { AppError, ResourceNotFoundError } from '../../types/errors.ts';
 
-describe('Recipe Repository - CRUD operations', () => {
-  it('should handle CRUD operations', async () => {
+Deno.test({
+  name: 'Recipe Repository - CRUD operations',
+  async fn() {
     const testContext = await setupTest();
 
     try {
@@ -40,10 +45,22 @@ describe('Recipe Repository - CRUD operations', () => {
 
       // Delete
       await repository.delete(createdRecipe.id);
-      const deletedRecipe = await repository.findById(createdRecipe.id);
-      assertEquals(deletedRecipe, null);
+
+      // Verify deletion by expecting ResourceNotFoundError
+      try {
+        await repository.findById(createdRecipe.id);
+        throw new Error('Expected ResourceNotFoundError but got no error');
+      } catch (error) {
+        const err = error as AppError;
+        assertEquals(err.code, 'RESOURCE_NOT_FOUND');
+        assertEquals(err.statusCode, 404);
+        assertEquals(err.message, 'Recipe not found');
+      }
     } finally {
       await testContext.server.close();
+      await cleanupTest();
     }
-  });
+  },
+  sanitizeResources: false,
+  sanitizeOps: false,
 });

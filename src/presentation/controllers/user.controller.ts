@@ -1,8 +1,13 @@
 import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
 import { BaseController, ControllerContext } from './base.controller.ts';
 import { UserService } from '../../business/services/user.service.ts';
-import { AppError } from '../../types/middleware.ts';
 import { User } from '../../types/mod.ts';
+import {
+  AppError,
+  AuthenticationError,
+  ResourceNotFoundError,
+  ValidationError,
+} from '../../types/errors.ts';
 
 export class UserController extends BaseController {
   constructor(private userService: UserService) {
@@ -17,8 +22,9 @@ export class UserController extends BaseController {
       const token = await this.userService.validateCredentials(email, password);
       await this.ok(ctx, { token });
     } catch (error) {
-      if (error instanceof AppError) {
-        await this.unauthorized(ctx, error.message);
+      const err = error as Error & { code?: string };
+      if (err.code === 'AUTHENTICATION_ERROR') {
+        await this.unauthorized(ctx, err.message);
       } else {
         await this.internalServerError(ctx, 'Failed to validate credentials');
       }
@@ -39,12 +45,11 @@ export class UserController extends BaseController {
 
       await this.created(ctx, user);
     } catch (error) {
-      if (error instanceof AppError) {
-        if (error.message.includes('Invalid email')) {
-          await this.badRequest(ctx, error.message);
-        } else {
-          await this.internalServerError(ctx, error.message);
-        }
+      const err = error as Error & { code?: string };
+      if (err.code === 'VALIDATION_ERROR') {
+        await this.badRequest(ctx, err.message);
+      } else if (err.code === 'RESOURCE_NOT_FOUND') {
+        await this.notFound(ctx, err.message);
       } else {
         await this.internalServerError(ctx, 'Failed to create user');
       }
@@ -55,14 +60,17 @@ export class UserController extends BaseController {
     try {
       const userId = ctx.state.user?.id;
       if (!userId) {
-        throw new AppError(Status.Unauthorized, 'User not authenticated');
+        throw new AuthenticationError('User not authenticated');
       }
 
       const user = await this.userService.getUserById(userId);
       await this.ok(ctx, { user }); // Wrap user in an object
     } catch (error) {
-      if (error instanceof AppError) {
-        await this.internalServerError(ctx, error.message);
+      const err = error as Error & { code?: string };
+      if (err.code === 'AUTHENTICATION_ERROR') {
+        await this.unauthorized(ctx, err.message);
+      } else if (err.code === 'RESOURCE_NOT_FOUND') {
+        await this.notFound(ctx, err.message);
       } else {
         await this.internalServerError(ctx, 'Failed to check user');
       }
@@ -75,14 +83,11 @@ export class UserController extends BaseController {
       const user = await this.userService.getUserById(id);
       await this.ok(ctx, user);
     } catch (error) {
-      if (error instanceof AppError) {
-        if (error.message.includes('not found')) {
-          await this.notFound(ctx, error.message);
-        } else if (error.message.includes('Invalid email')) {
-          await this.badRequest(ctx, error.message);
-        } else {
-          await this.internalServerError(ctx, error.message);
-        }
+      const err = error as Error & { code?: string };
+      if (err.code === 'RESOURCE_NOT_FOUND') {
+        await this.notFound(ctx, err.message);
+      } else if (err.code === 'VALIDATION_ERROR') {
+        await this.badRequest(ctx, err.message);
       } else {
         await this.internalServerError(ctx, 'Failed to get user');
       }
@@ -98,8 +103,11 @@ export class UserController extends BaseController {
       const user = await this.userService.updateUser(id, updates);
       await this.ok(ctx, user);
     } catch (error) {
-      if (error instanceof AppError) {
-        await this.internalServerError(ctx, error.message);
+      const err = error as Error & { code?: string };
+      if (err.code === 'RESOURCE_NOT_FOUND') {
+        await this.notFound(ctx, err.message);
+      } else if (err.code === 'VALIDATION_ERROR') {
+        await this.badRequest(ctx, err.message);
       } else {
         await this.internalServerError(ctx, 'Failed to update user');
       }
@@ -112,8 +120,11 @@ export class UserController extends BaseController {
       await this.userService.deleteUser(id);
       await this.noContent(ctx);
     } catch (error) {
-      if (error instanceof AppError) {
-        await this.internalServerError(ctx, error.message);
+      const err = error as Error & { code?: string };
+      if (err.code === 'RESOURCE_NOT_FOUND') {
+        await this.notFound(ctx, err.message);
+      } else if (err.code === 'VALIDATION_ERROR') {
+        await this.badRequest(ctx, err.message);
       } else {
         await this.internalServerError(ctx, 'Failed to delete user');
       }

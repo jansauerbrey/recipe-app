@@ -38,22 +38,12 @@ export class RecipeService implements IRecipeService {
   }
 
   async getRecipeById(id: string): Promise<RecipeResponse> {
-    try {
-      const recipe = await this.recipeRepository.findById(id);
-      if (!recipe) {
-        throw new ResourceNotFoundError('Recipe');
-      }
-      const { id: recipeId, ...rest } = recipe;
-      return {
-        ...rest,
-        _id: recipeId,
-      };
-    } catch (error) {
-      if (error instanceof ResourceNotFoundError) {
-        throw error;
-      }
-      throw new ValidationError('Invalid recipe ID');
-    }
+    const recipe = await this.recipeRepository.findById(id);
+    const { id: recipeId, ...rest } = recipe;
+    return {
+      ...rest,
+      _id: recipeId,
+    };
   }
 
   async listUserRecipes(userId: string): Promise<RecipeResponse[]> {
@@ -68,44 +58,20 @@ export class RecipeService implements IRecipeService {
   }
 
   async updateRecipe(id: string, updates: Partial<Recipe>): Promise<RecipeResponse> {
-    try {
-      // Validate ingredients if they're being updated
-      if (updates.ingredients?.some((ing) => !ing.name || ing.amount <= 0 || !ing.unit)) {
-        throw new ValidationError('Invalid ingredient');
-      }
-
-      const recipe = await this.recipeRepository.findById(id);
-      if (!recipe) {
-        throw new ResourceNotFoundError('Recipe');
-      }
-
-      const updatedRecipe = await this.recipeRepository.update(id, updates);
-      const { id: recipeId, ...rest } = updatedRecipe;
-      return {
-        ...rest,
-        _id: recipeId,
-      };
-    } catch (error) {
-      if (error instanceof ResourceNotFoundError || error instanceof ValidationError) {
-        throw error;
-      }
-      throw new ValidationError('Invalid recipe ID');
+    // Validate ingredients if they're being updated
+    if (updates.ingredients?.some((ing) => !ing.name || ing.amount <= 0 || !ing.unit)) {
+      throw new ValidationError('Invalid ingredient');
     }
+
+    const updatedRecipe = await this.recipeRepository.update(id, updates);
+    const { id: recipeId, ...rest } = updatedRecipe;
+    return {
+      ...rest,
+      _id: recipeId,
+    };
   }
 
   async deleteRecipe(id: string): Promise<void> {
-    try {
-      const recipe = await this.recipeRepository.findById(id);
-      if (!recipe) {
-        throw new ResourceNotFoundError('Recipe');
-      }
-
-      await this.recipeRepository.delete(id);
-    } catch (error) {
-      if (error instanceof ResourceNotFoundError) {
-        throw error;
-      }
-      throw new ValidationError('Invalid recipe ID');
-    }
+    await this.recipeRepository.delete(id);
   }
 }
