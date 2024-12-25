@@ -1,87 +1,62 @@
-/**
- * User Model
- * 
- * Handles user account management including:
- * - Authentication and authorization
- * - Profile information
- * - User preferences and settings
- * - Email verification
- * - Password reset functionality
- */
+'use strict';
 
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const SALT_WORK_FACTOR = 10;
 
-// User schema definition with case-insensitive unique username
 const UserSchema = new mongoose.Schema({
-  username: { 
-    type: String, 
+  username: {
+    type: String,
     required: true,
-    trim: true
+    unique: true
   },
-  username_lower: { 
-    type: String, 
+  email: {
+    type: String,
     required: true,
-    trim: true,
-    index: { unique: true }
+    unique: true
   },
-  password: { type: String, required: true },
-  fullname: String,
-  email: String,
-  emailNotConfirmed: String,
-  emailConfirmationToken: { type: String },
-  is_admin: { type: Boolean, default: false },
-  is_activated: { type: Boolean, default: false },
-  settings: {
-    preferredLanguage: String,
-    spokenLanguages: [String],
-    categoryOrder: [String],
-    preferredWeekStartDay: Number,
-  	autoupdate: { type: Boolean, default: true }
+  password: {
+    type: String,
+    required: true
   },
-  favoriteRecipes: [{type: mongoose.Schema.Types.ObjectId, ref: 'Recipe'}],
-  autologin: { type: Boolean, default: false },
-  created: { type: Date, default: Date.now },
-  resetPasswordToken: { type: String },
-  resetPasswordExpires: Date
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
+  },
+  resetPasswordToken: String,
+  resetPasswordExpires: Date,
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
 });
 
-UserSchema.pre('save', function(next) {
-  const user = this;
-  if (!user.isModified('password')) return next();
+UserSchema.pre('save', async function(next) {
+  // Only hash the password if it has been modified (or is new)
+  if (!this.isModified('password')) {
+    return next();
+  }
 
-  bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
-    if (err) return next(err);
-
-    bcrypt.hash(user.password, salt, function(err, hash) {
-      if (err) return next(err);
-      user.password = hash;
-      next();
-    });
-  });
+  try {
+    // Generate a salt
+    const salt = await bcrypt.genSalt(SALT_WORK_FACTOR);
+    // Hash the password using our new salt
+    const hash = await bcrypt.hash(this.password, salt);
+    // Override the cleartext password with the hashed one
+    this.password = hash;
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
-UserSchema.pre('update', function(next) {
-  const user = this;
-  if (!user.isModified('password')) return next();
-
-  bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
-    if (err) return next(err);
-
-    bcrypt.hash(user.password, salt, function(err, hash) {
-      if (err) return next(err);
-      user.password = hash;
-      next();
-    });
-  });
-});
-
-UserSchema.methods.comparePassword = function(password, cb) {
-  bcrypt.compare(password, this.password, function(err, isMatch) {
-    if (err) return cb(err);
-    cb(isMatch);
-  });
+UserSchema.methods.comparePassword = async function(candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
 };
 
 module.exports = mongoose.model('User', UserSchema);
