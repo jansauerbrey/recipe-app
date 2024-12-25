@@ -5,18 +5,18 @@ Deno.test({
   name: 'Authentication - should return 401 for unauthenticated request',
   async fn() {
     // Setup test environment
-    const { server } = await setupTest();
+    const testContext = await setupTest();
 
     try {
       // Create TCP connection
-      const tcpConn = await Deno.connect({ hostname: '127.0.0.1', port: 3000 });
+      const tcpConn = await Deno.connect({ hostname: '127.0.0.1', port: testContext.port });
 
       try {
         // Send HTTP request
         const encoder = new TextEncoder();
         const request = encoder.encode(
-          'GET /api/user/check HTTP/1.1\r\n' +
-            'Host: localhost:3000\r\n' +
+          `GET /api/user/check HTTP/1.1\r\n` +
+            `Host: localhost:${testContext.port}\r\n` +
             'Connection: close\r\n\r\n',
         );
         await tcpConn.write(request);
@@ -38,7 +38,7 @@ Deno.test({
       }
     } finally {
       // Cleanup test environment
-      await server.close();
+      await testContext.server.close();
       await cleanupTest();
     }
   },

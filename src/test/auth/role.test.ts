@@ -1,79 +1,58 @@
-/// <reference lib="deno.ns" />
-/// <reference lib="dom" />
+import { assertEquals } from 'https://deno.land/std@0.208.0/testing/asserts.ts';
+import { describe, it } from 'https://deno.land/std@0.208.0/testing/bdd.ts';
+import { setupTest } from '../test_utils.ts';
+import { createAuthHeader } from '../utils/helpers.ts';
 
-import { assertEquals, assertRejects } from "std/testing/asserts.ts";
-import { setupTest, cleanupTest } from "../test_utils.ts";
-import { createAuthContext, authTestData, type AuthContext } from "./test_helpers.ts";
+describe('Role Authorization Tests', () => {
+  it('should handle role-based authorization', async () => {
+    const testContext = await setupTest();
+    const baseUrl = `http://localhost:${testContext.port}/api`;
 
-// Role middleware implementation
-function checkRole(allowedRoles: string[]) {
-  return async function roleMiddleware(ctx: AuthContext, next: () => Promise<void>) {
-    const user = ctx.state.user;
-    if (!user) {
-      throw new Error("Unauthorized - no user in context");
-    }
+    try {
+      // Update test user to admin role
+      const db = testContext.mongoClient.database(
+        Deno.env.get('MONGO_DB_NAME') || 'recipe_app_test',
+      );
+      await db.collection('users').updateOne(
+        { _id: testContext.testUserId },
+        { $set: { role: 'admin' } },
+      );
 
-    if (!allowedRoles.includes(user.role)) {
-      throw new Error(`Access denied - requires one of roles: ${allowedRoles.join(", ")}`);
-    }
-
-    await next();
-  };
-}
-
-Deno.test({
-  name: "Role Authorization Tests",
-  async fn(t) {
-    await setupTest();
-
-    await t.step("should allow user with correct role", async () => {
-      const ctx = createAuthContext({ role: "admin" });
-      const roleMiddleware = checkRole(["admin", "superadmin"]);
-
-      let nextCalled = false;
-      await roleMiddleware(ctx, async () => {
-        nextCalled = true;
+      // Test admin access
+      const adminResponse = await fetch(`${baseUrl}/admin`, {
+        headers: await createAuthHeader(testContext.testUserId!, 'admin'),
       });
 
-      assertEquals(nextCalled, true);
-    });
+      assertEquals(adminResponse.status, 200);
+      const adminBody = await adminResponse.json();
+      assertEquals(adminBody.message, 'Admin route accessed successfully');
 
-    await t.step("should reject user with incorrect role", async () => {
-      const ctx = createAuthContext({ role: "user" });
-      const roleMiddleware = checkRole(["admin"]);
-
-      await assertRejects(
-        () => roleMiddleware(ctx, async () => {}),
-        Error,
-        "Access denied"
-      );
-    });
-
-    await t.step("should reject request with no user", async () => {
-      const ctx = createAuthContext();
-      const roleMiddleware = checkRole(["admin"]);
-
-      await assertRejects(
-        () => roleMiddleware(ctx, async () => {}),
-        Error,
-        "Unauthorized"
-      );
-    });
-
-    await t.step("should handle multiple allowed roles", async () => {
-      const ctx = createAuthContext({ role: "editor" });
-      const roleMiddleware = checkRole(["admin", "editor", "moderator"]);
-
-      let nextCalled = false;
-      await roleMiddleware(ctx, async () => {
-        nextCalled = true;
+      // Test incorrect role
+      const userResponse = await fetch(`${baseUrl}/admin`, {
+        headers: await createAuthHeader(testContext.testUserId!, 'user'),
       });
 
-      assertEquals(nextCalled, true);
-    });
+      assertEquals(userResponse.status, 403);
+      const userBody = await userResponse.json();
+      assertEquals(userBody.error, 'Forbidden');
 
-    await cleanupTest();
-  },
-  sanitizeResources: false,
-  sanitizeOps: false,
+      // Test no user
+      const noAuthResponse = await fetch(`${baseUrl}/admin`);
+
+      assertEquals(noAuthResponse.status, 401);
+      const noAuthBody = await noAuthResponse.json();
+      assertEquals(noAuthBody.error, 'No authorization token provided');
+
+      // Test multiple allowed roles
+      const moderatorResponse = await fetch(`${baseUrl}/moderator`, {
+        headers: await createAuthHeader(testContext.testUserId!, 'admin'),
+      });
+
+      assertEquals(moderatorResponse.status, 200);
+      const moderatorBody = await moderatorResponse.json();
+      assertEquals(moderatorBody.message, 'Moderator route accessed successfully');
+    } finally {
+      await testContext.server.close();
+    }
+  });
 });
