@@ -1,159 +1,122 @@
-import { Context, RouterContext } from "https://deno.land/x/oak@v12.6.1/mod.ts";
-import { BaseController } from "./base.controller.ts";
-import { IUserService, User } from "../../types/mod.ts";
-import { generateToken } from "../middleware/auth.middleware.ts";
-
-interface CreateUserBody {
-  email: string;
-  password: string;
-  name: string;
-}
-
-interface UpdateUserBody {
-  email?: string;
-  password?: string;
-  name?: string;
-}
+import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
+import { BaseController, ControllerContext } from './base.controller.ts';
+import { UserService } from '../../business/services/user.service.ts';
+import { AppError } from '../../types/middleware.ts';
+import { User } from '../../types/mod.ts';
 
 export class UserController extends BaseController {
-  constructor(private userService: IUserService) {
+  constructor(private userService: UserService) {
     super();
   }
 
-  async create(ctx: Context) {
-    const body = await this.getRequestBody<CreateUserBody>(ctx);
-    if (!body) {
-      return await this.badRequest(ctx, "Invalid request body");
-    }
-
-    const { email, password, name } = body;
-
+  async validateCredentials(ctx: ControllerContext): Promise<void> {
     try {
+      const body = ctx.request.body();
+      const { email, password } = await body.value;
+
+      const token = await this.userService.validateCredentials(email, password);
+      await this.ok(ctx, { token });
+    } catch (error) {
+      if (error instanceof AppError) {
+        await this.unauthorized(ctx, error.message);
+      } else {
+        await this.internalServerError(ctx, 'Failed to validate credentials');
+      }
+    }
+  }
+
+  async create(ctx: ControllerContext): Promise<void> {
+    try {
+      const body = ctx.request.body();
+      const userData = await body.value;
+
       const user = await this.userService.createUser({
-        email,
-        password,
-        name,
-        role: "user",
-      });
+        email: userData.email,
+        password: userData.password,
+        name: userData.name,
+        role: 'user',
+      } as Omit<User, 'id' | 'createdAt' | 'updatedAt'>);
+
       await this.created(ctx, user);
     } catch (error) {
-      if (error.message.includes("Invalid email")) {
-        await this.badRequest(ctx, error.message);
+      if (error instanceof AppError) {
+        if (error.message.includes('Invalid email')) {
+          await this.badRequest(ctx, error.message);
+        } else {
+          await this.internalServerError(ctx, error.message);
+        }
       } else {
-        await this.internalServerError(ctx, error.message);
+        await this.internalServerError(ctx, 'Failed to create user');
       }
     }
   }
 
-  async getById(ctx: RouterContext<"/users/:id">) {
-    const id = ctx.params.id;
+  async checkUser(ctx: ControllerContext): Promise<void> {
     try {
-      const user = await this.userService.getUser(id);
-      if (!user) {
-        return await this.notFound(ctx, "User not found");
+      const userId = ctx.state.user?.id;
+      if (!userId) {
+        throw new AppError(Status.Unauthorized, 'User not authenticated');
       }
+
+      const user = await this.userService.getUserById(userId);
+      await this.ok(ctx, { user }); // Wrap user in an object
+    } catch (error) {
+      if (error instanceof AppError) {
+        await this.internalServerError(ctx, error.message);
+      } else {
+        await this.internalServerError(ctx, 'Failed to check user');
+      }
+    }
+  }
+
+  async getById(ctx: ControllerContext): Promise<void> {
+    try {
+      const { id } = ctx.params;
+      const user = await this.userService.getUserById(id);
       await this.ok(ctx, user);
     } catch (error) {
-      await this.internalServerError(ctx, error.message);
+      if (error instanceof AppError) {
+        if (error.message.includes('not found')) {
+          await this.notFound(ctx, error.message);
+        } else if (error.message.includes('Invalid email')) {
+          await this.badRequest(ctx, error.message);
+        } else {
+          await this.internalServerError(ctx, error.message);
+        }
+      } else {
+        await this.internalServerError(ctx, 'Failed to get user');
+      }
     }
   }
 
-  async update(ctx: RouterContext<"/users/:id">) {
-    const id = ctx.params.id;
-    const body = await this.getRequestBody<UpdateUserBody>(ctx);
-    if (!body) {
-      return await this.badRequest(ctx, "Invalid request body");
-    }
-
+  async update(ctx: ControllerContext): Promise<void> {
     try {
-      const user = await this.userService.updateUser(id, body);
+      const { id } = ctx.params;
+      const body = ctx.request.body();
+      const updates = await body.value;
+
+      const user = await this.userService.updateUser(id, updates);
       await this.ok(ctx, user);
     } catch (error) {
-      if (error.message.includes("not found")) {
-        await this.notFound(ctx, error.message);
-      } else if (error.message.includes("Invalid email")) {
-        await this.badRequest(ctx, error.message);
-      } else {
+      if (error instanceof AppError) {
         await this.internalServerError(ctx, error.message);
+      } else {
+        await this.internalServerError(ctx, 'Failed to update user');
       }
     }
   }
 
-  async delete(ctx: RouterContext<"/users/:id">) {
-    const id = ctx.params.id;
+  async delete(ctx: ControllerContext): Promise<void> {
     try {
-      const deleted = await this.userService.deleteUser(id);
-      if (!deleted) {
-        return await this.notFound(ctx, "User not found");
-      }
+      const { id } = ctx.params;
+      await this.userService.deleteUser(id);
       await this.noContent(ctx);
     } catch (error) {
-      await this.internalServerError(ctx, error.message);
-    }
-  }
-
-  async checkUser(ctx: Context) {
-    const token = ctx.request.headers.get("Authorization");
-    if (!token) {
-      return await this.unauthorized(ctx, "No token provided");
-    }
-
-    try {
-      const [type, jwt] = token.split(" ");
-      if (!jwt || (type !== "Bearer" && type !== "AUTH")) {
-        return await this.unauthorized(ctx, "Invalid token format");
+      if (error instanceof AppError) {
+        await this.internalServerError(ctx, error.message);
+      } else {
+        await this.internalServerError(ctx, 'Failed to delete user');
       }
-
-      // The token validation will be handled by auth middleware
-      await this.ok(ctx, { status: "ok" });
-    } catch (error) {
-      await this.unauthorized(ctx, "Invalid token");
-    }
-  }
-
-  async validateCredentials(ctx: Context) {
-    console.log("Validating credentials...");
-    const body = await this.getRequestBody<{ username: string; password: string }>(ctx);
-    console.log("Request body:", body);
-
-    if (!body || !body.username || !body.password) {
-      console.log("Missing username or password");
-      return await this.badRequest(ctx, "Username and password are required");
-    }
-
-    try {
-      console.log("Looking up user and validating password...");
-      const isValid = await this.userService.validatePassword(body.username, body.password);
-      if (!isValid) {
-        console.log("Invalid password");
-        return await this.unauthorized(ctx, "Invalid credentials");
-      }
-
-      if (!isValid) {
-        console.log("Invalid credentials");
-        return await this.unauthorized(ctx, "Invalid credentials");
-      }
-
-      // Get user details for token generation
-      const user = await this.userService.getUserWithPassword(body.username);
-      if (!user) {
-        console.log("User not found after password validation");
-        return await this.internalServerError(ctx, "User not found after validation");
-      }
-
-      console.log("Generating token...");
-      const token = await generateToken(user.id, user.role);
-      const response = {
-        token: token,
-        permissions: user.role === 'admin' ? ['User', 'Admin'] : ['User'],
-        is_admin: user.role === 'admin',
-        _id: user.id
-      };
-      console.log("Login successful");
-      await this.ok(ctx, response);
-    } catch (error) {
-      console.error("Login error:", error);
-      await this.internalServerError(ctx, error.message);
     }
   }
 }

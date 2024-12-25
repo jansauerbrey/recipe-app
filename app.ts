@@ -3,9 +3,11 @@ import { load } from "https://deno.land/std@0.208.0/dotenv/mod.ts";
 import { oakCors } from "https://deno.land/x/cors@v1.2.2/mod.ts";
 import { MongoClient } from "https://deno.land/x/mongo@v0.32.0/mod.ts";
 import { Status } from "https://deno.land/std@0.208.0/http/http_status.ts";
-import { parse } from "https://deno.land/std@0.208.0/yaml/mod.ts";
+
+// Import middleware
 import { swaggerMiddleware } from "./src/presentation/middleware/swagger.middleware.ts";
 import { validateRequest, validateResponse } from "./src/presentation/middleware/validation.middleware.ts";
+import { AppState, AppError, AppMiddleware, createMiddleware } from "./src/types/middleware.ts";
 
 // Import layers
 import { UserRepository, RecipeRepository } from "./src/data/mod.ts";
@@ -60,9 +62,7 @@ export async function createApp() {
 
   // Initialize Oak application
   const app = new Application();
-
-  // Serve API documentation
-  app.use(swaggerMiddleware());
+  app.state = {} as AppState;
 
   // CORS configuration
   const allowedOrigins = appConfig.ENVIRONMENT === "production"
@@ -84,35 +84,34 @@ export async function createApp() {
   }));
 
   // Security headers middleware
-  app.use(async (ctx, next) => {
+  app.use(createMiddleware(async (ctx, next) => {
     // Skip security headers for image requests
     if (ctx.request.url.pathname.startsWith("/upload/")) {
       await next();
       return;
     }
 
-    // Only set basic security headers
+    // Set basic security headers
     ctx.response.headers.set("X-XSS-Protection", "1; mode=block");
     ctx.response.headers.set("X-Content-Type-Options", "nosniff");
     ctx.response.headers.set("Referrer-Policy", "no-referrer-when-downgrade");
     await next();
-  });
+  }));
 
   // Error handling middleware
-  app.use(async (ctx, next) => {
+  app.use(createMiddleware(async (ctx, next) => {
     try {
       await next();
     } catch (err) {
-      console.error(err);
-      ctx.response.status = err.status || Status.InternalServerError;
-      ctx.response.body = {
-        error: {
-          message: err.message || "Internal Server Error",
-          status: err.status || Status.InternalServerError,
-        },
-      };
+      if (err instanceof AppError) {
+        ctx.response.status = err.status;
+        ctx.response.body = { error: err.message };
+      } else {
+        ctx.response.status = Status.InternalServerError;
+        ctx.response.body = { error: "Internal Server Error" };
+      }
     }
-  });
+  }));
 
   // Initialize routes
   const router = new Router();
@@ -120,18 +119,14 @@ export async function createApp() {
 
   // Register router middleware
   app.use(router.routes());
-  app.use(router.allowedMethods({
-    throw: true,
-    notImplemented: () => new Response(null, { status: 200 }),
-    methodNotAllowed: () => new Response(null, { status: 200 })
-  }));
+  app.use(router.allowedMethods());
 
   // Add validation middleware after routes
-  app.use(validateRequest());
-  app.use(validateResponse());
+  app.use(validateRequest);
+  app.use(validateResponse);
 
-  // Static file serving (after API routes)
-  app.use(async (ctx, next) => {
+  // Static file serving middleware
+  app.use(createMiddleware(async (ctx, next) => {
     try {
       if (ctx.request.url.pathname.startsWith("/upload/")) {
         await ctx.send({
@@ -147,7 +142,7 @@ export async function createApp() {
     } catch {
       await next();
     }
-  });
+  }));
 
   return app;
 }

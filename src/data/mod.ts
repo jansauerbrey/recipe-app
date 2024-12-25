@@ -1,6 +1,2 @@
-// Export repositories
-export * from "./repositories/user.repository.ts";
-export * from "./repositories/recipe.repository.ts";
-
-// Export repository interfaces
-export type { IUserRepository, IRecipeRepository } from "../types/mod.ts";
+export { UserRepository } from './repositories/user.repository.ts';
+export { RecipeRepository } from './repositories/recipe.repository.ts';
