@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Recipe Planner</string>
+    <string name="title_activity_main">Recipe Planner</string>
+    <string name="package_name">com.rezeptplaner.app</string>
+    <string name="custom_url_scheme">com.rezeptplaner.app</string>
+</resources>

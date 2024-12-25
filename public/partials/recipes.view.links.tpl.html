@@ -1,0 +1,11 @@
+<div class="side-links" ng-show="isCordova && printingAvailable"><button ng-click="printInApp()" type="button" class="btn btn-link"><i class="glyphicon glyphicon-print"></i> Print</button></div>
+<div class="side-links" ng-show="isCordova && !printingAvailable"><button type="button" class="btn btn-link"><span class=" text-muted"><i class="glyphicon glyphicon-print"></i> Print (not available)</span></button></div>
+<div class="side-links" ng-hide="isCordova"><button ng-click="print()" type="button" class="btn btn-link"><i class="glyphicon glyphicon-print"></i> Print</button></div>
+<div class="side-links" ng-show="userExists"><button ng-show="recipe.fav_recipe" ng-click="unfavorite()" type="button" class="btn btn-link"><i class="glyphicon glyphicon-heart-empty"></i> Remove from Favorites</button></div>
+<div class="side-links" ng-show="userExists"><button ng-hide="recipe.fav_recipe" ng-click="favorite()" type="button" class="btn btn-link"><i class="glyphicon glyphicon-heart"></i> Add to Favorites</button></div>
+<div class="side-links" ng-show="userExists"><button type="button" class="btn btn-link"><span class=" text-muted"><i class="glyphicon glyphicon-duplicate"></i> Copy to My Recipes</span></button></div>
+<div class="side-links" ng-show="isCordova"><button type="button" class="btn btn-link" ng-click="shareInApp()"><i class="glyphicon glyphicon-share"></i> Share</button></div>
+<div class="side-links" ng-hide="isCordova"><button type="button" class="btn btn-link" ng-click="share()"><i class="glyphicon glyphicon-share"></i> Share</button></div>
+<div class="side-links" ng-show="allowEdit"><button type="button" class="btn btn-link" ui-sref=".edit({id: recipe._id})"><i class="glyphicon glyphicon-pencil"></i> Edit</button></div>
+<div class="side-links" ng-show="allowEdit"><button type="button" class="btn btn-link" ng-really-message="Are you sure?" ng-really-click="remove()"><i class="glyphicon glyphicon-trash"></i> Remove</button></div>
+<div class="side-links" ng-show="userExists"><button type="button" class="btn btn-link" ui-sref=".scheduleadd({recipe: recipe})"><i class="glyphicon glyphicon-calendar"></i> Add to Schedules</button></div>

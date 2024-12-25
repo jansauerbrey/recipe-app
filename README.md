@@ -20,22 +20,26 @@ A modern recipe management API built with Deno and Oak, featuring comprehensive 
 
 - Deno 1.37 or higher
 - MongoDB 5.0 or higher
-- Node.js 18+ (for legacy Cordova app)
+- Node.js 18+
+- Android Studio (for Android app development)
 
 ### Quick Start
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/yourusername/recipe-app.git
 cd recipe-app
 ```
 
 2. Run the setup script:
+
 ```bash
 ./setup.sh
 ```
 
 The setup script will:
+
 - Check Deno installation and version
 - Create and configure .env file
 - Set up upload directory
@@ -45,6 +49,7 @@ The setup script will:
 - Format code and run linter
 
 3. Start the development server:
+
 ```bash
 deno task dev
 ```
@@ -54,17 +59,20 @@ deno task dev
 If you prefer to set up manually:
 
 1. Create and configure .env file:
+
 ```bash
 cp .env.example .env
 ```
 
 2. Install dependencies and generate types:
+
 ```bash
 deno cache app.ts
 deno task generate-types
 ```
 
 3. Validate your configuration:
+
 ```bash
 deno task validate-env
 ```
@@ -97,6 +105,7 @@ deno task build
 ### API Documentation
 
 Access the Swagger UI documentation at:
+
 ```
 http://localhost:3000/api-docs
 ```
@@ -116,7 +125,7 @@ http://localhost:3000/api-docs
 │   ├── types/            # TypeScript types and interfaces
 │   └── openapi/          # OpenAPI documentation
 ├── scripts/              # Build and utility scripts
-└── cordova-app/         # Legacy Cordova mobile app
+└── android/            # Native Android app (Capacitor)
 ```
 
 ## Authentication
@@ -142,25 +151,73 @@ Authorization: AUTH <token>
 - PUT /api/recipes/{id} - Update recipe
 - DELETE /api/recipes/{id} - Delete recipe
 
+## Mobile App Development
+
+### Android App Setup
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Build the web assets:
+
+```bash
+npm run build
+```
+
+3. Sync Capacitor project:
+
+```bash
+npm run cap:sync
+```
+
+4. Open in Android Studio:
+
+```bash
+npm run cap:open:android
+```
+
+5. Build APK:
+
+```bash
+npm run cap:build:android
+```
+
+### Mobile Features
+
+- Native splash screen
+- Offline support
+- Native navigation
+- Secure HTTPS communication
+- Modern Android SDK support
+
 ## Recent Improvements
+
+1. **Mobile App Migration**
+   - Migrated from Cordova to Capacitor
+   - Modern native Android implementation
+   - Improved performance and native features
+   - Better development workflow
 
 1. **API Documentation**
    - Added OpenAPI/Swagger documentation
    - JSDoc comments for better IDE integration
    - Auto-generated TypeScript types
 
-2. **Authentication & Security**
+1. **Authentication & Security**
    - Split authentication middleware into separate concerns
    - Added role-based authorization
    - Implemented rate limiting
    - Added security headers
 
-3. **Validation**
+1. **Validation**
    - Request/response validation against OpenAPI schemas
    - File upload validation
    - Error handling improvements
 
-4. **Code Quality**
+1. **Code Quality**
    - Proper TypeScript types for MongoDB
    - Improved error handling
    - Better separation of concerns
