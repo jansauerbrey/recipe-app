@@ -131,12 +131,208 @@ export function createTestContext(
   return context;
 }
 
-export async function setupTestServer(): Promise<void> {
-  console.log('Starting test server...');
-  // Add any test server setup logic here
-  console.log('Server is ready');
+import { MongoClient } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
+
+let currentTestContext: TestServer | null = null;
+
+// Keep track of used ports
+const usedPorts = new Set<number>();
+const BASE_PORT = 3000;
+const MAX_PORT = 4000;
+
+async function getAvailablePort(): Promise<number> {
+  for (let port = BASE_PORT; port <= MAX_PORT; port++) {
+    if (!usedPorts.has(port)) {
+      try {
+        // Try to create a listener to verify port is available
+        const testListener = await Deno.listen({ port });
+        testListener.close();
+        usedPorts.add(port);
+        return port;
+      } catch {
+        // Port is in use, try next one
+        continue;
+      }
+    }
+  }
+  throw new Error('No available ports');
 }
 
-export async function cleanupTestServer(): Promise<void> {
-  // Add any test server cleanup logic here
+export interface TestServer {
+  port: number;
+  server: {
+    close: () => Promise<void>;
+  };
+  mongoClient: MongoClient;
+  testUserId: string;
+}
+
+import { Application } from 'https://deno.land/x/oak@v12.6.1/mod.ts';
+
+let app: Application | null = null;
+let controller: AbortController | null = null;
+let serverPromise: Promise<void> | null = null;
+
+export async function setupTest(): Promise<TestServer> {
+  console.log('Starting test server...');
+  
+  // Setup MongoDB connection
+  const mongoClient = new MongoClient();
+  const uri = Deno.env.get('MONGODB_URI') || 'mongodb://127.0.0.1:27018/recipe_app_test';
+  await mongoClient.connect(uri);
+  
+  // Create test user and get ID
+  const user = await setupTestUser();
+  const testUserId = user._id;
+  
+  // Setup server with dynamic port
+  const port = await getAvailablePort();
+  
+  // Create and configure Oak application
+  const { createApp } = await import('../../app.ts');
+  app = await createApp();
+  
+  try {
+    controller = new AbortController();
+    serverPromise = app.listen({
+      port,
+      signal: controller.signal,
+    });
+
+    // Wait for server to be ready
+    await new Promise<void>((resolve, reject) => {
+      const maxAttempts = 10;
+      let attempts = 0;
+      let timeoutId: number | null = null;
+
+      const cleanup = () => {
+        if (timeoutId !== null) {
+          clearTimeout(timeoutId);
+          timeoutId = null;
+        }
+      };
+
+      const checkServer = async () => {
+        try {
+          const response = await fetch(`http://localhost:${port}/api/user/check`);
+          await response.text(); // Consume the response body
+          if (response.status === 401) { // Expected unauthorized response
+            console.log('Server is ready on port:', port);
+            cleanup();
+            resolve();
+          } else if (attempts < maxAttempts) {
+            attempts++;
+            timeoutId = setTimeout(checkServer, 100);
+          } else {
+            cleanup();
+            reject(new Error('Server failed to start'));
+          }
+        } catch (error) {
+          if (error instanceof Error && error.message.includes('Connection refused')) {
+            if (attempts < maxAttempts) {
+              attempts++;
+              timeoutId = setTimeout(checkServer, 100);
+            } else {
+              cleanup();
+              reject(new Error('Server failed to start'));
+            }
+          } else {
+            console.error('Server check error:', error);
+            cleanup();
+            reject(error);
+          }
+        }
+      };
+
+      checkServer();
+    });
+
+    const server = {
+      close: async () => {
+        if (controller) {
+          controller.abort();
+        }
+        if (serverPromise) {
+          try {
+            await serverPromise;
+          } catch {
+            // Ignore abort errors
+          }
+        }
+        if (app) {
+          // @ts-expect-error - Access internal Oak server instance
+          const oakServer = app?._server;
+          if (oakServer) {
+            try {
+              await oakServer.close();
+            } catch {
+              // Ignore close errors
+            }
+          }
+        }
+        usedPorts.delete(port);
+      }
+    };
+
+    // Store current test context
+    currentTestContext = { port, server, mongoClient, testUserId };
+    return currentTestContext;
+  } catch (error) {
+    console.error('Server start error:', error);
+    await cleanupTest();
+    throw error;
+  }
+}
+
+export async function cleanupTest(): Promise<void> {
+  try {
+    if (currentTestContext) {
+      // Get database name from environment
+      const dbName = Deno.env.get('MONGO_DB_NAME') || 'recipe_app_test';
+
+      if (currentTestContext.mongoClient) {
+        // Clean up all collections in the test database
+        const db = currentTestContext.mongoClient.database(dbName);
+        const collections = await db.listCollectionNames();
+        
+        // Delete all documents from each collection
+        await Promise.all(collections.map(name => 
+          db.collection(name).deleteMany({})
+        ));
+
+        // Clean up test user
+        if (currentTestContext.testUserId) {
+          await cleanupTestUser(currentTestContext.testUserId);
+        }
+
+        // Close MongoDB connection
+        await currentTestContext.mongoClient.close();
+      }
+
+      // Close server
+      if (currentTestContext.server) {
+        await currentTestContext.server.close();
+      }
+    }
+
+    // Create a new connection to ensure cleanup
+    const mongoClient = new MongoClient();
+    const uri = Deno.env.get('MONGODB_URI') || 'mongodb://127.0.0.1:27018/recipe_app_test';
+    await mongoClient.connect(uri);
+    const dbName = Deno.env.get('MONGO_DB_NAME') || 'recipe_app_test';
+    const db = mongoClient.database(dbName);
+    
+    // Clean up any remaining data
+    const collections = await db.listCollectionNames();
+    await Promise.all(collections.map(name => 
+      db.collection(name).deleteMany({})
+    ));
+    
+    await mongoClient.close();
+  } catch (error) {
+    console.error('Error during cleanup:', error);
+    throw error;
+  } finally {
+    currentTestContext = null;
+  }
 }

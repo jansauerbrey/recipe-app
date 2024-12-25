@@ -57,17 +57,38 @@ async function loadOpenApiSpec(): Promise<OpenAPISpec> {
     return cachedSpec;
   }
 
+  // Use mock spec in test environment
+  const mockSpec = (globalThis as any).openApiSpec;
+  if (mockSpec) {
+    if (!isValidOpenAPISpec(mockSpec)) {
+      throw new Error('Invalid mock OpenAPI spec');
+    }
+    cachedSpec = mockSpec;
+    return mockSpec;
+  }
+
   try {
     const yamlContent = await Deno.readTextFile(
       join(Deno.cwd(), 'src', 'openapi', 'openapi.yaml'),
     );
-    cachedSpec = parse(yamlContent) as OpenAPISpec;
-    return cachedSpec;
+    const parsedSpec = parse(yamlContent) as unknown;
+    if (!isValidOpenAPISpec(parsedSpec)) {
+      throw new Error('Invalid OpenAPI spec in file');
+    }
+    cachedSpec = parsedSpec;
+    return parsedSpec;
   } catch (error: unknown) {
     throw new Error(
       `Failed to load OpenAPI spec: ${error instanceof Error ? error.message : String(error)}`
     );
   }
+}
+
+function isValidOpenAPISpec(spec: unknown): spec is OpenAPISpec {
+  return typeof spec === 'object' && 
+         spec !== null && 
+         'paths' in spec &&
+         typeof (spec as OpenAPISpec).paths === 'object';
 }
 
 /**
