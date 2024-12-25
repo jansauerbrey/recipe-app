@@ -9,12 +9,12 @@
  * - Password reset functionality
  */
 
-var mongoose = require('mongoose');
-var bcrypt = require('bcrypt');
-var SALT_WORK_FACTOR = 10;
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
+const SALT_WORK_FACTOR = 10;
 
 // User schema definition with case-insensitive unique username
-var UserSchema = new mongoose.Schema({
+const UserSchema = new mongoose.Schema({
   username: { 
     type: String, 
     required: true,
@@ -40,7 +40,7 @@ var UserSchema = new mongoose.Schema({
     preferredWeekStartDay: Number,
   	autoupdate: { type: Boolean, default: true }
   },
-	favoriteRecipes: [{type: mongoose.Schema.Types.ObjectId, ref: 'Recipe'}],
+  favoriteRecipes: [{type: mongoose.Schema.Types.ObjectId, ref: 'Recipe'}],
   autologin: { type: Boolean, default: false },
   created: { type: Date, default: Date.now },
   resetPasswordToken: { type: String },
@@ -48,7 +48,7 @@ var UserSchema = new mongoose.Schema({
 });
 
 UserSchema.pre('save', function(next) {
-  var user = this;
+  const user = this;
   if (!user.isModified('password')) return next();
 
   bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
@@ -63,7 +63,7 @@ UserSchema.pre('save', function(next) {
 });
 
 UserSchema.pre('update', function(next) {
-  var user = this;
+  const user = this;
   if (!user.isModified('password')) return next();
 
   bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
