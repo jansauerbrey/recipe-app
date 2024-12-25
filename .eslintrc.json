@@ -1,4 +1,5 @@
 {
+  "root": true,
   "env": {
     "browser": true,
     "es2021": true,
@@ -6,7 +7,8 @@
   },
   "extends": [
     "eslint:recommended",
-    "plugin:@typescript-eslint/recommended"
+    "plugin:@typescript-eslint/recommended",
+    "prettier"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -23,20 +25,85 @@
     "semi": ["error", "always"],
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/no-unused-vars": "warn",
+    "@typescript-eslint/no-unused-vars": ["warn", { 
+      "argsIgnorePattern": "^_",
+      "varsIgnorePattern": "^_"
+    }],
     "no-console": "off",
-    "complexity": "off",
-    "max-len": "off",
+    "complexity": ["warn", 30],
+    "max-len": ["warn", { 
+      "code": 120,
+      "ignoreComments": true,
+      "ignoreUrls": true,
+      "ignoreStrings": true,
+      "ignoreTemplateLiterals": true
+    }],
     "no-duplicate-imports": "warn",
     "no-var": "warn",
-    "prefer-const": "warn"
+    "prefer-const": "warn",
+    "no-mixed-spaces-and-tabs": "error"
   },
+  "overrides": [
+    {
+      "files": ["*.ts"],
+      "rules": {
+        "@typescript-eslint/explicit-function-return-type": ["warn", {
+          "allowExpressions": true,
+          "allowTypedFunctionExpressions": true,
+          "allowHigherOrderFunctions": true
+        }]
+      }
+    },
+    {
+      "files": ["src/**/*.ts"],
+      "rules": {
+        "@typescript-eslint/no-var-requires": "error",
+        "no-undef": "off"
+      }
+    },
+    {
+      "files": ["*.js"],
+      "rules": {
+        "@typescript-eslint/no-var-requires": "off",
+        "no-undef": "off",
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["public/app/**/*.js"],
+      "env": {
+        "browser": true
+      },
+      "globals": {
+        "angular": "readonly",
+        "cordova": "readonly",
+        "Camera": "readonly",
+        "format": "readonly",
+        "to": "readonly",
+        "process": "readonly",
+        "__dirname": "readonly",
+        "module": "readonly",
+        "require": "readonly"
+      }
+    },
+    {
+      "files": ["src/test/**/*.ts"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off",
+        "no-console": "off"
+      }
+    }
+  ],
   "ignorePatterns": [
     "dist",
     "build",
     "node_modules",
     "android",
     "ios",
-    "www"
+    "www",
+    "public/lib/**",
+    "*.min.js",
+    "*.beautiful.js",
+    "deno.lock"
   ]
 }
