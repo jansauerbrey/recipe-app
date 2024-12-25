@@ -12,6 +12,7 @@ import {
 } from './src/presentation/middleware/validation.middleware.ts';
 import { rateLimitMiddleware } from './src/presentation/middleware/rate-limit.middleware.ts';
 import { payloadLimitMiddleware } from './src/presentation/middleware/payload-limit.middleware.ts';
+import { loggingMiddleware } from './src/presentation/middleware/logging.middleware.ts';
 import { AppMiddleware, AppState, createMiddleware } from './src/types/middleware.ts';
 import { AppError } from './src/types/errors.ts';
 
@@ -69,6 +70,9 @@ export async function createApp() {
   // Initialize Oak application
   const app = new Application();
   app.state = {} as AppState;
+
+  // Add logging middleware first to capture all requests
+  app.use(loggingMiddleware);
 
   // CORS configuration
   const allowedOrigins = appConfig.ENVIRONMENT === 'production'
