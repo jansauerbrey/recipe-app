@@ -1,6 +1,6 @@
 import { Context } from 'https://deno.land/x/oak@v12.6.1/mod.ts';
 import { RateLimitError } from '../../types/errors.ts';
-import { createMiddleware } from '../../types/middleware.ts';
+import { AppMiddleware } from '../../types/middleware.ts';
 
 interface RateLimitConfig {
   windowMs: number; // Time window in milliseconds
@@ -9,6 +9,11 @@ interface RateLimitConfig {
 
 interface RateLimitEntry {
   count: number;
+  resetTime: Date;
+}
+
+interface RateLimitResult {
+  allowed: boolean;
   resetTime: Date;
 }
 
@@ -28,7 +33,7 @@ class RateLimiter {
     }, 60000);
   }
 
-  check(key: string): { allowed: boolean; resetTime: Date } {
+  check(key: string): RateLimitResult {
     const now = new Date();
     let entry = this.store.get(key);
 
@@ -51,7 +56,7 @@ class RateLimiter {
     return { allowed: true, resetTime: entry.resetTime };
   }
 
-  close() {
+  close(): void {
     clearInterval(this.cleanupInterval);
   }
 }
@@ -71,13 +76,12 @@ const unauthenticatedConfig: RateLimitConfig = {
 const authenticatedLimiter = new RateLimiter(defaultConfig);
 const unauthenticatedLimiter = new RateLimiter(unauthenticatedConfig);
 
-export const rateLimitMiddleware = async (ctx: Context, next: () => Promise<unknown>) => {
+export const rateLimitMiddleware: AppMiddleware = async (ctx: Context, next: () => Promise<unknown>): Promise<void> => {
   // Skip rate limiting for static files
-  const isStaticFile = ctx.request.url.pathname.match(
-    /\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$/,
-  );
-  if (isStaticFile) {
-    return await next();
+  const pathname = ctx.request.url?.pathname;
+  if (pathname?.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$/)) {
+    await next();
+    return;
   }
 
   const isAuthenticated = ctx.state.user !== undefined;
