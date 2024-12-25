@@ -1,154 +1,110 @@
-import { MongoClient, Collection, ObjectId } from "https://deno.land/x/mongo@v0.32.0/mod.ts";
-import { Recipe, IRecipeRepository } from "../../types/mod.ts";
+import { Collection, MongoClient, ObjectId } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
+import { Recipe } from '../../types/mod.ts';
+import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
+import { AppError } from '../../types/middleware.ts';
 
-export class RecipeRepository implements IRecipeRepository {
-  private collection: Collection<Omit<Recipe, "id"> & { _id: ObjectId }>;
+type RecipeDoc = Omit<Recipe, 'id'> & { _id: ObjectId };
 
-  constructor(db: MongoClient) {
-    const dbName = Deno.env.get("MONGO_DB_NAME") || "recipe-app-test";
-    this.collection = db.database(dbName).collection("recipes");
-    console.log("Using database:", dbName);
-    console.log("Database connection info:", {
-      name: dbName,
-      collections: db.database(dbName).listCollections()
+export class RecipeRepository {
+  private collection: Collection<RecipeDoc>;
+
+  constructor(client: MongoClient) {
+    const dbName = Deno.env.get('MONGO_DB_NAME') || 'recipe_app_test';
+    this.collection = client.database(dbName).collection<RecipeDoc>('recipes');
+  }
+
+  private toRecipe(doc: RecipeDoc): Recipe {
+    const { _id, ...rest } = doc;
+    return { id: _id.toString(), ...rest };
+  }
+
+  private toObjectId(id: string): ObjectId {
+    try {
+      return new ObjectId(id);
+    } catch {
+      throw new AppError(Status.BadRequest, 'Invalid recipe ID');
+    }
+  }
+
+  async create(recipeData: Omit<Recipe, 'id' | 'createdAt' | 'updatedAt'>): Promise<Recipe> {
+    // Validate required fields
+    if (!recipeData.title || !recipeData.userId) {
+      throw new AppError(Status.BadRequest, 'Missing required fields');
+    }
+
+    const now = new Date();
+    const _id = new ObjectId();
+
+    const doc = await this.collection.insertOne({
+      _id,
+      ...recipeData,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    return this.toRecipe({
+      _id,
+      ...recipeData,
+      createdAt: now,
+      updatedAt: now,
     });
   }
 
-  private toRecipe(doc: { _id: ObjectId | string } & Omit<Recipe, "id"> | null): Recipe | null {
-    if (!doc) return null;
-    const { _id, ...rest } = doc;
-    return {
-      id: _id instanceof ObjectId ? _id.toString() : _id.toString(),
-      ...rest,
-    };
-  }
-
-  private isValidObjectId(id: string): boolean {
-    try {
-      new ObjectId(id);
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  async create(recipe: Omit<Recipe, "id" | "createdAt" | "updatedAt">): Promise<Recipe> {
-    const now = new Date();
-    const doc = {
-      ...recipe,
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    try {
-      const result = await this.collection.insertOne(doc);
-      const objectId = result.$oid ? new ObjectId(result.$oid) : result;
-      const inserted = await this.collection.findOne({ _id: objectId });
-      
-      if (!inserted) {
-        throw new Error("Failed to create recipe");
-      }
-
-      const created = this.toRecipe(inserted);
-      if (!created) {
-        throw new Error("Failed to create recipe");
-      }
-
-      return created;
-    } catch (error) {
-      console.error("Error creating recipe:", error);
-      throw error;
-    }
-  }
-
   async findById(id: string): Promise<Recipe | null> {
-    if (!this.isValidObjectId(id)) {
-      return null;
-    }
-
     try {
-      const doc = await this.collection.findOne({ 
-        _id: new ObjectId(id)
-      });
-      return this.toRecipe(doc);
+      const doc = await this.collection.findOne({ _id: this.toObjectId(id) });
+      return doc ? this.toRecipe(doc) : null;
     } catch (error) {
-      console.error("Error finding recipe:", error);
-      return null;
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(Status.BadRequest, 'Invalid recipe ID');
     }
   }
 
   async findByUserId(userId: string): Promise<Recipe[]> {
-    try {
-      const docs = await this.collection.find({ userId }).toArray();
-      return docs
-        .map(doc => this.toRecipe(doc))
-        .filter((recipe): recipe is Recipe => recipe !== null);
-    } catch (error) {
-      console.error("Error finding recipes by user:", error);
-      return [];
-    }
+    const docs = await this.collection.find({ userId }).toArray();
+    return docs.map((doc) => this.toRecipe(doc));
   }
 
-  async update(id: string, recipe: Partial<Recipe>): Promise<Recipe> {
-    if (!this.isValidObjectId(id)) {
-      throw new Error("Invalid recipe ID");
-    }
-
-    const updateDoc = {
-      ...recipe,
-      updatedAt: new Date(),
-    };
-
+  async update(id: string, updates: Partial<Recipe>): Promise<Recipe> {
     try {
-      const objectId = new ObjectId(id);
-      const { modifiedCount } = await this.collection.updateOne(
-        { _id: objectId },
-        { $set: updateDoc }
+      const _id = this.toObjectId(id);
+      const doc = await this.collection.findAndModify(
+        { _id },
+        {
+          update: {
+            $set: { ...updates, updatedAt: new Date() },
+          },
+          new: true,
+        },
       );
 
-      if (modifiedCount === 0) {
-        throw new Error("Recipe not found");
+      if (!doc) {
+        throw new AppError(Status.NotFound, 'Recipe not found');
       }
 
-      const updated = await this.collection.findOne({ _id: objectId });
-      const result = this.toRecipe(updated);
-      if (!result) {
-        throw new Error("Recipe not found after update");
-      }
-      return result;
+      return this.toRecipe(doc);
     } catch (error) {
-      console.error("Error updating recipe:", error);
-      throw error;
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(Status.BadRequest, 'Invalid recipe ID');
     }
   }
 
-  async delete(id: string): Promise<boolean> {
+  async delete(id: string): Promise<void> {
     try {
-      if (!this.isValidObjectId(id)) {
-        return false;
+      const _id = this.toObjectId(id);
+      const result = await this.collection.deleteOne({ _id });
+      if (!result || result === 0) {
+        throw new AppError(Status.NotFound, 'Recipe not found');
       }
-
-      // First check if recipe exists
-      const recipe = await this.findById(id);
-      if (!recipe) {
-        return false;
-      }
-
-      const objectId = new ObjectId(id);
-      const result = await this.collection.deleteOne({
-        _id: objectId
-      });
-
-      console.log("Delete operation result:", {
-        id,
-        objectId: objectId.toString(),
-        result: typeof result === 'number' ? result : result.deletedCount
-      });
-
-      return typeof result === 'number' ? result > 0 : result.deletedCount > 0;
     } catch (error) {
-      console.error("Error deleting recipe:", error);
-      return false;
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(Status.BadRequest, 'Invalid recipe ID');
     }
   }
 }

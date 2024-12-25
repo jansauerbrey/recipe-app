@@ -1,114 +1,109 @@
-import { FileUploadError } from "../../types/errors.ts";
-import { join } from "std/path/mod.ts";
-import { ensureDir } from "std/fs/mod.ts";
-
-export interface UploadedFile {
-  fileName: string;
-  content: Uint8Array;
-  contentType: string;
-}
+import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
+import { AppError } from '../../types/errors.ts';
+import { ensureDir } from 'https://deno.land/std@0.208.0/fs/mod.ts';
+import { join } from 'https://deno.land/std@0.208.0/path/mod.ts';
+import { getConfig } from '../../types/env.ts';
 
 export interface UploadResult {
   fileName: string;
-  path: string;
   url: string;
 }
 
 export class UploadService {
   private uploadDir: string;
-  private allowedTypes: string[];
   private maxFileSize: number;
+  private allowedTypes: string[];
 
-  constructor(
-    uploadDir = "./upload",
-    allowedTypes = ["image/jpeg", "image/png", "image/gif"],
-    maxFileSize = 5 * 1024 * 1024 // 5MB
-  ) {
-    this.uploadDir = uploadDir;
-    this.allowedTypes = allowedTypes;
-    this.maxFileSize = maxFileSize;
+  constructor() {
+    const config = getConfig();
+    this.uploadDir = config.UPLOAD_DIR;
+    this.maxFileSize = config.MAX_FILE_SIZE;
+    this.allowedTypes = config.ALLOWED_FILE_TYPES.map((t: string) => t.trim());
   }
 
-  async initialize(): Promise<void> {
-    try {
-      await ensureDir(this.uploadDir);
-    } catch (error) {
-      throw new FileUploadError(`Failed to create upload directory: ${error.message}`);
-    }
-  }
-
-  async uploadFile(file: UploadedFile): Promise<UploadResult> {
-    // Validate file type
-    if (!this.allowedTypes.includes(file.contentType)) {
-      throw new FileUploadError(
-        `Invalid file type. Allowed types: ${this.allowedTypes.join(", ")}`
-      );
-    }
-
+  async uploadFile(file: File): Promise<UploadResult> {
     // Validate file size
-    if (file.content.length > this.maxFileSize) {
-      throw new FileUploadError(
-        `File too large. Maximum size: ${this.maxFileSize / 1024 / 1024}MB`
+    if (file.size > this.maxFileSize) {
+      throw new AppError(
+        `File size exceeds maximum allowed size of ${this.maxFileSize} bytes`,
+        Status.BadRequest,
+        'FILE_TOO_LARGE',
       );
     }
 
-    try {
-      // Generate unique filename
-      const fileName = `${crypto.randomUUID()}${this.getFileExtension(file.contentType)}`;
-      const filePath = join(this.uploadDir, fileName);
+    // Validate file type
+    const fileType = file.type;
+    if (!this.allowedTypes.includes(fileType)) {
+      throw new AppError(
+        `File type ${fileType} is not allowed. Allowed types: ${this.allowedTypes.join(', ')}`,
+        Status.BadRequest,
+        'INVALID_FILE_TYPE',
+      );
+    }
 
-      // Save file
-      await Deno.writeFile(filePath, file.content);
+    // Ensure upload directory exists
+    await ensureDir(this.uploadDir);
+
+    // Generate unique filename
+    const fileName = `${crypto.randomUUID()}-${file.name}`;
+    const filePath = join(this.uploadDir, fileName);
+
+    try {
+      // Write file to disk
+      const arrayBuffer = await file.arrayBuffer();
+      await Deno.writeFile(filePath, new Uint8Array(arrayBuffer));
 
       return {
         fileName,
-        path: filePath,
         url: `/upload/${fileName}`,
       };
-    } catch (error) {
-      throw new FileUploadError(`Failed to save file: ${error.message}`);
+    } catch (error: unknown) {
+      throw new AppError(
+        `Failed to save file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        Status.InternalServerError,
+        'FILE_SAVE_ERROR',
+      );
     }
   }
 
   async deleteFile(fileName: string): Promise<void> {
+    const filePath = join(this.uploadDir, fileName);
+
     try {
-      const filePath = join(this.uploadDir, fileName);
       await Deno.remove(filePath);
-    } catch (error) {
-      if (!(error instanceof Deno.errors.NotFound)) {
-        throw new FileUploadError(`Failed to delete file: ${error.message}`);
+    } catch (error: unknown) {
+      if (error instanceof Deno.errors.NotFound) {
+        throw new AppError(
+          'File not found',
+          Status.NotFound,
+          'FILE_NOT_FOUND',
+        );
       }
+      throw new AppError(
+        `Failed to delete file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        Status.InternalServerError,
+        'FILE_DELETE_ERROR',
+      );
     }
   }
 
   async getFile(fileName: string): Promise<Uint8Array> {
+    const filePath = join(this.uploadDir, fileName);
     try {
-      const filePath = join(this.uploadDir, fileName);
       return await Deno.readFile(filePath);
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof Deno.errors.NotFound) {
-        throw new FileUploadError("File not found");
+        throw new AppError(
+          'File not found',
+          Status.NotFound,
+          'FILE_NOT_FOUND',
+        );
       }
-      throw new FileUploadError(`Failed to read file: ${error.message}`);
+      throw new AppError(
+        `Failed to read file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        Status.InternalServerError,
+        'FILE_READ_ERROR',
+      );
     }
-  }
-
-  private getFileExtension(contentType: string): string {
-    switch (contentType) {
-      case "image/jpeg":
-        return ".jpg";
-      case "image/png":
-        return ".png";
-      case "image/gif":
-        return ".gif";
-      default:
-        return "";
-    }
-  }
-
-  // Helper method to validate file name
-  private validateFileName(fileName: string): boolean {
-    // Prevent directory traversal and ensure safe file names
-    return !fileName.includes("..") && !fileName.includes("/") && !fileName.includes("\\");
   }
 }
