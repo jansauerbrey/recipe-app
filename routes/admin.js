@@ -1,10 +1,10 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
-var mongoose = require('mongoose');
-var User = require('../models/User.js');
+const mongoose = require('mongoose');
+const User = require('../models/User.js');
 
-var auth = require('../auth/auth.js');
+const auth = require('../auth/auth.js');
 
 /* GET /admin listing. */
 router.get('/user', auth.verifyAdmin, function(req, res, next) {

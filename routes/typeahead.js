@@ -1,18 +1,18 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
-var mongoose = require('mongoose');
-var Ingredient = require('../models/Ingredient.js');
-var Recipe = require('../models/Recipe.js');
-var Tags = require('../models/Tag.js');
+const mongoose = require('mongoose');
+const Ingredient = require('../models/Ingredient.js');
+const Recipe = require('../models/Recipe.js');
+const Tags = require('../models/Tag.js');
 
-var auth = require('../auth/auth.js');
+const auth = require('../auth/auth.js');
 
 /* GET /ingredients listing. */
 router.get('/ingredients/', auth.verify, function(req, res, next) {
-  var searchTerm = new RegExp(req.query.search, 'i');
-  var language = req.query.language ? req.query.language : req._user.settings.spokenLanguages;
-  var query ={};
+  const searchTerm = new RegExp(req.query.search, 'i');
+  const language = req.query.language ? req.query.language : req._user.settings.spokenLanguages;
+  let query ={};
   if (language === 'de') {
     query = {'name.de': searchTerm};
   }
@@ -31,8 +31,8 @@ router.get('/ingredients/', auth.verify, function(req, res, next) {
 
 /* GET /recipe listing. */
 router.get('/recipes/', auth.verify, function(req, res, next) {
-  var searchTerm = new RegExp(req.query.search, 'i');
-  var query = {'name': searchTerm, language: {'$in': req._user.settings.spokenLanguages}};
+  const searchTerm = new RegExp(req.query.search, 'i');
+  const query = {'name': searchTerm, language: {'$in': req._user.settings.spokenLanguages}};
   Recipe.find(query).populate('author', 'fullname').limit(10).exec( function (err, recipes) {
     if (err) return next(err);
     res.json(recipes);
@@ -41,7 +41,7 @@ router.get('/recipes/', auth.verify, function(req, res, next) {
 
 /* GET /tags listing. */
 router.get('/tags/', auth.verify, function(req, res, next) {
-  var searchTerm = new RegExp(req.query.search, 'i');
+  const searchTerm = new RegExp(req.query.search, 'i');
   Tags.find({text: searchTerm}).limit(10).exec( function (err, tags) {
     if (err) return next(err);
     res.json(tags);

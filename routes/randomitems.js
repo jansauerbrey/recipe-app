@@ -1,10 +1,10 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
-var mongoose = require('mongoose');
-var Recipe = require('../models/Recipe.js');
+const mongoose = require('mongoose');
+const Recipe = require('../models/Recipe.js');
 
-var auth = require('../auth/auth.js');
+const auth = require('../auth/auth.js');
 
 /* GET /randomitems/recipes/:number */
 router.get('/recipes/:number', auth.verify, function(req, res, next) {
