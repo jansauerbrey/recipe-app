@@ -8,17 +8,17 @@
 require('dotenv').config();
 
 // Core dependencies
-const express = require('express');
-const path = require('path');
+var express = require('express');
+var path = require('path');
 const { logger, requestLogger, errorLogger } = require('./config/logger');
 const { globalErrorHandler } = require('./config/errorHandler');
-const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+var helmet = require('helmet');
+var rateLimit = require('express-rate-limit');
 
 // Authentication middleware
-const auth = require('./auth/auth');
+var auth = require('./auth/auth');
 
 // Configure API rate limiter
 const apiLimiter = rateLimit({
@@ -31,34 +31,34 @@ const apiLimiter = rateLimit({
 
 // Route handlers for different features
 
-const admin = require('./routes/admin');
-const user = require('./routes/user');
-const dishtypes = require('./routes/dishtypes');
-const units = require('./routes/units');
-const ingredients = require('./routes/ingredients');
-const categories = require('./routes/categories');
-const recipes = require('./routes/recipes');
-const tags = require('./routes/tags');
-const schedules = require('./routes/schedules');
-const shopitems = require('./routes/shopitems');
-const frequentshopitems = require('./routes/frequentshopitems');
-const typeahead = require('./routes/typeahead');
-const upload = require('./routes/upload');
-const randomitems = require('./routes/randomitems');
+var admin = require('./routes/admin');
+var user = require('./routes/user');
+var dishtypes = require('./routes/dishtypes');
+var units = require('./routes/units');
+var ingredients = require('./routes/ingredients');
+var categories = require('./routes/categories');
+var recipes = require('./routes/recipes');
+var tags = require('./routes/tags');
+var schedules = require('./routes/schedules');
+var shopitems = require('./routes/shopitems');
+var frequentshopitems = require('./routes/frequentshopitems');
+var typeahead = require('./routes/typeahead');
+var upload = require('./routes/upload');
+var randomitems = require('./routes/randomitems');
 
-const PORT = process.env.PORT || 3000;
+var PORT = process.env.PORT || 3000;
 
 // Database connection
-const mongoose = require('mongoose');
+var mongoose = require('mongoose');
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB connection successful'))
   .catch(err => console.log('MongoDB connection error:', err));
-mongoose.set('debug', true);
+mongoose.set('debug', true)
 
 
 // Initialize Express application
-const app = express();
-app.disable('X-powered-by'); // Security: Hide Express
+var app = express();
+app.disable("X-powered-by") // Security: Hide Express
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -68,13 +68,13 @@ app.set('view engine', 'ejs');
 app.use(helmet());
 app.use(helmet.contentSecurityPolicy({
   directives: {
-    defaultSrc: ['\'self\''],
-    styleSrc: ['\'self\'', '\'unsafe-inline\''],
-    scriptSrc: ['\'self\'', '\'unsafe-inline\'', '\'unsafe-eval\''],
-    imgSrc: ['\'self\'', 'data:', 'blob:'],
-    connectSrc: ['\'self\'', 'https://www.rezept-planer.de'],
-    formAction: ['\'self\''],
-    frameAncestors: ['\'none\'']
+    defaultSrc: ["'self'"],
+    styleSrc: ["'self'", "'unsafe-inline'"],
+    scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+    imgSrc: ["'self'", "data:", "blob:"],
+    connectSrc: ["'self'", "https://www.rezept-planer.de"],
+    formAction: ["'self'"],
+    frameAncestors: ["'none'"]
   }
 }));
 
@@ -103,12 +103,12 @@ app.all('/api/*', function(req, res, next) {
     
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
+    res.header("Access-Control-Allow-Origin", origin);
   }
   
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+  res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Credentials", "true");
   
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
@@ -119,10 +119,10 @@ app.all('/api/*', function(req, res, next) {
 
 // Security headers middleware
 app.use((req, res, next) => {
-  res.header('X-XSS-Protection', '1; mode=block');
-  res.header('X-Frame-Options', 'DENY');
-  res.header('X-Content-Type-Options', 'nosniff');
-  res.header('Referrer-Policy', 'strict-origin-same-origin');
+  res.header("X-XSS-Protection", "1; mode=block");
+  res.header("X-Frame-Options", "DENY");
+  res.header("X-Content-Type-Options", "nosniff");
+  res.header("Referrer-Policy", "strict-origin-same-origin");
   next();
 });
 
@@ -144,7 +144,7 @@ app.use('/api/randomitems', randomitems);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  const err = new Error('Not Found');
+  var err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
@@ -162,8 +162,8 @@ module.exports = app;
  * Module dependencies.
  */
 
-const debug = require('debug')('recipeApp:server');
-const http = require('http');
+var debug = require('debug')('recipeApp:server');
+var http = require('http');
 
 /**
  * Get port and store in Express.
@@ -175,7 +175,7 @@ app.set('port', PORT);
  * Create HTTP server.
  */
 
-const server = http.createServer(app);
+var server = http.createServer(app);
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -194,22 +194,22 @@ function onError(error) {
     throw error;
   }
 
-  const bind = typeof PORT === 'string'
+  var bind = typeof PORT === 'string'
     ? 'Pipe ' + PORT
     : 'Port ' + PORT;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
-  case 'EACCES':
-    console.error(bind + ' requires elevated privileges');
-    process.exit(1);
-    break;
-  case 'EADDRINUSE':
-    console.error(bind + ' is already in use');
-    process.exit(1);
-    break;
-  default:
-    throw error;
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
   }
 }
 
@@ -218,8 +218,8 @@ function onError(error) {
  */
 
 function onListening() {
-  const addr = server.address();
-  const bind = typeof addr === 'string'
+  var addr = server.address();
+  var bind = typeof addr === 'string'
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);

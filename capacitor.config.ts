@@ -12,8 +12,11 @@ const config: CapacitorConfig = {
   },
   android: {
     buildOptions: {
-      keystorePath: 'release.keystore',
+      keystorePath: 'app/release.keystore',
       keystoreAlias: 'recipe-planner',
+      keystorePassword: 'recipeapp',
+      keystoreAliasPassword: 'recipeapp',
+      releaseType: 'APK'
     },
     minWebViewVersion: 17,
   },
