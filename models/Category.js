@@ -1,13 +1,12 @@
-var mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-var CategorySchema = new mongoose.Schema({
+const CategorySchema = new mongoose.Schema({
   category: String,
   subcategory: String,
   subsubcategory: String,
   rewe_cat_id: Number,
-  author: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
-  updated_at: { type: Date, default: Date.now }
+  author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  updated_at: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model('Category', CategorySchema);
-
+export default mongoose.model('Category', CategorySchema);
