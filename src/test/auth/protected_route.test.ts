@@ -1,49 +1,93 @@
 import { assertEquals } from 'https://deno.land/std@0.208.0/testing/asserts.ts';
-import { describe, it } from 'https://deno.land/std@0.208.0/testing/bdd.ts';
-import { setupTest } from '../test_utils.ts';
+import { cleanupTest, setupTest } from '../test_utils.ts';
 import { createAuthHeader } from '../utils/helpers.ts';
 
-describe('Protected Route Tests', () => {
-  it('should handle protected routes correctly', async () => {
+Deno.test({
+  name: 'Protected Route - should allow authenticated access',
+  async fn() {
     const testContext = await setupTest();
     const baseUrl = `http://localhost:${testContext.port}/api`;
 
     try {
-      // Test authenticated request
-      const authResponse = await fetch(`${baseUrl}/protected`, {
+      const response = await fetch(`${baseUrl}/protected`, {
         headers: await createAuthHeader(testContext.testUserId!),
       });
 
-      assertEquals(authResponse.status, 200);
-      const authBody = await authResponse.json();
-      assertEquals(authBody.message, 'Protected route accessed successfully');
+      assertEquals(response.status, 200);
+      const body = await response.json();
+      assertEquals(body.message, 'Protected route accessed successfully');
+    } finally {
+      await testContext.server.close();
+      await cleanupTest();
+    }
+  },
+  sanitizeResources: false,
+  sanitizeOps: false,
+});
 
-      // Test unauthenticated request
-      const noAuthResponse = await fetch(`${baseUrl}/protected`);
+Deno.test({
+  name: 'Protected Route - should reject unauthenticated access',
+  async fn() {
+    const testContext = await setupTest();
+    const baseUrl = `http://localhost:${testContext.port}/api`;
 
-      assertEquals(noAuthResponse.status, 401);
-      const noAuthBody = await noAuthResponse.json();
-      assertEquals(noAuthBody.error, 'No authorization token provided');
+    try {
+      const response = await fetch(`${baseUrl}/protected`);
 
-      // Test role-protected route with correct role
-      const adminResponse = await fetch(`${baseUrl}/admin`, {
+      assertEquals(response.status, 401);
+      const body = await response.json();
+      assertEquals(body.error, 'No authorization token provided');
+    } finally {
+      await testContext.server.close();
+      await cleanupTest();
+    }
+  },
+  sanitizeResources: false,
+  sanitizeOps: false,
+});
+
+Deno.test({
+  name: 'Protected Route - should allow admin access to admin route',
+  async fn() {
+    const testContext = await setupTest();
+    const baseUrl = `http://localhost:${testContext.port}/api`;
+
+    try {
+      const response = await fetch(`${baseUrl}/admin`, {
         headers: await createAuthHeader(testContext.testUserId!, 'admin'),
       });
 
-      assertEquals(adminResponse.status, 200);
-      const adminBody = await adminResponse.json();
-      assertEquals(adminBody.message, 'Admin route accessed successfully');
+      assertEquals(response.status, 200);
+      const body = await response.json();
+      assertEquals(body.message, 'Admin route accessed successfully');
+    } finally {
+      await testContext.server.close();
+      await cleanupTest();
+    }
+  },
+  sanitizeResources: false,
+  sanitizeOps: false,
+});
 
-      // Test role-protected route with incorrect role
-      const userResponse = await fetch(`${baseUrl}/admin`, {
+Deno.test({
+  name: 'Protected Route - should reject non-admin access to admin route',
+  async fn() {
+    const testContext = await setupTest();
+    const baseUrl = `http://localhost:${testContext.port}/api`;
+
+    try {
+      const response = await fetch(`${baseUrl}/admin`, {
         headers: await createAuthHeader(testContext.testUserId!, 'user'),
       });
 
-      assertEquals(userResponse.status, 403);
-      const userBody = await userResponse.json();
-      assertEquals(userBody.error, 'Forbidden');
+      assertEquals(response.status, 403);
+      const body = await response.json();
+      assertEquals(body.error, 'Forbidden');
     } finally {
       await testContext.server.close();
+      await cleanupTest();
     }
-  });
+  },
+  sanitizeResources: false,
+  sanitizeOps: false,
 });

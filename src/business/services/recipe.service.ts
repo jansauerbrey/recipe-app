@@ -1,7 +1,6 @@
-import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
 import { RecipeRepository } from '../../data/repositories/recipe.repository.ts';
 import { Recipe, RecipeResponse } from '../../types/mod.ts';
-import { AppError } from '../../types/middleware.ts';
+import { ResourceNotFoundError, ValidationError } from '../../types/errors.ts';
 
 export interface IRecipeService {
   createRecipe(recipe: Omit<Recipe, 'id' | 'createdAt' | 'updatedAt'>): Promise<RecipeResponse>;
@@ -17,6 +16,19 @@ export class RecipeService implements IRecipeService {
   async createRecipe(
     recipe: Omit<Recipe, 'id' | 'createdAt' | 'updatedAt'>,
   ): Promise<RecipeResponse> {
+    // Validate required fields
+    if (!recipe.title) {
+      throw new ValidationError('Title is required');
+    }
+    if (!recipe.userId) {
+      throw new ValidationError('User ID is required');
+    }
+
+    // Validate ingredients
+    if (recipe.ingredients?.some((ing) => !ing.name || ing.amount <= 0 || !ing.unit)) {
+      throw new ValidationError('Invalid ingredient');
+    }
+
     const createdRecipe = await this.recipeRepository.create(recipe);
     const { id, ...rest } = createdRecipe;
     return {
@@ -26,15 +38,22 @@ export class RecipeService implements IRecipeService {
   }
 
   async getRecipeById(id: string): Promise<RecipeResponse> {
-    const recipe = await this.recipeRepository.findById(id);
-    if (!recipe) {
-      throw new AppError(Status.NotFound, 'Recipe not found');
+    try {
+      const recipe = await this.recipeRepository.findById(id);
+      if (!recipe) {
+        throw new ResourceNotFoundError('Recipe');
+      }
+      const { id: recipeId, ...rest } = recipe;
+      return {
+        ...rest,
+        _id: recipeId,
+      };
+    } catch (error) {
+      if (error instanceof ResourceNotFoundError) {
+        throw error;
+      }
+      throw new ValidationError('Invalid recipe ID');
     }
-    const { id: recipeId, ...rest } = recipe;
-    return {
-      ...rest,
-      _id: recipeId,
-    };
   }
 
   async listUserRecipes(userId: string): Promise<RecipeResponse[]> {
@@ -49,25 +68,44 @@ export class RecipeService implements IRecipeService {
   }
 
   async updateRecipe(id: string, updates: Partial<Recipe>): Promise<RecipeResponse> {
-    const recipe = await this.recipeRepository.findById(id);
-    if (!recipe) {
-      throw new AppError(Status.NotFound, 'Recipe not found');
-    }
+    try {
+      // Validate ingredients if they're being updated
+      if (updates.ingredients?.some((ing) => !ing.name || ing.amount <= 0 || !ing.unit)) {
+        throw new ValidationError('Invalid ingredient');
+      }
 
-    const updatedRecipe = await this.recipeRepository.update(id, updates);
-    const { id: recipeId, ...rest } = updatedRecipe;
-    return {
-      ...rest,
-      _id: recipeId,
-    };
+      const recipe = await this.recipeRepository.findById(id);
+      if (!recipe) {
+        throw new ResourceNotFoundError('Recipe');
+      }
+
+      const updatedRecipe = await this.recipeRepository.update(id, updates);
+      const { id: recipeId, ...rest } = updatedRecipe;
+      return {
+        ...rest,
+        _id: recipeId,
+      };
+    } catch (error) {
+      if (error instanceof ResourceNotFoundError || error instanceof ValidationError) {
+        throw error;
+      }
+      throw new ValidationError('Invalid recipe ID');
+    }
   }
 
   async deleteRecipe(id: string): Promise<void> {
-    const recipe = await this.recipeRepository.findById(id);
-    if (!recipe) {
-      throw new AppError(Status.NotFound, 'Recipe not found');
-    }
+    try {
+      const recipe = await this.recipeRepository.findById(id);
+      if (!recipe) {
+        throw new ResourceNotFoundError('Recipe');
+      }
 
-    await this.recipeRepository.delete(id);
+      await this.recipeRepository.delete(id);
+    } catch (error) {
+      if (error instanceof ResourceNotFoundError) {
+        throw error;
+      }
+      throw new ValidationError('Invalid recipe ID');
+    }
   }
 }

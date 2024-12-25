@@ -1,5 +1,4 @@
 import { assertEquals, assertExists } from 'https://deno.land/std@0.208.0/testing/asserts.ts';
-import { describe, it } from 'https://deno.land/std@0.208.0/testing/bdd.ts';
 import { ObjectId } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
 import { createTestRecipe } from '../utils/factories.ts';
 import {
@@ -8,22 +7,20 @@ import {
   assertSuccessResponse,
   createAuthHeader,
 } from '../utils/helpers.ts';
-import { setupTest } from '../test_utils.ts';
+import { cleanupTest, setupTest } from '../test_utils.ts';
 import { Recipe } from '../../types/mod.ts';
 import type { TestContext } from '../test_utils.ts';
 
 type TestRecipe = Omit<Recipe, 'id'> & { _id: string | ObjectId };
 
-describe('Recipe API Integration Tests', () => {
-  let testContext: TestContext;
-  let baseUrl: string;
-
-  it('should handle recipe lifecycle', async () => {
-    testContext = await setupTest();
-    baseUrl = `http://localhost:${testContext.port}/api`;
+Deno.test({
+  name: 'Recipe Integration - should create and list recipes',
+  async fn() {
+    const testContext = await setupTest();
+    const baseUrl = `http://localhost:${testContext.port}/api`;
 
     try {
-      // POST /recipes - Create
+      // Create recipe
       const recipe = createTestRecipe({
         userId: testContext.testUserId!,
       });
@@ -40,7 +37,7 @@ describe('Recipe API Integration Tests', () => {
       const createdRecipe = await assertSuccessResponse<TestRecipe>(createResponse, 201);
       assertExists(createdRecipe._id, 'Response should include recipe ID');
 
-      // GET /recipes - List
+      // List recipes
       const listResponse = await fetch(`${baseUrl}/recipes`, {
         headers: await createAuthHeader(testContext.testUserId!),
       });
@@ -48,8 +45,39 @@ describe('Recipe API Integration Tests', () => {
       const recipes = await assertSuccessResponse<TestRecipe[]>(listResponse);
       assertEquals(recipes.length, 1, 'Should return 1 recipe');
       assertEquals(recipes[0]._id, createdRecipe._id);
+    } finally {
+      await testContext.server.close();
+      await cleanupTest();
+    }
+  },
+  sanitizeResources: false,
+  sanitizeOps: false,
+});
 
-      // PUT /recipes/:id - Update
+Deno.test({
+  name: 'Recipe Integration - should update recipe',
+  async fn() {
+    const testContext = await setupTest();
+    const baseUrl = `http://localhost:${testContext.port}/api`;
+
+    try {
+      // First create a recipe
+      const recipe = createTestRecipe({
+        userId: testContext.testUserId!,
+      });
+
+      const createResponse = await fetch(`${baseUrl}/recipes`, {
+        method: 'POST',
+        headers: {
+          ...await createAuthHeader(testContext.testUserId!),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(recipe),
+      });
+
+      const createdRecipe = await assertSuccessResponse<TestRecipe>(createResponse, 201);
+
+      // Then update it
       const updates = {
         title: 'Updated Recipe Title',
         description: 'Updated description',
@@ -67,8 +95,39 @@ describe('Recipe API Integration Tests', () => {
       const updatedRecipe = await assertSuccessResponse<TestRecipe>(updateResponse);
       assertEquals(updatedRecipe.title, updates.title);
       assertEquals(updatedRecipe.description, updates.description);
+    } finally {
+      await testContext.server.close();
+      await cleanupTest();
+    }
+  },
+  sanitizeResources: false,
+  sanitizeOps: false,
+});
 
-      // DELETE /recipes/:id
+Deno.test({
+  name: 'Recipe Integration - should delete recipe',
+  async fn() {
+    const testContext = await setupTest();
+    const baseUrl = `http://localhost:${testContext.port}/api`;
+
+    try {
+      // First create a recipe
+      const recipe = createTestRecipe({
+        userId: testContext.testUserId!,
+      });
+
+      const createResponse = await fetch(`${baseUrl}/recipes`, {
+        method: 'POST',
+        headers: {
+          ...await createAuthHeader(testContext.testUserId!),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(recipe),
+      });
+
+      const createdRecipe = await assertSuccessResponse<TestRecipe>(createResponse, 201);
+
+      // Then delete it
       const deleteResponse = await fetch(`${baseUrl}/recipes/${createdRecipe._id}`, {
         method: 'DELETE',
         headers: await createAuthHeader(testContext.testUserId!),
@@ -84,6 +143,9 @@ describe('Recipe API Integration Tests', () => {
       assertErrorResponse(verifyResponse, 404, 'Recipe not found');
     } finally {
       await testContext.server.close();
+      await cleanupTest();
     }
-  });
+  },
+  sanitizeResources: false,
+  sanitizeOps: false,
 });
