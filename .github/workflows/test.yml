@@ -12,12 +12,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Setup Deno
       uses: denoland/setup-deno@v2
       with:
         deno-version: '2.1.4'  # Latest stable 2.x version
-        
+
     - name: Make test script executable
       run: chmod +x test.sh
       
