@@ -1,95 +1,128 @@
-import { Context } from 'oak';
+import { Context } from 'https://deno.land/x/oak@v12.6.1/mod.ts';
+import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
+import { AppMiddleware } from '../../../types/middleware.ts';
 import { RateLimitError } from '../../../types/errors.ts';
 
 interface RateLimitConfig {
-  windowMs: number;  // Time window in milliseconds
-  max: number;       // Max requests per window
+  windowMs: number;
+  max: number;
+  message?: string;
+  statusCode?: number;
+  skipFailedRequests?: boolean;
+  skipSuccessfulRequests?: boolean;
+  keyGenerator?: (ctx: Context) => string;
+  skip?: (ctx: Context) => boolean;
+  handler?: (ctx: Context) => Promise<void>;
 }
 
-// In-memory store for rate limiting
-// In production, you'd want to use Redis or similar
-const ipHits = new Map<string, { count: number; resetTime: number }>();
+interface RateLimitInfo {
+  limit: number;
+  current: number;
+  remaining: number;
+  resetTime: Date;
+}
 
-// Clean up expired entries periodically
-setInterval(() => {
-  const now = Date.now();
-  for (const [ip, data] of ipHits.entries()) {
-    if (data.resetTime <= now) {
-      ipHits.delete(ip);
-    }
-  }
-}, 60000); // Clean up every minute
-
-// Default config: 100 requests per minute
 const defaultConfig: RateLimitConfig = {
   windowMs: 60 * 1000, // 1 minute
-  max: 100
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests, please try again later.',
+  statusCode: Status.TooManyRequests,
+  skipFailedRequests: false,
+  skipSuccessfulRequests: false,
 };
 
-export function rateLimit(config: Partial<RateLimitConfig> = {}) {
-  const options: RateLimitConfig = { ...defaultConfig, ...config };
+const hits = new Map<string, { count: number; resetTime: number }>();
 
-  return async function(ctx: Context, next: () => Promise<void>) {
-    const ip = ctx.request.headers.get('x-forwarded-for') || 
-               ctx.request.headers.get('x-real-ip') ||
-               ctx.request.headers.get('cf-connecting-ip') ||
-               'unknown';
-    const now = Date.now();
+/**
+ * Generate a key for rate limiting based on IP address
+ */
+function defaultKeyGenerator(ctx: Context): string {
+  return ctx.request.ip;
+}
 
-    // Get or create rate limit data for this IP
-    let data = ipHits.get(ip);
-    if (!data || data.resetTime <= now) {
-      data = {
-        count: 0,
-        resetTime: now + options.windowMs
-      };
-      ipHits.set(ip, data);
+/**
+ * Check if request should be skipped
+ */
+function defaultSkip(_ctx: Context): boolean {
+  return false;
+}
+
+/**
+ * Default rate limit exceeded handler
+ */
+async function defaultHandler(ctx: Context): Promise<void> {
+  const retryAfter = Math.ceil(
+    (hits.get(ctx.request.ip)?.resetTime || 0) - Date.now()
+  ) / 1000;
+
+  ctx.response.status = Status.TooManyRequests;
+  ctx.response.headers.set('Retry-After', retryAfter.toString());
+  throw new RateLimitError('Too many requests', new Date(Date.now() + retryAfter * 1000));
+}
+
+/**
+ * Create rate limiting middleware
+ */
+export function rateLimit(options: Partial<RateLimitConfig> = {}): AppMiddleware {
+  const config = { ...defaultConfig, ...options };
+  const keyGen = config.keyGenerator || defaultKeyGenerator;
+  const skip = config.skip || defaultSkip;
+  const handler = config.handler || defaultHandler;
+
+  return async (ctx: Context, next: () => Promise<unknown>): Promise<void> => {
+    if (skip(ctx)) {
+      await next();
+      return;
     }
 
-    // Increment request count
-    data.count++;
+    const key = keyGen(ctx);
+    const now = Date.now();
+    const resetTime = now + config.windowMs;
+
+    let hit = hits.get(key);
+    if (!hit || hit.resetTime <= now) {
+      hit = { count: 0, resetTime };
+    }
+
+    hit.count++;
+    hits.set(key, hit);
 
     // Set rate limit headers
-    ctx.response.headers.set('X-RateLimit-Limit', options.max.toString());
-    ctx.response.headers.set('X-RateLimit-Remaining', Math.max(0, options.max - data.count).toString());
-    ctx.response.headers.set('X-RateLimit-Reset', Math.ceil(data.resetTime / 1000).toString());
+    const rateLimitInfo: RateLimitInfo = {
+      limit: config.max,
+      current: hit.count,
+      remaining: Math.max(0, config.max - hit.count),
+      resetTime: new Date(hit.resetTime),
+    };
 
-    // Check if rate limit exceeded
-    if (data.count > options.max) {
-      const retryAfter = Math.ceil((data.resetTime - now) / 1000);
-      ctx.response.headers.set('Retry-After', retryAfter.toString());
-      throw new RateLimitError();
+    ctx.response.headers.set('X-RateLimit-Limit', config.max.toString());
+    ctx.response.headers.set('X-RateLimit-Remaining', rateLimitInfo.remaining.toString());
+    ctx.response.headers.set('X-RateLimit-Reset', Math.ceil(hit.resetTime / 1000).toString());
+
+    if (hit.count > config.max) {
+      await handler(ctx);
+      return;
     }
 
-    await next();
+    try {
+      await next();
+
+      // Optionally skip successful requests
+      if (
+        config.skipSuccessfulRequests &&
+        ctx.response.status >= 200 &&
+        ctx.response.status < 300
+      ) {
+        hit.count--;
+        hits.set(key, hit);
+      }
+    } catch (error) {
+      // Optionally skip failed requests
+      if (config.skipFailedRequests) {
+        hit.count--;
+        hits.set(key, hit);
+      }
+      throw error;
+    }
   };
-}
-
-// Helper to get current rate limit status for an IP
-export function getRateLimitStatus(ip: string): {
-  remaining: number;
-  resetTime: number;
-  isLimited: boolean;
-} {
-  const data = ipHits.get(ip);
-  const now = Date.now();
-
-  if (!data || data.resetTime <= now) {
-    return {
-      remaining: defaultConfig.max,
-      resetTime: now + defaultConfig.windowMs,
-      isLimited: false
-    };
-  }
-
-  return {
-    remaining: Math.max(0, defaultConfig.max - data.count),
-    resetTime: data.resetTime,
-    isLimited: data.count > defaultConfig.max
-  };
-}
-
-// Helper to reset rate limit for an IP
-export function resetRateLimit(ip: string): void {
-  ipHits.delete(ip);
 }
