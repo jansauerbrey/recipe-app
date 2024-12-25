@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "allowJs": true,
     "lib": ["deno.window", "deno.ns", "dom"],
-    "strict": true
+    "strict": true,
+    "checkJs": true
   },
   "lint": {
     "files": {
