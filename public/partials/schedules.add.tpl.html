@@ -1,0 +1,43 @@
+	<div modal="scheduleAddModal">
+		<div class="modal-header">
+	    <h4 class="modal-title"><strong>Scheduling: </strong>{{date | date:'EEEE dd.MM.yyyy'}}</h4>
+    	<button type="button" class="close" ng-click="cancel()"><span aria-hidden="true">×</span></button>
+	  </div>
+	  <div class="modal-body">
+	    <div class="form-group">
+	      <label class="control-label">Recipe:</label>
+	      <input type="text" ng-model="newrecipe" uib-typeahead="recipe as recipe.name for recipe in GetRecipes($viewValue)" typeahead-template-url="partials/recipes.typeahead.tpl.html" typeahead-editable="false" typeahead-on-select="TASelect($item)" class="form-control" placeholder="Add Recipe...">
+	    </div>
+	    <div class="form-group">
+	      <label class="control-label">Persons / portions:</label>
+	      <div class="input-group">
+	      	<input type="text" ng-model="factor" ng-required="true" class="form-control">
+					<span class="input-group-btn">
+						<button class="btn btn-default" ng-click="factor=factor-1;" type="button">
+							<i class="glyphicon glyphicon-minus"></i>
+						</button>
+						<button class="btn btn-default" ng-click="factor=factor+1;" type="button">
+							<i class="glyphicon glyphicon-plus"></i>
+						</button>
+					</span>
+				</div>
+	    </div>
+	    
+	    <div class="row list-top-margin">
+	      <div ng-repeat="randomRecipe in randomRecipes" class="col-xs-6 col-sm-4 col-md-4 col-lg-4" ng-class="{'hidden-xs': $last}">
+          <a ng-click="selectRecipe(randomRecipe)">
+          <div class="thumbnail">
+            <img ng-src="https://www.rezept-planer.de/upload/{{randomRecipe.imagePath}}" spinkit-image-preloader='double-bounce-spinner'></img>
+            <div class="caption">
+	      			<p class="margin-off">{{randomRecipe.name | limitTo: 50}}</p>
+	    			</div>
+          </div>
+        </a>
+	      </div>
+	    </div>
+	    
+	  </div>
+	  <div class="modal-footer">
+	    <button ng-click="ok()" class="btn btn-primary">OK</button>
+	  </div>
+	</div>

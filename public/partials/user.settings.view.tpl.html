@@ -1,0 +1,61 @@
+<div class="row">
+<div class="col-xs-12">
+  <h3 class="hidden-xs margin-bottom-30">User settings
+    <a class="btn btn-primary pull-right hover-ref-element" ui-sref="user.settings.edit" role="button"><i class="glyphicon glyphicon-pencil"></i><span class="hover-show-element"> Edit</span></a>
+  </h3>
+	<form class="form-horizontal" role="form">
+		<div class="form-group">
+			<label for="inputUsername" class="col-sm-4 control-label">Username</label>
+			<div class="col-sm-4">
+				<p class="form-control-static">{{user.username}}</p>
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="inputEmail" class="col-sm-4 control-label">Email</label>
+			<div class="col-sm-4">
+				<p class="form-control-static">{{user.email}}</p>
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="inputFullname" class="col-sm-4 control-label">Fullname</label>
+			<div class="col-sm-4">
+				<p class="form-control-static">{{user.fullname}}</p>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-4 control-label">Preferred language:</label>
+			<div class="col-sm-4">
+				<p class="form-control-static"><span ng-repeat="languages in filtered=(languageOptions | filter: user.settings.preferredLanguage)">{{languages.name}}</span></p>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-4 control-label">Spoken languages:</label>
+			<div class="col-sm-4">
+				<p class="form-control-static">{{user.settings.spokenLanguages}}<span ng-repeat="languages in filtered=(languageOptions | filter: user.settings.spokenLanguages)">{{languages.name}}</span></p>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-4 control-label">Preferred week starting day in Shedules:</label>
+			<div class="col-sm-4">
+				<p class="form-control-static"><span ng-repeat="weekdays in filtered=(weekdayOptions | filter: user.settings.preferredWeekStartDay)">{{weekdays.name}}</span></p>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-4 control-label">Autoupdate:</label>
+			<div class="col-sm-4">
+				<button class="btn btn-default"><span class="glyphicon" ng-class="{'glyphicon-none': !user.settings.autoupdate, 'glyphicon-ok': user.settings.autoupdate}"></span></button> Sync shopitems accross devices in real time 	
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-4 control-label">Shopping item category order:</label>
+			<div class="col-sm-4">
+				<ul class="list-group">
+					<li ng-repeat="item in user.settings.categoryOrder" class="list-group-item">
+			  		<div>{{item}}</div>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</form>
+</div>
+</div>
