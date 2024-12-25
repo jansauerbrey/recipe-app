@@ -1,39 +1,58 @@
-import { Context } from 'oak';
-import { validateToken } from './token.middleware.ts';
-import { checkRole } from './role.middleware.ts';
-import { rateLimit } from './rate-limit.middleware.ts';
+import { Context } from 'https://deno.land/x/oak@v12.6.1/mod.ts';
+import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
+import { AppMiddleware } from '../../../types/middleware.ts';
 import { AuthenticationError } from '../../../types/errors.ts';
+import { verifyToken } from './token.middleware.ts';
+import { User } from '../../../types/user.ts';
 
-// Main authentication middleware that combines token validation and rate limiting
-export async function authMiddleware(ctx: Context, next: () => Promise<void>) {
-  // Skip auth for OPTIONS requests (CORS preflight)
-  if (ctx.request.headers.get('Access-Control-Request-Method')) {
-    return await next();
-  }
-
-  try {
-    // Apply rate limiting first
-    await rateLimit(ctx);
-
-    // Validate the token and add user to context
-    await validateToken(ctx);
-
-    await next();
-  } catch (error) {
-    if (error instanceof AuthenticationError) {
-      ctx.response.status = error.statusCode;
-      ctx.response.body = { error: error.message };
+// Middleware to check if user is authenticated
+export function isAuthenticated(): AppMiddleware {
+  return async (ctx: Context, next: () => Promise<unknown>): Promise<void> => {
+    // Allow OPTIONS requests to pass through
+    if (ctx.request.method === 'OPTIONS') {
+      await next();
       return;
     }
-    throw error;
-  }
+
+    const authHeader = ctx.request.headers.get('Authorization');
+    if (!authHeader) {
+      throw new AuthenticationError('No authorization header');
+    }
+
+    const [type, token] = authHeader.split(' ');
+    if (type !== 'Bearer' || !token) {
+      throw new AuthenticationError('Invalid authorization format');
+    }
+
+    const user = await verifyToken(token);
+    ctx.state.user = user;
+
+    await next();
+  };
 }
 
-// Role-based middleware creators
-export const adminOnly = () => checkRole(['admin']);
-export const userOnly = () => checkRole(['user', 'admin']);
+// Middleware to check if user has admin role
+export function isAdmin(): AppMiddleware {
+  return async (ctx: Context, next: () => Promise<unknown>): Promise<void> => {
+    const user = ctx.state.user as User;
+    if (!user || user.role !== 'admin') {
+      ctx.response.status = Status.Forbidden;
+      ctx.response.body = { error: 'Admin access required' };
+      return;
+    }
+    await next();
+  };
+}
 
-// Re-export other middleware for direct use
-export { validateToken } from './token.middleware.ts';
-export { checkRole } from './role.middleware.ts';
-export { rateLimit } from './rate-limit.middleware.ts';
+// Middleware to check if user has moderator role or higher
+export function isModerator(): AppMiddleware {
+  return async (ctx: Context, next: () => Promise<unknown>): Promise<void> => {
+    const user = ctx.state.user as User;
+    if (!user || (user.role !== 'moderator' && user.role !== 'admin')) {
+      ctx.response.status = Status.Forbidden;
+      ctx.response.body = { error: 'Moderator access required' };
+      return;
+    }
+    await next();
+  };
+}

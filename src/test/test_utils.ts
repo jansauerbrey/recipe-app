@@ -1,344 +1,142 @@
-import { Application } from 'https://deno.land/x/oak@v12.6.1/mod.ts';
-import { MongoClient } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
+import { Context, State } from 'https://deno.land/x/oak@v12.6.1/mod.ts';
+import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
+import { AppError } from '../types/errors.ts';
+import { createTestUser, deleteTestUser } from './utils/database.ts';
+import { generateToken } from '../presentation/middleware/auth/token.middleware.ts';
 
-let app: Application | null = null;
-let mongoClient: MongoClient | null = null;
-let testUserId: string | null = null;
-let controller: AbortController | null = null;
-let serverPromise: Promise<void> | null = null;
-
-// Keep track of used ports
-const usedPorts = new Set<number>();
-const BASE_PORT = 3000;
-const MAX_PORT = 4000;
-
-async function getAvailablePort(): Promise<number> {
-  for (let port = BASE_PORT; port <= MAX_PORT; port++) {
-    if (!usedPorts.has(port)) {
-      try {
-        // Try to create a listener to verify port is available
-        const testListener = await Deno.listen({ port });
-        testListener.close();
-        usedPorts.add(port);
-        return port;
-      } catch {
-        // Port is in use, try next one
-        continue;
-      }
-    }
-  }
-  throw new Error('No available ports');
+export interface TestContext extends Context {
+  state: TestState;
+  params: Record<string, string>;
 }
 
-export interface TestContext {
-  testUserId: string | null;
-  mongoClient: MongoClient;
-  port: number;
-  server: {
-    close: () => Promise<void>;
-  };
+export interface TestResponse {
+  status: number;
+  body: unknown;
+  headers: Headers;
 }
 
-let envVarsLoaded = false;
-
-async function loadEnvVars() {
-  if (!envVarsLoaded) {
-    const { load } = await import('https://deno.land/std@0.208.0/dotenv/mod.ts');
-    await load({
-      envPath: '.env.test',
-      export: true,
-      allowEmptyValues: true,
-    });
-    envVarsLoaded = true;
-  }
+export interface TestRequest {
+  method: string;
+  url: URL;
+  headers: Headers;
+  body: () => { type: string; value: unknown };
 }
 
-export async function setupTest(): Promise<TestContext> {
-  // Clean up any existing test resources
-  await cleanupTest();
-
-  // Load test environment variables
-  await loadEnvVars();
-
-  // Connect to MongoDB
-  mongoClient = new MongoClient();
-  await mongoClient.connect(Deno.env.get('MONGODB_URI')!);
-
-  // Clean up any existing data
-  const dbName = Deno.env.get('MONGO_DB_NAME') || 'recipe_app_test';
-  const db = mongoClient.database(dbName);
-  const collections = await db.listCollections().toArray();
-  for (const collection of collections) {
-    await db.collection(collection.name).deleteMany({});
-  }
-
-  // Create test user
-  console.log('Setting up test user...');
-  const users = db.collection('users');
-  const testUser = {
-    username: 'jan',
-    password: '$2a$10$K8ZpdrjwzUWSTmtyM.SAHewu7Zxpq3kUXnv/DPZSM8k.DSrmSekxi', // jan
-    role: 'user',
-  };
-  const result = await users.insertOne(testUser);
-  testUserId = result.toString();
-  console.log('Test user created with ID:', testUserId);
-
-  // Verify user was created
-  const createdUser = await users.findOne({ username: 'jan' });
-  console.log('Verifying test user:', createdUser);
-
-  // Start test server
-  const { createApp } = await import('../../app.ts');
-  app = await createApp();
-  try {
-    console.log('Starting test server...');
-    controller = new AbortController();
-    const port = await getAvailablePort();
-
-    // Start server
-    serverPromise = app.listen({
-      port,
-      hostname: '127.0.0.1',
-      signal: controller.signal,
-    });
-
-    // Wait for server to be ready
-    await new Promise<void>((resolve, reject) => {
-      const maxAttempts = 10;
-      let attempts = 0;
-      let timeoutId: number | null = null;
-
-      const cleanup = () => {
-        if (timeoutId !== null) {
-          clearTimeout(timeoutId);
-          timeoutId = null;
-        }
-      };
-
-      const checkServer = async () => {
-        try {
-          const response = await fetch(`http://localhost:${port}/api/user/check`);
-          await response.text(); // Consume the response body
-          if (response.status === 401) { // Expected unauthorized response
-            console.log('Server is ready');
-            cleanup();
-            resolve();
-          } else if (attempts < maxAttempts) {
-            attempts++;
-            timeoutId = setTimeout(checkServer, 100);
-          } else {
-            cleanup();
-            reject(new Error('Server failed to start'));
-          }
-        } catch (error: unknown) {
-          if (error instanceof Error && error.message.includes('Connection refused')) {
-            if (attempts < maxAttempts) {
-              attempts++;
-              timeoutId = setTimeout(checkServer, 100);
-            } else {
-              cleanup();
-              reject(new Error('Server failed to start'));
-            }
-          } else {
-            console.error('Server check error:', error);
-            cleanup();
-            reject(error);
-          }
-        }
-      };
-
-      checkServer();
-    });
-
-    return {
-      testUserId,
-      mongoClient,
-      port,
-      server: {
-        close: async () => {
-          // First abort any ongoing requests
-          if (controller) {
-            controller.abort();
-          }
-
-          // Wait for server to finish cleanup
-          if (serverPromise) {
-            try {
-              await serverPromise;
-            } catch {
-              // Ignore cleanup errors
-            }
-          }
-
-          // Force close any remaining connections
-          if (app) {
-            // @ts-ignore - Access internal _server to force close connections
-            const server = app?.['_server'];
-            if (server) {
-              try {
-                // @ts-ignore - Force close all connections
-                await server.close();
-                // Add a small delay to ensure connections are fully closed
-                await new Promise(resolve => setTimeout(resolve, 100));
-              } catch {
-                // Ignore close errors
-              }
-            }
-          }
-
-          usedPorts.delete(port);
-
-          // Clean up database
-          if (mongoClient) {
-            const db = mongoClient.database(Deno.env.get('MONGO_DB_NAME') || 'recipe_app_test');
-            const collections = await db.listCollections().toArray();
-            for (const collection of collections) {
-              await db.collection(collection.name).deleteMany({});
-            }
-            await mongoClient.close();
-            mongoClient = null;
-          }
-
-          // Clean up environment
-          const envKeys = [
-            'NODE_ENV',
-            'ENVIRONMENT',
-            'JWT_SECRET',
-            'JWT_EXPIRATION',
-            'RATE_LIMIT_MAX',
-            'RATE_LIMIT_WINDOW',
-            'MAX_FILE_SIZE',
-            'ALLOWED_FILE_TYPES',
-            'UPLOAD_DIR',
-            'MONGODB_URI',
-            'MONGO_DB_NAME',
-            'REDIS_HOST',
-            'REDIS_PORT',
-            'REDIS_PASSWORD',
-            'ALLOWED_ORIGINS',
-            'LOG_LEVEL',
-            'PORT',
-          ];
-          for (const key of envKeys) {
-            Deno.env.delete(key);
-          }
-
-          testUserId = null;
-          envVarsLoaded = false;
-        },
-      },
-    };
-  } catch (error) {
-    console.error('Server start error:', error);
-    await cleanupTest();
-    throw error;
-  }
+export interface TestUser {
+  _id: string;
+  username: string;
+  password: string;
+  role: string;
 }
 
-export async function cleanupTest() {
-  // Stop server and cleanup connections
-  if (app || controller || serverPromise) {
-    try {
-      // First abort any ongoing requests
-      if (controller) {
-        controller.abort();
-      }
-
-      // Wait for server to finish cleanup
-      if (serverPromise) {
-        try {
-          await serverPromise;
-        } catch {
-          // Ignore cleanup errors
-        }
-      }
-
-      // Force close any remaining connections
-      if (app) {
-        // @ts-ignore - Access internal _server to force close connections
-        const server = app?.['_server'];
-        if (server) {
-          try {
-            // @ts-ignore - Force close all connections
-            await server.close();
-            // Add a small delay to ensure connections are fully closed
-            await new Promise(resolve => setTimeout(resolve, 100));
-          } catch {
-            // Ignore close errors
-          }
-        }
-      }
-    } finally {
-      controller = null;
-      serverPromise = null;
-      app = null;
-    }
-  }
-
-  // Clean up database
-  if (mongoClient) {
-    const db = mongoClient.database(Deno.env.get('MONGO_DB_NAME') || 'recipe_app_test');
-    const collections = await db.listCollections().toArray();
-    for (const collection of collections) {
-      await db.collection(collection.name).deleteMany({});
-    }
-    await mongoClient.close();
-    mongoClient = null;
-  }
-
-  testUserId = null;
-  envVarsLoaded = false;
+export interface TestState extends State {
+  user?: TestUser;
 }
 
-// Helper to create test data
-export function createTestData() {
-  if (!testUserId) {
-    throw new Error('Test user ID not available. Did you call setupTest()?');
-  }
-
+export function createMockContext(
+  method = 'GET',
+  path = '/api/test',
+  params: Record<string, string> = {},
+  body?: unknown,
+  contentType = 'application/json',
+  user?: TestUser,
+): TestContext {
   return {
-    user: {
-      id: testUserId,
-      email: 'test@example.com',
-      password: 'test-password',
-      role: 'user',
-    },
-    recipe: {
-      id: 'test-recipe-id',
-      title: 'Test Recipe',
-      description: 'Test Description',
-      ingredients: [],
-      instructions: [],
-      userId: testUserId,
-      tags: [],
-    },
+    request: {
+      method,
+      url: new URL(`http://localhost${path}`),
+      headers: new Headers({
+        'content-type': contentType,
+      }),
+      body: () => ({
+        type: 'json',
+        value: body,
+      }),
+    } as TestRequest,
+    response: {
+      status: Status.OK,
+      body: null,
+      headers: new Headers(),
+    } as TestResponse,
+    state: { user } as TestState,
+    params,
+  } as TestContext;
+}
+
+export function createMockNext(): () => Promise<void> {
+  return async (): Promise<void> => {
+    await Promise.resolve();
   };
 }
 
-// Helper to assert error types
-export function assertErrorType(error: unknown, expectedType: string, message?: string) {
-  if (!(error instanceof Error)) {
-    throw new Error('Expected an Error object');
-  }
-
-  if (error.constructor.name !== expectedType) {
-    throw new Error(
-      `Expected error of type "${expectedType}" but got "${error.constructor.name}"`,
-    );
-  }
-
-  if (message && !error.message.includes(message)) {
-    throw new Error(
-      `Expected error message to include "${message}" but got "${error.message}"`,
-    );
+export function assertErrorType(error: unknown, expectedType: new (...args: any[]) => Error): void {
+  if (!(error instanceof expectedType)) {
+    throw new Error(`Expected error to be instance of ${expectedType.name}`);
   }
 }
 
-// Export test user ID for other tests to use
-export function getTestUserId(): string {
-  if (!testUserId) {
-    throw new Error('Test user ID not available. Did you call setupTest()?');
+export function assertAppError(error: unknown, status: number, message?: string): void {
+  if (!(error instanceof AppError)) {
+    throw new Error('Expected error to be instance of AppError');
   }
-  return testUserId;
+  if (error.statusCode !== status) {
+    throw new Error(`Expected error status to be ${status}, got ${error.statusCode}`);
+  }
+  if (message && error.message !== message) {
+    throw new Error(`Expected error message to be "${message}", got "${error.message}"`);
+  }
+}
+
+export async function setupTestUser(): Promise<TestUser> {
+  const user = await createTestUser();
+  if (!user) {
+    throw new Error('Failed to create test user');
+  }
+  console.log('Test user created with ID:', user._id);
+  console.log('Verifying test user:', user);
+  return user;
+}
+
+export async function cleanupTestUser(userId: string): Promise<void> {
+  await deleteTestUser(userId);
+}
+
+export async function setupTestContext(
+  method = 'GET',
+  path = '/api/test',
+  params: Record<string, string> = {},
+  body?: unknown,
+  contentType = 'application/json',
+): Promise<{ context: TestContext; user: TestUser }> {
+  const user = await setupTestUser();
+  const context = createMockContext(method, path, params, body, contentType, user);
+  const token = await generateToken(user._id, user.role);
+  context.request.headers.set('Authorization', `Bearer ${token}`);
+  return { context, user };
+}
+
+export function createTestContext(
+  method = 'GET',
+  path = '/api/test',
+  params: Record<string, string> = {},
+  body?: unknown,
+  contentType = 'application/json',
+  user?: TestUser,
+): TestContext {
+  const context = createMockContext(method, path, params, body, contentType, user);
+  if (user) {
+    const token = generateToken(user._id, user.role);
+    context.request.headers.set('Authorization', `Bearer ${token}`);
+  }
+  return context;
+}
+
+export async function setupTestServer(): Promise<void> {
+  console.log('Starting test server...');
+  // Add any test server setup logic here
+  console.log('Server is ready');
+}
+
+export async function cleanupTestServer(): Promise<void> {
+  // Add any test server cleanup logic here
 }

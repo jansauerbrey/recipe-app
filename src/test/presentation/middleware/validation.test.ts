@@ -1,6 +1,5 @@
 import {
   assertEquals,
-  assertRejects,
 } from 'https://deno.land/std@0.208.0/assert/mod.ts';
 import { Context, RouterContext } from 'https://deno.land/x/oak@v12.6.1/mod.ts';
 import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
@@ -25,7 +24,7 @@ interface MockResponse {
   headers: Headers;
 }
 
-type MockContext = Omit<RouterContext<string>, 'request' | 'response'> & {
+type MockContext = Pick<RouterContext<string>, 'request' | 'response' | 'state' | 'params'> & {
   request: MockRequest;
   response: MockResponse;
   params: Record<string, string>;
@@ -33,7 +32,7 @@ type MockContext = Omit<RouterContext<string>, 'request' | 'response'> & {
 
 function createMockContext(
   method = 'GET',
-  path = '/test',
+  path = '/api/test',
   params: Record<string, string> = {},
   body?: unknown,
   contentType = 'application/json',
@@ -60,7 +59,7 @@ function createMockContext(
 }
 
 // Mock OpenAPI spec for testing
-const mockOpenApiSpec = {
+globalThis.openApiSpec = {
   paths: {
     '/api/test': {
       post: {
@@ -103,22 +102,6 @@ const mockOpenApiSpec = {
   },
 };
 
-// Replace the actual OpenAPI spec with our mock for testing
-(globalThis as unknown as { openApiSpec: unknown }).openApiSpec = mockOpenApiSpec;
-
-async function assertValidationError(
-  fn: () => Promise<void>,
-  expectedMessage: string,
-): Promise<void> {
-  await assertRejects(
-    async () => {
-      await fn();
-    },
-    ValidationError,
-    expectedMessage,
-  );
-}
-
 // Create a properly typed mock next function
 const mockNext = async (): Promise<void> => {
   await Promise.resolve();
@@ -149,10 +132,16 @@ Deno.test('Validation Middleware', async (t) => {
     mockCtx.request.headers.set('x-api-key', 'test-key');
     mockCtx.request.url.searchParams.set('filter', 'active');
 
-    await assertValidationError(
-      async () => validateRequest(mockCtx as unknown as Context, mockNext),
-      'Missing required path parameter: id'
-    );
+    let error: ValidationError | null = null;
+    try {
+      await validateRequest(mockCtx as unknown as Context, mockNext);
+    } catch (e) {
+      if (e instanceof ValidationError) {
+        error = e;
+      }
+    }
+    assertEquals(error instanceof ValidationError, true);
+    assertEquals(error?.message, 'Missing required path parameter: id');
   });
 
   await t.step('validateRequest - should fail with missing query parameter', async () => {
@@ -164,10 +153,16 @@ Deno.test('Validation Middleware', async (t) => {
     );
     mockCtx.request.headers.set('x-api-key', 'test-key');
 
-    await assertValidationError(
-      async () => validateRequest(mockCtx as unknown as Context, mockNext),
-      'Missing required query parameter: filter'
-    );
+    let error: ValidationError | null = null;
+    try {
+      await validateRequest(mockCtx as unknown as Context, mockNext);
+    } catch (e) {
+      if (e instanceof ValidationError) {
+        error = e;
+      }
+    }
+    assertEquals(error instanceof ValidationError, true);
+    assertEquals(error?.message, 'Missing required query parameter: filter');
   });
 
   await t.step('validateRequest - should fail with missing header', async () => {
@@ -179,10 +174,16 @@ Deno.test('Validation Middleware', async (t) => {
     );
     mockCtx.request.url.searchParams.set('filter', 'active');
 
-    await assertValidationError(
-      async () => validateRequest(mockCtx as unknown as Context, mockNext),
-      'Missing required header parameter: x-api-key'
-    );
+    let error: ValidationError | null = null;
+    try {
+      await validateRequest(mockCtx as unknown as Context, mockNext);
+    } catch (e) {
+      if (e instanceof ValidationError) {
+        error = e;
+      }
+    }
+    assertEquals(error instanceof ValidationError, true);
+    assertEquals(error?.message, 'Missing required header parameter: x-api-key');
   });
 
   await t.step('validateRequest - should fail with missing required body', async () => {
@@ -195,10 +196,16 @@ Deno.test('Validation Middleware', async (t) => {
     mockCtx.request.headers.set('x-api-key', 'test-key');
     mockCtx.request.url.searchParams.set('filter', 'active');
 
-    await assertValidationError(
-      async () => validateRequest(mockCtx as unknown as Context, mockNext),
-      'Missing required request body'
-    );
+    let error: ValidationError | null = null;
+    try {
+      await validateRequest(mockCtx as unknown as Context, mockNext);
+    } catch (e) {
+      if (e instanceof ValidationError) {
+        error = e;
+      }
+    }
+    assertEquals(error instanceof ValidationError, true);
+    assertEquals(error?.message, 'Missing required request body');
   });
 
   await t.step('validateResponse - should pass with valid response', async () => {
@@ -214,10 +221,16 @@ Deno.test('Validation Middleware', async (t) => {
     const mockCtx = createMockContext('POST', '/api/test');
     mockCtx.response.status = Status.OK;
 
-    await assertValidationError(
-      async () => validateResponse(mockCtx as unknown as Context, mockNext),
-      'Missing response body'
-    );
+    let error: ValidationError | null = null;
+    try {
+      await validateResponse(mockCtx as unknown as Context, mockNext);
+    } catch (e) {
+      if (e instanceof ValidationError) {
+        error = e;
+      }
+    }
+    assertEquals(error instanceof ValidationError, true);
+    assertEquals(error?.message, 'Missing response body');
   });
 
   await t.step('should skip validation for undefined routes', async () => {

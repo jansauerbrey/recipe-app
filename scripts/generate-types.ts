@@ -26,9 +26,12 @@ function generateType(name: string, schema: Schema, spec: OpenAPISpec): string {
     schema = resolveRef(schema.$ref, spec);
   }
 
+  let properties: string;
+  let itemType: string;
+
   switch (schema.type) {
   case 'object':
-    const properties = Object.entries(schema.properties || {})
+    properties = Object.entries(schema.properties || {})
       .map(([key, value]) => {
         const isRequired = schema.required?.includes(key);
         const typeDeclaration = generateType(key, value, spec);
@@ -39,7 +42,7 @@ function generateType(name: string, schema: Schema, spec: OpenAPISpec): string {
 
   case 'array':
     if (schema.items) {
-      const itemType = generateType('item', schema.items, spec);
+      itemType = generateType('item', schema.items, spec);
       return `${itemType}[]`;
     }
     return 'any[]';
@@ -93,7 +96,7 @@ function generateResponseType(path: string, method: string, spec: OpenAPISpec): 
   return generateInterface(name, successResponse, spec);
 }
 
-async function main() {
+async function main(): Promise<void> {
   // Read OpenAPI spec
   const specPath = join(Deno.cwd(), 'src', 'openapi', 'openapi.yaml');
   const spec = parse(await Deno.readTextFile(specPath)) as OpenAPISpec;
