@@ -1,7 +1,6 @@
 import { Collection, MongoClient, ObjectId } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
 import { Recipe } from '../../types/mod.ts';
-import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
-import { AppError } from '../../types/middleware.ts';
+import { ResourceNotFoundError, ValidationError } from '../../types/errors.ts';
 
 type RecipeDoc = Omit<Recipe, 'id'> & { _id: ObjectId };
 
@@ -22,14 +21,14 @@ export class RecipeRepository {
     try {
       return new ObjectId(id);
     } catch {
-      throw new AppError(Status.BadRequest, 'Invalid recipe ID');
+      throw new ValidationError('Invalid recipe ID');
     }
   }
 
   async create(recipeData: Omit<Recipe, 'id' | 'createdAt' | 'updatedAt'>): Promise<Recipe> {
     // Validate required fields
     if (!recipeData.title || !recipeData.userId) {
-      throw new AppError(Status.BadRequest, 'Missing required fields');
+      throw new ValidationError('Missing required fields');
     }
 
     const now = new Date();
@@ -50,16 +49,13 @@ export class RecipeRepository {
     });
   }
 
-  async findById(id: string): Promise<Recipe | null> {
-    try {
-      const doc = await this.collection.findOne({ _id: this.toObjectId(id) });
-      return doc ? this.toRecipe(doc) : null;
-    } catch (error) {
-      if (error instanceof AppError) {
-        throw error;
-      }
-      throw new AppError(Status.BadRequest, 'Invalid recipe ID');
+  async findById(id: string): Promise<Recipe> {
+    const _id = this.toObjectId(id);
+    const doc = await this.collection.findOne({ _id });
+    if (!doc) {
+      throw new ResourceNotFoundError('Recipe');
     }
+    return this.toRecipe(doc);
   }
 
   async findByUserId(userId: string): Promise<Recipe[]> {
@@ -68,43 +64,29 @@ export class RecipeRepository {
   }
 
   async update(id: string, updates: Partial<Recipe>): Promise<Recipe> {
-    try {
-      const _id = this.toObjectId(id);
-      const doc = await this.collection.findAndModify(
-        { _id },
-        {
-          update: {
-            $set: { ...updates, updatedAt: new Date() },
-          },
-          new: true,
+    const _id = this.toObjectId(id);
+    const doc = await this.collection.findAndModify(
+      { _id },
+      {
+        update: {
+          $set: { ...updates, updatedAt: new Date() },
         },
-      );
+        new: true,
+      },
+    );
 
-      if (!doc) {
-        throw new AppError(Status.NotFound, 'Recipe not found');
-      }
-
-      return this.toRecipe(doc);
-    } catch (error) {
-      if (error instanceof AppError) {
-        throw error;
-      }
-      throw new AppError(Status.BadRequest, 'Invalid recipe ID');
+    if (!doc) {
+      throw new ResourceNotFoundError('Recipe');
     }
+
+    return this.toRecipe(doc);
   }
 
   async delete(id: string): Promise<void> {
-    try {
-      const _id = this.toObjectId(id);
-      const result = await this.collection.deleteOne({ _id });
-      if (!result || result === 0) {
-        throw new AppError(Status.NotFound, 'Recipe not found');
-      }
-    } catch (error) {
-      if (error instanceof AppError) {
-        throw error;
-      }
-      throw new AppError(Status.BadRequest, 'Invalid recipe ID');
+    const _id = this.toObjectId(id);
+    const result = await this.collection.deleteOne({ _id });
+    if (result === 0) {
+      throw new ResourceNotFoundError('Recipe');
     }
   }
 }

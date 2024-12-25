@@ -23,15 +23,7 @@ export interface ErrorResponse {
   message?: string;
 }
 
-export class AppError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-  ) {
-    super(message);
-    this.name = 'AppError';
-  }
-}
+import { AppError } from './errors.ts';
 
 export function isAppError(error: unknown): error is AppError {
   return error instanceof AppError;
@@ -41,7 +33,7 @@ export function handleError(error: unknown): ErrorResponse {
   if (isAppError(error)) {
     return {
       error: error.message,
-      status: error.status,
+      status: error.statusCode,
     };
   }
 

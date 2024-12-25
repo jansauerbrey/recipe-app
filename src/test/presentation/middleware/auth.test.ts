@@ -1,12 +1,10 @@
-import { assertEquals } from "https://deno.land/std@0.208.0/testing/asserts.ts";
-import { describe, it } from "https://deno.land/std@0.208.0/testing/bdd.ts";
-import { Status } from "https://deno.land/std@0.208.0/http/http_status.ts";
-import { Context } from "https://deno.land/x/oak@v12.6.1/mod.ts";
-import { authMiddleware } from "../../../presentation/middleware/auth.middleware.ts";
-import { AppRouterContext } from "../../../types/middleware.ts";
+import { assertEquals } from 'https://deno.land/std@0.208.0/testing/asserts.ts';
+import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
+import { authMiddleware, generateToken } from '../../../presentation/middleware/auth.middleware.ts';
+import { AppRouterContext } from '../../../types/middleware.ts';
 
-describe("Auth Middleware", () => {
-  it("should return 401 when no token is provided", async () => {
+Deno.test('Auth Middleware', async (t) => {
+  await t.step('should return 401 when no token is provided', async () => {
     const ctx = {
       request: {
         headers: new Headers(),
@@ -22,14 +20,14 @@ describe("Auth Middleware", () => {
     await authMiddleware(ctx, async () => {});
 
     assertEquals(ctx.response.status, Status.Unauthorized);
-    assertEquals(ctx.response.body, { error: "No authorization token provided" });
+    assertEquals(ctx.response.body, { error: 'No authorization token provided' });
   });
 
-  it("should return 401 when invalid token is provided", async () => {
+  await t.step('should return 401 when invalid token is provided', async () => {
     const ctx = {
       request: {
         headers: new Headers({
-          Authorization: "Bearer invalid-token",
+          Authorization: 'Bearer invalid-token',
         }),
       },
       response: {
@@ -43,15 +41,20 @@ describe("Auth Middleware", () => {
     await authMiddleware(ctx, async () => {});
 
     assertEquals(ctx.response.status, Status.Unauthorized);
-    assertEquals(ctx.response.body, { error: "Invalid token" });
+    assertEquals(ctx.response.body, { error: 'Invalid token' });
   });
 
-  it("should call next middleware when valid token is provided", async () => {
+  await t.step('should call next middleware when valid token is provided', async () => {
+    // Generate a valid token
+    const userId = 'test-user-id';
+    const role = 'user';
+    const token = await generateToken(userId, role);
+
     let nextCalled = false;
     const ctx = {
       request: {
         headers: new Headers({
-          Authorization: "Bearer valid-token",
+          Authorization: token, // generateToken already adds the AUTH prefix
         }),
       },
       response: {
@@ -66,12 +69,12 @@ describe("Auth Middleware", () => {
 
     const next = async () => {
       nextCalled = true;
-      ctx.state.user = { id: "test-user-id", role: "user" };
     };
 
     await authMiddleware(ctx, next);
 
     assertEquals(nextCalled, true);
-    assertEquals(ctx.state.user?.id, "test-user-id");
+    assertEquals(ctx.state.user?.id, userId);
+    assertEquals(ctx.state.user?.role, role);
   });
 });

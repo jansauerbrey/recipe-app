@@ -1,7 +1,7 @@
 import { Collection, MongoClient, ObjectId } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
 import { User } from '../../types/mod.ts';
 import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
-import { AppError } from '../../types/middleware.ts';
+import { AppError, ResourceNotFoundError, ValidationError } from '../../types/errors.ts';
 import * as bcrypt from 'https://deno.land/x/bcrypt@v0.4.1/mod.ts';
 
 type UserDoc = Omit<User, 'id'> & { _id: ObjectId };
@@ -40,13 +40,21 @@ export class UserRepository {
     });
   }
 
-  async findById(id: string): Promise<User | null> {
+  private toObjectId(id: string): ObjectId {
     try {
-      const doc = await this.collection.findOne({ _id: new ObjectId(id) });
-      return doc ? this.toUser(doc) : null;
+      return new ObjectId(id);
     } catch {
-      throw new AppError(Status.BadRequest, 'Invalid user ID');
+      throw new ValidationError('Invalid user ID');
     }
+  }
+
+  async findById(id: string): Promise<User> {
+    const _id = this.toObjectId(id);
+    const doc = await this.collection.findOne({ _id });
+    if (!doc) {
+      throw new ResourceNotFoundError('User');
+    }
+    return this.toUser(doc);
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -55,52 +63,42 @@ export class UserRepository {
   }
 
   async update(id: string, updates: Partial<User>): Promise<User> {
-    try {
-      if (updates.password) {
-        updates.password = await bcrypt.hash(updates.password);
-      }
+    const _id = this.toObjectId(id);
 
-      const doc = await this.collection.findAndModify(
-        { _id: new ObjectId(id) },
-        {
-          update: {
-            $set: { ...updates, updatedAt: new Date() },
-          },
-          new: true,
-        },
-      );
-
-      if (!doc) {
-        throw new AppError(Status.NotFound, 'User not found');
-      }
-
-      return this.toUser(doc);
-    } catch (error) {
-      if (error instanceof AppError) {
-        throw error;
-      }
-      throw new AppError(Status.BadRequest, 'Invalid user ID');
+    if (updates.password) {
+      updates.password = await bcrypt.hash(updates.password);
     }
+
+    const doc = await this.collection.findAndModify(
+      { _id },
+      {
+        update: {
+          $set: { ...updates, updatedAt: new Date() },
+        },
+        new: true,
+      },
+    );
+
+    if (!doc) {
+      throw new ResourceNotFoundError('User');
+    }
+
+    return this.toUser(doc);
   }
 
   async delete(id: string): Promise<void> {
-    try {
-      const result = await this.collection.deleteOne({ _id: new ObjectId(id) });
-      if (!result) {
-        throw new AppError(Status.NotFound, 'User not found');
-      }
-    } catch (error) {
-      if (error instanceof AppError) {
-        throw error;
-      }
-      throw new AppError(Status.BadRequest, 'Invalid user ID');
+    const _id = this.toObjectId(id);
+    const result = await this.collection.deleteOne({ _id });
+    if (!result) {
+      throw new ResourceNotFoundError('User');
     }
   }
 
   async validatePassword(id: string, password: string): Promise<boolean> {
-    const doc = await this.collection.findOne({ _id: new ObjectId(id) });
+    const _id = this.toObjectId(id);
+    const doc = await this.collection.findOne({ _id });
     if (!doc) {
-      return false;
+      throw new ResourceNotFoundError('User');
     }
 
     return bcrypt.compare(password, doc.password);
