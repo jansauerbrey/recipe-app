@@ -1,20 +1,32 @@
-import { loadTestConfig, cleanupTestConfig, setupTestDB, cleanupTestDB } from "./test_config.ts";
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  it,
+} from 'https://deno.land/std@0.208.0/testing/bdd.ts';
+import { assertEquals, assertExists } from 'https://deno.land/std@0.208.0/testing/asserts.ts';
+import { cleanupTest, setupTest } from './test_utils.ts';
+import { TestContext } from './test_utils.ts';
 
-// Global setup and teardown
-export async function setupTests() {
-  await loadTestConfig();
-  await setupTestDB();
-}
+let testContext: TestContext;
 
-export async function cleanupTests() {
-  await cleanupTestDB();
-  await cleanupTestConfig();
-}
+beforeAll(async () => {
+  testContext = await setupTest();
+});
 
-// Database setup and teardown
-export { setupTestDB, cleanupTestDB };
+afterAll(async () => {
+  await cleanupTest();
+});
 
-// Export test utilities
-export * from "./utils.ts";
-export { assertEquals, assertRejects, assertThrows } from "std/testing/asserts.ts";
-export { describe, it, beforeAll, afterAll } from "std/testing/bdd.ts";
+beforeEach(async () => {
+  // Reset database state
+  const db = testContext.mongoClient.database('recipe_app_test');
+  const collections = await db.listCollections().toArray();
+  for (const collection of collections) {
+    await db.collection(collection.name).deleteMany({});
+  }
+});
+
+export { afterAll, assertEquals, assertExists, beforeAll, beforeEach, describe, it };
+export { testContext };

@@ -1,22 +1,32 @@
-import { Database, MongoClient } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
+import { Collection, Database, MongoClient } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
 
-export interface TestDatabase {
+export interface TestContext {
   client: MongoClient;
   db: Database;
+  userId: string;
 }
 
 /**
  * Setup test database connection
  */
-export async function setupTestDatabase(): Promise<TestDatabase> {
+export async function setupTestDatabase(): Promise<TestContext> {
   const client = new MongoClient();
-  const dbName = Deno.env.get('MONGO_DB_NAME') || 'recipe-app-test';
+  const dbName = Deno.env.get('MONGO_DB_NAME') || 'recipe_app_test';
   const uri = Deno.env.get('MONGODB_URI') || 'mongodb://localhost:27017';
 
   try {
     await client.connect(uri);
     const db = client.database(dbName);
-    return { client, db };
+
+    // Create test user
+    const users = db.collection('users');
+    const result = await users.insertOne({
+      username: 'testuser',
+      password: '$2a$10$K8ZpdrjwzUWSTmtyM.SAHewu7Zxpq3kUXnv/DPZSM8k.DSrmSekxi', // 'testpass'
+      role: 'user',
+    });
+
+    return { client, db, userId: result.toString() };
   } catch (error) {
     console.error('Failed to connect to test database:', error);
     throw error;
@@ -26,18 +36,21 @@ export async function setupTestDatabase(): Promise<TestDatabase> {
 /**
  * Clean up test database
  */
-export async function cleanupTestDatabase(client: MongoClient) {
+export async function cleanupTestDatabase(client: MongoClient): Promise<void> {
   try {
-    const dbName = Deno.env.get('MONGO_DB_NAME') || 'recipe-app-test';
+    const dbName = Deno.env.get('MONGO_DB_NAME') || 'recipe_app_test';
     const db = client.database(dbName);
 
-    // Get all collection names
+    // Get all collections
     const collections = await db.listCollectionNames();
 
     // Clear all collections
-    for (const collectionName of collections) {
-      await db.collection(collectionName).deleteMany({});
-    }
+    const deletePromises = collections.map((name) => {
+      const collection: Collection<Document> = db.collection(name);
+      return collection.deleteMany({});
+    });
+
+    await Promise.all(deletePromises);
 
     // Close connection
     await client.close();
@@ -50,16 +63,8 @@ export async function cleanupTestDatabase(client: MongoClient) {
 /**
  * Create test data in database
  */
-export async function seedTestData(db: Database) {
+export async function seedTestData(db: Database, userId: string) {
   try {
-    // Create test user
-    const users = db.collection('users');
-    await users.insertOne({
-      username: 'testuser',
-      password: '$2a$10$K8ZpdrjwzUWSTmtyM.SAHewu7Zxpq3kUXnv/DPZSM8k.DSrmSekxi', // 'testpass'
-      role: 'user',
-    });
-
     // Create test recipes
     const recipes = db.collection('recipes');
     await recipes.insertMany([
@@ -70,7 +75,7 @@ export async function seedTestData(db: Database) {
           { name: 'Ingredient 1', amount: 100, unit: 'g' },
         ],
         instructions: ['Step 1', 'Step 2'],
-        userId: 'testuser',
+        userId,
       },
       {
         title: 'Test Recipe 2',
@@ -79,7 +84,7 @@ export async function seedTestData(db: Database) {
           { name: 'Ingredient 2', amount: 200, unit: 'ml' },
         ],
         instructions: ['Step 1', 'Step 2'],
-        userId: 'testuser',
+        userId,
       },
     ]);
   } catch (error) {
@@ -91,13 +96,13 @@ export async function seedTestData(db: Database) {
 /**
  * Utility function to wrap tests with database setup/cleanup
  */
-export function withTestDatabase(testFn: (db: TestDatabase) => Promise<void>) {
+export function withTestDatabase(testFn: (context: TestContext) => Promise<void>) {
   return async () => {
-    const testDb = await setupTestDatabase();
+    const testContext = await setupTestDatabase();
     try {
-      await testFn(testDb);
+      await testFn(testContext);
     } finally {
-      await cleanupTestDatabase(testDb.client);
+      await cleanupTestDatabase(testContext.client);
     }
   };
 }
