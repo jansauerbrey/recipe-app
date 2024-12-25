@@ -1,4 +1,4 @@
-declare module "djwt" {
+declare module 'djwt' {
   export interface Header {
     alg: string;
     typ?: string;

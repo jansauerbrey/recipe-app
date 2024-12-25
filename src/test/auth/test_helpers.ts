@@ -23,17 +23,17 @@ export function createAuthContext(options: {
 } = {}): AuthContext {
   const headers = new Headers();
   if (options.token) {
-    headers.set("Authorization", `Bearer ${options.token}`);
+    headers.set('Authorization', `Bearer ${options.token}`);
   }
 
   return {
     request: {
       headers,
-      method: options.method || "GET"
+      method: options.method || 'GET'
     },
     state: options.role ? {
       user: {
-        id: "test-user-id",
+        id: 'test-user-id',
         role: options.role
       }
     } : {}
@@ -42,19 +42,19 @@ export function createAuthContext(options: {
 
 // Test data for auth tests
 export const authTestData = {
-  validToken: "valid-token",
-  invalidToken: "invalid-token",
-  expiredToken: "expired-token",
+  validToken: 'valid-token',
+  invalidToken: 'invalid-token',
+  expiredToken: 'expired-token',
   users: {
     admin: {
-      id: "admin-user-id",
-      email: "admin@example.com",
-      role: "admin"
+      id: 'admin-user-id',
+      email: 'admin@example.com',
+      role: 'admin'
     },
     regular: {
-      id: "test-user-id",
-      email: "user@example.com",
-      role: "user"
+      id: 'test-user-id',
+      email: 'user@example.com',
+      role: 'user'
     }
   }
 };

@@ -1,4 +1,4 @@
-declare module "std/testing/bdd.ts" {
+declare module 'std/testing/bdd.ts' {
   export function describe(name: string, fn: () => void): void;
   export function it(name: string, fn: () => void | Promise<void>): void;
   export function beforeEach(fn: () => void | Promise<void>): void;
@@ -7,7 +7,7 @@ declare module "std/testing/bdd.ts" {
   export function afterAll(fn: () => void | Promise<void>): void;
 }
 
-declare module "std/testing/asserts.ts" {
+declare module 'std/testing/asserts.ts' {
   export type Constructor = new (...args: any[]) => any;
 
   export function assertEquals(actual: unknown, expected: unknown, msg?: string): void;
@@ -22,7 +22,7 @@ declare module "std/testing/asserts.ts" {
   export function assertThrows(fn: () => unknown, ErrorClass?: Constructor, msgIncludes?: string): void;
 }
 
-declare module "std/fs/mod.ts" {
+declare module 'std/fs/mod.ts' {
   export interface WalkOptions {
     maxDepth?: number;
     includeFiles?: boolean;
@@ -51,7 +51,7 @@ declare module "std/fs/mod.ts" {
   export function existsSync(path: string): boolean;
 }
 
-declare module "std/path/mod.ts" {
+declare module 'std/path/mod.ts' {
   export function basename(path: string, ext?: string): string;
   export function dirname(path: string): string;
   export function extname(path: string): string;
@@ -84,7 +84,7 @@ declare module "std/path/mod.ts" {
   }
 }
 
-declare module "std/flags/mod.ts" {
+declare module 'std/flags/mod.ts' {
   export interface ParseOptions {
     string?: string[];
     boolean?: string[];
@@ -97,7 +97,7 @@ declare module "std/flags/mod.ts" {
   export function parse(args: string[], options?: ParseOptions): Record<string, unknown>;
 }
 
-declare module "std/dotenv/mod.ts" {
+declare module 'std/dotenv/mod.ts' {
   export interface ConfigOptions {
     path?: string;
     export?: boolean;
@@ -113,7 +113,7 @@ declare module "std/dotenv/mod.ts" {
   export function loadSync(options?: ConfigOptions): void;
 }
 
-declare module "std/fmt/colors.ts" {
+declare module 'std/fmt/colors.ts' {
   export function red(str: string): string;
   export function green(str: string): string;
   export function yellow(str: string): string;

@@ -1,4 +1,4 @@
-import { Context, State } from "oak";
+import { Context, State } from 'oak';
 
 export type Middleware = (context: Context, next: () => Promise<void>) => Promise<void>;
 
@@ -10,7 +10,7 @@ export interface MockState extends State {
   [key: string]: unknown;
 }
 
-export interface MockContext extends Omit<Context, "state"> {
+export interface MockContext extends Omit<Context, 'state'> {
   state: MockState;
   request: {
     method: string;
@@ -46,7 +46,7 @@ export interface TestUser {
   id: string;
   email: string;
   name: string;
-  role: "user" | "admin";
+  role: 'user' | 'admin';
   password?: string;
   createdAt?: Date;
   updatedAt?: Date;

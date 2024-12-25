@@ -1,4 +1,4 @@
-declare module "mongo" {
+declare module 'mongo' {
   export class MongoClient {
     constructor();
     connect(uri: string): Promise<void>;

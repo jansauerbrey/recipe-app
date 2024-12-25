@@ -1,6 +1,6 @@
 /// <reference lib="deno.ns" />
 
-import { Database } from "https://deno.land/x/mongo@v0.32.0/mod.ts";
+import { Database } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
 
 // Use Deno's crypto API
 declare global {
@@ -38,17 +38,17 @@ export interface TestIngredient {
 // Test data factory
 export function createTestRecipe(overrides: Partial<TestRecipe> = {}): TestRecipe {
   return {
-    title: "Test Recipe",
-    description: "A test recipe description",
+    title: 'Test Recipe',
+    description: 'A test recipe description',
     ingredients: [
       {
-        name: "Test Ingredient",
+        name: 'Test Ingredient',
         amount: 100,
-        unit: "g"
+        unit: 'g'
       }
     ],
-    steps: ["Step 1: Test step"],
-    userId: "test-user-id",
+    steps: ['Step 1: Test step'],
+    userId: 'test-user-id',
     ...overrides,
     createdAt: overrides.createdAt || new Date(),
     updatedAt: overrides.updatedAt || new Date()
@@ -59,27 +59,27 @@ export function createTestRecipe(overrides: Partial<TestRecipe> = {}): TestRecip
 export const recipeTestData = {
   validRecipes: [
     createTestRecipe({
-      title: "Recipe 1",
-      userId: "user-1"
+      title: 'Recipe 1',
+      userId: 'user-1'
     }),
     createTestRecipe({
-      title: "Recipe 2",
-      userId: "user-1"
+      title: 'Recipe 2',
+      userId: 'user-1'
     }),
     createTestRecipe({
-      title: "Recipe 3",
-      userId: "user-2"
+      title: 'Recipe 3',
+      userId: 'user-2'
     })
   ],
   invalidRecipes: {
-    noTitle: createTestRecipe({ title: "" }),
+    noTitle: createTestRecipe({ title: '' }),
     noIngredients: createTestRecipe({ ingredients: [] }),
     noSteps: createTestRecipe({ steps: [] }),
     invalidIngredient: createTestRecipe({
       ingredients: [{
-        name: "",
+        name: '',
         amount: -1,
-        unit: ""
+        unit: ''
       }]
     })
   }
@@ -87,7 +87,7 @@ export const recipeTestData = {
 
 // Database helpers
 export async function setupTestRecipes(db: TestDB) {
-  const collection = db.collection("recipes");
+  const collection = db.collection('recipes');
   await collection.deleteMany({});
   
   // Insert test recipes
@@ -100,6 +100,6 @@ export async function setupTestRecipes(db: TestDB) {
 }
 
 export async function cleanupTestRecipes(db: TestDB) {
-  const collection = db.collection("recipes");
+  const collection = db.collection('recipes');
   await collection.deleteMany({});
 }
