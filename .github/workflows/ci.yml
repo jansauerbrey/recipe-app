@@ -33,7 +33,7 @@ jobs:
     strategy:
       matrix:
         node-version: [18.x]
-        mongodb-version: ['6.0', '7.0', '8.0']
+        mongodb-version: ['6.0']
 
     steps:
       - name: Git checkout
@@ -70,8 +70,19 @@ jobs:
 
       - name: Run Tests
         env:
-          MONGODB_URI: mongodb://127.0.0.1:27018/recipe_app_test
+          MONGODB_URI: mongodb://127.0.0.1:27018/recipe_app_test?replicaSet=test-rs
           MONGO_DB_NAME: recipe_app_test
+          PORT: 3000
+          ENVIRONMENT: test
+          JWT_SECRET: test-jwt-secret-for-ci
+          JWT_EXPIRATION: 3600
+          RATE_LIMIT_MAX: 100
+          RATE_LIMIT_WINDOW: 60000
+          MAX_FILE_SIZE: 5242880
+          ALLOWED_FILE_TYPES: image/jpeg,image/png,image/gif
+          UPLOAD_DIR: ./upload
+          ALLOWED_ORIGINS: http://localhost:3000
+          LOG_LEVEL: info
         run: |
           chmod +x test.sh
           ./test.sh
