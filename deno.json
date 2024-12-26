@@ -10,11 +10,20 @@
     "fmt": "deno fmt"
   },
   "lint": {
-    "files": {
-      "include": ["src/"]
-    },
+    "include": ["src/", "public/"],
+    "exclude": ["public/lib/"],
     "rules": {
-      "tags": ["recommended"]
+      "tags": ["recommended"],
+      "exclude": [
+        "ban-types",
+        "no-explicit-any",
+        "no-unused-vars",
+        "require-await",
+        "no-var",
+        "no-inner-declarations",
+        "no-redeclare",
+        "prefer-const"
+      ]
     }
   },
   "fmt": {

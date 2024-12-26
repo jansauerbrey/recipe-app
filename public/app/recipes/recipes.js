@@ -562,7 +562,7 @@ angular.module('app.recipes', ['ui.router', 'modalstate', 'app.alert'])
     };
 
     $scope.shareInApp = function() {
-      window.plugins.socialsharing.shareWithOptions(options, onSuccess, onError);
+      globalThis.plugins.socialsharing.shareWithOptions(options, onSuccess, onError);
     };
 
 

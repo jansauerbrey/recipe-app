@@ -46,7 +46,7 @@ angular.module("app", [ "app.auth", "app.recipes", "app.schedules", "app.shopite
     };
 } ]).controller("StartpageController", [ "$scope", function(e) {
     e.openLink = function(e) {
-        window.open(e);
+        globalThis.open(e);
     };
 } ]).directive("navsidebar", [ "$aside", "UserService", function(e, t) {
     return {
@@ -143,7 +143,7 @@ angular.module("app", [ "app.auth", "app.recipes", "app.schedules", "app.shopite
         link: function(t, n, a) {
             n.bind("click", function() {
                 navigator.camera.getPicture(function(n) {
-                    window.resolveLocalFileSystemURL(n, function(n) {
+                    globalThis.resolveLocalFileSystemURL(n, function(n) {
                         n.file(function(n) {
                             var a = new FileReader();
                             a.onloadend = function(a) {
@@ -254,7 +254,7 @@ angular.module("app", [ "app.auth", "app.recipes", "app.schedules", "app.shopite
     });
 } ]).run([ "$rootScope", "$state", "$stateParams", "$http", "UserService", "navigationTitle", "BASE_URI", function(e, t, n, a, i, r, o) {
     e.$state = t, e.$stateParams = n, e.print = function(e) {
-        window.print();
+        globalThis.print();
     }, e.$on("$stateChangeStart", function(n, s, c, l, u) {
         e.previousState = l ? l : {}, e.previousState.name = l.name ? l.name : "user.home", 
         e.previousStateParams = u ? u : {};
