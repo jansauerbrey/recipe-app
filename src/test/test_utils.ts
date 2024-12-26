@@ -182,7 +182,14 @@ export async function setupTest(): Promise<TestServer> {
   // Setup MongoDB connection
   const mongoClient = new MongoClient();
   const uri = Deno.env.get('MONGODB_URI') || 'mongodb://127.0.0.1:27018/recipe_app_test';
-  await mongoClient.connect(uri);
+  console.log('Connecting to MongoDB...', { uri });
+  try {
+    await mongoClient.connect(uri);
+    console.log('MongoDB connection successful');
+  } catch (error) {
+    console.error('MongoDB connection failed:', error);
+    throw error;
+  }
   
   // Create test user and get ID
   const user = await setupTestUser();

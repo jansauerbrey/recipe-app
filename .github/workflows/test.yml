@@ -16,10 +16,11 @@ jobs:
         ports:
           - 27018:27017
         options: >-
-          --health-cmd mongosh
-          --health-interval 10s
+          --health-cmd "mongo --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 5s
           --health-timeout 5s
           --health-retries 5
+          --health-start-period 10s
 
     steps:
     - uses: actions/checkout@v4
@@ -32,8 +33,52 @@ jobs:
     - name: Make test script executable
       run: chmod +x test.sh
       
+    - name: Install MongoDB tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y netcat-openbsd
+        wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
+        echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+        sudo apt-get update
+        sudo apt-get install -y mongodb-mongosh
+
+    - name: Check MongoDB Status
+      run: |
+        set -e  # Exit on any error
+        echo "MongoDB service container status..."
+        docker ps -a | grep mongo:6 || true
+        
+        echo "Step 1: Checking MongoDB port..."
+        if ! nc -zv localhost 27018; then
+          echo "Error: MongoDB port 27018 is not accessible"
+          exit 1
+        fi
+        echo "Port check successful"
+
+        echo "Step 2: Testing MongoDB version..."
+        if ! mongosh --port 27018 --eval "db.version()"; then
+          echo "Error: Could not get MongoDB version"
+          exit 1
+        fi
+        
+        echo "Step 3: Testing database creation..."
+        if ! mongosh --port 27018 --eval "use recipe_app_test; db.createCollection('test'); db.test.insertOne({test: true}); db.test.findOne()"; then
+          echo "Error: Could not create test collection and insert data"
+          exit 1
+        fi
+        
+        echo "Step 4: Testing connection with test URI..."
+        if ! mongosh "mongodb://localhost:27018/recipe_app_test" --eval "db.runCommand({ping: 1})"; then
+          echo "Error: Could not connect using test URI"
+          exit 1
+        fi
+        
+        echo "All MongoDB checks passed successfully"
+        
     - name: Run Tests
       env:
-        MONGODB_URI: mongodb://127.0.0.1:27018/recipe_app_test
+        MONGODB_URI: mongodb://localhost:27018/recipe_app_test
         MONGO_DB_NAME: recipe_app_test
-      run: ./test.sh
+      run: |
+        echo "Starting tests with MongoDB URI: $MONGODB_URI"
+        ./test.sh
