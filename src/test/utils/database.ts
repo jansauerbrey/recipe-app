@@ -1,5 +1,6 @@
 import { Collection, Database, MongoClient } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
 import { TestUser } from '../test_utils.ts';
+import { createIndexes, getCollections } from '../../types/db.ts';
 
 export interface TestContext {
   client: MongoClient;
@@ -16,8 +17,13 @@ export async function createTestUser(): Promise<TestUser> {
   const dbName = Deno.env.get('MONGO_DB_NAME') || 'recipe_app_test';
 
   try {
+    console.log('Connecting to MongoDB...', { uri });
     await client.connect(uri);
     const db = client.database(dbName);
+    
+    // Initialize collections and create indexes
+    const collections = getCollections(db);
+    await createIndexes(collections);
     const users = db.collection('users');
 
     const testUser = {
