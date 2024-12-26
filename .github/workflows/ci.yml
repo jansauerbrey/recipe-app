@@ -32,8 +32,8 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        node-version: '18'
-        mongodb-version: '8'
+        node-version: [18.x]
+        mongodb-version: [8.x]
 
     steps:
       - name: Git checkout
