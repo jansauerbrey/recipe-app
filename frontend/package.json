@@ -1,0 +1,21 @@
+{
+  "name": "recipe-app-frontend",
+  "private": true,
+  "workspaces": [
+    "web",
+    "mobile",
+    "shared"
+  ],
+  "scripts": {
+    "web:start": "yarn workspace @recipe-app/web start",
+    "mobile:start": "yarn workspace @recipe-app/mobile start",
+    "build:web": "yarn workspace @recipe-app/web build",
+    "build:mobile": "yarn workspace @recipe-app/mobile build",
+    "lint": "yarn workspaces run lint",
+    "test": "yarn workspaces run test"
+  },
+  "devDependencies": {
+    "lerna": "^6.6.2",
+    "yarn": "^1.22.19"
+  }
+}
