@@ -24,9 +24,12 @@ export interface TestRequest {
 
 export interface TestUser {
   _id: string;
-  username: string;
+  email: string;
+  name: string;
   password: string;
   role: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface TestState extends State {
