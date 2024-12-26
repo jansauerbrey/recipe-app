@@ -159,17 +159,28 @@ jobs:
     needs: [build-android]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-22.04
+    permissions:
+      contents: write
     steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Download APK
         uses: actions/download-artifact@v3
         with:
           name: app-debug
 
-      - name: Update Version
+      # Using GitHub run number for versioning instead of npm version
+      - name: Set Version
         run: |
-          git config --global user.name 'GitHub Actions'
-          git config --global user.email 'github-actions@github.com'
-          npm run version:patch
+          echo "Using GitHub run number ${{ github.run_number }} for versioning"
 
       - name: Create Release
         id: create_release
