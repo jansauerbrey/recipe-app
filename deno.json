@@ -1,8 +1,13 @@
 {
   "compilerOptions": {
-    "lib": ["deno.window", "deno.ns", "dom"],
-    "strict": true,
-    "checkJs": true
+    "strict": true
+  },
+  "importMap": "./import_map.json",
+  "tasks": {
+    "start": "deno run --allow-net --allow-read --allow-env app.ts",
+    "test": "deno test --allow-net --allow-read --allow-write --allow-env src/",
+    "lint": "deno lint",
+    "fmt": "deno fmt"
   },
   "lint": {
     "files": {
@@ -18,22 +23,10 @@
     },
     "options": {
       "useTabs": false,
-      "lineWidth": 100,
+      "lineWidth": 80,
       "indentWidth": 2,
       "singleQuote": true,
-      "proseWrap": "preserve"
-    }
-  },
-  "tasks": {
-    "start": "deno run --allow-net --allow-read --allow-env app.ts",
-    "dev": "deno run --watch --allow-net --allow-read --allow-env app.ts",
-    "test": "deno test --allow-net --allow-read --allow-env --allow-write --coverage=coverage --fail-fast --trace-leaks",
-    "test:watch": "deno test --watch --allow-net --allow-read --allow-env --allow-write --trace-leaks --no-check",
-    "test:coverage": "deno test --allow-net --allow-read --allow-env --allow-write --coverage=coverage --trace-leaks --no-check && deno coverage coverage --lcov --output=coverage.lcov"
-  },
-  "test": {
-    "files": {
-      "include": ["src/test/**/*.test.ts"]
+      "proseWrap": "always"
     }
   }
 }

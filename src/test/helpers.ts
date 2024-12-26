@@ -1,5 +1,5 @@
-import { type Context } from 'oak';
-import { create, verify } from 'djwt';
+import { type Context } from '@oak/mod.ts';
+import { create, verify } from '@djwt/mod.ts';
 
 const TEST_SECRET = 'test-secret-key';
 

@@ -1,4 +1,4 @@
-import { assertEquals, assertExists } from 'https://deno.land/std@0.208.0/testing/asserts.ts';
+import { assertEquals, assertExists } from '@std/testing/asserts.ts';
 import { cleanupTest, setupTest } from '../test_utils.ts';
 import { createAuthHeader } from '../utils/helpers.ts';
 
