@@ -1,4 +1,4 @@
-import { MongoClient, Database, Collection } from 'mongo';
+import { MongoClient, Database, Collection } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
 import { User, Recipe } from './mod.ts';
 
 export interface DBCollections {
@@ -30,10 +30,12 @@ export async function createIndexes(collections: DBCollections): Promise<void> {
     indexes: [
       {
         key: { email: 1 },
+        name: 'email_unique',
         unique: true,
       },
       {
         key: { role: 1 },
+        name: 'role_index',
       },
     ],
   });
@@ -43,18 +45,23 @@ export async function createIndexes(collections: DBCollections): Promise<void> {
     indexes: [
       {
         key: { userId: 1 },
+        name: 'user_id_index',
       },
       {
         key: { title: 'text', description: 'text' },
+        name: 'text_search_index',
       },
       {
         key: { tags: 1 },
+        name: 'tags_index',
       },
       {
         key: { 'ingredients.name': 1 },
+        name: 'ingredients_name_index',
       },
       {
         key: { createdAt: -1 },
+        name: 'created_at_index',
       },
     ],
   });
