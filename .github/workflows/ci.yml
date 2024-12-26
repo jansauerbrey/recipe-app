@@ -30,6 +30,20 @@ jobs:
   test:
     needs: lint
     runs-on: ubuntu-22.04
+    
+    services:
+      mongodb:
+        image: mongo:6
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongo --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+          --health-start-period 10s
+          --network-alias mongodb
+
     steps:
       - uses: actions/checkout@v3
 
@@ -54,6 +68,9 @@ jobs:
           restore-keys: ${{ runner.os }}-deno-
 
       - name: Run Tests
+        env:
+          MONGODB_URI: mongodb://127.0.0.1:27017/recipe_app_test
+          MONGO_DB_NAME: recipe_app_test
         run: |
           chmod +x test.sh
           ./test.sh
