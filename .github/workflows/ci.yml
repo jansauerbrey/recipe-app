@@ -30,28 +30,19 @@ jobs:
   test:
     needs: lint
     runs-on: ubuntu-22.04
-    
-    services:
-      mongodb:
-        image: mongo:6
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd "mongo --eval 'db.stats()'"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 5
-          --health-start-period 10s
-          --network-alias mongodb
+    strategy:
+      matrix:
+        node-version: '18'
+        mongodb-version: '8'
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Git checkout
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: ${{ matrix.node-version }}
 
       - name: Setup Deno
         uses: denoland/setup-deno@v2
@@ -67,29 +58,19 @@ jobs:
           key: ${{ runner.os }}-deno-${{ hashFiles('**/deno.lock') }}
           restore-keys: ${{ runner.os }}-deno-
 
-      - name: Install MongoDB Shell
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget gnupg
-          wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
-          echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
-          sudo apt-get update
-          sudo apt-get install -y mongodb-mongosh
+      - name: Setup MongoDB
+        uses: supercharge/mongodb-github-action@1.11.0
+        with:
+          mongodb-version: ${{ matrix.mongodb-version }}
+          mongodb-replica-set: test-rs
+          mongodb-port: 27018
 
       - name: Install Dependencies
         run: npm ci
 
-      - name: Verify MongoDB Connection
-        run: |
-          echo "Waiting for MongoDB to be ready..."
-          timeout 30 bash -c 'until mongosh --eval "db.runCommand({ping:1})" --quiet; do sleep 1; done'
-          echo "Testing database creation..."
-          mongosh --eval 'use recipe_app_test; db.createCollection("test"); db.test.insertOne({test: true}); db.test.findOne()'
-          echo "MongoDB is ready"
-
       - name: Run Tests
         env:
-          MONGODB_URI: mongodb://127.0.0.1:27017/recipe_app_test
+          MONGODB_URI: mongodb://127.0.0.1:27018/recipe_app_test
           MONGO_DB_NAME: recipe_app_test
         run: |
           chmod +x test.sh
