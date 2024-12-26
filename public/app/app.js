@@ -115,7 +115,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
   .controller('StartpageController', ['$scope', function($scope) {
 
     $scope.openLink = function(link) {
-      window.open(link);
+      globalThis.open(link);
     };
 
   }])
@@ -272,7 +272,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
       link: function(scope, element, attrs) {
         element.bind('click', function() {
           navigator.camera.getPicture(function(imageURI) {
-            window.resolveLocalFileSystemURL(imageURI, function(fileEntry) {
+            globalThis.resolveLocalFileSystemURL(imageURI, function(fileEntry) {
               fileEntry.file(function(file) {
                 const reader = new FileReader();
                 reader.onloadend = function(e) {
@@ -436,7 +436,7 @@ angular.module('app', ['app.auth', 'app.recipes', 'app.schedules', 'app.shopitem
       $rootScope.$state = $state;
       $rootScope.$stateParams = $stateParams;
       $rootScope.print = function(print) {
-        window.print();
+        globalThis.print();
       };
 
       $rootScope.$on('$stateChangeStart', function(event, toState, toStateParams, fromState, fromStateParams) {
