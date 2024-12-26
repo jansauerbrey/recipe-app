@@ -3,65 +3,23 @@
   "version": "1.0.1",
   "private": true,
   "scripts": {
-    "prepare": "husky",
     "start": "deno run --allow-net --allow-read --allow-env app.ts",
-    "build": "npm run clean && npm run build:web",
-    "build:web": "cd public && npm run build",
-    "clean": "rm -rf www/ && mkdir www",
+    "test": "deno test --allow-net --allow-read --allow-env",
+    "lint": "deno lint",
+    "fmt": "deno fmt",
     "cap:sync": "cap sync",
     "cap:open:android": "cap open android",
-    "cap:build:android": "cap build android",
-    "lint": "eslint \"**/*.{ts,js}\"",
-    "lint:fix": "eslint \"**/*.{ts,js}\" --fix",
-    "test": "./test.sh",
-    "version:patch": "npm version patch",
-    "version:minor": "npm version minor",
-    "version:major": "npm version major",
-    "preversion": "npm run test",
-    "postversion": "git push && git push --tags"
+    "cap:build:android": "cap build android"
   },
   "dependencies": {
     "@capacitor/android": "^6.2.0",
     "@capacitor/core": "^6.0.0",
-    "@capacitor/splash-screen": "^6.0.3",
-    "bcrypt": "^5.1.1",
-    "body-parser": "^1.20.2",
-    "cookie-parser": "^1.4.6",
-    "debug": "^4.3.4",
-    "dotenv": "^16.3.1",
-    "ejs": "^3.1.9",
-    "express": "^4.18.2",
-    "express-rate-limit": "^7.1.5",
-    "express-winston": "^4.2.0",
-    "helmet": "^7.1.0",
-    "mongoose": "^8.8.3",
-    "morgan": "^1.10.0",
-    "multer": "^1.4.5-lts.1",
-    "nodemailer": "^6.9.7",
-    "redis": "^4.6.11",
-    "sharp": "^0.32.6",
-    "uuid": "^9.0.1",
-    "winston": "^3.11.0"
+    "@capacitor/splash-screen": "^6.0.3"
   },
   "devDependencies": {
-    "@capacitor/cli": "^6.0.0",
-    "@typescript-eslint/eslint-plugin": "^6.15.0",
-    "@typescript-eslint/parser": "^6.15.0",
-    "eslint": "^8.56.0",
-    "eslint-config-prettier": "^9.1.0",
-    "husky": "^9.1.7",
-    "lint-staged": "^15.2.11",
-    "prettier": "^3.4.2",
-    "typescript": "^5.0.0"
+    "@capacitor/cli": "^6.0.0"
   },
   "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=9.0.0"
-  },
-  "lint-staged": {
-    "*.{js,ts}": [
-      "eslint --fix",
-      "prettier --write"
-    ]
+    "deno": ">=1.40.0"
   }
 }

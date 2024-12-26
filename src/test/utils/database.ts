@@ -105,7 +105,7 @@ export async function cleanupTestDatabase(client: MongoClient): Promise<void> {
 
     // Clear all collections
     const deletePromises = collections.map((name) => {
-      const collection: Collection<Document> = db.collection(name);
+      const collection = db.collection(name);
       return collection.deleteMany({});
     });
 

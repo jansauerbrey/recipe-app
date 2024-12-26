@@ -1,5 +1,5 @@
-import { Context, State } from 'https://deno.land/x/oak@v12.6.1/mod.ts';
-import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
+import { Context, State } from '@oak/mod.ts';
+import { Status } from '@std/http/http_status.ts';
 import { AppError } from '../types/errors.ts';
 import { createTestUser, deleteTestUser } from './utils/database.ts';
 import { generateToken } from '../presentation/middleware/auth/token.middleware.ts';
@@ -135,10 +135,8 @@ export function createTestContext(
 }
 
 import { MongoClient } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
-
 let currentTestContext: TestServer | null = null;
-
-// Keep track of used ports
+ 
 const usedPorts = new Set<number>();
 const BASE_PORT = 3000;
 const MAX_PORT = 4000;
@@ -204,6 +202,7 @@ export async function setupTest(): Promise<TestServer> {
   
   try {
     controller = new AbortController();
+    if (!app) throw new Error('Application not initialized');
     serverPromise = app.listen({
       port,
       signal: controller.signal,

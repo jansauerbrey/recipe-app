@@ -1,8 +1,8 @@
-import { Application, Router } from 'https://deno.land/x/oak@v12.6.1/mod.ts';
-import { load } from 'https://deno.land/std@0.208.0/dotenv/mod.ts';
-import { oakCors } from 'https://deno.land/x/cors@v1.2.2/mod.ts';
-import { MongoClient } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
-import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
+import { Application, Router } from '@oak/mod.ts';
+import { load } from '@std/dotenv/mod.ts';
+import { oakCors } from '@cors/mod.ts';
+import { MongoClient } from '@mongo/mod.ts';
+import { Status } from '@std/http/http_status.ts';
 
 // Import middleware
 import {
@@ -74,7 +74,7 @@ export async function createApp(): Promise<Application> {
     : ['http://localhost:3000', 'http://127.0.0.1:3000', 'https://www.rezept-planer.de'];
 
   app.use(oakCors({
-    origin: (origin) => {
+    origin: (origin: string | null | undefined) => {
       if (!origin) return allowedOrigins[0];
       return allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
     },
