@@ -340,5 +340,26 @@ angular.module('app.schedules', ['ui.router', 'modalstate'])
       })
     ;
         
+    $stateProvider
+      .state('user.schedules', {
+        url: '/schedules',
+        views: {
+          main: {
+            templateUrl: 'partials/schedules.tpl.html',
+            controller: 'SchedulesController'
+          }
+        },
+        resolve: {
+          schedules: ['SchedulesService', function(SchedulesService){
+            return SchedulesService.selectPeriod(),
+            SchedulesService.update();
+          }]
+        },
+        data: {
+          title: 'Schedules'
+        }
+      })
+    ;
+        
   }])
 ;

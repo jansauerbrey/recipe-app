@@ -86,9 +86,14 @@ jobs:
           UPLOAD_DIR: ./upload
           ALLOWED_ORIGINS: http://localhost:3000
           LOG_LEVEL: info
-        run: |
-          chmod +x test.sh
-          ./test.sh
+        run:
+          deno task test
+      
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: jansauerbrey/recipe-app
 
   security:
     needs: [test, lint]

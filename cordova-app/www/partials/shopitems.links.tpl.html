@@ -1,7 +1,0 @@
-<div class="side-links"><button type="button" class="btn btn-link" ui-sref="user.shopitems.view.add"><i class="glyphicon glyphicon-plus"></i> Add new item</button></div>
-<div class="side-links"><button type="button" class="btn btn-link" ng-really-click="remove()" ng-really-message="Are you sure to delete all items in the shopping list?"><i class="glyphicon glyphicon-trash"></i> Clear list</button></div>
-<div class="side-links" ng-show="isCordova && printingAvailable"><button ng-click="printInApp()" type="button" class="btn btn-link"><i class="glyphicon glyphicon-print"></i> Print</button></div>
-<div class="side-links" ng-show="isCordova && !printingAvailable"><button type="button" class="btn btn-link"><span class=" text-muted"><i class="glyphicon glyphicon-print"></i> Print (not available)</span></button></div>
-<div class="side-links" ng-hide="isCordova"><button ng-click="print()" type="button" class="btn btn-link"><i class="glyphicon glyphicon-print"></i> Print</button></div>
-<div class="side-links"><button type="button" class="btn btn-link" ng-show="autoupdate" ng-click="stopAutoupdate()"><i class="glyphicon glyphicon-ban-circle"></i> Stop automatic sync</button></div>
-<div class="side-links"><button type="button" class="btn btn-link" ng-show="!autoupdate" ng-click="startAutoupdate()"><i class="glyphicon glyphicon-refresh"></i> Start automatic sync</button></div>
