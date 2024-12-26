@@ -68,12 +68,15 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Create Upload Directory
+        run: mkdir -p upload
+
       - name: Run Tests
         env:
           MONGODB_URI: mongodb://127.0.0.1:27018/recipe_app_test?replicaSet=test-rs
           MONGO_DB_NAME: recipe_app_test
           PORT: 3000
-          ENVIRONMENT: test
+          ENVIRONMENT: development
           JWT_SECRET: test-jwt-secret-for-ci
           JWT_EXPIRATION: 3600
           RATE_LIMIT_MAX: 100
