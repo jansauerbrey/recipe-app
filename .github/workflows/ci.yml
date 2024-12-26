@@ -144,7 +144,7 @@ jobs:
 
       - name: Build Android
         run: |
-          npm run build
+          mkdir -p www  # Create www directory that Capacitor expects
           npm run cap:sync
           cd android
           ./gradlew assembleDebug
