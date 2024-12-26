@@ -87,13 +87,15 @@ jobs:
           ALLOWED_ORIGINS: http://localhost:3000
           LOG_LEVEL: info
         run:
-          deno task test
+          deno task test:coverage
       
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: jansauerbrey/recipe-app
+          files: coverage.lcov
+          flags: deno
 
   security:
     needs: [test, lint]
