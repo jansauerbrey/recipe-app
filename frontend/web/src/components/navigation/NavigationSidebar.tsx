@@ -1,5 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { AppShellNavbar, UnstyledButton, Stack, rem, Box } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import {
   IconHome,
   IconChefHat,
@@ -18,12 +19,14 @@ import {
 } from '@tabler/icons-react';
 import { useAuth } from '../../contexts/AuthContext';
 
-interface NavbarLinkProps {
+interface NavLink {
   icon: React.ReactNode;
   label: string;
   to: string;
   onClick?: () => void;
 }
+
+interface NavbarLinkProps extends NavLink {}
 
 function NavbarLink({ icon, label, to, onClick }: NavbarLinkProps) {
   const location = useLocation();
@@ -57,10 +60,15 @@ function NavbarLink({ icon, label, to, onClick }: NavbarLinkProps) {
   );
 }
 
-export function NavigationSidebar() {
+interface NavigationSidebarProps {
+  setOpened: (opened: boolean) => void;
+}
+
+export function NavigationSidebar({ setOpened }: NavigationSidebarProps) {
+  const isMobile = useMediaQuery('(max-width: 768px)');
   const { isAuthenticated, isAdmin, logout } = useAuth();
 
-  const userLinks = [
+  const userLinks: NavLink[] = [
     { icon: <IconHome size="1.2rem" stroke={1.5} />, label: 'Home', to: '/' },
     { icon: <IconChefHat size="1.2rem" stroke={1.5} />, label: 'Recipes', to: '/recipes' },
     { icon: <IconCalendar size="1.2rem" stroke={1.5} />, label: 'Schedules', to: '/schedules' },
@@ -68,7 +76,7 @@ export function NavigationSidebar() {
     { icon: <IconSettings size="1.2rem" stroke={1.5} />, label: 'Settings', to: '/settings' },
   ];
 
-  const adminLinks = [
+  const adminLinks: NavLink[] = [
     { icon: <IconRuler size="1.2rem" stroke={1.5} />, label: 'Units', to: '/admin/units' },
     { icon: <IconApple size="1.2rem" stroke={1.5} />, label: 'Ingredients', to: '/admin/ingredients' },
     { icon: <IconTags size="1.2rem" stroke={1.5} />, label: 'Tags', to: '/admin/tags' },
@@ -76,7 +84,7 @@ export function NavigationSidebar() {
     { icon: <IconUsers size="1.2rem" stroke={1.5} />, label: 'Users', to: '/admin/users' },
   ];
 
-  const authLinks = isAuthenticated ? [
+  const authLinks: NavLink[] = isAuthenticated ? [
     { icon: <IconLogout size="1.2rem" stroke={1.5} />, label: 'Logout', to: '/logout', onClick: logout }
   ] : [
     { icon: <IconLogin size="1.2rem" stroke={1.5} />, label: 'Login', to: '/login' },
@@ -93,7 +101,16 @@ export function NavigationSidebar() {
       <Stack gap={0} p="md">
         {/* User Links */}
         {isAuthenticated && userLinks.map((link) => (
-          <NavbarLink key={link.label} {...link} />
+          <NavbarLink 
+            key={link.label} 
+            {...link} 
+            onClick={() => {
+              link.onClick?.();
+              if (isMobile) {
+                setOpened(false);
+              }
+            }}
+          />
         ))}
 
         {/* Admin Links */}
@@ -101,7 +118,16 @@ export function NavigationSidebar() {
           <>
             <Box style={dividerStyle} />
             {adminLinks.map((link) => (
-              <NavbarLink key={link.label} {...link} />
+              <NavbarLink 
+                key={link.label} 
+                {...link}
+                onClick={() => {
+                  link.onClick?.();
+                  if (isMobile) {
+                    setOpened(false);
+                  }
+                }}
+              />
             ))}
           </>
         )}
@@ -109,7 +135,16 @@ export function NavigationSidebar() {
         {/* Auth Links */}
         <Box style={dividerStyle} />
         {authLinks.map((link) => (
-          <NavbarLink key={link.label} {...link} />
+          <NavbarLink 
+            key={link.label} 
+            {...link}
+            onClick={() => {
+              link.onClick?.();
+              if (isMobile) {
+                setOpened(false);
+              }
+            }}
+          />
         ))}
 
         {/* Footer Links */}
@@ -118,6 +153,11 @@ export function NavigationSidebar() {
           icon={<IconInfoCircle size="1.2rem" stroke={1.5} />}
           label="Impressum"
           to="/impressum"
+          onClick={() => {
+            if (isMobile) {
+              setOpened(false);
+            }
+          }}
         />
       </Stack>
     </AppShellNavbar>

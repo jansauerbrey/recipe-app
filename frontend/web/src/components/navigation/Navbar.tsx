@@ -1,12 +1,68 @@
-import { Group, Title } from '@mantine/core';
+import { Group, Title, Burger } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { DISH_TYPES } from '../../types/recipe';
 
-export function Navbar() {
+const getTitleFromPath = (pathname: string): string => {
+  // Check for recipe category routes
+  if (pathname.startsWith('/recipes/')) {
+    const slug = pathname.split('/')[2];
+    const dishType = DISH_TYPES.find(type => type.slug === slug);
+    if (dishType) {
+      return dishType.name;
+    }
+  }
+
+  const routes: Record<string, string> = {
+    '/': 'Recipe Planner',
+    '/recipes': 'Recipes',
+    '/schedules': 'Schedules',
+    '/shopping': 'Shopping List',
+    '/settings': 'Settings',
+    '/admin/units': 'Units',
+    '/admin/ingredients': 'Ingredients',
+    '/admin/tags': 'Tags',
+    '/admin/dishtypes': 'Dish Types',
+    '/admin/users': 'Users',
+    '/login': 'Login',
+    '/register': 'Register',
+    '/impressum': 'Impressum'
+  };
+
+  return routes[pathname] || 'Recipe Planner';
+};
+
+interface NavbarProps {
+  opened: boolean;
+  setOpened: (opened: boolean) => void;
+}
+
+export function Navbar({ opened, setOpened }: NavbarProps) {
   const { isAuthenticated, user } = useAuth();
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const location = useLocation();
+  const title = getTitleFromPath(location.pathname);
 
   return (
     <Group justify="space-between" p="md">
-      <Title order={3}>Recipe Planner</Title>
+      <Group>
+        {isMobile ? (
+          <Burger
+            opened={opened}
+            onClick={() => setOpened(!opened)}
+            size="sm"
+            aria-label="Toggle navigation"
+          />
+        ) : (
+          <img 
+            src="/icon.png" 
+            alt="Recipe Planner" 
+            style={{ height: '30px', width: 'auto' }}
+          />
+        )}
+        <Title order={3}>{title}</Title>
+      </Group>
       <Group>
         {isAuthenticated && (
           <Group>

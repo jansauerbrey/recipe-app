@@ -5,6 +5,7 @@ import { UserRepository } from '../data/repositories/user.repository.ts';
 import { RecipeRepository } from '../data/repositories/recipe.repository.ts';
 
 export * from './user.ts';
+export * from './recipe.ts';
 
 import { TagsService } from '../business/services/tags.service.ts';
 
