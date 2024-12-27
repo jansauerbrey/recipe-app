@@ -94,9 +94,10 @@ export class RecipeController extends BaseController {
       }
 
       const searchParams = ctx.request.url.searchParams;
+      const dishType = searchParams.get('dishType');
       const filter = {
-        userId,
-        dishType: searchParams.get('dishType') || undefined,
+        userId: (dishType === 'my') ? userId : undefined,
+        dishType: dishType || undefined,
         name: searchParams.get('name') || undefined,
         author: searchParams.get('author') || undefined,
         tags: searchParams.get('tags')?.split(',') || undefined,

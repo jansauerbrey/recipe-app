@@ -98,30 +98,30 @@ export class RecipeService implements IRecipeService {
 
   async countRecipesByCategory(userId: string): Promise<Record<string, number>> {
     const allRecipes = await this.recipeRepository.findWithFilters({});
-    const userRecipes = await this.recipeRepository.findWithFilters({ userId });
+    const userRecipes = await this.recipeRepository.findByUserId(userId);
     const counts: Record<string, number> = {};
 
     // Count all recipes
     counts['all'] = allRecipes.length;
 
-    // Count user's recipes
+    // Count user's recipes (only user-specific count)
     counts['my'] = userRecipes.length;
 
-    // Count by category
+    // Count by category (all recipes)
     allRecipes.forEach((recipe) => {
       if (recipe.category) {
         counts[recipe.category] = (counts[recipe.category] || 0) + 1;
       }
     });
 
-    // Count new recipes (less than 30 days old)
+    // Count new recipes (all recipes)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     counts['new'] = allRecipes.filter(recipe => 
       new Date(recipe.createdAt) > thirtyDaysAgo
     ).length;
 
-    // Count favorite recipes
+    // Count favorite recipes (all recipes)
     counts['favorites'] = allRecipes.filter(recipe => recipe.fav_recipe).length;
 
     return counts;

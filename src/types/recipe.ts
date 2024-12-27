@@ -1,11 +1,20 @@
-export interface DishType {
+export interface LocalizedName {
+  en: string;
+  de: string;
+  fi: string;
+}
+
+// Frontend-specific type for recipe filters and dishtypes display
+export interface RecipeFilter {
   id: string;
   name: string;
   slug: string;
   imageUrl: string;
 }
 
-export const DISH_TYPES: DishType[] = [
+// @deprecated Use DishType from dishtype.ts for real dishtypes. This array combines both
+// frontend filters and hardcoded dishtypes that should come from the database.
+export const DISH_TYPES: RecipeFilter[] = [
   { id: 'all', name: 'All Recipes', slug: 'all', imageUrl: '/img/dishtypes/all.jpg' },
   { id: 'my', name: 'My Recipes', slug: 'my', imageUrl: '/img/dishtypes/my.jpg' },
   { id: 'new', name: 'New Recipes', slug: 'new', imageUrl: '/img/dishtypes/new.jpg' },

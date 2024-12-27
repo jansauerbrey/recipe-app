@@ -21,7 +21,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   isPublic = false,
   title,
 }) => {
-  const { isAuthenticated, user, hasPermission } = useAuth();
+  const { isAuthenticated, user, hasPermission, isLoading } = useAuth();
   const location = useLocation();
   const { setTitle } = useNavigationTitle();
   const { previousState } = usePreviousState();
@@ -41,6 +41,11 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Allow public routes to pass through
   if (isPublic) {
     return <>{children}</>;
+  }
+
+  // Show nothing while checking authentication
+  if (isLoading) {
+    return null;
   }
 
   // Require authentication for non-public routes

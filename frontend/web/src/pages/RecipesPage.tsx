@@ -1,51 +1,21 @@
 import React from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { DISH_TYPES, RecipeCount, Recipe } from '../types/recipe';
+import { Link, useSearchParams } from 'react-router-dom';
+import { DISH_TYPES, RecipeCount } from '../types/recipe';
 import './RecipesPage.css';
 import { useQuery } from '@tanstack/react-query';
-import { useAuth } from '../contexts/AuthContext';
+import { otherApi } from '../utils/otherApi';
 import RecipeList from '../components/RecipeList';
 
 const RecipesPage: React.FC = () => {
-  const { dishTypeSlug } = useParams();
-  const { token } = useAuth();
+  const [searchParams] = useSearchParams();
+  const dishTypeSlug = searchParams.get('dishType');
 
   // Query for recipe counts
   const { data: recipeCount } = useQuery<RecipeCount>({
     queryKey: ['recipeCount'],
-    queryFn: async () => {
-      const response = await fetch('/api/other/recipecount', {
-        headers: {
-          'Authorization': token || ''
-        }
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch recipe counts');
-      }
-      return response.json();
-    }
+    queryFn: () => otherApi.getRecipeCounts()
   });
 
-  // Query for recipes
-  useQuery<Recipe[]>({
-    queryKey: ['recipes', dishTypeSlug],
-    queryFn: async () => {
-      // Only fetch recipes if dishTypeSlug is defined
-      if (!dishTypeSlug) return [];
-      
-      const response = await fetch(`/api/recipes?dishType=${dishTypeSlug}`, {
-        headers: {
-          'Authorization': token || ''
-        }
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch recipes');
-      }
-      const data = await response.json();
-      console.log('Recipes data:', data); // Log the recipe data
-      return data;
-    }
-  });
 
   return (
     <div className="container">
@@ -63,27 +33,31 @@ const RecipesPage: React.FC = () => {
           </div>
 
           {dishTypeSlug ? (
-            <RecipeList dishTypeSlug={dishTypeSlug} />
+            <RecipeList />
           ) : (
             <div className="row g-4">
               {DISH_TYPES.map((type) => (
-                <div key={type.id} className="col-12 col-sm-6 col-lg-4 col-xxl-3">
-                  <Link to={`/recipes/${type.slug}`} className="text-decoration-none">
+                <div key={type._id} className="col-12 col-sm-6 col-lg-4 col-xxl-3">
+                  <Link 
+                    to={`/recipes/filter?dishType=${type.identifier}`} 
+                    className="text-decoration-none"
+                    state={{ isSpecialFilter: ['all', 'my', 'new', 'favorites'].includes(type.identifier) }}
+                  >
                     <div className="card h-100">
                       <img 
-                        src={type.imageUrl} 
+                        src={type.imagePath} 
                         className="card-img-top" 
-                        alt={type.name}
+                        alt={type.name.en}
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           target.src = '/img/dishtypes/no_image.png';
                         }}
                       />
                       <div className="card-body">
-                        <h5 className="card-title">{type.name}</h5>
+                        <h5 className="card-title">{type.name.en}</h5>
                         <p className="card-text text-muted">
                           {recipeCount ? 
-                            `${recipeCount[type.slug as keyof RecipeCount] || 0} recipes` : 
+                            `${recipeCount[type.identifier as keyof RecipeCount] || 0} recipes` : 
                             '0 recipes'
                           }
                         </p>

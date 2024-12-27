@@ -3,6 +3,7 @@ import axios, { AxiosError, AxiosInstance } from 'axios';
 class ApiClient {
   private api: AxiosInstance;
   private static instance: ApiClient;
+  private static authToken: string | null = null;
 
   private constructor() {
     this.api = axios.create({
@@ -15,9 +16,8 @@ class ApiClient {
     // Add request interceptor for auth token
     this.api.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem('auth_token');
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+        if (ApiClient.authToken) {
+          config.headers.Authorization = ApiClient.authToken;
         }
         return config;
       },
@@ -29,7 +29,7 @@ class ApiClient {
       (response) => response,
       (error: AxiosError) => {
         if (error.response?.status === 401) {
-          localStorage.removeItem('auth_token');
+          ApiClient.authToken = null;
           window.location.href = '/login';
         }
         return Promise.reject(error);
@@ -44,20 +44,8 @@ class ApiClient {
     return ApiClient.instance;
   }
 
-  // Auth endpoints
-  public async login(email: string, password: string) {
-    const response = await this.api.post('/auth/login', { email, password });
-    return response.data;
-  }
-
-  public async checkAuth() {
-    const response = await this.api.get('/user/check');
-    return response.data;
-  }
-
-  public async logout() {
-    const response = await this.api.post('/auth/logout');
-    return response.data;
+  public static setAuthToken(token: string | null) {
+    ApiClient.authToken = token;
   }
 
   // Generic request methods
@@ -82,4 +70,12 @@ class ApiClient {
   }
 }
 
-export const api = ApiClient.getInstance();
+const apiInstance = ApiClient.getInstance();
+
+export const api = {
+  get: <T>(url: string) => apiInstance.get<T>(url),
+  post: <T>(url: string, data: any) => apiInstance.post<T>(url, data),
+  put: <T>(url: string, data: any) => apiInstance.put<T>(url, data),
+  delete: <T>(url: string) => apiInstance.delete<T>(url),
+  setAuthToken: ApiClient.setAuthToken
+};

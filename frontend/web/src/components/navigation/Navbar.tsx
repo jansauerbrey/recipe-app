@@ -7,10 +7,10 @@ import { DISH_TYPES } from '../../types/recipe';
 const getTitleFromPath = (pathname: string): string => {
   // Check for recipe category routes
   if (pathname.startsWith('/recipes/')) {
-    const slug = pathname.split('/')[2];
-    const dishType = DISH_TYPES.find(type => type.slug === slug);
+    const identifier = pathname.split('/')[2];
+    const dishType = DISH_TYPES.find(type => type.identifier === identifier);
     if (dishType) {
-      return dishType.name;
+      return dishType.name.en;
     }
   }
 

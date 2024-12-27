@@ -1,15 +1,16 @@
 import React, { useState, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { debounce } from 'lodash';
-import { Recipe, RecipeSearchFilters, TagFilters, Tag } from '../types/recipe';
+import { Recipe, RecipeSearchFilters, TagFilters, Tag, DISH_TYPES } from '../types/recipe';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../contexts/AuthContext';
+import { recipeApi } from '../utils/recipeApi';
+import { tagsApi } from '../utils/tagsApi';
 import RecipeCard from './RecipeCard';
 
-interface RecipeListProps {
-  dishTypeSlug: string;
-}
-
-const RecipeList: React.FC<RecipeListProps> = ({ dishTypeSlug }) => {
+const RecipeList: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const dishTypeSlug = searchParams.get('dishType');
   const { token } = useAuth();
   const [searchFilters, setSearchFilters] = useState<RecipeSearchFilters>({});
   const [localSearchValue, setLocalSearchValue] = useState("");
@@ -58,34 +59,14 @@ const RecipeList: React.FC<RecipeListProps> = ({ dishTypeSlug }) => {
 
   const { data: tags } = useQuery<Tag[]>({
     queryKey: ['tags'],
-    queryFn: async () => {
-      const response = await fetch('/api/tags', {
-        headers: {
-          'Authorization': token || ''
-        }
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch tags');
-      }
-      return response.json();
-    }
+    queryFn: () => tagsApi.getTags()
   });
 
   const queryClient = useQueryClient();
 
   const favoriteMutation = useMutation({
     mutationFn: async (recipeId: string) => {
-      const response = await fetch(`/api/recipes/${recipeId}/favorite`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': token || '',
-          'Content-Type': 'application/json'
-        }
-      });
-      if (!response.ok) {
-        throw new Error('Failed to toggle favorite');
-      }
-      return response.json();
+      return recipeApi.toggleFavorite(recipeId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recipes'] });
@@ -106,40 +87,12 @@ const RecipeList: React.FC<RecipeListProps> = ({ dishTypeSlug }) => {
     enabled: !searchFilters.name || searchFilters.name.length >= 2,
     staleTime: 1000, // Keep data fresh for 1 second
     queryFn: async () => {
-      const queryParams: Record<string, string> = {
-        dishType: dishTypeSlug
+      const filters: RecipeSearchFilters = {
+        ...searchFilters,
+        ...(dishTypeSlug && { dishType: dishTypeSlug }), // Only include dishType if it exists
+        tags: Object.keys(tagFilters).filter(tag => tagFilters[tag])
       };
-
-      if (searchFilters.name) {
-        queryParams.name = searchFilters.name;
-      }
-      
-      if (searchFilters.author?.fullname) {
-        queryParams.author = searchFilters.author.fullname;
-      }
-      
-      if (searchFilters.author?._id) {
-        queryParams.myRecipes = 'true';
-      }
-      
-      if (Object.keys(tagFilters).length > 0) {
-        const selectedTags = Object.keys(tagFilters).filter(tag => tagFilters[tag]);
-        if (selectedTags.length > 0) {
-          queryParams.tags = selectedTags.join(',');
-        }
-      }
-
-      const params = new URLSearchParams(queryParams);
-
-      const response = await fetch(`/api/recipes?${params.toString()}`, {
-        headers: {
-          'Authorization': token || ''
-        }
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch recipes');
-      }
-      return response.json();
+      return recipeApi.getRecipes(filters);
     }
   });
 
@@ -223,7 +176,7 @@ const RecipeList: React.FC<RecipeListProps> = ({ dishTypeSlug }) => {
                             }))}
                           />
                           <label className="form-check-label" htmlFor={`tag-${tag.text}`}>
-                            {tag.text} ({tag.count})
+                            {tag.text}
                           </label>
                         </div>
                       </div>
