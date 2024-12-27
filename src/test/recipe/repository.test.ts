@@ -14,7 +14,7 @@ Deno.test({
     const testContext = await setupTest();
 
     try {
-      const repository = new RecipeRepository(testContext.mongoClient);
+      const repository = new RecipeRepository(testContext.database);
 
       // Create
       const recipe = createTestRecipe({

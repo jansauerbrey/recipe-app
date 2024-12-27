@@ -1,4 +1,5 @@
 import { Database } from '../data/database.ts';
+import { ObjectId } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
 import { UserService } from '../business/services/user.service.ts';
 import { RecipeService } from '../business/services/recipe.service.ts';
 import { UserRepository } from '../data/repositories/user.repository.ts';
@@ -40,13 +41,13 @@ export interface Recipe {
 }
 
 export interface Tag {
-  _id: string;
+  _id: ObjectId;
   name: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export interface TagResponse extends Omit<Tag, 'id'> {
+export interface TagResponse extends Omit<Tag, '_id'> {
   _id: string;
 }
 

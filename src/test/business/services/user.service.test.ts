@@ -17,17 +17,17 @@ Deno.test({
   name: 'UserService Tests',
   async fn() {
     const testContext = await setupTest();
-    const userRepository = new UserRepository(testContext.mongoClient);
+    const userRepository = new UserRepository(testContext.database);
     const userService = new UserService(userRepository);
 
     try {
       // Clean up any existing users
-      await testContext.mongoClient.database('recipe_app_test').collection('users').deleteMany({});
+      await testContext.database.users.deleteMany({});
 
       const createTestUserData = (suffix = ''): Omit<User, 'id' | 'createdAt' | 'updatedAt'> => ({
         email: `test${suffix}@example.com`,
         password: 'password123',
-        name: 'Test User',
+        username: `Test User ${suffix}`,
         role: 'user' as const,
       });
 
@@ -37,7 +37,7 @@ Deno.test({
         const user = await userService.createUser(userData);
 
         assertEquals(user.email, userData.email);
-        assertEquals(user.name, userData.name);
+        assertEquals(user.username, userData.username);
         assertEquals(user.role, userData.role);
         assertNotEquals(user.password, userData.password); // Password should be hashed
         assertEquals(typeof user.id, 'string');
@@ -143,7 +143,7 @@ Deno.test({
         const user = await userService.getUserById(createdUser.id);
 
         assertEquals(user.email, userData.email);
-        assertEquals(user.name, userData.name);
+        assertEquals(user.username, userData.username);
         assertEquals(user.role, userData.role);
       }
 
@@ -163,10 +163,10 @@ Deno.test({
         const userData = createTestUserData('8');
         const user = await userService.createUser(userData);
         const updatedUser = await userService.updateUser(user.id, {
-          name: 'Updated Name',
+          username: 'Updated Name',
         });
 
-        assertEquals(updatedUser.name, 'Updated Name');
+        assertEquals(updatedUser.username, 'Updated Name');
         assertEquals(updatedUser.email, userData.email);
         assertNotEquals(updatedUser.updatedAt, user.updatedAt);
       }

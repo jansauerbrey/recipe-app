@@ -135,6 +135,7 @@ export function createTestContext(
 }
 
 import { MongoClient } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
+import { MongoDatabase } from '../data/database.ts';
 let currentTestContext: TestServer | null = null;
  
 const usedPorts = new Set<number>();
@@ -165,6 +166,7 @@ export interface TestServer {
     close: () => Promise<void>;
   };
   mongoClient: MongoClient;
+  database: MongoDatabase;
   testUserId: string;
 }
 
@@ -283,8 +285,9 @@ export async function setupTest(): Promise<TestServer> {
       }
     };
 
-    // Store current test context
-    currentTestContext = { port, server, mongoClient, testUserId };
+    // Initialize database and store test context
+    const database = new MongoDatabase(mongoClient);
+    currentTestContext = { port, server, mongoClient, database, testUserId };
     return currentTestContext;
   } catch (error) {
     console.error('Server start error:', error);

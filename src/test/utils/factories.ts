@@ -25,7 +25,7 @@ export function createTestUser(overrides: Partial<TestUser> = {}): TestUser {
   return {
     email: 'test@example.com',
     password: 'test-password',
-    name: 'Test User',
+    username: 'Test User',
     role: 'user',
     ...overrides,
   };

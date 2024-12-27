@@ -13,8 +13,8 @@ interface ErrorResponseBody {
  */
 export async function assertUserExists(db: Database, user: TestUser) {
   const users = db.collection('users');
-  const foundUser = await users.findOne({ name: user.name });
-  assertExists(foundUser, `User ${user.name} not found in database`);
+  const foundUser = await users.findOne({ username: user.username });
+  assertExists(foundUser, `User ${user.username} not found in database`);
   assertEquals(foundUser.role, user.role, 'User role does not match');
 }
 
