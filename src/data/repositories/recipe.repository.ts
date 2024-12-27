@@ -103,20 +103,22 @@ export class RecipeRepository {
         case 'my':
           // Already handled by userId filter
           break;
-        case 'new':
+        case 'new': {
           const thirtyDaysAgo = new Date();
           thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
           query.createdAt = { $gt: thirtyDaysAgo };
           break;
+        }
         case 'favorites':
           query.fav_recipe = true;
           break;
-        default:
+        default: {
           // For regular dish types, filter by category
           const dishType = DISH_TYPES.find((dt: DishType) => dt.slug === filter.dishType);
           if (dishType) {
             query.category = dishType.slug;
           }
+        }
       }
     }
 

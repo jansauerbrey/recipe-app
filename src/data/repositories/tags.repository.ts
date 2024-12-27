@@ -1,9 +1,10 @@
-import { Collection } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
+import { Collection, ObjectId } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
 import { Tag } from '../../types/mod.ts';
 import { Database } from '../database.ts';
+import { ResourceNotFoundError } from '../../types/errors.ts';
 
 export interface ITagsRepository {
-  create(tag: Omit<Tag, '_id'>): Promise<Tag>;
+  create(tag: Omit<Tag, '_id' | 'createdAt' | 'updatedAt'>): Promise<Tag>;
   findById(id: string): Promise<Tag>;
   findAll(): Promise<Tag[]>;
   update(id: string, updates: Partial<Tag>): Promise<Tag>;
@@ -13,15 +14,30 @@ export interface ITagsRepository {
 export class MongoTagsRepository implements ITagsRepository {
   constructor(private db: Database) {}
 
-  async create(tag: Omit<Tag, '_id'>): Promise<Tag> {
-    const result = await this.db.tags.insertOne(tag as any);
-    return { ...tag, _id: result.toString() };
+  async create(tag: Omit<Tag, '_id' | 'createdAt' | 'updatedAt'>): Promise<Tag> {
+    const now = new Date();
+    const tagWithTimestamps = {
+      ...tag,
+      createdAt: now,
+      updatedAt: now,
+    };
+    const _id = new ObjectId();
+    const result = await this.db.tags.insertOne({ ...tagWithTimestamps, _id });
+    return { ...tagWithTimestamps, _id };
+  }
+
+  private toObjectId(id: string): ObjectId {
+    try {
+      return new ObjectId(id);
+    } catch {
+      throw new ResourceNotFoundError('Tag');
+    }
   }
 
   async findById(id: string): Promise<Tag> {
-    const tag = await this.db.tags.findOne({ _id: id });
+    const tag = await this.db.tags.findOne({ _id: this.toObjectId(id) });
     if (!tag) {
-      throw new Error('Tag not found');
+      throw new ResourceNotFoundError('Tag');
     }
     return tag;
   }
@@ -32,21 +48,25 @@ export class MongoTagsRepository implements ITagsRepository {
 
   async update(id: string, updates: Partial<Tag>): Promise<Tag> {
     const result = await this.db.tags.updateOne(
-      { _id: id },
-      { $set: updates }
+      { _id: this.toObjectId(id) },
+      { $set: { ...updates, updatedAt: new Date() } }
     );
     if (result.modifiedCount === 0) {
-      throw new Error('Tag not found');
+      throw new ResourceNotFoundError('Tag');
     }
-    const updatedTag = await this.db.tags.findOne({ _id: id });
+    const updatedTag = await this.db.tags.findOne({ _id: this.toObjectId(id) });
     if (!updatedTag) {
-      throw new Error('Tag not found');
+      throw new ResourceNotFoundError('Tag');
     }
     return updatedTag;
   }
 
   async delete(id: string): Promise<void> {
-    await this.db.tags.deleteOne({ _id: id });
+    const result = await this.db.tags.deleteOne({ _id: this.toObjectId(id) });
+    console.log('THIS IS THE RESULT: ', result);
+    if (result === 0) {
+      throw new ResourceNotFoundError('Tag');
+    }
   }
 }
 

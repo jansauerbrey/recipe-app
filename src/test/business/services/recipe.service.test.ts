@@ -9,7 +9,7 @@ Deno.test({
   name: 'RecipeService Tests',
   async fn() {
     const testContext = await setupTest();
-    const recipeRepository = new RecipeRepository(testContext.mongoClient);
+    const recipeRepository = new RecipeRepository(testContext.database);
     const recipeService = new RecipeService(recipeRepository);
     const testUserId = 'test-user-123';
 
@@ -33,7 +33,7 @@ Deno.test({
       {
         await cleanupTest();
         const newContext = await setupTest();
-        const newRepository = new RecipeRepository(newContext.mongoClient);
+        const newRepository = new RecipeRepository(newContext.database);
         const newService = new RecipeService(newRepository);
         const recipeData = createTestRecipeData();
         const recipe = await newService.createRecipe(recipeData);
@@ -53,7 +53,7 @@ Deno.test({
       {
         await cleanupTest();
         const newContext = await setupTest();
-        const newRepository = new RecipeRepository(newContext.mongoClient);
+        const newRepository = new RecipeRepository(newContext.database);
         const newService = new RecipeService(newRepository);
         const recipeData = createTestRecipeData();
         delete (recipeData as any).title;
@@ -73,7 +73,7 @@ Deno.test({
       {
         await cleanupTest();
         const newContext = await setupTest();
-        const newRepository = new RecipeRepository(newContext.mongoClient);
+        const newRepository = new RecipeRepository(newContext.database);
         const newService = new RecipeService(newRepository);
         const recipeData = {
           ...createTestRecipeData(),
@@ -95,7 +95,7 @@ Deno.test({
       {
         await cleanupTest();
         const newContext = await setupTest();
-        const newRepository = new RecipeRepository(newContext.mongoClient);
+        const newRepository = new RecipeRepository(newContext.database);
         const newService = new RecipeService(newRepository);
         const recipeData = createTestRecipeData();
         const created = await newService.createRecipe(recipeData);
@@ -113,7 +113,7 @@ Deno.test({
       {
         await cleanupTest();
         const newContext = await setupTest();
-        const newRepository = new RecipeRepository(newContext.mongoClient);
+        const newRepository = new RecipeRepository(newContext.database);
         const newService = new RecipeService(newRepository);
         try {
           await newService.getRecipeById('507f1f77bcf86cd799439011');
@@ -130,7 +130,7 @@ Deno.test({
       {
         await cleanupTest();
         const newContext = await setupTest();
-        const newRepository = new RecipeRepository(newContext.mongoClient);
+        const newRepository = new RecipeRepository(newContext.database);
         const newService = new RecipeService(newRepository);
         const recipe1 = await newService.createRecipe(createTestRecipeData());
         const recipe2 = await newService.createRecipe({
@@ -149,7 +149,7 @@ Deno.test({
       {
         await cleanupTest();
         const newContext = await setupTest();
-        const newRepository = new RecipeRepository(newContext.mongoClient);
+        const newRepository = new RecipeRepository(newContext.database);
         const newService = new RecipeService(newRepository);
         const recipes = await newService.listUserRecipes('nonexistent-user');
         assertEquals(recipes.length, 0);
@@ -159,7 +159,7 @@ Deno.test({
       {
         await cleanupTest();
         const newContext = await setupTest();
-        const newRepository = new RecipeRepository(newContext.mongoClient);
+        const newRepository = new RecipeRepository(newContext.database);
         const newService = new RecipeService(newRepository);
         const recipe = await newService.createRecipe(createTestRecipeData());
         const updatedRecipe = await newService.updateRecipe(recipe._id, {
@@ -177,7 +177,7 @@ Deno.test({
       {
         await cleanupTest();
         const newContext = await setupTest();
-        const newRepository = new RecipeRepository(newContext.mongoClient);
+        const newRepository = new RecipeRepository(newContext.database);
         const newService = new RecipeService(newRepository);
         const recipe = await newService.createRecipe(createTestRecipeData());
 
@@ -198,7 +198,7 @@ Deno.test({
       {
         await cleanupTest();
         const newContext = await setupTest();
-        const newRepository = new RecipeRepository(newContext.mongoClient);
+        const newRepository = new RecipeRepository(newContext.database);
         const newService = new RecipeService(newRepository);
         try {
           await newService.updateRecipe('507f1f77bcf86cd799439011', {
@@ -217,7 +217,7 @@ Deno.test({
       {
         await cleanupTest();
         const newContext = await setupTest();
-        const newRepository = new RecipeRepository(newContext.mongoClient);
+        const newRepository = new RecipeRepository(newContext.database);
         const newService = new RecipeService(newRepository);
         const recipe = await newService.createRecipe(createTestRecipeData());
         await newService.deleteRecipe(recipe._id);
@@ -237,7 +237,7 @@ Deno.test({
       {
         await cleanupTest();
         const newContext = await setupTest();
-        const newRepository = new RecipeRepository(newContext.mongoClient);
+        const newRepository = new RecipeRepository(newContext.database);
         const newService = new RecipeService(newRepository);
         try {
           await newService.deleteRecipe('507f1f77bcf86cd799439011');
