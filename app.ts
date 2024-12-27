@@ -17,7 +17,9 @@ import { AppError } from './src/types/errors.ts';
 
 // Import layers
 import { RecipeRepository, UserRepository } from './src/data/mod.ts';
-import { RecipeService, UserService } from './src/business/mod.ts';
+import { MongoTagsRepository } from './src/data/repositories/tags.repository.ts';
+import { MongoDatabase } from './src/data/database.ts';
+import { RecipeService, UserService, TagsService } from './src/business/mod.ts';
 import { initializeRoutes } from './src/presentation/routes/mod.ts';
 import { Dependencies } from './src/types/mod.ts';
 import { AppConfig, getConfig } from './src/types/env.ts';
@@ -34,29 +36,35 @@ export async function createApp(): Promise<Application> {
   const logger = console;
 
   // Initialize MongoDB connection
-  const client = new MongoClient();
+  const mongoClient = new MongoClient();
   try {
     logger.info('Connecting to MongoDB...', { uri: appConfig.MONGODB_URI });
-    await client.connect(appConfig.MONGODB_URI);
+    await mongoClient.connect(appConfig.MONGODB_URI);
     logger.info('MongoDB connection successful');
   } catch (err) {
     logger.error('MongoDB connection error:', err);
     Deno.exit(1);
   }
+  
+  // Create database instance
+  const client = new MongoDatabase(mongoClient);
 
   // Initialize repositories
   const userRepository = new UserRepository(client);
   const recipeRepository = new RecipeRepository(client);
+  const tagsRepository = new MongoTagsRepository(client);
 
   // Initialize services
   const userService = new UserService(userRepository);
   const recipeService = new RecipeService(recipeRepository);
+  const tagsService = new TagsService(tagsRepository);
 
   // Create dependencies container
   const dependencies: Dependencies = {
     db: client,
     userService,
     recipeService,
+    tagsService,
     userRepository,
     recipeRepository,
   };
@@ -167,7 +175,7 @@ export async function createApp(): Promise<Application> {
 // Start server if this is the main module
 if (import.meta.main) {
   const app = await createApp();
-  const port = Number(Deno.env.get('PORT') || 3000);
+  const port = Number(Deno.env.get('PORT') || 8000);
   console.info(`Server running on port ${port}`);
   await app.listen({ port });
 }

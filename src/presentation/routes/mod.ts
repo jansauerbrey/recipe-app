@@ -3,13 +3,19 @@ import { adminOnly, authMiddleware } from '../middleware/auth.middleware.ts';
 import { UserController } from '../controllers/user.controller.ts';
 import { RecipeController } from '../controllers/recipe.controller.ts';
 import { Dependencies } from '../../types/mod.ts';
+import { createTagsRouter } from './tags.ts';
 import { AppState, createMiddleware } from '../../types/middleware.ts';
 import { ControllerContext } from '../controllers/base.controller.ts';
 
 type AppRouter = Router<AppState>;
 
 export async function initializeRoutes(router: AppRouter, dependencies: Dependencies) {
-  const { userService, recipeService } = dependencies;
+  const { userService, recipeService, tagsService } = dependencies;
+
+  // Add tags routes
+  const tagsRouter = createTagsRouter(tagsService);
+  router.use(tagsRouter.routes());
+  router.use(tagsRouter.allowedMethods());
 
   // Initialize controllers
   const userController = new UserController(userService);
@@ -54,7 +60,7 @@ export async function initializeRoutes(router: AppRouter, dependencies: Dependen
   );
 
   // User routes
-  router.post('/api/users', routeHandler((ctx) => userController.create(ctx)));
+  router.post('/api/user/create', routeHandler((ctx) => userController.create(ctx)));
   router.get('/api/users/:id', authMiddleware, routeHandler((ctx) => userController.getById(ctx)));
   router.put('/api/users/:id', authMiddleware, routeHandler((ctx) => userController.update(ctx)));
   router.delete(
@@ -71,6 +77,14 @@ export async function initializeRoutes(router: AppRouter, dependencies: Dependen
     routeHandler((ctx) => recipeController.listUserRecipes(ctx)),
   );
   router.post('/api/recipes', authMiddleware, routeHandler((ctx) => recipeController.create(ctx)));
+
+  // Count recipes by category
+  router.get(
+    '/api/other/recipecount',
+    authMiddleware,
+    routeHandler((ctx) => recipeController.count(ctx)),
+  );
+
   router.get(
     '/api/recipes/:id',
     authMiddleware,

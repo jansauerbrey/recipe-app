@@ -1,4 +1,5 @@
-import { Collection, MongoClient, ObjectId } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
+import { Collection, ObjectId } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
+import { Database } from '../database.ts';
 import { Recipe } from '../../types/mod.ts';
 import { ResourceNotFoundError, ValidationError } from '../../types/errors.ts';
 
@@ -7,9 +8,8 @@ type RecipeDoc = Omit<Recipe, 'id'> & { _id: ObjectId };
 export class RecipeRepository {
   private collection: Collection<RecipeDoc>;
 
-  constructor(client: MongoClient) {
-    const dbName = Deno.env.get('MONGO_DB_NAME') || 'recipe_app_test';
-    this.collection = client.database(dbName).collection<RecipeDoc>('recipes');
+  constructor(db: Database) {
+    this.collection = db.recipes;
   }
 
   private toRecipe(doc: RecipeDoc): Recipe {

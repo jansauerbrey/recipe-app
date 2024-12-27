@@ -1,7 +1,7 @@
 import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
 import { BaseController, ControllerContext } from './base.controller.ts';
 import { UserService } from '../../business/services/user.service.ts';
-import { User } from '../../types/mod.ts';
+import { User, CreateUserInput } from '../../types/mod.ts';
 import {
   AppError,
   AuthenticationError,
@@ -36,12 +36,20 @@ export class UserController extends BaseController {
       const body = ctx.request.body();
       const userData = await body.value;
 
-      const user = await this.userService.createUser({
+      // Validate required fields
+      if (!userData.email || !userData.password || !userData.username) {
+        throw new ValidationError('Email, password, and username are required');
+      }
+
+      const createUserData: CreateUserInput = {
         email: userData.email,
         password: userData.password,
-        name: userData.name,
+        username: userData.username,
+        settings: userData.settings,
         role: 'user',
-      } as Omit<User, 'id' | 'createdAt' | 'updatedAt'>);
+      };
+
+      const user = await this.userService.createUser(createUserData);
 
       await this.created(ctx, user);
     } catch (error) {

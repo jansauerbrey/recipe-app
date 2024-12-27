@@ -174,4 +174,30 @@ export class RecipeController extends BaseController {
       }
     }
   }
+
+  async count(ctx: ControllerContext): Promise<void> {
+    try {
+      const userId = ctx.state.user?.id;
+      if (!userId) {
+        throw new AuthenticationError('User not authenticated');
+      }
+
+      const counts = await this.recipeService.countRecipesByCategory(userId);
+      await this.ok(ctx, counts);
+    } catch (error) {
+      const err = error as Error & { statusCode?: number; code?: string };
+
+      if (err instanceof AppError) {
+        switch (err.statusCode) {
+        case Status.Unauthorized:
+          await this.unauthorized(ctx, err.message);
+          break;
+        default:
+          await this.internalServerError(ctx, err.message);
+        }
+      } else {
+        await this.internalServerError(ctx, 'Failed to count recipes');
+      }
+    }
+  }
 }

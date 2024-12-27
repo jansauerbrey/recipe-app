@@ -1,23 +1,18 @@
-import { MongoClient } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
+import { Database } from '../data/database.ts';
 import { UserService } from '../business/services/user.service.ts';
 import { RecipeService } from '../business/services/recipe.service.ts';
 import { UserRepository } from '../data/repositories/user.repository.ts';
 import { RecipeRepository } from '../data/repositories/recipe.repository.ts';
 
-export interface User {
-  id: string;
-  email: string;
-  password: string;
-  name: string;
-  role: 'user' | 'admin';
-  createdAt: Date;
-  updatedAt: Date;
-}
+export * from './user.ts';
+
+import { TagsService } from '../business/services/tags.service.ts';
 
 export interface Dependencies {
-  db: MongoClient;
+  db: Database;
   userService: UserService;
   recipeService: RecipeService;
+  tagsService: TagsService;
   userRepository: UserRepository;
   recipeRepository: RecipeRepository;
 }
@@ -36,8 +31,22 @@ export interface Recipe {
   ingredients: Ingredient[];
   instructions: string[];
   tags: string[];
+  category?: string;
+  new_recipe?: boolean;
+  fav_recipe?: boolean;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface Tag {
+  _id: string;
+  name: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface TagResponse extends Omit<Tag, 'id'> {
+  _id: string;
 }
 
 export interface RecipeResponse extends Omit<Recipe, 'id'> {

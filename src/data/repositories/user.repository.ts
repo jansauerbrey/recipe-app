@@ -1,4 +1,5 @@
-import { Collection, MongoClient, ObjectId } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
+import { Collection, ObjectId } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
+import { Database } from '../database.ts';
 import { User } from '../../types/mod.ts';
 import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
 import { AppError, ResourceNotFoundError, ValidationError } from '../../types/errors.ts';
@@ -9,9 +10,8 @@ type UserDoc = Omit<User, 'id'> & { _id: ObjectId };
 export class UserRepository {
   private collection: Collection<UserDoc>;
 
-  constructor(client: MongoClient) {
-    const dbName = Deno.env.get('MONGO_DB_NAME') || 'recipe_app_test';
-    this.collection = client.database(dbName).collection<UserDoc>('users');
+  constructor(db: Database) {
+    this.collection = db.users;
   }
 
   private toUser(doc: UserDoc): User {
@@ -59,6 +59,11 @@ export class UserRepository {
 
   async findByEmail(email: string): Promise<User | null> {
     const doc = await this.collection.findOne({ email });
+    return doc ? this.toUser(doc) : null;
+  }
+
+  async findByUsername(username: string): Promise<User | null> {
+    const doc = await this.collection.findOne({ username });
     return doc ? this.toUser(doc) : null;
   }
 
