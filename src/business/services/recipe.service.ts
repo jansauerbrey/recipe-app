@@ -2,10 +2,19 @@ import { RecipeRepository } from '../../data/repositories/recipe.repository.ts';
 import { Recipe, RecipeResponse } from '../../types/mod.ts';
 import { ResourceNotFoundError, ValidationError } from '../../types/errors.ts';
 
+export interface RecipeFilter {
+  userId?: string;
+  dishType?: string;
+  name?: string;
+  author?: string;
+  tags?: string[];
+}
+
 export interface IRecipeService {
   createRecipe(recipe: Omit<Recipe, 'id' | 'createdAt' | 'updatedAt'>): Promise<RecipeResponse>;
   getRecipeById(id: string): Promise<RecipeResponse>;
   listUserRecipes(userId: string): Promise<RecipeResponse[]>;
+  listRecipesWithFilters(filter: RecipeFilter): Promise<RecipeResponse[]>;
   updateRecipe(id: string, updates: Partial<Recipe>): Promise<RecipeResponse>;
   deleteRecipe(id: string): Promise<void>;
   countRecipesByCategory(userId: string): Promise<Record<string, number>>;
@@ -58,6 +67,17 @@ export class RecipeService implements IRecipeService {
     });
   }
 
+  async listRecipesWithFilters(filter: RecipeFilter): Promise<RecipeResponse[]> {
+    const recipes = await this.recipeRepository.findWithFilters(filter);
+    return recipes.map((recipe) => {
+      const { id, ...rest } = recipe;
+      return {
+        ...rest,
+        _id: id,
+      };
+    });
+  }
+
   async updateRecipe(id: string, updates: Partial<Recipe>): Promise<RecipeResponse> {
     // Validate ingredients if they're being updated
     if (updates.ingredients?.some((ing) => !ing.name || ing.amount <= 0 || !ing.unit)) {
@@ -77,32 +97,32 @@ export class RecipeService implements IRecipeService {
   }
 
   async countRecipesByCategory(userId: string): Promise<Record<string, number>> {
-    const recipes = await this.recipeRepository.findByUserId(userId);
+    const allRecipes = await this.recipeRepository.findWithFilters({});
+    const userRecipes = await this.recipeRepository.findWithFilters({ userId });
     const counts: Record<string, number> = {};
 
-    // Initialize counts for all dish types
-    counts['Main Dishes'] = 0;
-    counts['Appetizers'] = 0;
-    counts['Desserts'] = 0;
-    counts['Salads'] = 0;
-    counts['Soups'] = 0;
-    counts['Beverages'] = 0;
+    // Count all recipes
+    counts['all'] = allRecipes.length;
 
-    recipes.forEach((recipe) => {
-      // Count by dish type category
-      const category = recipe.category || 'Main Dishes';
-      counts[category] = (counts[category] || 0) + 1;
+    // Count user's recipes
+    counts['my'] = userRecipes.length;
 
-      // Count new recipes
-      if (recipe.new_recipe) {
-        counts['new'] = (counts['new'] || 0) + 1;
-      }
-
-      // Count favorite recipes
-      if (recipe.fav_recipe) {
-        counts['favorites'] = (counts['favorites'] || 0) + 1;
+    // Count by category
+    allRecipes.forEach((recipe) => {
+      if (recipe.category) {
+        counts[recipe.category] = (counts[recipe.category] || 0) + 1;
       }
     });
+
+    // Count new recipes (less than 30 days old)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    counts['new'] = allRecipes.filter(recipe => 
+      new Date(recipe.createdAt) > thirtyDaysAgo
+    ).length;
+
+    // Count favorite recipes
+    counts['favorites'] = allRecipes.filter(recipe => recipe.fav_recipe).length;
 
     return counts;
   }

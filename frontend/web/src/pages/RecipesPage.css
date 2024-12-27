@@ -1,0 +1,52 @@
+.card {
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.card .card-img-top {
+  height: 180px;
+  object-fit: cover;
+}
+
+.card .card-title {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: var(--bs-dark);
+}
+
+.card .card-text {
+  font-size: 0.9rem;
+}
+
+/* Responsive image heights */
+@media (min-width: 1400px) {
+  /* 4 columns on xxl */
+  .card .card-img-top {
+    height: 180px;
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1399px) {
+  /* 3 columns on lg */
+  .card .card-img-top {
+    height: 200px;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 991px) {
+  /* 2 columns on sm */
+  .card .card-img-top {
+    height: 220px;
+  }
+}
+
+@media (max-width: 575px) {
+  /* 1 column on xs */
+  .card .card-img-top {
+    height: 240px;
+  }
+}

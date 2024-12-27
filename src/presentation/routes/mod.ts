@@ -74,7 +74,7 @@ export async function initializeRoutes(router: AppRouter, dependencies: Dependen
   router.get(
     '/api/recipes',
     authMiddleware,
-    routeHandler((ctx) => recipeController.listUserRecipes(ctx)),
+    routeHandler((ctx) => recipeController.listRecipes(ctx)),
   );
   router.post('/api/recipes', authMiddleware, routeHandler((ctx) => recipeController.create(ctx)));
 
