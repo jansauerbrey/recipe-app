@@ -1,0 +1,561 @@
+{
+  "categories": {
+    "_id": {
+      "primaryKey": true,
+      "type": "Object",
+      "required": true
+    },
+    "category": {
+      "type": "string",
+      "required": true
+    },
+    "subcategory": {
+      "type": "string",
+      "required": true
+    },
+    "subsubcategory": {
+      "key": true,
+      "type": "string",
+      "required": true
+    },
+    "rewe_cat_id": {
+      "type": "number",
+      "required": true
+    },
+    "author": {
+      "foreignKey": true,
+      "references": "users",
+      "key": true,
+      "type": "Object",
+      "required": true
+    },
+    "__v": {
+      "type": "number",
+      "required": true
+    },
+    "updated_at": {
+      "type": "Date",
+      "required": true
+    },
+    "product_group": {
+      "type": "Object",
+      "structure": {
+        "id": {
+          "type": "number",
+          "required": true
+        },
+        "name": {
+          "type": "Object",
+          "structure": {
+            "en": {
+              "type": "string",
+              "required": true
+            },
+            "de": {
+              "key": true,
+              "type": "string",
+              "required": true
+            },
+            "fi": {
+              "type": "string",
+              "required": true
+            }
+          },
+          "required": true
+        }
+      },
+      "required": true
+    }
+  },
+  "dishtypes": {
+    "_id": {
+      "primaryKey": true,
+      "type": "Object",
+      "required": true
+    },
+    "author": {
+      "foreignKey": true,
+      "references": "users",
+      "key": true,
+      "type": "Object",
+      "required": true
+    },
+    "order": {
+      "type": "number",
+      "required": true
+    },
+    "imagePath": {
+      "key": true,
+      "type": "string",
+      "required": true
+    },
+    "updated_at": {
+      "type": "Date",
+      "required": true
+    },
+    "name": {
+      "type": "Object",
+      "structure": {
+        "fi": {
+          "type": "string",
+          "required": true
+        },
+        "de": {
+          "type": "string",
+          "required": true
+        },
+        "en": {
+          "type": "string",
+          "required": true
+        }
+      },
+      "required": true
+    },
+    "__v": {
+      "type": "number",
+      "required": true
+    },
+    "identifier": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "tags": {
+    "_id": {
+      "primaryKey": true,
+      "type": "Object",
+      "required": true
+    },
+    "text": {
+      "key": true,
+      "type": "string",
+      "required": true
+    },
+    "updated_at": {
+      "type": "Date",
+      "required": true
+    },
+    "__v": {
+      "type": "number",
+      "required": true
+    },
+    "author": {
+      "foreignKey": true,
+      "references": "users",
+      "key": true,
+      "type": "Object",
+      "required": true
+    }
+  },
+  "schedules": {
+    "_id": {
+      "primaryKey": true,
+      "type": "Object",
+      "required": true
+    },
+    "recipe": {
+      "foreignKey": true,
+      "references": "recipes",
+      "type": "Object",
+      "required": true
+    },
+    "factor": {
+      "type": "number",
+      "required": true
+    },
+    "author": {
+      "foreignKey": true,
+      "references": "users",
+      "key": true,
+      "type": "Object",
+      "required": true
+    },
+    "updated_at": {
+      "type": "Date",
+      "required": true
+    },
+    "date": {
+      "type": "Date",
+      "required": true
+    },
+    "__v": {
+      "type": "number",
+      "required": true
+    }
+  },
+  "users": {
+    "_id": {
+      "primaryKey": true,
+      "type": "Object",
+      "required": true
+    },
+    "username": {
+      "type": "string",
+      "required": true
+    },
+    "password": {
+      "type": "string",
+      "required": false
+    },
+    "email": {
+      "key": true,
+      "type": "string",
+      "required": true
+    },
+    "fullname": {
+      "key": true,
+      "type": "string",
+      "required": true
+    },
+    "created": {
+      "type": "Date",
+      "required": true
+    },
+    "is_activated": {
+      "type": "boolean",
+      "required": true
+    },
+    "is_admin": {
+      "type": "boolean",
+      "required": true
+    },
+    "__v": {
+      "type": "number",
+      "required": true
+    },
+    "autologin": {
+      "type": "boolean",
+      "required": true
+    },
+    "settings": {
+      "type": "Object",
+      "structure": {
+        "spokenLanguages": {
+          "type": "Array",
+          "required": true
+        },
+        "categoryOrder": {
+          "type": "Array",
+          "required": true
+        },
+        "autoupdate": {
+          "type": "boolean",
+          "required": true
+        },
+        "preferredLanguage": {
+          "type": "string",
+          "required": true
+        },
+        "preferredWeekStartDay": {
+          "type": "number",
+          "required": true
+        }
+      },
+      "required": true
+    },
+    "username_lower": {
+      "type": "string",
+      "required": true
+    },
+    "favoriteRecipes": {
+      "type": "Array",
+      "required": true
+    },
+    "resetPasswordExpires": {
+      "type": "Date",
+      "required": true
+    },
+    "resetPasswordToken": {
+      "type": "string",
+      "required": true
+    },
+    "emailNotConfirmed": {
+      "key": true,
+      "type": "string",
+      "required": true
+    },
+    "emailConfirmationToken": {
+      "type": "undefined",
+      "required": false
+    }
+  },
+  "ingredients": {
+    "_id": {
+      "primaryKey": true,
+      "type": "Object",
+      "required": true
+    },
+    "category": {
+      "key": true,
+      "type": "string",
+      "required": true
+    },
+    "subcategory": {
+      "type": "string",
+      "required": true
+    },
+    "subsubcategory": {
+      "type": "string",
+      "required": true
+    },
+    "rewe_art_no": {
+      "type": "number",
+      "required": true
+    },
+    "rewe_cat_id": {
+      "type": "number",
+      "required": true
+    },
+    "rewe_img_link_xs": {
+      "type": "string",
+      "required": true
+    },
+    "rewe_img_link_sm": {
+      "type": "string",
+      "required": true
+    },
+    "rewe_img_link_md": {
+      "type": "string",
+      "required": true
+    },
+    "author": {
+      "foreignKey": true,
+      "references": "users",
+      "key": true,
+      "type": "Object",
+      "required": true
+    },
+    "updated_at": {
+      "type": "Date",
+      "required": true
+    },
+    "name": {
+      "type": "Object",
+      "structure": {
+        "en": {
+          "key": true,
+          "type": "string",
+          "required": true
+        },
+        "de": {
+          "key": true,
+          "type": "string",
+          "required": true
+        },
+        "fi": {
+          "key": true,
+          "type": "string",
+          "required": true
+        }
+      },
+      "required": true
+    },
+    "__v": {
+      "type": "number",
+      "required": true
+    },
+    "cat": {
+      "foreignKey": true,
+      "references": "categories",
+      "key": true,
+      "type": "Object",
+      "required": true
+    }
+  },
+  "shopitems": {
+    "_id": {
+      "primaryKey": true,
+      "type": "Object",
+      "required": true
+    },
+    "author": {
+      "foreignKey": true,
+      "references": "users",
+      "key": true,
+      "type": "Object",
+      "required": true
+    },
+    "unit": {
+      "foreignKey": true,
+      "references": "units",
+      "key": true,
+      "type": "Object",
+      "required": true
+    },
+    "ingredient": {
+      "foreignKey": true,
+      "references": "ingredients",
+      "key": true,
+      "type": "Object",
+      "required": true
+    },
+    "schedule": {
+      "foreignKey": true,
+      "references": "schedules",
+      "key": true,
+      "type": "Object",
+      "required": false
+    },
+    "amount": {
+      "type": "number",
+      "required": false
+    },
+    "expire_date": {
+      "type": "Date",
+      "required": true
+    },
+    "updated_at": {
+      "type": "Date",
+      "required": true
+    },
+    "completed": {
+      "type": "boolean",
+      "required": true
+    },
+    "__v": {
+      "type": "number",
+      "required": true
+    },
+    "recipe": {
+      "foreignKey": true,
+      "references": "recipes",
+      "type": "Object",
+      "required": false
+    },
+    "active": {
+      "type": "boolean",
+      "required": true
+    }
+  },
+  "units": {
+    "_id": {
+      "primaryKey": true,
+      "type": "Object",
+      "required": true
+    },
+    "updated_at": {
+      "type": "Date",
+      "required": true
+    },
+    "name": {
+      "type": "Object",
+      "structure": {
+        "en": {
+          "type": "string",
+          "required": true
+        },
+        "de": {
+          "type": "string",
+          "required": true
+        },
+        "fi": {
+          "type": "string",
+          "required": true
+        }
+      },
+      "required": true
+    },
+    "author": {
+      "foreignKey": true,
+      "references": "users",
+      "key": true,
+      "type": "Object",
+      "required": true
+    },
+    "__v": {
+      "type": "number",
+      "required": true
+    }
+  },
+  "recipes": {
+    "_id": {
+      "primaryKey": true,
+      "type": "Object",
+      "required": true
+    },
+    "language": {
+      "type": "string",
+      "required": true
+    },
+    "instructions": {
+      "type": "string",
+      "required": true
+    },
+    "name": {
+      "key": true,
+      "type": "string",
+      "required": true
+    },
+    "prepTime": {
+      "type": "number",
+      "required": true
+    },
+    "yield": {
+      "type": "number",
+      "required": true
+    },
+    "totalTime": {
+      "type": "number",
+      "required": true
+    },
+    "author": {
+      "foreignKey": true,
+      "references": "users",
+      "key": true,
+      "type": "Object",
+      "required": true
+    },
+    "cookTime": {
+      "type": "number",
+      "required": true
+    },
+    "kilocalories": {
+      "type": "number",
+      "required": true
+    },
+    "waitTime": {
+      "type": "number",
+      "required": true
+    },
+    "carb": {
+      "type": "number",
+      "required": true
+    },
+    "fat": {
+      "type": "number",
+      "required": true
+    },
+    "protein": {
+      "type": "number",
+      "required": true
+    },
+    "updated_at": {
+      "type": "Date",
+      "required": true
+    },
+    "ingredients": {
+      "type": "Array",
+      "required": true
+    },
+    "tags": {
+      "type": "Array",
+      "required": true
+    },
+    "__v": {
+      "type": "number",
+      "required": true
+    },
+    "dishType": {
+      "foreignKey": true,
+      "references": "dishtypes",
+      "key": true,
+      "type": "Object",
+      "required": true
+    },
+    "imagePath": {
+      "key": true,
+      "type": "string",
+      "required": true
+    }
+  }
+}

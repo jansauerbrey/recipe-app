@@ -4,18 +4,30 @@ import { UserController } from '../controllers/user.controller.ts';
 import { RecipeController } from '../controllers/recipe.controller.ts';
 import { Dependencies } from '../../types/mod.ts';
 import { createTagsRouter } from './tags.ts';
+import { createUnitsRouter } from './units.ts';
+import { createDishTypesRouter } from './dishtypes.ts';
 import { AppState, createMiddleware } from '../../types/middleware.ts';
 import { ControllerContext } from '../controllers/base.controller.ts';
 
 type AppRouter = Router<AppState>;
 
 export async function initializeRoutes(router: AppRouter, dependencies: Dependencies) {
-  const { userService, recipeService, tagsService } = dependencies;
+  const { userService, recipeService, tagsService, unitService, dishTypeService } = dependencies;
 
   // Add tags routes
   const tagsRouter = createTagsRouter(tagsService);
   router.use(tagsRouter.routes());
   router.use(tagsRouter.allowedMethods());
+
+  // Add units routes
+  const unitsRouter = createUnitsRouter(unitService);
+  router.use(unitsRouter.routes());
+  router.use(unitsRouter.allowedMethods());
+
+  // Add dishtype routes
+  const dishTypesRouter = createDishTypesRouter(dishTypeService);
+  router.use(dishTypesRouter.routes());
+  router.use(dishTypesRouter.allowedMethods());
 
   // Initialize controllers
   const userController = new UserController(userService);
@@ -32,8 +44,7 @@ export async function initializeRoutes(router: AppRouter, dependencies: Dependen
   });
 
   router.get('/api/admin', authMiddleware, (ctx) => {
-    const userRole = ctx.state.user?.role;
-    if (userRole !== 'admin') {
+    if (!ctx.state.user?.is_admin) {
       ctx.response.status = 403;
       ctx.response.body = { error: 'Forbidden' };
       return;
@@ -41,9 +52,9 @@ export async function initializeRoutes(router: AppRouter, dependencies: Dependen
     ctx.response.body = { message: 'Admin route accessed successfully' };
   });
 
+  // Note: Since we only have is_admin flag, we'll treat admin as moderator
   router.get('/api/moderator', authMiddleware, (ctx) => {
-    const userRole = ctx.state.user?.role;
-    if (!userRole || !['admin', 'moderator'].includes(userRole)) {
+    if (!ctx.state.user?.is_admin) {
       ctx.response.status = 403;
       ctx.response.body = { error: 'Forbidden' };
       return;

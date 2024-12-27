@@ -1,0 +1,2431 @@
+{
+	"info": {
+		"_postman_id": "002fa96f-5f8b-4d43-8142-62527e109c07",
+		"name": "www.rezept-planer.de",
+		"description": "# 🚀 Get started here\n\nThis template guides you through CRUD operations (GET, POST, PUT, DELETE), variables, and tests.\n\n## 🔖 **How to use this template**\n\n#### **Step 1: Send requests**\n\nRESTful APIs allow you to perform CRUD operations using the POST, GET, PUT, and DELETE HTTP methods.\n\nThis collection contains each of these [request](https://learning.postman.com/docs/sending-requests/requests/) types. Open each request and click \"Send\" to see what happens.\n\n#### **Step 2: View responses**\n\nObserve the response tab for status code (200 OK), response time, and size.\n\n#### **Step 3: Send new Body data**\n\nUpdate or add new data in \"Body\" in the POST request. Typically, Body data is also used in PUT request.\n\n```\n{\n    \"name\": \"Add your name in the body\"\n}\n\n ```\n\n#### **Step 4: Update the variable**\n\nVariables enable you to store and reuse values in Postman. We have created a [variable](https://learning.postman.com/docs/sending-requests/variables/) called `base_url` with the sample request [https://postman-api-learner.glitch.me](https://postman-api-learner.glitch.me). Replace it with your API endpoint to customize this collection.\n\n#### **Step 5: Add tests in the \"Scripts\" tab**\n\nAdding tests to your requests can help you confirm that your API is working as expected. You can write test scripts in JavaScript and view the output in the \"Test Results\" tab.\n\n<img src=\"https://content.pstmn.io/fa30ea0a-373d-4545-a668-e7b283cca343/aW1hZ2UucG5n\" alt=\"\" height=\"1530\" width=\"2162\">\n\n## 💪 Pro tips\n\n- Use folders to group related requests and organize the collection.\n    \n- Add more [scripts](https://learning.postman.com/docs/writing-scripts/intro-to-scripts/) to verify if the API works as expected and execute workflows.\n    \n\n## 💡Related templates\n\n[API testing basics](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9a37a28-055b-49cd-8c7e-97494a21eb54&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[API documentation](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9c28f47-1253-44af-a2f3-20dce4da1f18&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[Authorization methods](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=31a9a6ed-4cdf-4ced-984c-d12c9aec1c27&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12538509"
+	},
+	"item": [
+		{
+			"name": "recipes",
+			"item": [
+				{
+					"name": "api/recipes/count",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/recipes/count",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"recipes",
+								"count"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/recipes",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/recipes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"recipes"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/recipes/breakfast",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/recipes?dishType=56294bad07ee48b60ec4405b&updated_at=2014-12-30T23:00:00.000Z",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"recipes"
+							],
+							"query": [
+								{
+									"key": "dishType",
+									"value": "56294bad07ee48b60ec4405b"
+								},
+								{
+									"key": "updated_at",
+									"value": "2014-12-30T23:00:00.000Z"
+								}
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/recipes",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ingredients\": [\n        {\n            \"qty\": 2,\n            \"unit\": {\n                \"_id\": \"5511d2fd4194de051c7efd7f\"\n            },\n            \"ingredient\": {\n                \"name\": {\n                    \"en\": \"Tomato\",\n                    \"de\": \"Tomate\",\n                    \"fi\": \"Tomaatti\"\n                },\n                \"_id\": \"555909abe96a26a4210d8ea7\",\n                \"category\": \"Obst & Gemüse\",\n                \"subcategory\": \"Gemüse\",\n                \"subsubcategory\": \"Tomaten\",\n                \"rewe_art_no\": 1041181,\n                \"rewe_cat_id\": 113,\n                \"rewe_img_link_xs\": \"https://d9gkwhfwam31p.cloudfront.net/1041181/21289418_warenkorb.png\",\n                \"rewe_img_link_sm\": \"https://d9gkwhfwam31p.cloudfront.net/1041181/21289418_webansicht.png\",\n                \"rewe_img_link_md\": \"https://d9gkwhfwam31p.cloudfront.net/1041181/21289418_lightbox.png\",\n                \"author\": \"5547ec2ca0a1a5ae57866e2f\",\n                \"updated_at\": \"2015-05-17T21:35:39.048Z\",\n                \"__v\": 0,\n                \"cat\": \"5558ebcd6bb81a4414408394\"\n            }\n        },\n        {\n            \"qty\": 1,\n            \"unit\": {\n                \"_id\": \"5511d2fd4194de051c7efd7f\"\n            },\n            \"ingredient\": {\n                \"name\": {\n                    \"en\": \"Cucumber\",\n                    \"de\": \"Gurke\",\n                    \"fi\": \"Kurkku\"\n                },\n                \"_id\": \"555909a0e96a26a4210d8dc2\",\n                \"category\": \"Obst & Gemüse\",\n                \"subcategory\": \"Gemüse\",\n                \"subsubcategory\": \"Gurken\",\n                \"rewe_art_no\": 7359497,\n                \"rewe_cat_id\": 11613,\n                \"rewe_img_link_xs\": \"https://d9gkwhfwam31p.cloudfront.net/7359497/7361160_warenkorb.png\",\n                \"rewe_img_link_sm\": \"https://d9gkwhfwam31p.cloudfront.net/7359497/7361160_webansicht.png\",\n                \"rewe_img_link_md\": \"https://d9gkwhfwam31p.cloudfront.net/7359497/7361160_lightbox.png\",\n                \"author\": \"5547ec2ca0a1a5ae57866e2f\",\n                \"updated_at\": \"2015-05-17T21:35:28.490Z\",\n                \"__v\": 0,\n                \"cat\": \"5558ebcd6bb81a4414408387\"\n            }\n        }\n    ],\n    \"imagePath\": \"no_image.png\",\n    \"waitTime\": 3,\n    \"name\": \"test 4\",\n    \"tags\": [\n        {\n            \"_id\": \"55465c56f4cf8a5b3f1c1a0b\",\n            \"text\": \"Fleisch\",\n            \"updated_at\": \"2015-05-03T17:35:18.482Z\",\n            \"__v\": 0\n        }\n    ],\n    \"yield\": 1,\n    \"instructions\": \"bla\",\n    \"language\": \"de\",\n    \"prepTime\": 1,\n    \"totalTime\": 6,\n    \"cookTime\": 2,\n    \"kilocalories\": \"4\",\n    \"carb\": \"5\",\n    \"fat\": \"6\",\n    \"protein\": \"7\",\n    \"dishType\": {\n        \"_id\": \"562940db4bdc01930dca94da\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/recipes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"recipes"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/recipes/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/recipes/676ead739e5e3fb0e01fc7ca",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"recipes",
+								"676ead739e5e3fb0e01fc7ca"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/recipes/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"_id\": \"676ea9c49e5e3fb0e01fc7c0\",\n    \"tags\": [\n        {\n            \"_id\": \"5638b17b575b0fca081344e0\",\n            \"text\": \"Vegan\",\n            \"author\": \"5547ec4a2113a48d58b3e6d3\",\n            \"updated_at\": \"2015-11-03T13:07:07.430Z\",\n            \"__v\": 0\n        },\n        {\n            \"_id\": \"55465ccdf4cf8a5b3f1c1a0c\",\n            \"text\": \"Vegetarisch\",\n            \"updated_at\": \"2015-05-03T17:37:17.340Z\",\n            \"__v\": 0\n        }\n    ],\n    \"ingredients\": [\n        {\n            \"_id\": \"676ea9c49e5e3fb0e01fc7c1\",\n            \"qty\": 1,\n            \"unit\": {\n                \"_id\": \"5511d2fd4194de051c7efd7f\",\n                \"updated_at\": \"2015-03-24T21:11:25.234Z\",\n                \"name\": {\n                    \"fi\": \"kpl\",\n                    \"de\": \"Stück\",\n                    \"en\": \"Pieces\"\n                },\n                \"__v\": 0,\n                \"author\": \"5547ec4a2113a48d58b3e6d3\"\n            },\n            \"ingredient\": {\n                \"_id\": \"555909a0e96a26a4210d8d79\",\n                \"category\": \"Obst & Gemüse\",\n                \"subcategory\": \"Gemüse\",\n                \"subsubcategory\": \"Tomaten\",\n                \"rewe_art_no\": 2224358,\n                \"rewe_cat_id\": 113,\n                \"rewe_img_link_xs\": \"https://d9gkwhfwam31p.cloudfront.net/2224358/23270214_warenkorb.png\",\n                \"rewe_img_link_sm\": \"https://d9gkwhfwam31p.cloudfront.net/2224358/23270214_webansicht.png\",\n                \"rewe_img_link_md\": \"https://d9gkwhfwam31p.cloudfront.net/2224358/23270214_lightbox.png\",\n                \"author\": \"5547ec2ca0a1a5ae57866e2f\",\n                \"updated_at\": \"2015-05-17T21:35:28.450Z\",\n                \"name\": {\n                    \"en\": \"Cherry Roma tomatoes\",\n                    \"de\": \"Cherry Romatomaten\",\n                    \"fi\": \"Kirsikka Roma tomaatit\"\n                },\n                \"__v\": 0,\n                \"cat\": \"5558ebcd6bb81a4414408394\"\n            }\n        },\n        {\n            \"_id\": \"676ea9c49e5e3fb0e01fc7c2\",\n            \"qty\": 1,\n            \"unit\": {\n                \"_id\": \"558e4193c1c40712477249da\",\n                \"author\": \"5547ec4a2113a48d58b3e6d3\",\n                \"updated_at\": \"2015-06-27T06:24:19.443Z\",\n                \"name\": {\n                    \"en\": \"pkg.\",\n                    \"de\": \"Pkg.\",\n                    \"fi\": \"pkg.\"\n                },\n                \"__v\": 0\n            },\n            \"ingredient\": {\n                \"_id\": \"555909a5e96a26a4210d8e32\",\n                \"category\": \"Obst & Gemüse\",\n                \"subcategory\": \"Gemüse\",\n                \"subsubcategory\": \"Paprika & Chili\",\n                \"rewe_art_no\": 1056856,\n                \"rewe_cat_id\": 53,\n                \"rewe_img_link_xs\": \"https://d9gkwhfwam31p.cloudfront.net/1056856/9685530_warenkorb.png\",\n                \"rewe_img_link_sm\": \"https://d9gkwhfwam31p.cloudfront.net/1056856/9685530_webansicht.png\",\n                \"rewe_img_link_md\": \"https://d9gkwhfwam31p.cloudfront.net/1056856/9685530_lightbox.png\",\n                \"author\": \"5547ec2ca0a1a5ae57866e2f\",\n                \"updated_at\": \"2015-05-17T21:35:33.931Z\",\n                \"name\": {\n                    \"en\": \"Sweet pepper\",\n                    \"de\": \"Paprika\",\n                    \"fi\": \"Paprika\"\n                },\n                \"__v\": 0,\n                \"cat\": \"5558ebcd6bb81a441440838f\"\n            }\n        }\n    ],\n    \"imagePath\": \"283a5437-7330-441f-baac-a7e316dad400.png\",\n    \"waitTime\": 0,\n    \"name\": \"testtest\",\n    \"language\": \"de\",\n    \"dishType\": {\n        \"_id\": \"56293446137c052908b75e22\",\n        \"name\": {\n            \"en\": \"Main dish\"\n        },\n        \"name_translated\": \"Main dish\"\n    },\n    \"yield\": 2,\n    \"instructions\": \"bla bla bla bla\",\n    \"prepTime\": 10,\n    \"totalTime\": 60,\n    \"cookTime\": 20,\n    \"kilocalories\": 1,\n    \"carb\": 2,\n    \"fat\": 3,\n    \"protein\": 4,\n    \"author\": {\n        \"_id\": \"5547ec2ca0a1a5ae57866e2f\",\n        \"fullname\": \"Jan Sauerbrey\"\n    },\n    \"updated_at\": \"2024-12-27T13:21:08.555Z\",\n    \"__v\": 0,\n    \"new_recipe\": true,\n    \"fav_recipe\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/recipes/676ea9c49e5e3fb0e01fc7c0",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"recipes",
+								"676ea9c49e5e3fb0e01fc7c0"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/recipes/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/recipes/676ea9c49e5e3fb0e01fc7c0",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"recipes",
+								"676ea9c49e5e3fb0e01fc7c0"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/upload",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "file",
+							"file": {
+								"src": "Tu2NOrMz2/Screenshot from 2024-04-29 10-22-20.png"
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/upload",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"upload"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "schedules",
+			"item": [
+				{
+					"name": "api/schedules",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/schedules?endDate=1735858800000&startDate=1735254000000",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"schedules"
+							],
+							"query": [
+								{
+									"key": "endDate",
+									"value": "1735858800000"
+								},
+								{
+									"key": "startDate",
+									"value": "1735254000000"
+								}
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/schedules",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"date\": 1735470000000,\n    \"recipe\": {\n        \"tags\": [\n            \"5638b17b575b0fca081344e0\",\n            \"55465ccdf4cf8a5b3f1c1a0c\"\n        ],\n        \"_id\": \"676ea9c49e5e3fb0e01fc7c0\",\n        \"ingredients\": [\n            {\n                \"_id\": \"676ea9c49e5e3fb0e01fc7c1\",\n                \"qty\": 1,\n                \"unit\": \"5511d2fd4194de051c7efd7f\",\n                \"ingredient\": \"555909a0e96a26a4210d8d79\"\n            },\n            {\n                \"_id\": \"676ea9c49e5e3fb0e01fc7c2\",\n                \"qty\": 1,\n                \"unit\": \"558e4193c1c40712477249da\",\n                \"ingredient\": \"555909a5e96a26a4210d8e32\"\n            }\n        ],\n        \"imagePath\": \"283a5437-7330-441f-baac-a7e316dad400.png\",\n        \"waitTime\": 0,\n        \"name\": \"testtest\",\n        \"language\": \"de\",\n        \"dishType\": \"56293446137c052908b75e22\",\n        \"yield\": 2,\n        \"instructions\": \"bla bla bla\",\n        \"prepTime\": 10,\n        \"totalTime\": 60,\n        \"cookTime\": 20,\n        \"kilocalories\": 1,\n        \"carb\": 2,\n        \"fat\": 3,\n        \"protein\": 4,\n        \"author\": {\n            \"_id\": \"5547ec2ca0a1a5ae57866e2f\",\n            \"fullname\": \"Jan Sauerbrey\"\n        },\n        \"updated_at\": \"2024-12-27T13:21:08.555Z\",\n        \"__v\": 0\n    },\n    \"factor\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/schedules",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"schedules"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/schedules/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/schedules/676eafe09e5e3fb0e01fc7d0",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"schedules",
+								"676eafe09e5e3fb0e01fc7d0"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/schedules/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"_id\": \"676eafe09e5e3fb0e01fc7d0\",\n    \"date\": \"2024-12-30T11:00:00.000Z\",\n    \"recipe\": {\n        \"tags\": [\n            \"5638b17b575b0fca081344e0\",\n            \"55465ccdf4cf8a5b3f1c1a0c\"\n        ],\n        \"_id\": \"676ea9c49e5e3fb0e01fc7c0\",\n        \"ingredients\": [\n            {\n                \"_id\": \"676ea9c49e5e3fb0e01fc7c1\",\n                \"qty\": 1,\n                \"unit\": \"5511d2fd4194de051c7efd7f\",\n                \"ingredient\": \"555909a0e96a26a4210d8d79\"\n            },\n            {\n                \"_id\": \"676ea9c49e5e3fb0e01fc7c2\",\n                \"qty\": 1,\n                \"unit\": \"558e4193c1c40712477249da\",\n                \"ingredient\": \"555909a5e96a26a4210d8e32\"\n            }\n        ],\n        \"imagePath\": \"283a5437-7330-441f-baac-a7e316dad400.png\",\n        \"waitTime\": 0,\n        \"name\": \"testtest\",\n        \"language\": \"de\",\n        \"dishType\": \"56293446137c052908b75e22\",\n        \"yield\": 2,\n        \"instructions\": \"bla bla bla\",\n        \"prepTime\": 10,\n        \"totalTime\": 60,\n        \"cookTime\": 20,\n        \"kilocalories\": 1,\n        \"carb\": 2,\n        \"fat\": 3,\n        \"protein\": 4,\n        \"author\": \"5547ec2ca0a1a5ae57866e2f\",\n        \"updated_at\": \"2024-12-27T13:21:08.555Z\",\n        \"__v\": 0\n    },\n    \"factor\": 2,\n    \"author\": \"5547ec2ca0a1a5ae57866e2f\",\n    \"updated_at\": \"2024-12-27T13:47:12.657Z\",\n    \"__v\": 0\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/schedules/676eafe09e5e3fb0e01fc7d0",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"schedules",
+								"676eafe09e5e3fb0e01fc7d0"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/schedules/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/schedules/676eafe09e5e3fb0e01fc7d0",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"schedules",
+								"676eafe09e5e3fb0e01fc7d0"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ingredients",
+			"item": [
+				{
+					"name": "api/ingredients",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/ingredients",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"ingredients"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/ingredients",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": {\n        \"en\": \"test\",\n        \"de\": \"test\",\n        \"fi\": \"test\"\n    },\n    \"rewe_img_link_xs\": \"test1\",\n    \"rewe_img_link_sm\": \"test2\",\n    \"rewe_img_link_md\": \"test3\",\n    \"rewe_art_no\": 999,\n    \"category\": \"Baby & Kind\",\n    \"subcategory\": \"Babypflege\",\n    \"subsubcategory\": \"Tücher\",\n    \"rewe_cat_id\": 11233\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/ingredients",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"ingredients"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/ingredients/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/ingredients/676eb96de8cb09d8f3b19e16",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"ingredients",
+								"676eb96de8cb09d8f3b19e16"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/ingredients/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": {\n        \"en\": \"test3\",\n        \"de\": \"test2\",\n        \"fi\": \"test2\"\n    },\n    \"_id\": \"676eb96de8cb09d8f3b19e16\",\n    \"rewe_img_link_xs\": \"test1\",\n    \"rewe_img_link_sm\": \"test2\",\n    \"rewe_img_link_md\": \"test3\",\n    \"rewe_art_no\": 999,\n    \"category\": \"Baby & Kind\",\n    \"subcategory\": \"Babypflege\",\n    \"subsubcategory\": \"Tücher\",\n    \"rewe_cat_id\": 11233,\n    \"author\": \"5547ec2ca0a1a5ae57866e2f\",\n    \"updated_at\": \"2024-12-27T14:27:57.457Z\",\n    \"__v\": 0\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/ingredients/676eb96de8cb09d8f3b19e16",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"ingredients",
+								"676eb96de8cb09d8f3b19e16"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/ingredients/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/ingredients/676eb96de8cb09d8f3b19e16",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"ingredients",
+								"676eb96de8cb09d8f3b19e16"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "user",
+			"item": [
+				{
+					"name": "api/user/login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"jan\",\n    \"password\": \"jan\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/user/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"login"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/user/check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/user/check",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"check"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/user/register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"test2\",\n    \"password\": \"test\",\n    \"passwordConfirmation\": \"test\",\n    \"email\": \"test@sby.de\",\n    \"emailConfirmation\": \"test@sby.de\",\n    \"fullname\": \"test\",\n    \"settings\": {\n        \"preferredLanguage\": \"en\",\n        \"spokenLanguages\": [\n            \"de\",\n            \"en\"\n        ]\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/user/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"register"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "/api/user/info/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/user/info/5547ec2ca0a1a5ae57866e2f",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"info",
+								"5547ec2ca0a1a5ae57866e2f"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "/api/user/info/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullname\": \"Jan Sauerbrey\",\n  \"settings\": {\n    \"spokenLanguages\": [\n      \"de\",\n      \"en\",\n      \"fi\"\n    ],\n    \"categoryOrder\": [\n      \"Servicetheke\",\n      \"Obst & Gemüse\",\n      \"Frühstück\",\n      \"Nahrungsmittel\",\n      \"Weitere Bereiche\",\n      \"Drogerie\",\n      \"Baby & Kind\",\n      \"Kühlprodukte\",\n      \"Süssigkeitenn\",\n      \"Haushalt\",\n      \"Getränke\",\n      \"Tiefkühl\"\n    ],\n    \"autoupdate\": true,\n    \"preferredLanguage\": \"de\",\n    \"preferredWeekStartDay\": 6\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/user/info/5547ec2ca0a1a5ae57866e2f",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"info",
+								"5547ec2ca0a1a5ae57866e2f"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "/api/user/favorites/:recipe_id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"method\": \"add\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/user/favorites/66e6f7baccf6b0143166cda2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"favorites",
+								"66e6f7baccf6b0143166cda2"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "units",
+			"item": [
+				{
+					"name": "api/units",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/units",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"units"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/units",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": {\n    \"en\": \"test\",\n    \"de\": \"test\",\n    \"fi\": \"test\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/units",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"units"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/units/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/units/676eb6b3e8cb09d8f3b19e15",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"units",
+								"676eb6b3e8cb09d8f3b19e15"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/units/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": {\n    \"en\": \"test2\",\n    \"de\": \"test2\",\n    \"fi\": \"test2\"\n  },\n  \"_id\": \"676eb676e8cb09d8f3b19e14\",\n  \"updated_at\": \"2024-12-27T14:15:18.175Z\",\n  \"__v\": 0,\n  \"author\": \"5547ec2ca0a1a5ae57866e2f\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/units/676eb676e8cb09d8f3b19e14",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"units",
+								"676eb676e8cb09d8f3b19e14"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/units/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/units/676eb6b3e8cb09d8f3b19e15",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"units",
+								"676eb6b3e8cb09d8f3b19e15"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "admin",
+			"item": [
+				{
+					"name": "api/admin/user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/admin/user",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"user"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/admin/user/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/user/676db7029e5e3fb0e01fc7bc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"user",
+								"676db7029e5e3fb0e01fc7bc"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/admin/user/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"is_admin\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/user/554f1f03b9860423060881fe",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"user",
+								"554f1f03b9860423060881fe"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/admin/user/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/admin/user/676db7029e5e3fb0e01fc7bc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"admin",
+								"user",
+								"676db7029e5e3fb0e01fc7bc"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "tags",
+			"item": [
+				{
+					"name": "api/tags",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/tags",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tags"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/tags",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"text\": \"testtest\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tags",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tags"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/tags/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tags/61dc5e4998a8b026c16893a8",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tags",
+								"61dc5e4998a8b026c16893a8"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/tags/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"_id\": \"61dc5e4998a8b026c16893a8\",\n    \"text\": \"#vegantest2\",\n    \"author\": \"5547ec4a2113a48d58b3e6d3\",\n    \"updated_at\": \"2022-01-10T16:26:49.892Z\",\n    \"__v\": 0\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tags/61dc5e4998a8b026c16893a8",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tags",
+								"61dc5e4998a8b026c16893a8"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/tags/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tags/61dc5e4998a8b026c16893a8",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tags",
+								"61dc5e4998a8b026c16893a8"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "categories",
+			"item": [
+				{
+					"name": "api/categories",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/categories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/categories",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"category\": \"Test\",\n    \"subcategory\": \"Test Sub\",\n    \"subsubcategory\": \"Test Sub Sub\",\n    \"rewe_cat_id\": 11223,\n    \"product_group\": {\n        \"id\": 11223,\n        \"name\": {\n            \"en\": \"\",\n            \"de\": \"Baden & Waschen\",\n            \"fi\": \"\"\n        }\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/categories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/categories/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/categories/676ec2a59c0392dc2b66ad7f",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								"676ec2a59c0392dc2b66ad7f"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/categories/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"_id\": \"5558ebcd6bb81a44144082bf\",\n    \"category\": \"Baby & Kind\",\n    \"subcategory\": \"Babypflege\",\n    \"subsubcategory\": \"Baden & Waschen\",\n    \"rewe_cat_id\": 11223,\n    \"author\": \"5547ec2ca0a1a5ae57866e2f\",\n    \"__v\": 0,\n    \"updated_at\": \"2015-05-17T19:28:13.086Z\",\n    \"product_group\": {\n        \"id\": 11223,\n        \"name\": {\n            \"en\": \"Bathing & Washing\",\n            \"de\": \"Baden & Waschen\",\n            \"fi\": \"\"\n        }\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/categories/5558ebcd6bb81a44144082bf",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								"5558ebcd6bb81a44144082bf"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/categories/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/categories/676ec2a59c0392dc2b66ad7f",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"categories",
+								"676ec2a59c0392dc2b66ad7f"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "dishtypes",
+			"item": [
+				{
+					"name": "api/dishtypes",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/dishtypes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"dishtypes"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/dishtypes",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": {\n        \"en\": \"test\",\n        \"de\": \"test\",\n        \"fi\": \"test\"\n    },\n    \"order\": 4,\n    \"imagePath\": \"test.png\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/dishtypes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"dishtypes"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/dishtypes/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/dishtypes/56294bad07ee48b60ec4405b",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"dishtypes",
+								"56294bad07ee48b60ec4405b"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/dishtypes/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": {\n        \"fi\": \"Aamupala\",\n        \"de\": \"Frühstück\",\n        \"en\": \"Breakfast\"\n    },\n    \"_id\": \"56294bad07ee48b60ec4405b\",\n    \"author\": \"5547ec2ca0a1a5ae57866e2f\",\n    \"updated_at\": \"2015-10-22T20:48:45.689Z\",\n    \"__v\": 0,\n    \"imagePath\": \"breakfast.jpg\",\n    \"order\": 1,\n    \"identifier\": \"breakfast\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/dishtypes/56294bad07ee48b60ec4405b",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"dishtypes",
+								"56294bad07ee48b60ec4405b"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/dishtypes/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/dishtypes/676ebe32e8cb09d8f3b19e1a",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"dishtypes",
+								"676ebe32e8cb09d8f3b19e1a"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "typeahead",
+			"item": [
+				{
+					"name": "api/typeahead/tags",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/typeahead/tags?search=veg",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"typeahead",
+								"tags"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "veg"
+								}
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/typeahead/ingredients",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/typeahead/ingredients?language=de&search=tom",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"typeahead",
+								"ingredients"
+							],
+							"query": [
+								{
+									"key": "language",
+									"value": "de"
+								},
+								{
+									"key": "search",
+									"value": "tom"
+								}
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/typeahead/recipes",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/typeahead/recipes?search=te",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"typeahead",
+								"recipes"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "te"
+								}
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "shopitems",
+			"item": [
+				{
+					"name": "api/shopitems",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/shopitems",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"shopitems"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/frequentshopitems",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/frequentshopitems",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"frequentshopitems"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/shopitems",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ingredient\": {\n        \"name\": {\n            \"en\": \"Coconut milk\",\n            \"de\": \"Kokosmilch\",\n            \"fi\": \"Kookosmaito\"\n        },\n        \"_id\": \"555909a5e96a26a4210d8dfc\",\n        \"category\": \"Nahrungsmittel\",\n        \"subcategory\": \"Konserven & Feinkost\",\n        \"subsubcategory\": \"Obst\",\n        \"rewe_art_no\": 792132,\n        \"rewe_cat_id\": 1613,\n        \"rewe_img_link_xs\": \"https://d9gkwhfwam31p.cloudfront.net/0792132/20265739_warenkorb.png\",\n        \"rewe_img_link_sm\": \"https://d9gkwhfwam31p.cloudfront.net/0792132/20265739_webansicht.png\",\n        \"rewe_img_link_md\": \"https://d9gkwhfwam31p.cloudfront.net/0792132/20265739_lightbox.png\",\n        \"author\": \"5547ec2ca0a1a5ae57866e2f\",\n        \"updated_at\": \"2015-05-17T21:35:33.895Z\",\n        \"__v\": 0,\n        \"cat\": \"5558ebcd6bb81a4414408371\",\n        \"name_translated\": \"Kokosmilch\"\n    },\n    \"unit\": {\n        \"name\": {\n            \"fi\": \"kpl\",\n            \"de\": \"Stück\",\n            \"en\": \"Pieces\"\n        },\n        \"_id\": \"5511d2fd4194de051c7efd7f\",\n        \"updated_at\": \"2015-03-24T21:11:25.234Z\",\n        \"__v\": 0,\n        \"author\": \"5547ec4a2113a48d58b3e6d3\"\n    },\n    \"amount\": 2,\n    \"completed\": false,\n    \"expire_date\": \"2025-01-09T23:00:00.000Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/shopitems",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"shopitems"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/shopitems/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/shopitems/676eb4ef371a6fd8866cdc96",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"shopitems",
+								"676eb4ef371a6fd8866cdc96"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/shopitems/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"completed\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/shopitems/676eb41339b045d866ac8a54",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"shopitems",
+								"676eb41339b045d866ac8a54"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/shopitems/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/shopitems/676eb4ef371a6fd8866cdc96",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"shopitems",
+								"676eb4ef371a6fd8866cdc96"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				},
+				{
+					"name": "api/shopitems",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/shopitems",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"shopitems"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "value",
+				"value": "AUTH ec801562733f01777161591b8a713bdd57bef6d72a066005badb690961c0654e",
+				"type": "string"
+			},
+			{
+				"key": "key",
+				"value": "Authorization",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://www.rezept-planer.de"
+		}
+	]
+}

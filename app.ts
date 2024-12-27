@@ -12,17 +12,65 @@ import {
 import { rateLimitMiddleware } from './src/presentation/middleware/rate-limit.middleware.ts';
 import { payloadLimitMiddleware } from './src/presentation/middleware/payload-limit.middleware.ts';
 import { loggingMiddleware } from './src/presentation/middleware/logging.middleware.ts';
-import { AppState, createMiddleware } from './src/types/middleware.ts';
+import { AppState } from './src/types/middleware.ts';
+import { Context, Middleware, Next } from 'https://deno.land/x/oak@v12.6.1/mod.ts';
 import { AppError } from './src/types/errors.ts';
 
 // Import layers
-import { RecipeRepository, UserRepository } from './src/data/mod.ts';
+import { RecipeRepository, UserRepository, UnitRepository, DishTypeRepository } from './src/data/mod.ts';
 import { MongoTagsRepository } from './src/data/repositories/tags.repository.ts';
 import { MongoDatabase } from './src/data/database.ts';
-import { RecipeService, UserService, TagsService } from './src/business/mod.ts';
+import { RecipeService, UserService, TagsService, UnitService, DishTypeService } from './src/business/mod.ts';
 import { initializeRoutes } from './src/presentation/routes/mod.ts';
 import { Dependencies } from './src/types/mod.ts';
 import { AppConfig, getConfig } from './src/types/env.ts';
+
+// Define middleware
+const securityHeadersMiddleware: Middleware<AppState> = async (ctx: Context, next: Next) => {
+  // Skip security headers for image requests
+  if (ctx.request.url.pathname.startsWith('/upload/')) {
+    await next();
+    return;
+  }
+
+  // Set basic security headers
+  ctx.response.headers.set('X-XSS-Protection', '1; mode=block');
+  ctx.response.headers.set('X-Content-Type-Options', 'nosniff');
+  ctx.response.headers.set('Referrer-Policy', 'no-referrer-when-downgrade');
+  await next();
+};
+
+const errorHandlingMiddleware: Middleware<AppState> = async (ctx: Context, next: Next) => {
+  try {
+    await next();
+  } catch (err) {
+    if (err instanceof AppError) {
+      ctx.response.status = err.statusCode;
+      ctx.response.body = { error: err.message, code: err.code };
+    } else {
+      ctx.response.status = Status.InternalServerError;
+      ctx.response.body = { error: 'Internal Server Error' };
+    }
+  }
+};
+
+const staticFileMiddleware: Middleware<AppState> = async (ctx: Context, next: Next) => {
+  try {
+    if (ctx.request.url.pathname.startsWith('/upload/')) {
+      await ctx.send({
+        root: Deno.cwd(),
+        path: ctx.request.url.pathname,
+      });
+    } else {
+      await ctx.send({
+        root: `${Deno.cwd()}/public`,
+        index: 'index.html',
+      });
+    }
+  } catch {
+    await next();
+  }
+};
 
 export async function createApp(): Promise<Application> {
   // Load environment variables
@@ -53,11 +101,15 @@ export async function createApp(): Promise<Application> {
   const userRepository = new UserRepository(client);
   const recipeRepository = new RecipeRepository(client);
   const tagsRepository = new MongoTagsRepository(client);
+  const unitRepository = new UnitRepository(client);
+  const dishTypeRepository = new DishTypeRepository(client);
 
   // Initialize services
   const userService = new UserService(userRepository);
   const recipeService = new RecipeService(recipeRepository);
   const tagsService = new TagsService(tagsRepository);
+  const unitService = new UnitService(unitRepository);
+  const dishTypeService = new DishTypeService(dishTypeRepository);
 
   // Create dependencies container
   const dependencies: Dependencies = {
@@ -65,8 +117,12 @@ export async function createApp(): Promise<Application> {
     userService,
     recipeService,
     tagsService,
+    unitService,
     userRepository,
     recipeRepository,
+    unitRepository,
+    dishTypeService,
+    dishTypeRepository,
   };
 
   // Initialize Oak application
@@ -109,34 +165,10 @@ export async function createApp(): Promise<Application> {
   app.use(payloadLimitMiddleware);
 
   // Security headers middleware
-  app.use(createMiddleware(async (ctx, next) => {
-    // Skip security headers for image requests
-    if (ctx.request.url.pathname.startsWith('/upload/')) {
-      await next();
-      return;
-    }
-
-    // Set basic security headers
-    ctx.response.headers.set('X-XSS-Protection', '1; mode=block');
-    ctx.response.headers.set('X-Content-Type-Options', 'nosniff');
-    ctx.response.headers.set('Referrer-Policy', 'no-referrer-when-downgrade');
-    await next();
-  }));
+  app.use(securityHeadersMiddleware);
 
   // Error handling middleware
-  app.use(createMiddleware(async (ctx, next) => {
-    try {
-      await next();
-    } catch (err) {
-      if (err instanceof AppError) {
-        ctx.response.status = err.statusCode;
-        ctx.response.body = { error: err.message, code: err.code };
-      } else {
-        ctx.response.status = Status.InternalServerError;
-        ctx.response.body = { error: 'Internal Server Error' };
-      }
-    }
-  }));
+  app.use(errorHandlingMiddleware);
 
   // Initialize routes
   const router = new Router();
@@ -151,23 +183,7 @@ export async function createApp(): Promise<Application> {
   app.use(validateResponse);
 
   // Static file serving middleware
-  app.use(createMiddleware(async (ctx, next) => {
-    try {
-      if (ctx.request.url.pathname.startsWith('/upload/')) {
-        await ctx.send({
-          root: Deno.cwd(),
-          path: ctx.request.url.pathname,
-        });
-      } else {
-        await ctx.send({
-          root: `${Deno.cwd()}/public`,
-          index: 'index.html',
-        });
-      }
-    } catch {
-      await next();
-    }
-  }));
+  app.use(staticFileMiddleware);
 
   return app;
 }

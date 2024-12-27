@@ -91,17 +91,15 @@ export class RecipeRepository {
   async findWithFilters(filter: RecipeFilter): Promise<Recipe[]> {
     const query: Record<string, unknown> = {};
 
-    if (filter.userId) {
-      query.userId = filter.userId;
-    }
-
     if (filter.dishType) {
       switch (filter.dishType) {
         case 'all':
-          // No filter needed for 'all'
+          // No filters for 'all' recipes
           break;
         case 'my':
-          // Already handled by userId filter
+          if (filter.userId) {
+            query.userId = filter.userId;
+          }
           break;
         case 'new': {
           const thirtyDaysAgo = new Date();

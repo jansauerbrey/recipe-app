@@ -1,9 +1,10 @@
 import { MongoClient, Database, Collection } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
-import { User, Recipe } from './mod.ts';
+import { User, Recipe, DishType } from './mod.ts';
 
 export interface DBCollections {
   users: Collection<User>;
   recipes: Collection<Recipe>;
+  dishtypes: Collection<DishType>;
 }
 
 export interface DB extends Database {
@@ -20,6 +21,7 @@ export function getCollections(db: Database): DBCollections {
   return {
     users: db.collection<User>('users'),
     recipes: db.collection<Recipe>('recipes'),
+    dishtypes: db.collection<DishType>('dishtypes'),
   };
 }
 
@@ -62,6 +64,29 @@ export async function createIndexes(collections: DBCollections): Promise<void> {
       {
         key: { createdAt: -1 },
         name: 'created_at_index',
+      },
+    ],
+  });
+
+  // DishType indexes
+  await collections.dishtypes.createIndexes({
+    indexes: [
+      {
+        key: { author: 1 },
+        name: 'author_index',
+      },
+      {
+        key: { order: 1 },
+        name: 'order_index',
+      },
+      {
+        key: { identifier: 1 },
+        name: 'identifier_unique',
+        unique: true,
+      },
+      {
+        key: { updated_at: -1 },
+        name: 'updated_at_index',
       },
     ],
   });

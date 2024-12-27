@@ -1,11 +1,13 @@
 import React, { createContext, useState, useCallback, useEffect, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { api } from '../utils/api';
 
 interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean;
   user: User | null;
   token: string | null;
+  isLoading: boolean;
   login: (credentials: { email: string; password: string }) => Promise<void>;
   logout: () => void;
   hasPermission: (permission: string) => boolean;
@@ -29,6 +31,10 @@ interface LoginResponse {
   token: string;
 }
 
+interface UserCheckResponse {
+  user: User;
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function useAuth() {
@@ -44,33 +50,37 @@ export { AuthContext };
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
 
   const isAuthenticated = !!user;
   const isAdmin = user?.role === 'admin';
 
+  // Update API client's auth token whenever token changes
+  useEffect(() => {
+    api.setAuthToken(token);
+  }, [token]);
+
   useEffect(() => {
     // Check for existing session on mount
     const checkAuth = async () => {
       try {
-        if (!token) return;
-        
-        const response = await fetch('/api/user/check', {
-          headers: {
-            'Authorization': token,
-          }
-        });
-        if (response.ok) {
-          const { user: userData } = await response.json();
-          setUser(userData);
+        if (!token) {
+          setIsLoading(false);
+          return;
         }
+        
+        const { user: userData } = await api.get<UserCheckResponse>('/user/check');
+        setUser(userData);
       } catch (error) {
         console.error('Failed to check authentication status:', error);
         // Clear invalid token
         localStorage.removeItem('token');
         setToken(null);
         setUser(null);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -79,38 +89,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(async (credentials: { email: string; password: string }) => {
     try {
-      const response = await fetch('/api/user/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(credentials),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Login failed');
-      }
-
-      const { token: newToken } = await response.json() as LoginResponse;
+      const { token: newToken } = await api.post<LoginResponse>('/user/login', credentials);
       localStorage.setItem('token', newToken);
       setToken(newToken);
       
       // Fetch user data with the new token
-      const userResponse = await fetch('/api/user/check', {
-        headers: {
-          'Authorization': newToken,
-        }
-      });
+      const { user: userData } = await api.get<UserCheckResponse>('/user/check');
+      setUser(userData);
       
-      if (userResponse.ok) {
-        const { user: userData } = await userResponse.json();
-        setUser(userData);
-        
-        // Redirect to previous state or home
-        const from = location.state?.from?.pathname || '/home';
-        navigate(from, { replace: true });
-      }
+      // Redirect to previous state or home
+      const from = location.state?.from?.pathname || '/home';
+      navigate(from, { replace: true });
     } catch (error) {
       if (error instanceof Error) {
         throw error;
@@ -123,12 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       if (token) {
         try {
-          await fetch('/api/user/logout', {
-            method: 'POST',
-            headers: {
-              'Authorization': token,
-            },
-          });
+          await api.post('/user/logout', {});
         } catch (error) {
           console.error('Logout failed:', error);
         }
@@ -161,6 +145,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAdmin,
     user,
     token,
+    isLoading,
     login,
     logout,
     hasPermission,

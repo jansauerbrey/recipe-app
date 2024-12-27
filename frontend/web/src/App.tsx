@@ -14,6 +14,14 @@ import { RegisterPage } from './pages/RegisterPage';
 import { AccessDeniedPage } from './pages/AccessDeniedPage';
 import { ImpressumPage } from './pages/ImpressumPage';
 import { RecipesPage } from './pages/RecipesPage';
+import RecipeDetailPage from './pages/RecipeDetailPage';
+import CreateRecipePage from './pages/CreateRecipePage';
+import UnitsPage from './pages/units/UnitsPage';
+import CreateUnitPage from './pages/units/CreateUnitPage';
+import EditUnitPage from './pages/units/EditUnitPage';
+import DishTypesPage from './pages/dishtypes/DishTypesPage';
+import CreateDishTypePage from './pages/dishtypes/CreateDishTypePage';
+import EditDishTypePage from './pages/dishtypes/EditDishTypePage';
 
 // Initialize React Query client
 const queryClient = new QueryClient({
@@ -26,6 +34,8 @@ const queryClient = new QueryClient({
 });
 
 const AppContent: React.FC = () => {
+  // We might need location later for navigation state management
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const location = useLocation();
 
   return (
@@ -35,32 +45,49 @@ const AppContent: React.FC = () => {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/access-denied" element={<AccessDeniedPage />} />
 
-      {/* Main Layout routes */}
+      {/* Protected routes with MainLayout */}
       <Route
-        path="/"
         element={
-          <ProtectedRoute isPublic={location.pathname === '/impressum'}>
+          <ProtectedRoute>
             <MainLayout />
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="/home" replace />} />
-        <Route path="home" element={<HomePage />} />
-        <Route path="recipes/:dishTypeSlug?" element={<RecipesPage />} />
+        {/* Home route */}
+        <Route path="/" element={<Navigate to="/home" replace />} />
+        <Route path="/home" element={<HomePage />} />
+
+        {/* Recipe routes */}
+        <Route path="recipes">
+          <Route index element={<RecipesPage />} />
+          <Route path="new" element={<CreateRecipePage />} />
+          <Route path=":id" element={<RecipeDetailPage />} />
+          <Route path="filter" element={<RecipesPage />} />
+        </Route>
+
+        {/* Other protected routes */}
         <Route path="schedules/*" element={<div>Schedules (Coming Soon)</div>} />
         <Route path="shopping/*" element={<div>Shopping Lists (Coming Soon)</div>} />
         <Route path="settings/*" element={<div>Settings (Coming Soon)</div>} />
-        
+
         {/* Admin routes */}
         <Route
           path="admin/*"
           element={
             <ProtectedRoute requiredRole="admin">
               <Routes>
-                <Route path="units/*" element={<div>Units Management (Coming Soon)</div>} />
+                <Route path="units">
+                  <Route index element={<UnitsPage />} />
+                  <Route path="create" element={<CreateUnitPage />} />
+                  <Route path="edit/:id" element={<EditUnitPage />} />
+                </Route>
                 <Route path="ingredients/*" element={<div>Ingredients Management (Coming Soon)</div>} />
                 <Route path="tags/*" element={<div>Tags Management (Coming Soon)</div>} />
-                <Route path="dishtypes/*" element={<div>Dish Types Management (Coming Soon)</div>} />
+                <Route path="dishtypes">
+                  <Route index element={<DishTypesPage />} />
+                  <Route path="create" element={<CreateDishTypePage />} />
+                  <Route path="edit/:id" element={<EditDishTypePage />} />
+                </Route>
                 <Route path="users/*" element={<div>Users Management (Coming Soon)</div>} />
               </Routes>
             </ProtectedRoute>
@@ -69,8 +96,10 @@ const AppContent: React.FC = () => {
 
         {/* Logout route */}
         <Route path="logout" element={<div>Logging out...</div>} />
-        
-        {/* Public routes that use MainLayout */}
+      </Route>
+
+      {/* Public routes that use MainLayout */}
+      <Route element={<MainLayout />}>
         <Route path="impressum" element={<ImpressumPage />} />
       </Route>
 

@@ -7,16 +7,26 @@ import { RecipeRepository } from '../data/repositories/recipe.repository.ts';
 
 export * from './user.ts';
 export * from './recipe.ts';
+export * from './unit.ts';
+export * from './dishtype.ts';
 
 import { TagsService } from '../business/services/tags.service.ts';
+import { UnitService } from '../business/services/unit.service.ts';
+import { DishTypeService } from '../business/services/dishtype.service.ts';
+import { UnitRepository } from '../data/repositories/unit.repository.ts';
+import { DishTypeRepository } from '../data/repositories/dishtype.repository.ts';
 
 export interface Dependencies {
   db: Database;
   userService: UserService;
   recipeService: RecipeService;
   tagsService: TagsService;
+  unitService: UnitService;
   userRepository: UserRepository;
   recipeRepository: RecipeRepository;
+  unitRepository: UnitRepository;
+  dishTypeService: DishTypeService;
+  dishTypeRepository: DishTypeRepository;
 }
 
 export interface Ingredient {
