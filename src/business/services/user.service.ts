@@ -1,4 +1,4 @@
-import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
+import { Status } from '@std/http/http_status.ts';
 import { UserRepository } from '../../data/repositories/user.repository.ts';
 import { User } from '../../types/mod.ts';
 import { AuthenticationError, ResourceNotFoundError, ValidationError } from '../../types/errors.ts';
@@ -18,6 +18,10 @@ export class UserService implements IUserService {
   private isValidEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+  }
+
+  private isValidUsername(username: string): boolean {
+    return Boolean(username) && username.length >= 3;
   }
 
   async validateCredentials(email: string, password: string): Promise<string> {
@@ -53,11 +57,23 @@ export class UserService implements IUserService {
       throw new ValidationError('Invalid email format');
     }
 
+    if (!this.isValidUsername(userData.username)) {
+      throw new ValidationError('Username must be at least 3 characters');
+    }
+
     this.validatePassword(userData.password);
 
-    const existingUser = await this.userRepository.findByEmail(userData.email);
-    if (existingUser) {
+    const [existingEmail, existingUsername] = await Promise.all([
+      this.userRepository.findByEmail(userData.email),
+      this.userRepository.findByUsername(userData.username)
+    ]);
+
+    if (existingEmail) {
       throw new ValidationError('Email already in use');
+    }
+
+    if (existingUsername) {
+      throw new ValidationError('Username already taken');
     }
 
     return this.userRepository.create(userData);

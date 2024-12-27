@@ -1,21 +1,23 @@
 {
   "name": "recipe-app-frontend",
+  "version": "1.0.0",
   "private": true,
   "workspaces": [
     "web",
-    "mobile",
+    "mobile", 
     "shared"
   ],
   "scripts": {
     "web:start": "yarn workspace @recipe-app/web start",
+    "web:build": "yarn workspace @recipe-app/web build",
     "mobile:start": "yarn workspace @recipe-app/mobile start",
-    "build:web": "yarn workspace @recipe-app/web build",
-    "build:mobile": "yarn workspace @recipe-app/mobile build",
+    "mobile:android": "yarn workspace @recipe-app/mobile android",
+    "mobile:ios": "yarn workspace @recipe-app/mobile ios",
+    "shared:build": "yarn workspace @recipe-app/shared build",
     "lint": "yarn workspaces run lint",
     "test": "yarn workspaces run test"
   },
   "devDependencies": {
-    "lerna": "^6.6.2",
-    "yarn": "^1.22.19"
+    "typescript": "^4.9.5"
   }
 }

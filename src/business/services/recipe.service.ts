@@ -8,6 +8,7 @@ export interface IRecipeService {
   listUserRecipes(userId: string): Promise<RecipeResponse[]>;
   updateRecipe(id: string, updates: Partial<Recipe>): Promise<RecipeResponse>;
   deleteRecipe(id: string): Promise<void>;
+  countRecipesByCategory(userId: string): Promise<Record<string, number>>;
 }
 
 export class RecipeService implements IRecipeService {
@@ -73,5 +74,36 @@ export class RecipeService implements IRecipeService {
 
   async deleteRecipe(id: string): Promise<void> {
     await this.recipeRepository.delete(id);
+  }
+
+  async countRecipesByCategory(userId: string): Promise<Record<string, number>> {
+    const recipes = await this.recipeRepository.findByUserId(userId);
+    const counts: Record<string, number> = {};
+
+    // Initialize counts for all dish types
+    counts['Main Dishes'] = 0;
+    counts['Appetizers'] = 0;
+    counts['Desserts'] = 0;
+    counts['Salads'] = 0;
+    counts['Soups'] = 0;
+    counts['Beverages'] = 0;
+
+    recipes.forEach((recipe) => {
+      // Count by dish type category
+      const category = recipe.category || 'Main Dishes';
+      counts[category] = (counts[category] || 0) + 1;
+
+      // Count new recipes
+      if (recipe.new_recipe) {
+        counts['new'] = (counts['new'] || 0) + 1;
+      }
+
+      // Count favorite recipes
+      if (recipe.fav_recipe) {
+        counts['favorites'] = (counts['favorites'] || 0) + 1;
+      }
+    });
+
+    return counts;
   }
 }
