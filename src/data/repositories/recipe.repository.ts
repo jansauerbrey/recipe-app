@@ -1,11 +1,14 @@
 import { Collection, ObjectId } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
 import { Database } from '../database.ts';
-import { Recipe } from '../../types/mod.ts';
+import { Recipe, CreateRecipeData, RecipeIngredient } from '../../types/mod.ts';
 import { DishType } from '../../types/dishtype.ts';
 import { FilterType, RECIPE_FILTERS } from '../../types/filter.ts';
 import { ResourceNotFoundError, ValidationError } from '../../types/errors.ts';
 
-type RecipeDoc = Omit<Recipe, 'id'> & { _id: ObjectId };
+// MongoDB document type
+type RecipeDoc = Omit<Recipe, 'id'> & {
+  _id: ObjectId;
+};
 
 interface RecipeFilter {
   userId?: string;
@@ -42,9 +45,9 @@ export class RecipeRepository {
     }
   }
 
-  async create(recipeData: Omit<Recipe, 'id' | 'createdAt' | 'updatedAt'>): Promise<Recipe> {
+  async create(recipeData: CreateRecipeData): Promise<Recipe> {
     // Validate required fields
-    if (!recipeData.title || !recipeData.userId) {
+    if (!recipeData.name || !recipeData.userId) {
       throw new ValidationError('Missing required fields');
     }
 

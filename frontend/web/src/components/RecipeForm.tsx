@@ -52,7 +52,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
 
   const [newTag, setNewTag] = useState('');
   const [imagePreview, setImagePreview] = useState<string | null>(
-    initialData?.imagePath ? `/upload/${initialData.imagePath}` : null
+    initialData?.imagePath && initialData.imagePath !== '' ? `/upload/${initialData.imagePath}` : null
   );
 
   const handleInputChange = (
@@ -78,12 +78,37 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        e.target.value = ''; // Reset input
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Image size should be less than 5MB');
+        e.target.value = ''; // Reset input
+        return;
+      }
+
+      console.log('Selected file:', {
+        name: file.name,
+        type: file.type,
+        size: file.size
+      });
+
       setFormData((prev) => ({ ...prev, image: file }));
+      
+      // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
+    } else {
+      setFormData((prev) => ({ ...prev, image: undefined }));
+      setImagePreview(null);
     }
   };
 
@@ -422,6 +447,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
         <label className="form-label">Image</label>
         <input
           type="file"
+          name="image"
           className="form-control"
           accept="image/*"
           onChange={handleImageChange}

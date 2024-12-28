@@ -79,7 +79,7 @@ Deno.test({
 
       // Then update it
       const updates = {
-        title: 'Updated Recipe Title',
+        name: 'Updated Recipe Title',
         description: 'Updated description',
       };
 
@@ -93,7 +93,7 @@ Deno.test({
       });
 
       const updatedRecipe = await assertSuccessResponse<TestRecipe>(updateResponse);
-      assertEquals(updatedRecipe.title, updates.title);
+      assertEquals(updatedRecipe.name, updates.name);
       assertEquals(updatedRecipe.description, updates.description);
     } finally {
       await testContext.server.close();

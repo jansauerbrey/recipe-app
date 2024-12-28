@@ -1,8 +1,8 @@
-import { Context } from 'https://deno.land/x/oak@v12.6.1/mod.ts';
 import { PayloadTooLargeError } from '../../types/errors.ts';
-import { AppMiddleware } from '../../types/middleware.ts';
+import { createMiddleware } from '../../types/middleware.ts';
+import { ControllerContext } from '../controllers/base.controller.ts';
 
-interface PayloadLimitConfig {
+export interface PayloadLimitConfig {
   json?: number; // JSON payload limit in bytes
   form?: number; // Form data limit in bytes
   text?: number; // Text payload limit in bytes
@@ -17,28 +17,52 @@ const DEFAULT_LIMITS: Required<PayloadLimitConfig> = {
   raw: 1024 * 1024, // 1MB for raw data
 };
 
-// Routes that need different limits
+  // Routes that need different limits
 const ROUTE_SPECIFIC_LIMITS: Record<string, PayloadLimitConfig> = {
   '/api/recipes': {
     json: 500 * 1024, // 500KB for recipe data (might include base64 images)
   },
   '/api/upload': {
-    form: 5 * 1024 * 1024, // 5MB for file uploads
+    form: 10 * 1024 * 1024, // 10MB for file uploads
   },
+};
+
+// Route patterns for dynamic routes
+const ROUTE_PATTERNS = {
+  UPLOAD: /^\/api\/upload\/[^\/]+$/,  // Matches /api/upload/{id}
 };
 
 /**
  * Middleware to limit payload size based on content type and route
  */
-export const payloadLimitMiddleware: AppMiddleware = async (
-  ctx: Context,
-  next: () => Promise<unknown>,
-): Promise<void> => {
+const payloadLimitHandler = async (ctx: ControllerContext, next: () => Promise<unknown>) => {
+  // Ensure request and headers exist
+  if (!ctx.request?.headers) {
+    await next();
+    return;
+  }
+
   const contentType = ctx.request.headers.get('content-type')?.toLowerCase() ?? '';
   const contentLength = parseInt(ctx.request.headers.get('content-length') ?? '0', 10);
 
-  // Get route-specific limits or default limits
-  const routeLimits = ROUTE_SPECIFIC_LIMITS[ctx.request.url.pathname] || DEFAULT_LIMITS;
+  // Get route-specific limits
+  const pathname = ctx.request.url.pathname;
+  let routeLimits: PayloadLimitConfig = {};
+  
+  // Check exact matches first
+  if (pathname in ROUTE_SPECIFIC_LIMITS) {
+    routeLimits = ROUTE_SPECIFIC_LIMITS[pathname];
+  } 
+  // Then check patterns
+  else if (ROUTE_PATTERNS.UPLOAD.test(pathname)) {
+    routeLimits = ROUTE_SPECIFIC_LIMITS['/api/upload'];
+  }
+
+  // Merge with default limits
+  routeLimits = {
+    ...DEFAULT_LIMITS,
+    ...routeLimits,
+  };
 
   // Skip payload check for GET and HEAD requests
   if (['GET', 'HEAD'].includes(ctx.request.method)) {
@@ -64,28 +88,8 @@ export const payloadLimitMiddleware: AppMiddleware = async (
     throw new PayloadTooLargeError(undefined, limit);
   }
 
-  // For multipart/form-data, we need to check the actual payload size
-  if (contentType.includes('multipart/form-data')) {
-    const body = ctx.request.body();
-    if (body.type === 'form-data') {
-      const formData = await body.value;
-      let totalSize = 0;
-
-      // Use type assertion since we know it's FormData
-      const form = formData as unknown as FormData;
-      for (const value of form.values()) {
-        if (typeof value === 'string') {
-          totalSize += new TextEncoder().encode(value).length;
-        } else if (value instanceof File) {
-          totalSize += value.size;
-        }
-
-        if (totalSize > limit) {
-          throw new PayloadTooLargeError(undefined, limit);
-        }
-      }
-    }
-  }
 
   await next();
 };
+
+export const payloadLimitMiddleware = createMiddleware(payloadLimitHandler);

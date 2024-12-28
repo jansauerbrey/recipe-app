@@ -49,6 +49,8 @@ const createMockContext = (
     },
     response: {
       headers: new Headers(),
+      status: 200,
+      body: undefined,
     },
     state: {},
     app: {},
@@ -65,16 +67,12 @@ const createMockContext = (
   return ctx;
 };
 
-const assertPayloadError = async (fn: () => Promise<void>): Promise<void> => {
-  try {
-    await fn();
-    throw new Error('Expected PayloadTooLargeError');
-  } catch (error: unknown) {
-    if (!(error instanceof PayloadTooLargeError)) {
-      throw new Error(`Expected PayloadTooLargeError but got ${error instanceof Error ? error.constructor.name : typeof error}`);
-    }
-    assertEquals(error instanceof PayloadTooLargeError, true);
-  }
+const assertPayloadError = async (ctx: TestContext, fn: () => Promise<void>): Promise<void> => {
+  await fn();
+  assertEquals(ctx.response.status, 413);
+  const body = ctx.response.body as { error: string; status: number };
+  assertEquals(body.status, 413);
+  assertEquals(typeof body.error === 'string' && body.error.includes('Request payload too large'), true);
 };
 
 Deno.test('Payload Limit Middleware', async (t) => {
@@ -89,7 +87,7 @@ Deno.test('Payload Limit Middleware', async (t) => {
     const mockCtx = createMockContext('POST', 'application/json', 200 * 1024); // 200KB (exceeds 100KB limit)
     const mockNext = (): Promise<void> => Promise.resolve();
 
-    await assertPayloadError(async () => {
+    await assertPayloadError(mockCtx, async () => {
       await payloadLimitMiddleware(mockCtx as unknown as Context<State>, mockNext);
     });
   });
@@ -105,7 +103,7 @@ Deno.test('Payload Limit Middleware', async (t) => {
     const mockCtx = createMockContext('POST', 'multipart/form-data', 600 * 1024, '/api/test', true);
     const mockNext = (): Promise<void> => Promise.resolve();
 
-    await assertPayloadError(async () => {
+    await assertPayloadError(mockCtx, async () => {
       await payloadLimitMiddleware(mockCtx as unknown as Context<State>, mockNext);
     });
   });
@@ -135,7 +133,7 @@ Deno.test('Payload Limit Middleware', async (t) => {
     const mockCtx = createMockContext('POST', 'text/plain', 60 * 1024); // Over 50KB limit
     const mockNext = (): Promise<void> => Promise.resolve();
 
-    await assertPayloadError(async () => {
+    await assertPayloadError(mockCtx, async () => {
       await payloadLimitMiddleware(mockCtx as unknown as Context<State>, mockNext);
     });
   });

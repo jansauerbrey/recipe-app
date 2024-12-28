@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Category } from '../../types/category';
 import { Ingredient } from '../../types/ingredient';
 import { ingredientsApi } from '../../utils/ingredientsApi';
@@ -20,7 +20,7 @@ const CreateIngredientModal: React.FC<CreateIngredientModalProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const initialFormData = {
+  const initialFormData = useMemo(() => ({
     name: {
       en: '',
       de: '',
@@ -33,7 +33,7 @@ const CreateIngredientModal: React.FC<CreateIngredientModalProps> = ({
       sm: '',
       md: '',
     },
-  };
+  }), []);
 
   const [formData, setFormData] = useState(initialFormData);
 
@@ -52,7 +52,7 @@ const CreateIngredientModal: React.FC<CreateIngredientModalProps> = ({
       // Reset form when modal closes
       setFormData(initialFormData);
     }
-  }, [show, initialName]);
+  }, [show, initialName, initialFormData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

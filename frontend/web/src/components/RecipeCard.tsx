@@ -13,15 +13,23 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onFavoriteToggle, onSch
   return (
     <div className="recipe-card card h-100">
       <Link to={`/recipes/${recipe._id}`} className="text-decoration-none">
-        <img
-          src={recipe.imagePath?.startsWith('http') ? recipe.imagePath : `/upload/${recipe.imagePath}`}
-          className="card-img-top"
-          alt={recipe.name}
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.src = '/img/dishtypes/no_image.png';
-          }}
-        />
+        {recipe.imagePath ? (
+          <img
+            src={recipe.imagePath.startsWith('http') ? recipe.imagePath : `/upload/${recipe.imagePath}`}
+            className="card-img-top"
+            alt={recipe.name}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = '/img/dishtypes/no_image.png';
+            }}
+          />
+        ) : (
+          <img
+            src="/img/dishtypes/no_image.png"
+            className="card-img-top"
+            alt={recipe.name}
+          />
+        )}
       </Link>
       <div className="card-body d-flex flex-column">
         <Link to={`/recipes/${recipe._id}`} className="text-decoration-none">

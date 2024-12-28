@@ -34,7 +34,7 @@ Deno.test({
 
       const createdRecipe = await assertSuccessResponse<TestRecipe>(response, 201);
       assertExists(createdRecipe._id, 'Response should include recipe ID');
-      assertEquals(createdRecipe.title, recipe.title);
+      assertEquals(createdRecipe.name, recipe.name);
     } finally {
       await testContext.server.close();
       await cleanupTest();
@@ -73,7 +73,7 @@ Deno.test({
       });
 
       const retrievedRecipe = await assertSuccessResponse<TestRecipe>(getResponse);
-      assertEquals(retrievedRecipe.title, recipe.title);
+      assertEquals(retrievedRecipe.name, recipe.name);
     } finally {
       await testContext.server.close();
       await cleanupTest();
@@ -108,7 +108,7 @@ Deno.test({
 
       // Then update it
       const updates = {
-        title: 'Updated Recipe Title',
+        name: 'Updated Recipe Title',
         description: 'Updated description',
       };
 
@@ -122,7 +122,7 @@ Deno.test({
       });
 
       const updatedRecipe = await assertSuccessResponse<TestRecipe>(updateResponse);
-      assertEquals(updatedRecipe.title, updates.title);
+      assertEquals(updatedRecipe.name, updates.name);
       assertEquals(updatedRecipe.description, updates.description);
     } finally {
       await testContext.server.close();

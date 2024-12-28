@@ -34,16 +34,25 @@ const DishTypesList: React.FC<DishTypesListProps> = ({ dishTypes }) => {
         {dishTypes.map((dishType) => (
           <div key={dishType._id} className="col-12 col-sm-6 col-lg-4">
             <div className="card h-100">
-              <img
-                src={`/img/dishtypes/${dishType.imagePath}`}
-                alt={dishType.name.en}
-                className="card-img-top"
-                style={{ height: '200px', objectFit: 'cover' }}
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = '/img/dishtypes/no_image.png';
-                }}
-              />
+              {dishType.imagePath ? (
+                <img
+                  src={`/img/dishtypes/${dishType.imagePath}`}
+                  alt={dishType.name.en}
+                  className="card-img-top"
+                  style={{ height: '200px', objectFit: 'cover' }}
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = '/img/dishtypes/no_image.png';
+                  }}
+                />
+              ) : (
+                <img
+                  src="/img/dishtypes/no_image.png"
+                  alt={dishType.name.en}
+                  className="card-img-top"
+                  style={{ height: '200px', objectFit: 'cover' }}
+                />
+              )}
               <div className="card-body">
                 <h3 className="card-title h5">{dishType.name.en}</h3>
                 <div className="text-muted mb-2">

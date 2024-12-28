@@ -1,5 +1,5 @@
 import { RecipeRepository } from '../../data/repositories/recipe.repository.ts';
-import { Recipe, RecipeResponse } from '../../types/mod.ts';
+import { Recipe, RecipeResponse, CreateRecipeData, RecipeIngredient } from '../../types/mod.ts';
 import { ResourceNotFoundError, ValidationError } from '../../types/errors.ts';
 
 export interface RecipeFilter {
@@ -11,7 +11,7 @@ export interface RecipeFilter {
 }
 
 export interface IRecipeService {
-  createRecipe(recipe: Omit<Recipe, 'id' | 'createdAt' | 'updatedAt'>): Promise<RecipeResponse>;
+  createRecipe(recipe: CreateRecipeData): Promise<RecipeResponse>;
   getRecipeById(id: string): Promise<RecipeResponse>;
   listUserRecipes(userId: string): Promise<RecipeResponse[]>;
   listRecipesWithFilters(filter: RecipeFilter): Promise<RecipeResponse[]>;
@@ -23,19 +23,17 @@ export interface IRecipeService {
 export class RecipeService implements IRecipeService {
   constructor(private recipeRepository: RecipeRepository) {}
 
-  async createRecipe(
-    recipe: Omit<Recipe, 'id' | 'createdAt' | 'updatedAt'>,
-  ): Promise<RecipeResponse> {
+  async createRecipe(recipe: CreateRecipeData): Promise<RecipeResponse> {
     // Validate required fields
-    if (!recipe.title) {
-      throw new ValidationError('Title is required');
+    if (!recipe.name) {
+      throw new ValidationError('Name is required');
     }
     if (!recipe.userId) {
       throw new ValidationError('User ID is required');
     }
 
     // Validate ingredients
-    if (recipe.ingredients?.some((ing) => !ing.name || ing.amount <= 0 || !ing.unit)) {
+    if (recipe.ingredients?.some((ing: RecipeIngredient) => !ing.name || ing.amount <= 0 || !ing.unit)) {
       throw new ValidationError('Invalid ingredient');
     }
 
@@ -107,10 +105,10 @@ export class RecipeService implements IRecipeService {
     // Count user's recipes (only user-specific count)
     counts['my'] = userRecipes.length;
 
-    // Count by category (all recipes)
+    // Count by dishType (all recipes)
     allRecipes.forEach((recipe) => {
-      if (recipe.category) {
-        counts[recipe.category] = (counts[recipe.category] || 0) + 1;
+      if (recipe.dishType?.identifier) {
+        counts[recipe.dishType.identifier] = (counts[recipe.dishType.identifier] || 0) + 1;
       }
     });
 

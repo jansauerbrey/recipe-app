@@ -1,4 +1,4 @@
-import { Context, State } from 'oak';
+import { Context, State } from 'https://deno.land/x/oak@v12.6.1/mod.ts';
 
 export type Middleware = (context: Context, next: () => Promise<void>) => Promise<void>;
 
@@ -10,7 +10,7 @@ export interface MockState extends State {
   [key: string]: unknown;
 }
 
-export interface MockContext extends Omit<Context, 'state'> {
+export interface MockContext {
   state: MockState;
   request: {
     method: string;
@@ -25,10 +25,7 @@ export interface MockContext extends Omit<Context, 'state'> {
     headers: Headers;
     type: string;
   };
-  cookies: {
-    get(key: string): string | undefined;
-    set(key: string, value: string, options?: any): void;
-  };
+  cookies: Map<string, string>;
   throw(status: number, message?: string): never;
   assert(condition: boolean, status: number, message?: string): void;
 }
@@ -54,7 +51,7 @@ export interface TestUser {
 
 export interface TestRecipe {
   id: string;
-  title: string;
+  name: string;
   description: string;
   ingredients: Array<{
     name: string;

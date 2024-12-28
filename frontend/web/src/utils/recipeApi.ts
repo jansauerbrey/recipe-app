@@ -28,48 +28,90 @@ export const recipeApi = {
 
   // Create a new recipe
   async createRecipe(recipe: RecipeFormData): Promise<Recipe> {
-    const formData = new FormData();
-    
-    // Add recipe data
-    formData.append('recipe', JSON.stringify({
-      name: recipe.name,
-      language: recipe.language,
-      instructions: recipe.instructions,
-      prepTime: recipe.prepTime,
-      yield: recipe.yield,
-      totalTime: recipe.totalTime,
-      cookTime: recipe.cookTime,
-      kilocalories: recipe.kilocalories,
-      waitTime: recipe.waitTime,
-      carb: recipe.carb,
-      fat: recipe.fat,
-      protein: recipe.protein,
-      ingredients: recipe.ingredients,
-      tags: recipe.tags,
-      dishType: recipe.dishType,
-    }));
+    try {
+      // First, create the recipe
+      const recipeResponse = await api.post<Recipe>('/recipes', {
+        name: recipe.name,
+        language: recipe.language,
+        instructions: recipe.instructions,
+        prepTime: recipe.prepTime,
+        yield: recipe.yield,
+        totalTime: recipe.totalTime,
+        cookTime: recipe.cookTime,
+        kilocalories: recipe.kilocalories,
+        waitTime: recipe.waitTime,
+        carb: recipe.carb,
+        fat: recipe.fat,
+        protein: recipe.protein,
+        ingredients: recipe.ingredients,
+        tags: recipe.tags,
+        dishType: recipe.dishType,
+      });
 
-    // Add image if present
-    if (recipe.image) {
-      formData.append('image', recipe.image);
+      // If there's an image, upload it in a separate call
+      if (recipe.image) {
+        const formData = new FormData();
+        // Ensure we're sending the file with the correct field name and filename
+        formData.append('image', recipe.image, recipe.image.name);
+        
+        // Log the form data for debugging
+        console.log('Uploading image:', {
+          fileName: recipe.image.name,
+          fileType: recipe.image.type,
+          fileSize: recipe.image.size,
+          formDataEntries: Array.from(formData.entries()).map(([key, value]) => ({
+            key,
+            value: value instanceof File ? {
+              name: value.name,
+              type: value.type,
+              size: value.size
+            } : value
+          }))
+        });
+        
+        await api.post(`/upload/${recipeResponse._id}`, formData);
+      }
+
+      return recipeResponse;
+    } catch (error) {
+      throw error;
     }
-
-    return api.post<Recipe>('/recipes', formData);
   },
 
   // Update an existing recipe
   async updateRecipe(id: string, recipe: Partial<RecipeFormData>): Promise<Recipe> {
-    const formData = new FormData();
-    
-    // Add recipe data
-    formData.append('recipe', JSON.stringify(recipe));
+    try {
+      // First update the recipe data
+      const recipeResponse = await api.put<Recipe>(`/recipes/${id}`, {
+        name: recipe.name,
+        language: recipe.language,
+        instructions: recipe.instructions,
+        prepTime: recipe.prepTime,
+        yield: recipe.yield,
+        totalTime: recipe.totalTime,
+        cookTime: recipe.cookTime,
+        kilocalories: recipe.kilocalories,
+        waitTime: recipe.waitTime,
+        carb: recipe.carb,
+        fat: recipe.fat,
+        protein: recipe.protein,
+        ingredients: recipe.ingredients,
+        tags: recipe.tags,
+        dishType: recipe.dishType,
+      });
 
-    // Add image if present
-    if (recipe.image) {
-      formData.append('image', recipe.image);
+      // If there's an image, upload it in a separate call
+      if (recipe.image) {
+        const formData = new FormData();
+        formData.append('image', recipe.image, recipe.image.name);
+        
+        await api.post(`/upload/${id}`, formData);
+      }
+
+      return recipeResponse;
+    } catch (error) {
+      throw error;
     }
-
-    return api.put<Recipe>(`/recipes/${id}`, formData);
   },
 
   // Delete a recipe

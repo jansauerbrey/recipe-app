@@ -23,24 +23,24 @@ Deno.test({
 
       const createdRecipe = await repository.create(recipe);
       assertExists(createdRecipe.id);
-      assertEquals(createdRecipe.title, recipe.title);
+      assertEquals(createdRecipe.name, recipe.name);
       assertEquals(createdRecipe.userId, recipe.userId);
 
       // Read
       const foundRecipe = await repository.findById(createdRecipe.id);
       assertExists(foundRecipe);
       assertEquals(foundRecipe.id, createdRecipe.id);
-      assertEquals(foundRecipe.title, recipe.title);
+      assertEquals(foundRecipe.name, recipe.name);
 
       // Update
       const updates = {
-        title: 'Updated Recipe Title',
+        name: 'Updated Recipe Title',
         description: 'Updated description',
       };
 
       const updatedRecipe = await repository.update(createdRecipe.id, updates);
       assertEquals(updatedRecipe.id, createdRecipe.id);
-      assertEquals(updatedRecipe.title, updates.title);
+      assertEquals(updatedRecipe.name, updates.name);
       assertEquals(updatedRecipe.description, updates.description);
 
       // Delete

@@ -46,15 +46,23 @@ const RecipeDetail: React.FC<RecipeDetailProps> = ({
       </div>
 
       <div className="recipe-image mb-4">
-        <img
-          src={recipe.imagePath?.startsWith('http') ? recipe.imagePath : `/upload/${recipe.imagePath}`}
-          alt={recipe.name}
-          className="img-fluid rounded"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.src = '/img/dishtypes/no_image.png';
-          }}
-        />
+        {recipe.imagePath ? (
+          <img
+            src={recipe.imagePath.startsWith('http') ? recipe.imagePath : `/upload/${recipe.imagePath}`}
+            alt={recipe.name}
+            className="img-fluid rounded"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = '/img/dishtypes/no_image.png';
+            }}
+          />
+        ) : (
+          <img
+            src="/img/dishtypes/no_image.png"
+            alt={recipe.name}
+            className="img-fluid rounded"
+          />
+        )}
       </div>
 
       <div className="recipe-info mb-4">
