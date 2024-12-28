@@ -6,13 +6,23 @@ import { createTagsRouter } from './tags.ts';
 import { createUnitsRouter } from './units.ts';
 import { createDishTypesRouter } from './dishtypes.ts';
 import { createRecipesRouter } from './recipes.ts';
+import { createCategoriesRouter } from './categories.ts';
+import { createIngredientsRouter } from './ingredients.ts';
 import { AppState, createMiddleware } from '../../types/middleware.ts';
 import { ControllerContext } from '../controllers/base.controller.ts';
 
 type AppRouter = Router<AppState>;
 
 export async function initializeRoutes(router: AppRouter, dependencies: Dependencies) {
-  const { userService, recipeService, tagsService, unitService, dishTypeService } = dependencies;
+  const { 
+    userService, 
+    recipeService, 
+    tagsService, 
+    unitService, 
+    dishTypeService,
+    categoryService,
+    ingredientService
+  } = dependencies;
 
   // Add tags routes
   const tagsRouter = createTagsRouter(tagsService);
@@ -33,6 +43,16 @@ export async function initializeRoutes(router: AppRouter, dependencies: Dependen
   const recipesRouter = createRecipesRouter(recipeService);
   router.use(recipesRouter.routes());
   router.use(recipesRouter.allowedMethods());
+
+  // Add category routes
+  const categoriesRouter = createCategoriesRouter(categoryService);
+  router.use(categoriesRouter.routes());
+  router.use(categoriesRouter.allowedMethods());
+
+  // Add ingredient routes
+  const ingredientsRouter = createIngredientsRouter(ingredientService);
+  router.use(ingredientsRouter.routes());
+  router.use(ingredientsRouter.allowedMethods());
 
   // Initialize user controller
   const userController = new UserController(userService);
