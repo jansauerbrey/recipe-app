@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { Recipe, RecipeFormData, DishType, Unit } from '../types/recipe';
 import IngredientTypeahead from './ingredients/IngredientTypeahead';
+import CreateIngredientModal from './ingredients/CreateIngredientModal';
 import { Ingredient as ApiIngredient } from '../types/ingredient';
+import { Category } from '../types/category';
 
 interface RecipeFormProps {
   initialData?: Recipe;
   dishTypes: DishType[];
   units: Unit[];
+  categories: Category[];
   onSubmit: (data: RecipeFormData) => Promise<void>;
   onCancel: () => void;
 }
@@ -17,7 +20,10 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
   units,
   onSubmit,
   onCancel,
+  categories,
 }) => {
+  const [showCreateIngredientModal, setShowCreateIngredientModal] = useState(false);
+  const [newIngredientName, setNewIngredientName] = useState('');
   const [formData, setFormData] = useState<RecipeFormData>({
     name: initialData?.name || '',
     language: initialData?.language || 'en',
@@ -81,18 +87,23 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
     }
   };
 
+  const [typeaheadKey, setTypeaheadKey] = useState(0);
+
   const addIngredient = () => {
     if (newIngredient.amount > 0 && newIngredient._id) {
       setFormData((prev) => ({
         ...prev,
         ingredients: [...prev.ingredients, { ...newIngredient }],
       }));
+      // Reset ingredient form
       setNewIngredient({
         _id: '',
         name: { en: '', de: '', fi: '' },
         amount: 0,
         unit: units.length > 0 ? units[0] : { _id: '', name: { en: '', de: '', fi: '' } },
       });
+      // Force typeahead to reset by changing its key
+      setTypeaheadKey(prev => prev + 1);
     }
   };
 
@@ -126,7 +137,8 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="recipe-form">
+    <div>
+      <form onSubmit={handleSubmit} className="recipe-form">
       <div className="mb-3">
         <label className="form-label">Recipe Name</label>
         <input
@@ -320,12 +332,17 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
             ))}
           </select>
           <IngredientTypeahead
+            key={typeaheadKey}
             onSelect={(ingredient: ApiIngredient) => {
               setNewIngredient((prev) => ({
                 ...prev,
                 name: ingredient.name,
                 _id: ingredient._id,
               }));
+            }}
+            onCreateNew={(name: string) => {
+              setNewIngredientName(name);
+              setShowCreateIngredientModal(true);
             }}
             placeholder="Search ingredients..."
             selectedIngredient={newIngredient._id ? { 
@@ -427,7 +444,22 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
           {initialData ? 'Update Recipe' : 'Create Recipe'}
         </button>
       </div>
-    </form>
+      </form>
+      <CreateIngredientModal
+      show={showCreateIngredientModal}
+      onClose={() => setShowCreateIngredientModal(false)}
+      onIngredientCreated={(ingredient) => {
+        setNewIngredient((prev) => ({
+          ...prev,
+          name: ingredient.name,
+          _id: ingredient._id,
+        }));
+        setShowCreateIngredientModal(false);
+      }}
+      categories={categories}
+      initialName={newIngredientName}
+      />
+    </div>
   );
 };
 

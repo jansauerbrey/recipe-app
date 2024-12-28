@@ -32,14 +32,6 @@ export class IngredientService {
       throw new ValidationError('Category ID is required');
     }
 
-    if (data.rewe_art_no === undefined) {
-      throw new ValidationError('REWE article number is required');
-    }
-
-    if (!data.rewe_img_links?.xs || !data.rewe_img_links?.sm || !data.rewe_img_links?.md) {
-      throw new ValidationError('All REWE image links (xs, sm, md) are required');
-    }
-
     try {
       // Validate category exists
       const category = await this.categoryRepository.findById(data.category_id);
@@ -56,8 +48,8 @@ export class IngredientService {
     return await this.repository.create(userId, {
       name: data.name,
       category_id: new ObjectId(data.category_id),
-      rewe_art_no: data.rewe_art_no,
-      rewe_img_links: data.rewe_img_links,
+      ...(data.rewe_art_no !== undefined && { rewe_art_no: data.rewe_art_no }),
+      ...(data.rewe_img_links && { rewe_img_links: data.rewe_img_links }),
     });
   }
 
@@ -65,8 +57,6 @@ export class IngredientService {
     // Prepare update data
     const updateData: Partial<Ingredient> = {
       ...(data.name && { name: data.name }),
-      ...(data.rewe_art_no !== undefined && { rewe_art_no: data.rewe_art_no }),
-      ...(data.rewe_img_links && { rewe_img_links: data.rewe_img_links }),
     };
 
     // Handle category_id separately

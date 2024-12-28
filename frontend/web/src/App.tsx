@@ -16,6 +16,7 @@ import { ImpressumPage } from './pages/ImpressumPage';
 import { RecipesPage } from './pages/RecipesPage';
 import RecipeDetailPage from './pages/RecipeDetailPage';
 import CreateRecipePage from './pages/CreateRecipePage';
+import EditRecipePage from './pages/EditRecipePage';
 import UnitsPage from './pages/units/UnitsPage';
 import CreateUnitPage from './pages/units/CreateUnitPage';
 import EditUnitPage from './pages/units/EditUnitPage';
@@ -68,6 +69,7 @@ const AppContent: React.FC = () => {
           <Route index element={<RecipesPage />} />
           <Route path="new" element={<CreateRecipePage />} />
           <Route path=":id" element={<RecipeDetailPage />} />
+          <Route path=":id/edit" element={<EditRecipePage />} />
           <Route path="filter" element={<RecipesPage />} />
         </Route>
 

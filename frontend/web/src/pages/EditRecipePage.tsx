@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Recipe, Unit, DishType } from '../types/recipe';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Unit, RecipeFormData, DishType, Recipe } from '../types/recipe';
 import { Category } from '../types/category';
 import { api } from '../utils/api';
 import { recipeApi } from '../utils/recipeApi';
-import RecipeDetail from '../components/RecipeDetail';
 import RecipeForm from '../components/RecipeForm';
 
-const RecipeDetailPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+const EditRecipePage: React.FC = () => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
   const [units, setUnits] = useState<Unit[]>([]);
   const [dishTypes, setDishTypes] = useState<DishType[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -33,53 +31,26 @@ const RecipeDetailPage: React.FC = () => {
         setDishTypes(dishTypesData);
         setCategories(categoriesData);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load recipe');
+        setError('Failed to load required data');
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (id) {
-      fetchData();
-    }
+    fetchData();
   }, [id]);
 
-  const handleFavoriteToggle = async (recipeId: string) => {
+  const handleSubmit = async (formData: RecipeFormData) => {
     try {
-      const updatedRecipe = await recipeApi.toggleFavorite(recipeId);
-      setRecipe(updatedRecipe);
-    } catch (err) {
-      setError('Failed to update favorite status');
-    }
-  };
-
-  const handleEdit = (recipeId: string) => {
-    setIsEditing(true);
-  };
-
-  const handleDelete = async (recipeId: string) => {
-    if (window.confirm('Are you sure you want to delete this recipe?')) {
-      try {
-        await recipeApi.deleteRecipe(recipeId);
-        navigate('/recipes');
-      } catch (err) {
-        setError('Failed to delete recipe');
-      }
-    }
-  };
-
-  const handleFormSubmit = async (formData: any) => {
-    try {
-      const updatedRecipe = await recipeApi.updateRecipe(id!, formData);
-      setRecipe(updatedRecipe);
-      setIsEditing(false);
+      await recipeApi.updateRecipe(id!, formData);
+      navigate(`/recipes/${id}`);
     } catch (err) {
       setError('Failed to update recipe');
     }
   };
 
   const handleCancel = () => {
-    setIsEditing(false);
+    navigate(`/recipes/${id}`);
   };
 
   if (isLoading) {
@@ -110,25 +81,17 @@ const RecipeDetailPage: React.FC = () => {
 
   return (
     <div className="container py-4">
-      {isEditing ? (
-        <RecipeForm
-          initialData={recipe}
-          dishTypes={dishTypes}
-          units={units}
-          categories={categories}
-          onSubmit={handleFormSubmit}
-          onCancel={handleCancel}
-        />
-      ) : (
-        <RecipeDetail
-          recipe={recipe}
-          onFavoriteToggle={handleFavoriteToggle}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
-      )}
+      <h1 className="mb-4">Edit Recipe</h1>
+      <RecipeForm
+        initialData={recipe}
+        dishTypes={dishTypes}
+        units={units}
+        categories={categories}
+        onSubmit={handleSubmit}
+        onCancel={handleCancel}
+      />
     </div>
   );
 };
 
-export default RecipeDetailPage;
+export default EditRecipePage;
