@@ -22,6 +22,12 @@ import EditUnitPage from './pages/units/EditUnitPage';
 import DishTypesPage from './pages/dishtypes/DishTypesPage';
 import CreateDishTypePage from './pages/dishtypes/CreateDishTypePage';
 import EditDishTypePage from './pages/dishtypes/EditDishTypePage';
+import CategoriesPage from './pages/categories/CategoriesPage';
+import CreateCategoryPage from './pages/categories/CreateCategoryPage';
+import EditCategoryPage from './pages/categories/EditCategoryPage';
+import IngredientsPage from './pages/ingredients/IngredientsPage';
+import CreateIngredientPage from './pages/ingredients/CreateIngredientPage';
+import EditIngredientPage from './pages/ingredients/EditIngredientPage';
 
 // Initialize React Query client
 const queryClient = new QueryClient({
@@ -81,7 +87,16 @@ const AppContent: React.FC = () => {
                   <Route path="create" element={<CreateUnitPage />} />
                   <Route path="edit/:id" element={<EditUnitPage />} />
                 </Route>
-                <Route path="ingredients/*" element={<div>Ingredients Management (Coming Soon)</div>} />
+                <Route path="ingredients">
+                  <Route index element={<IngredientsPage />} />
+                  <Route path="create" element={<CreateIngredientPage />} />
+                  <Route path="edit/:id" element={<EditIngredientPage />} />
+                </Route>
+                <Route path="categories">
+                  <Route index element={<CategoriesPage />} />
+                  <Route path="create" element={<CreateCategoryPage />} />
+                  <Route path="edit/:id" element={<EditCategoryPage />} />
+                </Route>
                 <Route path="tags/*" element={<div>Tags Management (Coming Soon)</div>} />
                 <Route path="dishtypes">
                   <Route index element={<DishTypesPage />} />

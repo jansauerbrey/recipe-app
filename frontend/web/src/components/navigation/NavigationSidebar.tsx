@@ -12,6 +12,7 @@ import {
   IconTags,
   IconBowl,
   IconUsers,
+  IconCategory,
   IconLogout,
   IconLogin,
   IconUserPlus,
@@ -19,14 +20,14 @@ import {
 } from '@tabler/icons-react';
 import { useAuth } from '../../contexts/AuthContext';
 
-interface NavLink {
+interface NavLinkItem {
   icon: React.ReactNode;
   label: string;
   to: string;
   onClick?: () => void;
 }
 
-interface NavbarLinkProps extends NavLink {}
+interface NavbarLinkProps extends NavLinkItem {}
 
 function NavbarLink({ icon, label, to, onClick }: NavbarLinkProps) {
   const location = useLocation();
@@ -68,7 +69,7 @@ export function NavigationSidebar({ setOpened }: NavigationSidebarProps) {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const { isAuthenticated, isAdmin, logout } = useAuth();
 
-  const userLinks: NavLink[] = [
+  const userLinks: NavLinkItem[] = [
     { icon: <IconHome size="1.2rem" stroke={1.5} />, label: 'Home', to: '/' },
     { icon: <IconChefHat size="1.2rem" stroke={1.5} />, label: 'Recipes', to: '/recipes' },
     { icon: <IconCalendar size="1.2rem" stroke={1.5} />, label: 'Schedules', to: '/schedules' },
@@ -76,15 +77,16 @@ export function NavigationSidebar({ setOpened }: NavigationSidebarProps) {
     { icon: <IconSettings size="1.2rem" stroke={1.5} />, label: 'Settings', to: '/settings' },
   ];
 
-  const adminLinks: NavLink[] = [
+  const adminLinks: NavLinkItem[] = [
     { icon: <IconRuler size="1.2rem" stroke={1.5} />, label: 'Units', to: '/admin/units' },
     { icon: <IconApple size="1.2rem" stroke={1.5} />, label: 'Ingredients', to: '/admin/ingredients' },
+    { icon: <IconCategory size="1.2rem" stroke={1.5} />, label: 'Categories', to: '/admin/categories' },
     { icon: <IconTags size="1.2rem" stroke={1.5} />, label: 'Tags', to: '/admin/tags' },
     { icon: <IconBowl size="1.2rem" stroke={1.5} />, label: 'Dish Types', to: '/admin/dishtypes' },
     { icon: <IconUsers size="1.2rem" stroke={1.5} />, label: 'Users', to: '/admin/users' },
   ];
 
-  const authLinks: NavLink[] = isAuthenticated ? [
+  const authLinks: NavLinkItem[] = isAuthenticated ? [
     { icon: <IconLogout size="1.2rem" stroke={1.5} />, label: 'Logout', to: '/logout', onClick: logout }
   ] : [
     { icon: <IconLogin size="1.2rem" stroke={1.5} />, label: 'Login', to: '/login' },
