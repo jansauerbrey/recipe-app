@@ -127,6 +127,34 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         continue-on-error: true
 
+  build-frontend:
+    needs: [test, security, lint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'yarn'
+
+      - name: Install Frontend Dependencies
+        run: |
+          cd frontend/web
+          yarn install
+
+      - name: Build Frontend
+        run: |
+          cd frontend/web
+          yarn build
+
+      - name: Upload Frontend Build
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-build
+          path: frontend/web/build
+
   build-android:
     needs: [test, security, lint]
     runs-on: ubuntu-latest
