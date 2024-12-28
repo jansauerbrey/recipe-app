@@ -59,23 +59,29 @@ const errorHandlingMiddleware: Middleware<AppState> = async (ctx: Context, next:
 const staticFileMiddleware: Middleware<AppState> = async (ctx: Context, next: Next) => {
   try {
     if (ctx.request.url.pathname.startsWith('/upload/')) {
-      await ctx.send({
-        root: Deno.cwd(),
-        path: ctx.request.url.pathname,
-      });
+      // Only serve uploads in local development
+      if (Deno.env.get('DENO_DEPLOYMENT_ID') === undefined) {
+        await ctx.send({
+          root: '.',
+          path: ctx.request.url.pathname,
+        });
+      } else {
+        ctx.response.status = Status.NotFound;
+        return;
+      }
     } else if (ctx.request.url.pathname.startsWith('/api/')) {
       await next();
     } else {
       try {
-        // Try to serve static files first
+        // Try to serve static files from public directory
         await ctx.send({
-          root: `${Deno.cwd()}/public`,
+          root: './public',
           path: ctx.request.url.pathname,
         });
       } catch {
         // If file not found, serve index.html for client-side routing
         await ctx.send({
-          root: `${Deno.cwd()}/public`,
+          root: './public',
           path: 'index.html',
         });
       }
@@ -86,13 +92,16 @@ const staticFileMiddleware: Middleware<AppState> = async (ctx: Context, next: Ne
 };
 
 export async function createApp(): Promise<Application> {
-  // Load environment variables based on environment
-  const envFile = Deno.env.get('ENVIRONMENT') === 'test' ? '.env.test' : '.env';
-  await load({
-    envPath: envFile,
-    export: true,
-    allowEmptyValues: true,
-  });
+  // Load environment variables from .env file in local development
+  if (Deno.env.get('DENO_DEPLOYMENT_ID') === undefined) {
+    const envFile = Deno.env.get('ENVIRONMENT') === 'test' ? '.env.test' : '.env';
+    await load({
+      envPath: envFile,
+      export: true,
+      allowEmptyValues: true,
+    });
+  }
+  // In Deno Deploy, environment variables are set through the dashboard
 
   const appConfig: AppConfig = getConfig();
   const logger = console;
@@ -103,9 +112,9 @@ export async function createApp(): Promise<Application> {
     logger.info('Connecting to MongoDB...', { uri: appConfig.MONGODB_URI });
     await mongoClient.connect(appConfig.MONGODB_URI);
     logger.info('MongoDB connection successful');
-  } catch (err) {
+  } catch (err: unknown) {
     logger.error('MongoDB connection error:', err);
-    Deno.exit(1);
+    throw new Error(`Failed to connect to MongoDB: ${err instanceof Error ? err.message : 'Unknown error'}`);
   }
   
   // Create database instance
@@ -147,10 +156,12 @@ export async function createApp(): Promise<Application> {
     ingredientRepository,
   };
 
-  // Ensure upload directory exists
-  const uploadDir = join(Deno.cwd(), 'upload');
-  await ensureDir(uploadDir);
-  console.log('Upload directory ensured:', uploadDir);
+  // Ensure upload directory exists in local development
+  if (Deno.env.get('DENO_DEPLOYMENT_ID') === undefined) {
+    const uploadDir = join(Deno.cwd(), 'upload');
+    await ensureDir(uploadDir);
+    console.log('Upload directory ensured:', uploadDir);
+  }
 
   // Initialize Oak application
   const app = new Application();
