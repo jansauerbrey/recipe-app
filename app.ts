@@ -17,10 +17,10 @@ import { Context, Middleware, Next } from 'https://deno.land/x/oak@v12.6.1/mod.t
 import { AppError } from './src/types/errors.ts';
 
 // Import layers
-import { RecipeRepository, UserRepository, UnitRepository, DishTypeRepository } from './src/data/mod.ts';
+import { RecipeRepository, UserRepository, UnitRepository, DishTypeRepository, CategoryRepository, IngredientRepository } from './src/data/mod.ts';
 import { MongoTagsRepository } from './src/data/repositories/tags.repository.ts';
 import { MongoDatabase } from './src/data/database.ts';
-import { RecipeService, UserService, TagsService, UnitService, DishTypeService } from './src/business/mod.ts';
+import { RecipeService, UserService, TagsService, UnitService, DishTypeService, CategoryService, IngredientService } from './src/business/mod.ts';
 import { initializeRoutes } from './src/presentation/routes/mod.ts';
 import { Dependencies } from './src/types/mod.ts';
 import { AppConfig, getConfig } from './src/types/env.ts';
@@ -104,6 +104,8 @@ export async function createApp(): Promise<Application> {
   const tagsRepository = new MongoTagsRepository(client);
   const unitRepository = new UnitRepository(client);
   const dishTypeRepository = new DishTypeRepository(client);
+  const categoryRepository = new CategoryRepository(client);
+  const ingredientRepository = new IngredientRepository(client);
 
   // Initialize services
   const userService = new UserService(userRepository);
@@ -111,6 +113,8 @@ export async function createApp(): Promise<Application> {
   const tagsService = new TagsService(tagsRepository);
   const unitService = new UnitService(unitRepository);
   const dishTypeService = new DishTypeService(dishTypeRepository);
+  const categoryService = new CategoryService(categoryRepository);
+  const ingredientService = new IngredientService(ingredientRepository, categoryRepository);
 
   // Create dependencies container
   const dependencies: Dependencies = {
@@ -124,6 +128,10 @@ export async function createApp(): Promise<Application> {
     unitRepository,
     dishTypeService,
     dishTypeRepository,
+    categoryService,
+    categoryRepository,
+    ingredientService,
+    ingredientRepository,
   };
 
   // Initialize Oak application

@@ -10,12 +10,18 @@ export * from './recipe.ts';
 export * from './unit.ts';
 export * from './dishtype.ts';
 export * from './filter.ts';
+export * from './category.ts';
+export * from './ingredient.ts';
 
 import { TagsService } from '../business/services/tags.service.ts';
 import { UnitService } from '../business/services/unit.service.ts';
 import { DishTypeService } from '../business/services/dishtype.service.ts';
+import { CategoryService } from '../business/services/category.service.ts';
+import { IngredientService } from '../business/services/ingredient.service.ts';
 import { UnitRepository } from '../data/repositories/unit.repository.ts';
 import { DishTypeRepository } from '../data/repositories/dishtype.repository.ts';
+import { CategoryRepository } from '../data/repositories/category.repository.ts';
+import { IngredientRepository } from '../data/repositories/ingredient.repository.ts';
 
 export interface Dependencies {
   db: Database;
@@ -28,9 +34,13 @@ export interface Dependencies {
   unitRepository: UnitRepository;
   dishTypeService: DishTypeService;
   dishTypeRepository: DishTypeRepository;
+  categoryService: CategoryService;
+  categoryRepository: CategoryRepository;
+  ingredientService: IngredientService;
+  ingredientRepository: IngredientRepository;
 }
 
-export interface Ingredient {
+export interface RecipeIngredient {
   name: string;
   amount: number;
   unit: string;
@@ -41,7 +51,7 @@ export interface Recipe {
   userId: string;
   title: string;
   description: string;
-  ingredients: Ingredient[];
+  ingredients: RecipeIngredient[];
   instructions: string[];
   tags: string[];
   dishType: string;

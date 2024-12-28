@@ -99,7 +99,83 @@ components:
         - instructions
         - userId
 
+    LocalizedName:
+      type: object
+      properties:
+        en:
+          type: string
+        de:
+          type: string
+        fi:
+          type: string
+      required:
+        - en
+        - de
+        - fi
+
+    Category:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          $ref: '#/components/schemas/LocalizedName'
+        parent_id:
+          type: string
+          nullable: true
+        rewe_cat_id:
+          type: integer
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - _id
+        - name
+        - rewe_cat_id
+        - updated_at
+
+    ReweImageLinks:
+      type: object
+      properties:
+        xs:
+          type: string
+        sm:
+          type: string
+        md:
+          type: string
+      required:
+        - xs
+        - sm
+        - md
+
     Ingredient:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          $ref: '#/components/schemas/LocalizedName'
+        category_id:
+          type: string
+        rewe_art_no:
+          type: integer
+        rewe_img_links:
+          $ref: '#/components/schemas/ReweImageLinks'
+        author_id:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+      required:
+        - _id
+        - name
+        - category_id
+        - rewe_art_no
+        - rewe_img_links
+        - author_id
+        - updated_at
+
+    RecipeIngredient:
       type: object
       properties:
         id:
@@ -118,6 +194,395 @@ components:
         - unit
 
 paths:
+  /api/categories:
+    get:
+      tags:
+        - Categories
+      summary: List all categories
+      description: Get all categories
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - Categories
+      summary: Create category
+      description: Create a new category
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  $ref: '#/components/schemas/LocalizedName'
+                parent_id:
+                  type: string
+                rewe_cat_id:
+                  type: integer
+              required:
+                - name
+                - rewe_cat_id
+      responses:
+        '201':
+          description: Category created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/categories/root:
+    get:
+      tags:
+        - Categories
+      summary: Get root categories
+      description: Get all categories without a parent
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of root categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/categories/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Categories
+      summary: Get category
+      description: Get a category by ID
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Category details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '404':
+          description: Category not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      tags:
+        - Categories
+      summary: Update category
+      description: Update an existing category
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  $ref: '#/components/schemas/LocalizedName'
+                parent_id:
+                  type: string
+                  nullable: true
+                rewe_cat_id:
+                  type: integer
+      responses:
+        '200':
+          description: Category updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '404':
+          description: Category not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Categories
+      summary: Delete category
+      description: Delete a category
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Category deleted
+        '400':
+          description: Cannot delete category with subcategories or ingredients
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Category not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/categories/{id}/subcategories:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Categories
+      summary: Get subcategories
+      description: Get all subcategories of a category
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of subcategories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+        '404':
+          description: Parent category not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/ingredients:
+    get:
+      tags:
+        - Ingredients
+      summary: List all ingredients
+      description: Get all ingredients
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of ingredients
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Ingredient'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - Ingredients
+      summary: Create ingredient
+      description: Create a new ingredient
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  $ref: '#/components/schemas/LocalizedName'
+                category_id:
+                  type: string
+                rewe_art_no:
+                  type: integer
+                rewe_img_links:
+                  $ref: '#/components/schemas/ReweImageLinks'
+              required:
+                - name
+                - category_id
+                - rewe_art_no
+                - rewe_img_links
+      responses:
+        '201':
+          description: Ingredient created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ingredient'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/ingredients/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Ingredients
+      summary: Get ingredient
+      description: Get an ingredient by ID
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Ingredient details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ingredient'
+        '404':
+          description: Ingredient not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      tags:
+        - Ingredients
+      summary: Update ingredient
+      description: Update an existing ingredient
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  $ref: '#/components/schemas/LocalizedName'
+                category_id:
+                  type: string
+                rewe_art_no:
+                  type: integer
+                rewe_img_links:
+                  $ref: '#/components/schemas/ReweImageLinks'
+      responses:
+        '200':
+          description: Ingredient updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ingredient'
+        '404':
+          description: Ingredient not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Ingredients
+      summary: Delete ingredient
+      description: Delete an ingredient
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Ingredient deleted
+        '404':
+          description: Ingredient not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/categories/{categoryId}/ingredients:
+    parameters:
+      - name: categoryId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Ingredients
+      summary: Get ingredients by category
+      description: Get all ingredients in a category
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of ingredients
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Ingredient'
+        '404':
+          description: Category not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /api/user/login:
     post:
       tags:
