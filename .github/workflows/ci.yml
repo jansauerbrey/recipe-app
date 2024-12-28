@@ -221,6 +221,7 @@ jobs:
         uses: denoland/deployctl@v1
         env:
           DENO_DEPLOY_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
         with:
           project: recipe-app
           entrypoint: app.ts

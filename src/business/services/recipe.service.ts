@@ -1,6 +1,7 @@
 import { RecipeRepository } from '../../data/repositories/recipe.repository.ts';
 import { Recipe, RecipeResponse, CreateRecipeData, RecipeIngredient } from '../../types/mod.ts';
 import { ResourceNotFoundError, ValidationError } from '../../types/errors.ts';
+import { storageService } from '../../utils/storage.ts';
 
 export interface RecipeFilter {
   userId?: string;
@@ -82,6 +83,23 @@ export class RecipeService implements IRecipeService {
       throw new ValidationError('Invalid ingredient');
     }
 
+    // If updating image, delete the old one
+    if (updates.imagePath) {
+      const existingRecipe = await this.recipeRepository.findById(id);
+      if (existingRecipe.imagePath) {
+        try {
+          // Extract key from the old image URL
+          const oldKey = this.getKeyFromUrl(existingRecipe.imagePath);
+          if (oldKey) {
+            await storageService.deleteFile(oldKey);
+          }
+        } catch (error) {
+          console.error('Failed to delete old image:', error);
+          // Continue with update even if deletion fails
+        }
+      }
+    }
+
     const updatedRecipe = await this.recipeRepository.update(id, updates);
     const { id: recipeId, ...rest } = updatedRecipe;
     return {
@@ -91,7 +109,35 @@ export class RecipeService implements IRecipeService {
   }
 
   async deleteRecipe(id: string): Promise<void> {
+    // Get recipe to check for image
+    const recipe = await this.recipeRepository.findById(id);
+    
+    // Delete the recipe
     await this.recipeRepository.delete(id);
+
+    // Delete associated image if it exists
+    if (recipe.imagePath) {
+      try {
+        const key = this.getKeyFromUrl(recipe.imagePath);
+        if (key) {
+          await storageService.deleteFile(key);
+        }
+      } catch (error) {
+        console.error('Failed to delete recipe image:', error);
+        // Don't throw error as recipe is already deleted
+      }
+    }
+  }
+
+  private getKeyFromUrl(url: string): string | null {
+    try {
+      // Extract the key from the full R2 URL
+      // URL format: https://{accountId}.r2.cloudflarestorage.com/{bucket}/{key}
+      const urlParts = url.split('/');
+      return urlParts.slice(4).join('/'); // Skip protocol, domain, and bucket
+    } catch {
+      return null;
+    }
   }
 
   async countRecipesByCategory(userId: string): Promise<Record<string, number>> {
