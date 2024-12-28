@@ -2,13 +2,20 @@ import { Group, Title, Burger } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { DISH_TYPES } from '../../types/recipe';
+import { DishType, RECIPE_FILTERS } from '../../types/recipe';
+import { useQuery } from '@tanstack/react-query';
+import { api } from '../../utils/api';
 
-const getTitleFromPath = (pathname: string): string => {
+const getTitleFromPath = (pathname: string, dishTypes: DishType[] | undefined): string => {
   // Check for recipe category routes
   if (pathname.startsWith('/recipes/')) {
     const identifier = pathname.split('/')[2];
-    const dishType = DISH_TYPES.find(type => type.identifier === identifier);
+    // Check both filters and dish types
+    const filter = RECIPE_FILTERS.find(type => type.identifier === identifier);
+    if (filter) {
+      return filter.name.en;
+    }
+    const dishType = dishTypes?.find(type => type.identifier === identifier);
     if (dishType) {
       return dishType.name.en;
     }
@@ -42,7 +49,12 @@ export function Navbar({ opened, setOpened }: NavbarProps) {
   const { isAuthenticated, user } = useAuth();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const location = useLocation();
-  const title = getTitleFromPath(location.pathname);
+  const { data: dishTypes } = useQuery<DishType[]>({
+    queryKey: ['dishTypes'],
+    queryFn: () => api.get('/dishtypes')
+  });
+
+  const title = getTitleFromPath(location.pathname, dishTypes);
 
   return (
     <Group justify="space-between" p="md">

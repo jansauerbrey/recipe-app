@@ -8,6 +8,14 @@ export const recipeApi = {
     if (filters?.name) queryParams.append('name', filters.name);
     if (filters?.author?._id) queryParams.append('author', filters.author._id);
     if (filters?.dishType) queryParams.append('dishType', filters.dishType);
+    if (filters?.tags?.length) queryParams.append('tags', filters.tags.join(','));
+    if (filters?.dateRange?.from) {
+      queryParams.append('fromDate', filters.dateRange.from.toISOString());
+      if (filters.dateRange.to) {
+        queryParams.append('toDate', filters.dateRange.to.toISOString());
+      }
+    }
+    if (filters?.favorites) queryParams.append('favorites', 'true');
     
     const url = `/recipes${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     return api.get<Recipe[]>(url);

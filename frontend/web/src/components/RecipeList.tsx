@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { debounce } from 'lodash';
-import { Recipe, RecipeSearchFilters, TagFilters, Tag, DISH_TYPES } from '../types/recipe';
+import { Recipe, RecipeSearchFilters, TagFilters, Tag } from '../types/recipe';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../contexts/AuthContext';
 import { recipeApi } from '../utils/recipeApi';
@@ -82,16 +82,38 @@ const RecipeList: React.FC = () => {
     console.log('Schedule recipe:', recipeId);
   };
 
+  // Check if current filter is a special filter
+  const isSpecialFilter = ['all', 'my', 'new', 'favorites'].includes(dishTypeSlug || '');
+
   const { data: recipes, isLoading, error } = useQuery<Recipe[]>({
-    queryKey: ['recipes', dishTypeSlug, searchFilters, tagFilters],
+    queryKey: ['recipes', dishTypeSlug, searchFilters, tagFilters, isSpecialFilter],
     enabled: !searchFilters.name || searchFilters.name.length >= 2,
     staleTime: 1000, // Keep data fresh for 1 second
     queryFn: async () => {
       const filters: RecipeSearchFilters = {
         ...searchFilters,
-        ...(dishTypeSlug && { dishType: dishTypeSlug }), // Only include dishType if it exists
+        // Only include dishType for non-special filters
+        ...(!isSpecialFilter && dishTypeSlug && { dishType: dishTypeSlug }),
         tags: Object.keys(tagFilters).filter(tag => tagFilters[tag])
       };
+
+      // Handle special filters
+      if (isSpecialFilter) {
+        switch (dishTypeSlug) {
+          case 'my':
+            filters.author = { _id: 'my' };
+            break;
+          case 'new':
+            // Assuming we want to show recipes from the last 7 days
+            filters.dateRange = { from: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) };
+            break;
+          case 'favorites':
+            filters.favorites = true;
+            break;
+          // 'all' case doesn't need special handling as it shows everything
+        }
+      }
+
       return recipeApi.getRecipes(filters);
     }
   });

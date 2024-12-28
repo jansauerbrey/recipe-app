@@ -31,7 +31,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
     protein: initialData?.protein || 0,
     ingredients: initialData?.ingredients || [],
     tags: initialData?.tags || [],
-    dishType: initialData?.dishType || (dishTypes.length > 0 ? dishTypes[0] : { _id: '', name: { en: '', de: '', fi: '' }, order: 0, imagePath: '', identifier: '' }),
+    dishType: initialData?.dishType || (dishTypes.length > 0 ? dishTypes[0] : { _id: '', name: { en: '', de: '', fi: '' }, order: 0, imagePath: '/img/dishtypes/no_image.png', identifier: '', author: '', updated_at: new Date().toISOString() }),
     imagePath: initialData?.imagePath || '',
   });
 

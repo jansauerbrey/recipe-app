@@ -44,7 +44,7 @@ export async function initializeRoutes(router: AppRouter, dependencies: Dependen
   });
 
   router.get('/api/admin', authMiddleware, (ctx) => {
-    if (!ctx.state.user?.is_admin) {
+    if (ctx.state.user?.role !== 'admin') {
       ctx.response.status = 403;
       ctx.response.body = { error: 'Forbidden' };
       return;
@@ -54,7 +54,7 @@ export async function initializeRoutes(router: AppRouter, dependencies: Dependen
 
   // Note: Since we only have is_admin flag, we'll treat admin as moderator
   router.get('/api/moderator', authMiddleware, (ctx) => {
-    if (!ctx.state.user?.is_admin) {
+    if (ctx.state.user?.role !== 'admin') {
       ctx.response.status = 403;
       ctx.response.body = { error: 'Forbidden' };
       return;
