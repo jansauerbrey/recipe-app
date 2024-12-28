@@ -64,7 +64,7 @@ export class Logger {
   }
 
   debug(message: string, context: LogContext = {}): void {
-    if (this.environment === 'development') {
+    if (this.environment === 'development' || this.environment === 'test') {
       this.output(this.formatLog(LogLevel.DEBUG, message, context));
     }
   }
