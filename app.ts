@@ -63,11 +63,22 @@ const staticFileMiddleware: Middleware<AppState> = async (ctx: Context, next: Ne
         root: Deno.cwd(),
         path: ctx.request.url.pathname,
       });
+    } else if (ctx.request.url.pathname.startsWith('/api/')) {
+      await next();
     } else {
-      await ctx.send({
-        root: `${Deno.cwd()}/public`,
-        index: 'index.html',
-      });
+      try {
+        // Try to serve static files first
+        await ctx.send({
+          root: `${Deno.cwd()}/public`,
+          path: ctx.request.url.pathname,
+        });
+      } catch {
+        // If file not found, serve index.html for client-side routing
+        await ctx.send({
+          root: `${Deno.cwd()}/public`,
+          path: 'index.html',
+        });
+      }
     }
   } catch {
     await next();
@@ -149,9 +160,7 @@ export async function createApp(): Promise<Application> {
   app.use(loggingMiddleware);
 
   // CORS configuration
-  const allowedOrigins = appConfig.ENVIRONMENT === 'production'
-    ? ['https://www.rezept-planer.de']
-    : ['http://localhost:3000', 'http://127.0.0.1:3000', 'https://www.rezept-planer.de'];
+  const allowedOrigins = appConfig.CORS_ORIGINS;
 
   app.use(oakCors({
     origin: (origin: string | null | undefined) => {
@@ -186,6 +195,9 @@ export async function createApp(): Promise<Application> {
   // Error handling middleware
   app.use(errorHandlingMiddleware);
 
+  // Static file serving middleware (before API routes)
+  app.use(staticFileMiddleware);
+
   // Initialize routes
   const router = new Router();
   await initializeRoutes(router, dependencies);
@@ -197,9 +209,6 @@ export async function createApp(): Promise<Application> {
   // Add validation middleware after routes
   app.use(validateRequest);
   app.use(validateResponse);
-
-  // Static file serving middleware
-  app.use(staticFileMiddleware);
 
   return app;
 }

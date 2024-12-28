@@ -20,7 +20,7 @@ export interface AppConfig {
   UPLOAD_DIR: string;
 
   // CORS
-  ALLOWED_ORIGINS: string[];
+  CORS_ORIGINS: string[];
 
   // Logging
   LOG_LEVEL: 'debug' | 'info' | 'warn' | 'error';
@@ -65,8 +65,8 @@ export function getConfig(): AppConfig {
     UPLOAD_DIR: Deno.env.get('UPLOAD_DIR') || './upload',
 
     // CORS
-    ALLOWED_ORIGINS:
-      (Deno.env.get('ALLOWED_ORIGINS') || 'http://localhost:3000,http://127.0.0.1:3000').split(','),
+    CORS_ORIGINS:
+      (Deno.env.get('CORS_ORIGINS') || 'http://localhost:3000,http://127.0.0.1:3000').split(','),
 
     // Logging
     LOG_LEVEL: (Deno.env.get('LOG_LEVEL') || 'info') as 'debug' | 'info' | 'warn' | 'error',
