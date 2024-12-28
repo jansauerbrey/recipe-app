@@ -238,6 +238,7 @@ export const IngredientTypeahead: React.FC<IngredientTypeaheadProps> = ({
           {!isLoading && searchQuery.length >= MIN_SEARCH_LENGTH && filteredIngredients.length === 0 && searchQuery.trim() && (
             <div
               role="option"
+              aria-selected={false}
               className="p-2 cursor-pointer hover:bg-gray-100 d-flex align-items-center"
               onClick={() => onCreateNew(searchQuery)}
               style={{ cursor: 'pointer' }}

@@ -8,10 +8,19 @@ class ApiClient {
   private constructor() {
     this.api = axios.create({
       baseURL: '/api',
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
+
+    // Add request interceptor to set content type
+    this.api.interceptors.request.use(
+      (config) => {
+        // Let axios set the correct content type for FormData
+        if (!(config.data instanceof FormData)) {
+          config.headers['Content-Type'] = 'application/json';
+        }
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
 
     // Add request interceptor for auth token
     this.api.interceptors.request.use(

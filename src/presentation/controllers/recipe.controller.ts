@@ -1,7 +1,7 @@
 import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
 import { BaseController, ControllerContext } from './base.controller.ts';
 import { RecipeService } from '../../business/services/recipe.service.ts';
-import { Recipe, RecipeResponse } from '../../types/mod.ts';
+import { Recipe, RecipeResponse, CreateRecipeData } from '../../types/mod.ts';
 import {
   AppError,
   AuthenticationError,
@@ -24,14 +24,14 @@ export class RecipeController extends BaseController {
       const body = ctx.request.body();
       const recipeData = await body.value;
 
-      if (!recipeData.title) {
+      if (!recipeData.name) {
         throw new ValidationError('Missing required fields');
       }
 
       const recipe = await this.recipeService.createRecipe({
         ...recipeData,
         userId,
-      } as Omit<Recipe, 'id' | 'createdAt' | 'updatedAt'>);
+      } as CreateRecipeData);
 
       await this.created(ctx, recipe);
     } catch (error) {

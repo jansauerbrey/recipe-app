@@ -23,8 +23,8 @@ export async function assertUserExists(db: Database, user: TestUser) {
  */
 export async function assertRecipeExists(db: Database, recipe: TestRecipe) {
   const recipes = db.collection('recipes');
-  const foundRecipe = await recipes.findOne({ title: recipe.title });
-  assertExists(foundRecipe, `Recipe ${recipe.title} not found in database`);
+  const foundRecipe = await recipes.findOne({ name: recipe.name });
+  assertExists(foundRecipe, `Recipe ${recipe.name} not found in database`);
   assertEquals(foundRecipe.description, recipe.description, 'Recipe description does not match');
   assertEquals(foundRecipe.userId, recipe.userId, 'Recipe userId does not match');
 }

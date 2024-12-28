@@ -128,7 +128,7 @@ export async function seedTestData(db: Database, userId: string): Promise<void> 
     const recipes = db.collection('recipes');
     await recipes.insertMany([
       {
-        title: 'Test Recipe 1',
+        name: 'Test Recipe 1',
         description: 'Test Description 1',
         ingredients: [
           { name: 'Ingredient 1', amount: 100, unit: 'g' },
@@ -137,7 +137,7 @@ export async function seedTestData(db: Database, userId: string): Promise<void> 
         userId,
       },
       {
-        title: 'Test Recipe 2',
+        name: 'Test Recipe 2',
         description: 'Test Description 2',
         ingredients: [
           { name: 'Ingredient 2', amount: 200, unit: 'ml' },

@@ -15,7 +15,7 @@ Deno.test({
 
     try {
       const createTestRecipeData = (): Omit<Recipe, 'id' | 'createdAt' | 'updatedAt'> => ({
-        title: 'Test Recipe',
+        name: 'Test Recipe',
         description: 'A test recipe description',
         ingredients: [
           {
@@ -27,7 +27,15 @@ Deno.test({
         instructions: ['Step 1: Test instruction'],
         userId: testUserId,
         tags: ['test'],
-        dishType: 'maindishes',
+        dishType: {
+          _id: 'maindishes-id',
+          name: { en: 'Main Dishes', de: 'Hauptgerichte', fi: 'Pääruoat' },
+          order: 1,
+          imagePath: 'maindishes.jpg',
+          identifier: 'maindishes',
+          author: 'system',
+          updated_at: new Date().toISOString()
+        },
       });
 
       // Test: should create a new recipe
@@ -39,7 +47,7 @@ Deno.test({
         const recipeData = createTestRecipeData();
         const recipe = await newService.createRecipe(recipeData);
 
-        assertEquals(recipe.title, recipeData.title);
+        assertEquals(recipe.name, recipeData.name);
         assertEquals(recipe.description, recipeData.description);
         assertEquals(recipe.ingredients, recipeData.ingredients);
         assertEquals(recipe.instructions, recipeData.instructions);
@@ -57,7 +65,7 @@ Deno.test({
         const newRepository = new RecipeRepository(newContext.database);
         const newService = new RecipeService(newRepository);
         const recipeData = createTestRecipeData();
-        delete (recipeData as any).title;
+        delete (recipeData as any).name;
 
         try {
           await newService.createRecipe(recipeData);
@@ -66,7 +74,7 @@ Deno.test({
           const err = error as AppError;
           assertEquals(err.code, 'VALIDATION_ERROR');
           assertEquals(err.statusCode, 400);
-          assertEquals(err.message, 'Title is required');
+          assertEquals(err.message, 'Name is required');
         }
       }
 
@@ -102,7 +110,7 @@ Deno.test({
         const created = await newService.createRecipe(recipeData);
         const recipe = await newService.getRecipeById(created._id);
 
-        assertEquals(recipe?.title, recipeData.title);
+        assertEquals(recipe?.name, recipeData.name);
         assertEquals(recipe?.description, recipeData.description);
         assertEquals(recipe?.ingredients, recipeData.ingredients);
         assertEquals(recipe?.instructions, recipeData.instructions);
@@ -136,7 +144,7 @@ Deno.test({
         const recipe1 = await newService.createRecipe(createTestRecipeData());
         const recipe2 = await newService.createRecipe({
           ...createTestRecipeData(),
-          title: 'Another Recipe',
+          name: 'Another Recipe',
         });
 
         const recipes = await newService.listUserRecipes(testUserId);
@@ -164,11 +172,11 @@ Deno.test({
         const newService = new RecipeService(newRepository);
         const recipe = await newService.createRecipe(createTestRecipeData());
         const updatedRecipe = await newService.updateRecipe(recipe._id, {
-          title: 'Updated Title',
+          name: 'Updated Title',
           description: 'Updated description',
         });
 
-        assertEquals(updatedRecipe.title, 'Updated Title');
+        assertEquals(updatedRecipe.name, 'Updated Title');
         assertEquals(updatedRecipe.description, 'Updated description');
         assertEquals(updatedRecipe.ingredients, recipe.ingredients);
         assertNotEquals(updatedRecipe.updatedAt, recipe.updatedAt);
@@ -203,7 +211,7 @@ Deno.test({
         const newService = new RecipeService(newRepository);
         try {
           await newService.updateRecipe('507f1f77bcf86cd799439011', {
-            title: 'Updated Title',
+            name: 'Updated Title',
           });
           throw new Error('Expected ResourceNotFoundError but got no error');
         } catch (error) {
@@ -249,6 +257,62 @@ Deno.test({
           assertEquals(err.statusCode, 404);
           assertEquals(err.message, 'Recipe not found');
         }
+      }
+
+      // Test: should count recipes by category and dishType
+      {
+        await cleanupTest();
+        const newContext = await setupTest();
+        const newRepository = new RecipeRepository(newContext.database);
+        const newService = new RecipeService(newRepository);
+
+        // Create recipes with different dishTypes
+        await newService.createRecipe({
+          ...createTestRecipeData(),
+          dishType: {
+            _id: 'breakfast-id',
+            name: { en: 'Breakfast', de: 'Frühstück', fi: 'Aamiainen' },
+            order: 0,
+            imagePath: 'breakfast.jpg',
+            identifier: 'breakfast',
+            author: 'system',
+            updated_at: new Date().toISOString()
+          }
+        });
+        await newService.createRecipe({
+          ...createTestRecipeData(),
+          dishType: {
+            _id: 'maindishes-id',
+            name: { en: 'Main Dishes', de: 'Hauptgerichte', fi: 'Pääruoat' },
+            order: 1,
+            imagePath: 'maindishes.jpg',
+            identifier: 'maindishes',
+            author: 'system',
+            updated_at: new Date().toISOString()
+          }
+        });
+        await newService.createRecipe({
+          ...createTestRecipeData(),
+          dishType: {
+            _id: 'breakfast-id',
+            name: { en: 'Breakfast', de: 'Frühstück', fi: 'Aamiainen' },
+            order: 0,
+            imagePath: 'breakfast.jpg',
+            identifier: 'breakfast',
+            author: 'system',
+            updated_at: new Date().toISOString()
+          }
+        });
+
+        const counts = await newService.countRecipesByCategory(testUserId);
+
+        // Verify total counts
+        assertEquals(counts['all'], 3);
+        assertEquals(counts['my'], 3);
+
+        // Verify dishType counts
+        assertEquals(counts['breakfast'], 2);
+        assertEquals(counts['maindishes'], 1);
       }
     } finally {
       await testContext.server.close();

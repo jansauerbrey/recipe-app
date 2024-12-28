@@ -20,7 +20,7 @@ export type TestDB = Database;
 // Recipe test data types
 export interface TestRecipe extends MongoDocument {
   id?: string;
-  title: string;
+  name: string;
   description: string;
   ingredients: TestIngredient[];
   steps: string[];
@@ -38,7 +38,7 @@ export interface TestIngredient {
 // Test data factory
 export function createTestRecipe(overrides: Partial<TestRecipe> = {}): TestRecipe {
   return {
-    title: 'Test Recipe',
+    name: 'Test Recipe',
     description: 'A test recipe description',
     ingredients: [
       {
@@ -59,20 +59,20 @@ export function createTestRecipe(overrides: Partial<TestRecipe> = {}): TestRecip
 export const recipeTestData = {
   validRecipes: [
     createTestRecipe({
-      title: 'Recipe 1',
+      name: 'Recipe 1',
       userId: 'user-1'
     }),
     createTestRecipe({
-      title: 'Recipe 2',
+      name: 'Recipe 2',
       userId: 'user-1'
     }),
     createTestRecipe({
-      title: 'Recipe 3',
+      name: 'Recipe 3',
       userId: 'user-2'
     })
   ],
   invalidRecipes: {
-    noTitle: createTestRecipe({ title: '' }),
+    noName: createTestRecipe({ name: '' }),
     noIngredients: createTestRecipe({ ingredients: [] }),
     noSteps: createTestRecipe({ steps: [] }),
     invalidIngredient: createTestRecipe({

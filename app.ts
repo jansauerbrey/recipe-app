@@ -3,6 +3,8 @@ import { load } from '@std/dotenv/mod.ts';
 import { oakCors } from '@cors/mod.ts';
 import { MongoClient } from '@mongo/mod.ts';
 import { Status } from '@std/http/http_status.ts';
+import { ensureDir } from 'https://deno.land/std@0.208.0/fs/ensure_dir.ts';
+import { join } from 'https://deno.land/std@0.208.0/path/mod.ts';
 
 // Import middleware
 import {
@@ -133,6 +135,11 @@ export async function createApp(): Promise<Application> {
     ingredientService,
     ingredientRepository,
   };
+
+  // Ensure upload directory exists
+  const uploadDir = join(Deno.cwd(), 'upload');
+  await ensureDir(uploadDir);
+  console.log('Upload directory ensured:', uploadDir);
 
   // Initialize Oak application
   const app = new Application();

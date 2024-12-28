@@ -5,7 +5,7 @@ export type TestUser = Omit<User, 'id' | 'createdAt' | 'updatedAt'>;
 
 export function createTestRecipe(overrides: Partial<TestRecipe> = {}): TestRecipe {
   return {
-    title: 'Test Recipe',
+    name: 'Test Recipe',
     description: 'A test recipe description',
     ingredients: [
       {
@@ -17,7 +17,15 @@ export function createTestRecipe(overrides: Partial<TestRecipe> = {}): TestRecip
     instructions: ['Step 1: Test instruction'],
     tags: [],
     userId: 'test-user-id',
-    dishType: 'maindishes',
+    dishType: {
+      _id: 'maindishes-id',
+      name: { en: 'Main Dishes', de: 'Hauptgerichte', fi: 'Pääruoat' },
+      order: 1,
+      imagePath: 'maindishes.jpg',
+      identifier: 'maindishes',
+      author: 'system',
+      updated_at: new Date().toISOString()
+    },
     ...overrides,
   };
 }

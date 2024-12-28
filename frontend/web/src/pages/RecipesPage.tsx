@@ -51,15 +51,23 @@ const RecipesPage: React.FC = () => {
                       state={{ isSpecialFilter: true }}
                     >
                       <div className="card h-100">
-                        <img 
-                          src={`/img/dishtypes/${type.imagePath}`} 
-                          className="card-img-top" 
-                          alt={type.name.en}
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = '/img/dishtypes/no_image.png';
-                          }}
-                        />
+                        {type.imagePath ? (
+                          <img 
+                            src={`/img/dishtypes/${type.imagePath}`} 
+                            className="card-img-top" 
+                            alt={type.name.en}
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = '/img/dishtypes/no_image.png';
+                            }}
+                          />
+                        ) : (
+                          <img
+                            src="/img/dishtypes/no_image.png"
+                            className="card-img-top"
+                            alt={type.name.en}
+                          />
+                        )}
                         <div className="card-body">
                           <h5 className="card-title">{type.name.en}</h5>
                           <p className="card-text text-muted">
@@ -93,15 +101,23 @@ const RecipesPage: React.FC = () => {
                       className="text-decoration-none"
                     >
                       <div className="card h-100">
-                        <img 
-                          src={`/img/dishtypes/${type.imagePath}`} 
-                          className="card-img-top" 
-                          alt={type.name.en}
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = '/img/dishtypes/no_image.png';
-                          }}
-                        />
+                        {type.imagePath ? (
+                          <img 
+                            src={`/img/dishtypes/${type.imagePath}`} 
+                            className="card-img-top" 
+                            alt={type.name.en}
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = '/img/dishtypes/no_image.png';
+                            }}
+                          />
+                        ) : (
+                          <img
+                            src="/img/dishtypes/no_image.png"
+                            className="card-img-top"
+                            alt={type.name.en}
+                          />
+                        )}
                         <div className="card-body">
                           <h5 className="card-title">{type.name.en}</h5>
                           <p className="card-text text-muted">

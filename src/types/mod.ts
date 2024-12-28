@@ -4,6 +4,7 @@ import { UserService } from '../business/services/user.service.ts';
 import { RecipeService } from '../business/services/recipe.service.ts';
 import { UserRepository } from '../data/repositories/user.repository.ts';
 import { RecipeRepository } from '../data/repositories/recipe.repository.ts';
+import { Recipe } from './recipe.ts';
 
 export * from './user.ts';
 export * from './recipe.ts';
@@ -38,28 +39,6 @@ export interface Dependencies {
   categoryRepository: CategoryRepository;
   ingredientService: IngredientService;
   ingredientRepository: IngredientRepository;
-}
-
-export interface RecipeIngredient {
-  name: string;
-  amount: number;
-  unit: string;
-}
-
-export interface Recipe {
-  id: string;
-  userId: string;
-  title: string;
-  description: string;
-  ingredients: RecipeIngredient[];
-  instructions: string[];
-  tags: string[];
-  dishType: string;
-  category?: string;
-  new_recipe?: boolean;
-  fav_recipe?: boolean;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 export interface Tag {

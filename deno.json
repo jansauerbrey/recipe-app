@@ -4,7 +4,7 @@
   },
   "importMap": "./import_map.json",
   "tasks": {
-    "start": "deno run --allow-net --allow-read --allow-env app.ts",
+    "start": "deno run --allow-net --allow-read --allow-env --allow-write app.ts",
     "test": "ENVIRONMENT=test deno test --allow-net --allow-read --allow-write --allow-env src/",
     "test:coverage": "ENVIRONMENT=test deno test --coverage --allow-net --allow-read --allow-write --allow-env src/ && deno coverage",
     "lint": "deno lint",

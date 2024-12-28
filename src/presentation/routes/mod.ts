@@ -8,6 +8,7 @@ import { createDishTypesRouter } from './dishtypes.ts';
 import { createRecipesRouter } from './recipes.ts';
 import { createCategoriesRouter } from './categories.ts';
 import { createIngredientsRouter } from './ingredients.ts';
+import { createUploadRouter } from './upload.ts';
 import { AppState, createMiddleware } from '../../types/middleware.ts';
 import { ControllerContext } from '../controllers/base.controller.ts';
 
@@ -23,6 +24,11 @@ export async function initializeRoutes(router: AppRouter, dependencies: Dependen
     categoryService,
     ingredientService
   } = dependencies;
+
+  // Add upload routes
+  const uploadRouter = createUploadRouter(recipeService);
+  router.use(uploadRouter.routes());
+  router.use(uploadRouter.allowedMethods());
 
   // Add tags routes
   const tagsRouter = createTagsRouter(tagsService);
