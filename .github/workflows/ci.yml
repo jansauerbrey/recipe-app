@@ -191,8 +191,53 @@ jobs:
           name: app-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
 
+  deploy:
+    needs: [build-frontend]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Clean public directory
+        run: |
+          rm -rf public/*
+          
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+          
+      - name: Download Frontend Build
+        uses: actions/download-artifact@v3
+        with:
+          name: frontend-build
+          path: public
+          
+      - name: Deploy to Deno Deploy
+        uses: denoland/deployctl@v1
+        env:
+          DENO_DEPLOY_TOKEN: ${{ secrets.DENO_DEPLOY_TOKEN }}
+        with:
+          project: recipe-app
+          entrypoint: app.ts
+          include: |
+            app.ts
+            deno.json
+            import_map.json
+            src/business/**/*
+            src/data/**/*
+            src/openapi/**/*
+            src/presentation/**/*
+            src/types/**/*
+            src/utils/**/*
+            public/**/*
+
   release:
-    needs: [build-android]
+    needs: [build-android, deploy]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
