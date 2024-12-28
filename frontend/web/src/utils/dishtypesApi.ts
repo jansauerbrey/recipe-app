@@ -1,4 +1,4 @@
-import { CreateDishTypeDto, DishType, UpdateDishTypeDto } from '../types/dishtype';
+import { CreateDishTypeDto, DishType } from '../types/dishtype';
 import { api } from './api';
 
 export const dishtypesApi = {

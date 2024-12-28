@@ -1,9 +1,8 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { debounce } from 'lodash';
 import { Recipe, RecipeSearchFilters, TagFilters, Tag } from '../types/recipe';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '../contexts/AuthContext';
 import { recipeApi } from '../utils/recipeApi';
 import { tagsApi } from '../utils/tagsApi';
 import RecipeCard from './RecipeCard';
@@ -11,28 +10,35 @@ import RecipeCard from './RecipeCard';
 const RecipeList: React.FC = () => {
   const [searchParams] = useSearchParams();
   const dishTypeSlug = searchParams.get('dishType');
-  const { token } = useAuth();
   const [searchFilters, setSearchFilters] = useState<RecipeSearchFilters>({});
   const [localSearchValue, setLocalSearchValue] = useState("");
   const [localAuthorValue, setLocalAuthorValue] = useState("");
   
-  // Debounced search filter update
-  const debouncedSetSearchFilters = useCallback(
-    debounce((updates: Partial<RecipeSearchFilters>) => {
+  // Create debounced function
+  const debouncedUpdate = useMemo(
+    () => debounce((updates: Partial<RecipeSearchFilters>) => {
       setSearchFilters(prev => ({
         ...prev,
         ...updates
       }));
     }, 500),
-    []
+    [] // Empty dependency array since we only want to create this once
   );
 
   // Cleanup debounced function on unmount
   React.useEffect(() => {
     return () => {
-      debouncedSetSearchFilters.cancel();
+      debouncedUpdate.cancel();
     };
-  }, [debouncedSetSearchFilters]);
+  }, [debouncedUpdate]);
+
+  // Wrapper function to call the debounced update
+  const debouncedSetSearchFilters = useCallback(
+    (updates: Partial<RecipeSearchFilters>) => {
+      debouncedUpdate(updates);
+    },
+    [debouncedUpdate]
+  );
 
   // Update local state immediately and debounce the API call
   const handleSearchChange = (value: string) => {
