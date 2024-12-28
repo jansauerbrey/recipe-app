@@ -27,6 +27,7 @@ interface MockState {
   user?: {
     id: string;
     role: string;
+    is_admin: boolean;
   };
 }
 
@@ -40,22 +41,33 @@ function createMockContext(
   token?: string,
   method = 'GET',
   path = '/test',
+  isAdmin?: boolean,
 ): MockContext {
-  return {
+  const context = {
     request: {
       method,
       url: new URL(`http://localhost${path}`),
-      headers: new Headers(
-        token ? { Authorization: token } : undefined
-      ),
+      headers: new Headers(token ? { Authorization: token } : undefined),
     },
     response: {
       status: Status.OK,
       body: null,
       headers: new Headers(),
     },
-    state: {},
+    state: {
+      user: undefined,
+    },
   } as MockContext;
+  
+  if (isAdmin !== undefined) {
+    context.state.user = {
+      id: 'test-user',
+      role: isAdmin ? 'admin' : 'user',
+      is_admin: isAdmin,
+    };
+  }
+
+  return context;
 }
 
 Deno.test('Auth Middleware', async (t) => {
@@ -149,8 +161,7 @@ Deno.test('Auth Middleware', async (t) => {
 
 Deno.test('Admin Only Middleware', async (t) => {
   await t.step('should pass for admin users', async () => {
-    const mockCtx = createMockContext();
-    mockCtx.state.user = { id: 'admin-user', role: 'admin' };
+    const mockCtx = createMockContext(undefined, undefined, undefined, true);
     let nextCalled = false;
 
     const mockNext = async () => {
@@ -164,8 +175,7 @@ Deno.test('Admin Only Middleware', async (t) => {
   });
 
   await t.step('should fail for non-admin users', async () => {
-    const mockCtx = createMockContext();
-    mockCtx.state.user = { id: 'regular-user', role: 'user' };
+    const mockCtx = createMockContext(undefined, undefined, undefined, false);
     let nextCalled = false;
 
     const mockNext = async () => {
@@ -178,7 +188,7 @@ Deno.test('Admin Only Middleware', async (t) => {
     assertEquals(mockCtx.response.status, Status.Forbidden);
     assertEquals(
       (mockCtx.response.body as { error: string }).error,
-      'Admin access required'
+      'Admin access required',
     );
   });
 
@@ -196,7 +206,7 @@ Deno.test('Admin Only Middleware', async (t) => {
     assertEquals(mockCtx.response.status, Status.Forbidden);
     assertEquals(
       (mockCtx.response.body as { error: string }).error,
-      'Admin access required'
+      'Admin access required',
     );
   });
 });

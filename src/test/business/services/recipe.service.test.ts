@@ -27,6 +27,7 @@ Deno.test({
         instructions: ['Step 1: Test instruction'],
         userId: testUserId,
         tags: ['test'],
+        dishType: 'maindishes',
       });
 
       // Test: should create a new recipe

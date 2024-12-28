@@ -17,6 +17,7 @@ export function createTestRecipe(overrides: Partial<TestRecipe> = {}): TestRecip
     instructions: ['Step 1: Test instruction'],
     tags: [],
     userId: 'test-user-id',
+    dishType: 'maindishes',
     ...overrides,
   };
 }

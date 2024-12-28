@@ -9,6 +9,7 @@ export * from './user.ts';
 export * from './recipe.ts';
 export * from './unit.ts';
 export * from './dishtype.ts';
+export * from './filter.ts';
 
 import { TagsService } from '../business/services/tags.service.ts';
 import { UnitService } from '../business/services/unit.service.ts';
@@ -43,6 +44,7 @@ export interface Recipe {
   ingredients: Ingredient[];
   instructions: string[];
   tags: string[];
+  dishType: string;
   category?: string;
   new_recipe?: boolean;
   fav_recipe?: boolean;

@@ -51,10 +51,12 @@ export interface MongoIngredient {
 
 export interface MongoDishType {
   _id: ObjectId;
+  author: ObjectId;
   name: LocalizedName;
   order: number;
   imagePath: string;
   identifier: string;
+  updated_at: Date;
 }
 
 export interface MongoAuthor {
