@@ -2,9 +2,8 @@ import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
 import { BaseController, ControllerContext } from './base.controller.ts';
 import { RecipeService } from '../../business/services/recipe.service.ts';
 import { AuthenticationError, ValidationError } from '../../types/errors.ts';
-import { ensureDir } from 'https://deno.land/std@0.208.0/fs/ensure_dir.ts';
-import { join } from 'https://deno.land/std@0.208.0/path/mod.ts';
 import { Recipe } from '../../types/recipe.ts';
+import { storageService } from '../../utils/storage.ts';
 
 export class UploadController extends BaseController {
   constructor(private recipeService: RecipeService) {
@@ -28,12 +27,6 @@ export class UploadController extends BaseController {
       if (recipe.userId !== userId) {
         throw new AuthenticationError('Not authorized to modify this recipe');
       }
-
-      // Ensure directories exist
-      const uploadDir = join(Deno.cwd(), 'upload');
-      const tempDir = join(uploadDir, 'temp');
-      await ensureDir(uploadDir);
-      await ensureDir(tempDir);
 
       console.log('Starting file upload process...');
 
@@ -78,18 +71,21 @@ export class UploadController extends BaseController {
       try {
         // Generate unique filename
         const ext = file.originalName?.split('.').pop() || 'jpg';
-        const newFilename = `${id}_${Date.now()}.${ext}`;
-        const filepath = join(uploadDir, newFilename);
+        const key = `recipes/${id}_${Date.now()}.${ext}`;
 
-        // Write the file content
-        await Deno.writeFile(filepath, file.content);
-        console.log(`File saved successfully to ${filepath}`);
+        // Upload to R2
+        const imageUrl = await storageService.uploadFile(
+          file.content,
+          key,
+          file.contentType || 'image/jpeg'
+        );
+        console.log(`File uploaded successfully to ${imageUrl}`);
 
-        // Update recipe with image path
-        const update: Partial<Recipe> = { imagePath: newFilename };
+        // Update recipe with image URL
+        const update: Partial<Recipe> = { imagePath: imageUrl };
         await this.recipeService.updateRecipe(id, update);
 
-        await this.ok(ctx, { filename: newFilename });
+        await this.ok(ctx, { filename: key, url: imageUrl });
       } catch (writeError: unknown) {
         console.error('File write error:', writeError);
         const errorMessage = writeError instanceof Error ? writeError.message : 'Unknown error occurred';
@@ -102,12 +98,6 @@ export class UploadController extends BaseController {
         await this.badRequest(ctx, error.message);
       } else if (error instanceof AuthenticationError) {
         await this.unauthorized(ctx, error.message);
-      } else if (error instanceof Deno.errors.PermissionDenied) {
-        console.error('Permission denied when writing file:', error);
-        await this.internalServerError(ctx, 'Server configuration error: Unable to write file');
-      } else if (error instanceof Deno.errors.NotFound) {
-        console.error('Upload directory not found:', error);
-        await this.internalServerError(ctx, 'Server configuration error: Upload directory not found');
       } else {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
         await this.internalServerError(ctx, `Failed to upload image: ${errorMessage}`);
