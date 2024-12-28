@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Recipe, RecipeFormData, DishType, Unit } from '../types/recipe';
+import IngredientTypeahead from './ingredients/IngredientTypeahead';
+import { Ingredient as ApiIngredient } from '../types/ingredient';
 
 interface RecipeFormProps {
   initialData?: Recipe;
@@ -36,6 +38,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
   });
 
   const [newIngredient, setNewIngredient] = useState({
+    _id: '',
     name: { en: '', de: '', fi: '' },
     amount: 0,
     unit: units.length > 0 ? units[0] : { _id: '', name: { en: '', de: '', fi: '' } },
@@ -79,12 +82,13 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
   };
 
   const addIngredient = () => {
-    if (newIngredient.amount > 0 && newIngredient.name.en) {
+    if (newIngredient.amount > 0 && newIngredient._id) {
       setFormData((prev) => ({
         ...prev,
-        ingredients: [...prev.ingredients, { ...newIngredient, _id: Date.now().toString() }],
+        ingredients: [...prev.ingredients, { ...newIngredient }],
       }));
       setNewIngredient({
+        _id: '',
         name: { en: '', de: '', fi: '' },
         amount: 0,
         unit: units.length > 0 ? units[0] : { _id: '', name: { en: '', de: '', fi: '' } },
@@ -282,7 +286,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
             </div>
           ))}
         </div>
-        <div className="input-group">
+        <div className="input-group flex-nowrap">
           <input
             type="number"
             className="form-control"
@@ -296,6 +300,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
             }
             min="0"
             step="0.1"
+            style={{ width: '100px', flex: '0 0 auto' }}
           />
           <select
             className="form-select"
@@ -306,6 +311,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
                 setNewIngredient(prev => ({ ...prev, unit: selectedUnit }));
               }
             }}
+            style={{ width: '120px', flex: '0 0 auto' }}
           >
             {units.map((unit) => (
               <option key={unit._id} value={unit._id}>
@@ -313,22 +319,30 @@ const RecipeForm: React.FC<RecipeFormProps> = ({
               </option>
             ))}
           </select>
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Ingredient name"
-            value={newIngredient.name.en}
-            onChange={(e) =>
+          <IngredientTypeahead
+            onSelect={(ingredient: ApiIngredient) => {
               setNewIngredient((prev) => ({
                 ...prev,
-                name: { ...prev.name, en: e.target.value },
-              }))
-            }
+                name: ingredient.name,
+                _id: ingredient._id,
+              }));
+            }}
+            placeholder="Search ingredients..."
+            selectedIngredient={newIngredient._id ? { 
+              _id: newIngredient._id, 
+              name: newIngredient.name,
+              category_id: '',  // These fields are required by the Ingredient type
+              rewe_art_no: 0,  // but not used in the display context
+              rewe_img_links: { xs: '', sm: '', md: '' },
+              author_id: '',
+              updated_at: new Date().toISOString()
+            } : undefined}
           />
           <button
             type="button"
             className="btn btn-outline-secondary"
             onClick={addIngredient}
+            style={{ flex: '0 0 auto' }}
           >
             Add
           </button>
