@@ -1,40 +1,55 @@
 name: Deploy to Deno Deploy
+
 on:
   workflow_run:
     workflows: ["CI/CD Pipeline"]
     types:
       - completed
-    branches: [master]
+    branches:
+      - master
 
 jobs:
   deploy:
-    name: Deploy
-    runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
-
+    
     steps:
-      - name: Clone repository
-        uses: actions/checkout@v3
-
-      - name: Setup Deno environment
+      - uses: actions/checkout@v3
+      
+      - name: Clean public directory
+        run: |
+          rm -rf public/*
+          
+      - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-
+          
+      # Downloads the frontend build (from frontend/web/build/) and places it in the public directory
       - name: Download Frontend Build
-        uses: actions/download-artifact@v3
+        uses: dawidd6/action-download-artifact@v2
         with:
           name: frontend-build
-          path: public
-
-      - name: Upload to Deno Deploy
+          path: public # This is where Deno serves static files from
+          workflow: ci.yml
+          run_id: ${{ github.event.workflow_run.id }}
+          
+      - name: Deploy to Deno Deploy
         uses: denoland/deployctl@v1
         with:
-          project: "recipe-app"
-          entrypoint: "./app.ts"
-          root: "."
-          include: "public/,src/"
-          exclude: "frontend/,android/,scripts/"
+          project: recipe-app
+          entrypoint: app.ts
+          include: |
+            app.ts
+            deno.json
+            import_map.json
+            src/business/**/*
+            src/data/**/*
+            src/openapi/**/*
+            src/presentation/**/*
+            src/types/**/*
+            src/utils/**/*
+            public/**/*
