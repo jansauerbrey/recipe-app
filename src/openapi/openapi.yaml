@@ -170,8 +170,6 @@ components:
         - _id
         - name
         - category_id
-        - rewe_art_no
-        - rewe_img_links
         - author_id
         - updated_at
 
@@ -450,8 +448,6 @@ paths:
               required:
                 - name
                 - category_id
-                - rewe_art_no
-                - rewe_img_links
       responses:
         '201':
           description: Ingredient created

@@ -38,8 +38,8 @@ const IngredientList: React.FC<IngredientListProps> = ({ ingredients }) => {
               <th>English</th>
               <th>German</th>
               <th>Finnish</th>
-              <th>REWE Article No.</th>
               <th>Category</th>
+              <th>REWE Article No.</th>
               <th className="text-end">Actions</th>
             </tr>
           </thead>
@@ -47,7 +47,7 @@ const IngredientList: React.FC<IngredientListProps> = ({ ingredients }) => {
             {ingredients.map((ingredient) => (
               <tr key={ingredient._id}>
                 <td>
-                  {ingredient.rewe_img_links.xs && (
+                  {ingredient.rewe_img_links?.xs && (
                     <img 
                       src={ingredient.rewe_img_links.xs} 
                       alt={ingredient.name.en}
@@ -58,8 +58,8 @@ const IngredientList: React.FC<IngredientListProps> = ({ ingredients }) => {
                 <td>{ingredient.name.en}</td>
                 <td>{ingredient.name.de}</td>
                 <td>{ingredient.name.fi}</td>
-                <td>{ingredient.rewe_art_no}</td>
                 <td>{ingredient.category_id}</td>
+                <td>{ingredient.rewe_art_no || '-'}</td>
                 <td className="text-end">
                   <button
                     onClick={() => navigate(`edit/${ingredient._id}`)}

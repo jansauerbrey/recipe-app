@@ -40,8 +40,8 @@ const IngredientForm: React.FC<IngredientFormProps> = ({ id, categories }) => {
       setFormData({
         name: data.name,
         category_id: data.category_id,
-        rewe_art_no: data.rewe_art_no,
-        rewe_img_links: data.rewe_img_links,
+        rewe_art_no: data.rewe_art_no || 0,
+        rewe_img_links: data.rewe_img_links || { xs: '', sm: '', md: '' },
       });
     } catch (err) {
       setError('Failed to load ingredient');
@@ -156,7 +156,7 @@ const IngredientForm: React.FC<IngredientFormProps> = ({ id, categories }) => {
         </div>
 
         <div className="mb-3">
-          <label className="form-label">REWE Article Number</label>
+          <label className="form-label">REWE Article Number (Optional)</label>
           <input
             type="number"
             className="form-control"
@@ -167,12 +167,11 @@ const IngredientForm: React.FC<IngredientFormProps> = ({ id, categories }) => {
                 rewe_art_no: parseInt(e.target.value) || 0,
               }))
             }
-            required
           />
         </div>
 
         <div className="mb-3">
-          <label className="form-label">Image URLs</label>
+          <label className="form-label">Image URLs (Optional)</label>
           <div className="row g-3">
             <div className="col-md-4">
               <input

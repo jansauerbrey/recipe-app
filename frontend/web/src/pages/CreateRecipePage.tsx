@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Unit, RecipeFormData, DishType } from '../types/recipe';
+import { Category } from '../types/category';
 import { api } from '../utils/api';
 import { recipeApi } from '../utils/recipeApi';
 import RecipeForm from '../components/RecipeForm';
@@ -9,6 +10,7 @@ const CreateRecipePage: React.FC = () => {
   const navigate = useNavigate();
   const [units, setUnits] = useState<Unit[]>([]);
   const [dishTypes, setDishTypes] = useState<DishType[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,12 +18,14 @@ const CreateRecipePage: React.FC = () => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const [unitsData, dishTypesData] = await Promise.all([
+        const [unitsData, dishTypesData, categoriesData] = await Promise.all([
           api.get<Unit[]>('/units'),
-          api.get<DishType[]>('/dishtypes')
+          api.get<DishType[]>('/dishtypes'),
+          api.get<Category[]>('/categories')
         ]);
         setUnits(unitsData);
         setDishTypes(dishTypesData);
+        setCategories(categoriesData);
       } catch (err) {
         setError('Failed to load required data');
       } finally {
@@ -69,6 +73,7 @@ const CreateRecipePage: React.FC = () => {
       <RecipeForm
         dishTypes={dishTypes}
         units={units}
+        categories={categories}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
       />
