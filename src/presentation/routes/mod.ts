@@ -1,11 +1,11 @@
 import { Router } from 'https://deno.land/x/oak@v12.6.1/mod.ts';
 import { adminOnly, authMiddleware } from '../middleware/auth.middleware.ts';
 import { UserController } from '../controllers/user.controller.ts';
-import { RecipeController } from '../controllers/recipe.controller.ts';
 import { Dependencies } from '../../types/mod.ts';
 import { createTagsRouter } from './tags.ts';
 import { createUnitsRouter } from './units.ts';
 import { createDishTypesRouter } from './dishtypes.ts';
+import { createRecipesRouter } from './recipes.ts';
 import { AppState, createMiddleware } from '../../types/middleware.ts';
 import { ControllerContext } from '../controllers/base.controller.ts';
 
@@ -29,9 +29,13 @@ export async function initializeRoutes(router: AppRouter, dependencies: Dependen
   router.use(dishTypesRouter.routes());
   router.use(dishTypesRouter.allowedMethods());
 
-  // Initialize controllers
+  // Add recipe routes
+  const recipesRouter = createRecipesRouter(recipeService);
+  router.use(recipesRouter.routes());
+  router.use(recipesRouter.allowedMethods());
+
+  // Initialize user controller
   const userController = new UserController(userService);
-  const recipeController = new RecipeController(recipeService);
 
   // Helper function to create route handlers
   const routeHandler = (handler: (ctx: ControllerContext) => Promise<void>) => {
@@ -79,37 +83,6 @@ export async function initializeRoutes(router: AppRouter, dependencies: Dependen
     authMiddleware,
     adminOnly,
     routeHandler((ctx) => userController.delete(ctx)),
-  );
-
-  // Recipe routes
-  router.get(
-    '/api/recipes',
-    authMiddleware,
-    routeHandler((ctx) => recipeController.listRecipes(ctx)),
-  );
-  router.post('/api/recipes', authMiddleware, routeHandler((ctx) => recipeController.create(ctx)));
-
-  // Count recipes by category
-  router.get(
-    '/api/other/recipecount',
-    authMiddleware,
-    routeHandler((ctx) => recipeController.count(ctx)),
-  );
-
-  router.get(
-    '/api/recipes/:id',
-    authMiddleware,
-    routeHandler((ctx) => recipeController.getById(ctx)),
-  );
-  router.put(
-    '/api/recipes/:id',
-    authMiddleware,
-    routeHandler((ctx) => recipeController.update(ctx)),
-  );
-  router.delete(
-    '/api/recipes/:id',
-    authMiddleware,
-    routeHandler((ctx) => recipeController.delete(ctx)),
   );
 
   return router;

@@ -73,9 +73,10 @@ const staticFileMiddleware: Middleware<AppState> = async (ctx: Context, next: Ne
 };
 
 export async function createApp(): Promise<Application> {
-  // Load environment variables
+  // Load environment variables based on environment
+  const envFile = Deno.env.get('ENVIRONMENT') === 'test' ? '.env.test' : '.env';
   await load({
-    envPath: '.env',
+    envPath: envFile,
     export: true,
     allowEmptyValues: true,
   });

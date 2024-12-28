@@ -14,23 +14,25 @@ export function createDishTypesRouter(dishTypeService: DishTypeService): Router<
     return createMiddleware(handler);
   };
 
-  // Public routes
+  // All routes require authentication
   router.get(
     '/api/dishtypes',
+    authMiddleware,
     routeHandler((ctx) => controller.listDishTypes(ctx))
   );
 
   router.get(
     '/api/dishtypes/:id',
+    authMiddleware,
     routeHandler((ctx) => controller.getDishTypeById(ctx))
   );
 
   router.get(
     '/api/dishtypes/identifier/:identifier',
+    authMiddleware,
     routeHandler((ctx) => controller.getDishTypeByIdentifier(ctx))
   );
 
-  // Protected routes - require authentication
   router.post(
     '/api/dishtypes',
     authMiddleware,
