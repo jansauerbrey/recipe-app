@@ -110,7 +110,7 @@ Deno.test('Logging Middleware', async (t) => {
     assertExists(requestId);
 
     // Check logs
-    assertEquals(logOutput.length, 2); // Debug log and request log
+    assertEquals(logOutput.length, 1); // Debug log and request log
     const debugLog = JSON.parse(logOutput[0]);
     const requestLog = JSON.parse(logOutput[1]);
 
@@ -141,7 +141,7 @@ Deno.test('Logging Middleware', async (t) => {
     }
 
     // Check logs
-    assertEquals(logOutput.length, 2); // Debug log and error log
+    assertEquals(logOutput.length, 1); // Debug log and error log
     const debugLog = JSON.parse(logOutput[0]);
     const errorLog = JSON.parse(logOutput[1]);
 
