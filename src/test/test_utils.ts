@@ -1,5 +1,6 @@
 import { Context, State } from '@oak/mod.ts';
 import { Status } from '@std/http/http_status.ts';
+import { load } from '@std/dotenv/mod.ts';
 import { AppError } from '../types/errors.ts';
 import { createTestUser, deleteTestUser } from './utils/database.ts';
 import { generateToken } from '../presentation/middleware/auth/token.middleware.ts';
@@ -179,15 +180,50 @@ let serverPromise: Promise<void> | null = null;
 export async function setupTest(): Promise<TestServer> {
   console.log('Starting test server...');
   
+  // Set test environment
+  Deno.env.set('ENVIRONMENT', 'test');
+
+  // Load environment variables from file only in local development
+  if (Deno.env.get('CI') !== 'true' && Deno.env.get('DENO_DEPLOYMENT_ID') === undefined) {
+    await load({
+      envPath: '.env.test',
+      export: true,
+      allowEmptyValues: true,
+    });
+  }
+
+  // Ensure required environment variables are set
+  const requiredVars = ['MONGODB_URI', 'MONGO_DB_NAME'];
+  for (const varName of requiredVars) {
+    if (!Deno.env.get(varName)) {
+      throw new Error(`Required environment variable ${varName} is not set`);
+    }
+  }
+  
   // Setup MongoDB connection
   const mongoClient = new MongoClient();
-  const uri = Deno.env.get('MONGODB_URI') || 'mongodb://127.0.0.1:27018/recipe_app_test';
-  console.log('Connecting to MongoDB...', { uri });
+  const uri = Deno.env.get('MONGODB_URI');
+  if (!uri) {
+    throw new Error('MONGODB_URI environment variable is required');
+  }
+
+  // Log connection attempt
+  console.log('Connecting to MongoDB...', { 
+    environment: Deno.env.get('ENVIRONMENT')
+  });
+
   try {
     await mongoClient.connect(uri);
     console.log('MongoDB connection successful');
   } catch (error) {
-    console.error('MongoDB connection failed:', error);
+    console.error('MongoDB connection failed:', {
+      error: error instanceof Error ? {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+        cause: error.cause
+      } : error
+    });
     throw error;
   }
   
@@ -303,47 +339,79 @@ export async function cleanupTest(): Promise<void> {
       const dbName = Deno.env.get('MONGO_DB_NAME') || 'recipe_app_test';
 
       if (currentTestContext.mongoClient) {
-        // Clean up all collections in the test database
-        const db = currentTestContext.mongoClient.database(dbName);
-        const collections = await db.listCollectionNames();
-        
-        // Delete all documents from each collection
-        await Promise.all(collections.map(name => 
-          db.collection(name).deleteMany({})
-        ));
+        try {
+          // Clean up all collections in the test database
+          const db = currentTestContext.mongoClient.database(dbName);
+          const collections = await db.listCollectionNames();
+          
+          // Delete all documents from each collection
+          await Promise.all(collections.map((name: string) => 
+            db.collection(name).deleteMany({}).catch(err => {
+              console.error(`Error cleaning collection ${name}:`, err);
+            })
+          ));
 
-        // Clean up test user
-        if (currentTestContext.testUserId) {
-          await cleanupTestUser(currentTestContext.testUserId);
+          // Clean up test user
+          if (currentTestContext.testUserId) {
+            try {
+              await cleanupTestUser(currentTestContext.testUserId);
+            } catch (err) {
+              console.error('Error cleaning up test user:', err);
+            }
+          }
+
+          // Close MongoDB connection
+          try {
+            await currentTestContext.mongoClient.close();
+          } catch (err) {
+            console.error('Error closing MongoDB connection:', err);
+          }
+        } catch (err) {
+          console.error('Error during database cleanup:', err);
         }
-
-        // Close MongoDB connection
-        await currentTestContext.mongoClient.close();
       }
 
       // Close server
       if (currentTestContext.server) {
-        await currentTestContext.server.close();
+        try {
+          await currentTestContext.server.close();
+        } catch (err) {
+          console.error('Error closing server:', err);
+        }
       }
     }
 
     // Create a new connection to ensure cleanup
-    const mongoClient = new MongoClient();
-    const uri = Deno.env.get('MONGODB_URI') || 'mongodb://127.0.0.1:27018/recipe_app_test';
-    await mongoClient.connect(uri);
-    const dbName = Deno.env.get('MONGO_DB_NAME') || 'recipe_app_test';
-    const db = mongoClient.database(dbName);
-    
-    // Clean up any remaining data
-    const collections = await db.listCollectionNames();
-    await Promise.all(collections.map(name => 
-      db.collection(name).deleteMany({})
-    ));
-    
-    await mongoClient.close();
+    try {
+      const mongoClient = new MongoClient();
+      const uri = Deno.env.get('MONGODB_URI');
+      if (!uri) {
+        throw new Error('MONGODB_URI environment variable is required');
+      }
+      await mongoClient.connect(uri);
+      const dbName = Deno.env.get('MONGO_DB_NAME') || 'recipe_app_test';
+      const db = mongoClient.database(dbName);
+      
+      // Clean up any remaining data
+      const collections = await db.listCollectionNames();
+      await Promise.all(collections.map((name: string) => 
+        db.collection(name).deleteMany({}).catch(err => {
+          console.error(`Error cleaning collection ${name}:`, err);
+        })
+      ));
+      
+      try {
+        await mongoClient.close();
+      } catch (err) {
+        console.error('Error closing final cleanup connection:', err);
+      }
+    } catch (error) {
+      console.error('Final cleanup error:', error);
+      // Continue even if final cleanup fails
+    }
   } catch (error) {
     console.error('Error during cleanup:', error);
-    throw error;
+    // Don't throw error to allow tests to continue
   } finally {
     currentTestContext = null;
   }

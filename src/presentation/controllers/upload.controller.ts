@@ -3,11 +3,14 @@ import { BaseController, ControllerContext } from './base.controller.ts';
 import { RecipeService } from '../../business/services/recipe.service.ts';
 import { AuthenticationError, ValidationError } from '../../types/errors.ts';
 import { Recipe } from '../../types/recipe.ts';
-import { storageService } from '../../utils/storage.ts';
+import { StorageService } from '../../utils/storage.ts';
 
 export class UploadController extends BaseController {
+  private storageService: StorageService;
+
   constructor(private recipeService: RecipeService) {
     super();
+    this.storageService = new StorageService();
   }
 
   async uploadRecipeImage(ctx: ControllerContext): Promise<void> {
@@ -69,23 +72,27 @@ export class UploadController extends BaseController {
       }
 
       try {
-        // Generate unique filename
+        // Generate unique filename with timestamp
         const ext = file.originalName?.split('.').pop() || 'jpg';
         const key = `recipes/${id}_${Date.now()}.${ext}`;
 
         // Upload to R2
-        const imageUrl = await storageService.uploadFile(
+        await this.storageService.uploadFile(
           file.content,
           key,
           file.contentType || 'image/jpeg'
         );
-        console.log(`File uploaded successfully to ${imageUrl}`);
+        console.log(`File uploaded successfully with key: ${key}`);
 
-        // Update recipe with image URL
-        const update: Partial<Recipe> = { imagePath: imageUrl };
+        // Update recipe with the storage key
+        const update: Partial<Recipe> = { imagePath: key };
         await this.recipeService.updateRecipe(id, update);
 
-        await this.ok(ctx, { filename: key, url: imageUrl });
+        // Return both the storage key and a relative URL path for the frontend
+        await this.ok(ctx, { 
+          key: key,
+          url: `/upload/${key}` // Frontend will use this path to request the image
+        });
       } catch (writeError: unknown) {
         console.error('File write error:', writeError);
         const errorMessage = writeError instanceof Error ? writeError.message : 'Unknown error occurred';
@@ -101,6 +108,44 @@ export class UploadController extends BaseController {
       } else {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
         await this.internalServerError(ctx, `Failed to upload image: ${errorMessage}`);
+      }
+    }
+  }
+
+  async serveImage(ctx: ControllerContext): Promise<void> {
+    try {
+      // Get the full path including the key and any additional segments
+      const key = ctx.params.key + (ctx.params[0] || '');
+      if (!key) {
+        throw new ValidationError('Image path is required');
+      }
+
+      console.log(`Serving image with path: ${key}`);
+
+      try {
+        const { data, contentType } = await this.storageService.getObject(key);
+        
+        // Set appropriate headers
+        ctx.response.headers.set('Content-Type', contentType || 'image/jpeg');
+        ctx.response.headers.set('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+        
+        // Send the image data
+        ctx.response.body = data;
+      } catch (error) {
+        console.error('Error retrieving image:', error);
+        if (error instanceof Error && error.message.includes('NoSuchKey')) {
+          throw new ValidationError('Image not found');
+        }
+        throw error;
+      }
+    } catch (error) {
+      console.error('Image serving error:', error);
+      
+      if (error instanceof ValidationError) {
+        await this.badRequest(ctx, error.message);
+      } else {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        await this.internalServerError(ctx, `Failed to serve image: ${errorMessage}`);
       }
     }
   }

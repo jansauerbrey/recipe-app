@@ -1,7 +1,7 @@
 import { RecipeRepository } from '../../data/repositories/recipe.repository.ts';
 import { Recipe, RecipeResponse, CreateRecipeData, RecipeIngredient } from '../../types/mod.ts';
 import { ResourceNotFoundError, ValidationError } from '../../types/errors.ts';
-import { storageService } from '../../utils/storage.ts';
+import { StorageService } from '../../utils/storage.ts';
 
 export interface RecipeFilter {
   userId?: string;
@@ -22,7 +22,11 @@ export interface IRecipeService {
 }
 
 export class RecipeService implements IRecipeService {
-  constructor(private recipeRepository: RecipeRepository) {}
+  private storageService: StorageService;
+
+  constructor(private recipeRepository: RecipeRepository) {
+    this.storageService = new StorageService();
+  }
 
   async createRecipe(recipe: CreateRecipeData): Promise<RecipeResponse> {
     // Validate required fields
@@ -91,7 +95,7 @@ export class RecipeService implements IRecipeService {
           // Extract key from the old image URL
           const oldKey = this.getKeyFromUrl(existingRecipe.imagePath);
           if (oldKey) {
-            await storageService.deleteFile(oldKey);
+            await this.storageService.deleteFile(oldKey);
           }
         } catch (error) {
           console.error('Failed to delete old image:', error);
@@ -120,7 +124,7 @@ export class RecipeService implements IRecipeService {
       try {
         const key = this.getKeyFromUrl(recipe.imagePath);
         if (key) {
-          await storageService.deleteFile(key);
+          await this.storageService.deleteFile(key);
         }
       } catch (error) {
         console.error('Failed to delete recipe image:', error);
@@ -131,10 +135,18 @@ export class RecipeService implements IRecipeService {
 
   private getKeyFromUrl(url: string): string | null {
     try {
-      // Extract the key from the full R2 URL
+      // Extract the key from the API URL
+      // URL format: /upload/recipes/[id]_[timestamp].[ext]
+      if (url.startsWith('/upload/')) {
+        return url.substring('/upload/'.length);
+      }
+      // Handle legacy R2 URLs for backward compatibility
       // URL format: https://{accountId}.r2.cloudflarestorage.com/{bucket}/{key}
-      const urlParts = url.split('/');
-      return urlParts.slice(4).join('/'); // Skip protocol, domain, and bucket
+      if (url.includes('r2.cloudflarestorage.com')) {
+        const urlParts = url.split('/');
+        return urlParts.slice(4).join('/'); // Skip protocol, domain, and bucket
+      }
+      return null;
     } catch {
       return null;
     }
