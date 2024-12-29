@@ -11,8 +11,8 @@
     "fmt": "deno fmt"
   },
   "lint": {
-    "include": ["src/", "public/"],
-    "exclude": ["public/lib/"],
+    "include": ["src/"],
+    "exclude": ["public/"],
     "rules": {
       "tags": ["recommended"],
       "exclude": [

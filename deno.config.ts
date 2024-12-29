@@ -16,7 +16,6 @@ const config: CompilerOptions = {
     'mongo': ['https://deno.land/x/mongo@v0.32.0/mod.ts'],
     'oak_rate_limit': ['https://deno.land/x/oak_rate_limit@v0.1.1/mod.ts'],
     'http/*': ['https://deno.land/std@0.208.0/http/*'],
-    'bcrypt': ['https://deno.land/x/bcrypt@v0.4.1/mod.ts'],
     'djwt': ['https://deno.land/x/djwt@v3.0.1/mod.ts'],
   },
 };

@@ -3,7 +3,7 @@ import { Database } from '../database.ts';
 import { User } from '../../types/mod.ts';
 import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
 import { AppError, ResourceNotFoundError, ValidationError } from '../../types/errors.ts';
-import * as bcrypt from 'https://deno.land/x/bcrypt@v0.4.1/mod.ts';
+import { hashPassword, verifyPassword } from '../../utils/crypto.ts';
 import { logger } from '../../utils/logger.ts';
 
 type UserDoc = Omit<User, 'id'> & { _id: ObjectId };
@@ -21,7 +21,7 @@ export class UserRepository {
   }
 
   async create(userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
-    const hashedPassword = await bcrypt.hash(userData.password);
+    const hashedPassword = await hashPassword(userData.password);
     const now = new Date();
 
     const doc = await this.collection.insertOne({
@@ -121,7 +121,7 @@ export class UserRepository {
     const _id = this.toObjectId(id);
 
     if (updates.password) {
-      updates.password = await bcrypt.hash(updates.password);
+      updates.password = await hashPassword(updates.password);
     }
 
     const doc = await this.collection.findAndModify(
@@ -160,7 +160,7 @@ export class UserRepository {
     }
 
     logger.debug('Comparing password hash');
-    const isValid = await bcrypt.compare(password, doc.password);
+    const isValid = await verifyPassword(password, doc.password);
     logger.debug('Password validation result', { userId: id, isValid });
     return isValid;
   }

@@ -1,7 +1,7 @@
 import { MongoClient } from 'https://deno.land/x/mongo@v0.32.0/mod.ts';
-import { hash } from 'https://deno.land/x/bcrypt@v0.4.1/mod.ts';
+import { hashPassword } from '../src/utils/crypto.ts';
 
-async function createUser(email: string, password: string, role: string = 'user') {
+async function createUser(email: string, password: string, username: string, role: string = 'user') {
   const client = new MongoClient();
   try {
     const { load } = await import('https://deno.land/std@0.208.0/dotenv/mod.ts');
@@ -15,12 +15,13 @@ async function createUser(email: string, password: string, role: string = 'user'
     const db = client.database(dbName);
     const users = db.collection('users');
 
-    // Hash the provided password
-    const hashedPassword = await hash(password);
+    // Hash the provided password using our new implementation
+    const hashedPassword = await hashPassword(password);
 
-    // Create user
+    // Create user with username
     const user = {
       email,
+      username,
       password: hashedPassword,
       role,
       createdAt: new Date(),
@@ -45,14 +46,15 @@ async function createUser(email: string, password: string, role: string = 'user'
   }
 }
 
-// Get email, password, and optional role from command line arguments
+// Get email, password, username, and optional role from command line arguments
 const email = Deno.args[0];
 const password = Deno.args[1];
-const role = Deno.args[2];
+const username = Deno.args[2];
+const role = Deno.args[3];
 
-if (!email || !password) {
-  console.error('Usage: deno run --allow-net --allow-read --allow-env create-user.ts <email> <password> [role]');
+if (!email || !password || !username) {
+  console.error('Usage: deno run --allow-net --allow-read --allow-env create-user.ts <email> <password> <username> [role]');
   Deno.exit(1);
 }
 
-createUser(email, password, role);
+createUser(email, password, username, role);
