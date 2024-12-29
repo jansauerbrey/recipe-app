@@ -10,6 +10,7 @@ export const LoginPage: React.FC = () => {
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation() as { state?: { message?: string; from?: { pathname: string } } };
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const form = useForm<LoginCredentials>({
     initialValues: {
@@ -23,12 +24,15 @@ export const LoginPage: React.FC = () => {
   });
 
   const handleSubmit = async (values: LoginCredentials) => {
+    if (isLoading) return;
+    
+    setIsLoading(true);
     try {
       await login(values as { email: string; password: string });
-      const from = location.state?.from?.pathname || '/home';
-      navigate(from, { replace: true });
+      // Navigation is handled in AuthContext after successful login
     } catch (error) {
       form.setErrors({ email: 'Invalid credentials' });
+      setIsLoading(false);
     }
   };
 
@@ -71,7 +75,7 @@ export const LoginPage: React.FC = () => {
               {...form.getInputProps('password')}
             />
 
-            <Button type="submit" fullWidth>
+            <Button type="submit" fullWidth loading={isLoading} disabled={isLoading}>
               Sign in
             </Button>
 

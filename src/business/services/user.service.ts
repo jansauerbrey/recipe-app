@@ -7,6 +7,7 @@ import { logger } from '../../utils/logger.ts';
 
 export interface IUserService {
   validateCredentials(email: string, password: string): Promise<string>;
+  refreshToken(userId: string, role: string): Promise<string>;
   createUser(userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User>;
   getUserById(id: string): Promise<User>;
   updateUser(id: string, updates: Partial<User>): Promise<User>;
@@ -15,6 +16,25 @@ export interface IUserService {
 
 export class UserService implements IUserService {
   constructor(private userRepository: UserRepository) {}
+
+  async refreshToken(userId: string, role: string): Promise<string> {
+    logger.debug('Refreshing token for user', { userId });
+    
+    // Verify user still exists and has same role
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      logger.debug('User not found during token refresh', { userId });
+      throw new AuthenticationError('Invalid token');
+    }
+    
+    if (user.role !== role) {
+      logger.debug('User role mismatch during token refresh', { userId, expectedRole: role, actualRole: user.role });
+      throw new AuthenticationError('Invalid token');
+    }
+
+    logger.debug('Generating new token', { userId });
+    return generateToken(userId, role);
+  }
 
   private isValidEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

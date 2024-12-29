@@ -57,11 +57,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isAuthenticated = !!user;
   const isAdmin = user?.role === 'admin';
 
-  // Update API client's auth token whenever token changes
-  useEffect(() => {
-    api.setAuthToken(token);
-  }, [token]);
-
   useEffect(() => {
     // Check for existing session on mount
     const checkAuth = async () => {
@@ -91,9 +86,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const { token: newToken } = await api.post<LoginResponse>('/user/login', credentials);
       localStorage.setItem('token', newToken);
+      // Set token in API client first
+      api.setAuthToken(newToken);
       setToken(newToken);
       
-      // Fetch user data with the new token
+      // Now fetch user data with the new token
       const { user: userData } = await api.get<UserCheckResponse>('/user/check');
       setUser(userData);
       

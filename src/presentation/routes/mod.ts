@@ -94,6 +94,11 @@ export async function initializeRoutes(router: AppRouter, dependencies: Dependen
 
   // Auth routes
   router.post('/api/user/login', routeHandler((ctx) => userController.validateCredentials(ctx)));
+  router.post(
+    '/api/user/refresh',
+    authMiddleware,
+    routeHandler((ctx) => userController.refreshToken(ctx)),
+  );
   router.get(
     '/api/user/check',
     authMiddleware,

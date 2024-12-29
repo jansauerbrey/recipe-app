@@ -14,6 +14,27 @@ export class UserController extends BaseController {
     super();
   }
 
+  async refreshToken(ctx: ControllerContext): Promise<void> {
+    try {
+      const userId = ctx.state.user?.id;
+      const userRole = ctx.state.user?.role;
+      
+      if (!userId || !userRole) {
+        throw new AuthenticationError('User not authenticated');
+      }
+
+      const token = await this.userService.refreshToken(userId, userRole);
+      await this.ok(ctx, { token });
+    } catch (error) {
+      const err = error as Error & { code?: string };
+      if (err.code === 'AUTHENTICATION_ERROR') {
+        await this.unauthorized(ctx, err.message);
+      } else {
+        await this.internalServerError(ctx, 'Failed to refresh token');
+      }
+    }
+  }
+
   async validateCredentials(ctx: ControllerContext): Promise<void> {
     try {
       const body = ctx.request.body();
