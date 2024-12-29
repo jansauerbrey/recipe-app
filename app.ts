@@ -77,6 +77,7 @@ const staticFileMiddleware: Middleware<AppState> = async (ctx: Context, next: Ne
         await ctx.send({
           root: './public',
           path: ctx.request.url.pathname,
+          index: 'index.html', // Default index file
         });
       } catch {
         // If file not found, serve index.html for client-side routing
