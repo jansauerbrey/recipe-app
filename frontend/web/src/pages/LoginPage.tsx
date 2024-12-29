@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, useLocation, Navigate, Link } from 'react-router-dom';
+import { useLocation, Navigate, Link } from 'react-router-dom';
 import { TextInput, PasswordInput, Button, Paper, Title, Stack, Group, Anchor, Alert, Container } from '@mantine/core';
 import { IconCheck } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
@@ -8,7 +8,6 @@ import { LoginCredentials } from '../types/auth';
 
 export const LoginPage: React.FC = () => {
   const { login, isAuthenticated } = useAuth();
-  const navigate = useNavigate();
   const location = useLocation() as { state?: { message?: string; from?: { pathname: string } } };
   const [isLoading, setIsLoading] = React.useState(false);
 
