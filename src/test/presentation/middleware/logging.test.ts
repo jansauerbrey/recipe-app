@@ -110,18 +110,19 @@ Deno.test('Logging Middleware', async (t) => {
     assertExists(requestId);
 
     // Check logs
-    assertEquals(logOutput.length, 1); // Debug log and request log
-    const debugLog = JSON.parse(logOutput[0]);
-    const requestLog = JSON.parse(logOutput[1]);
+    assertEquals(logOutput.length, 2); // Debug log and request log
+    const logs = logOutput.map(log => JSON.parse(log));
+    
+    // First log should be debug
+    assertEquals(logs[0].message, 'Request received');
+    assertEquals(logs[0].context.method, 'GET');
+    assertEquals(logs[0].context.path, '/test');
 
-    assertEquals(debugLog.message, 'Request received');
-    assertEquals(debugLog.context.method, 'GET');
-    assertEquals(debugLog.context.path, '/test');
-
-    assertEquals(requestLog.level, 'info');
-    assertEquals(requestLog.message, 'HTTP GET /test');
-    assertEquals(requestLog.context.statusCode, 200);
-    assertExists(requestLog.context.duration);
+    // Second log should be info
+    assertEquals(logs[1].level, 'info');
+    assertEquals(logs[1].message, 'HTTP GET /test');
+    assertEquals(logs[1].context.statusCode, 200);
+    assertExists(logs[1].context.duration);
 
     restoreConsole();
   });
@@ -141,17 +142,19 @@ Deno.test('Logging Middleware', async (t) => {
     }
 
     // Check logs
-    assertEquals(logOutput.length, 1); // Debug log and error log
-    const debugLog = JSON.parse(logOutput[0]);
-    const errorLog = JSON.parse(logOutput[1]);
+    assertEquals(logOutput.length, 2); // Debug log and error log
+    const logs = logOutput.map(log => JSON.parse(log));
 
-    assertEquals(debugLog.message, 'Request received');
-    assertEquals(errorLog.level, 'error');
-    assertEquals(errorLog.message, 'Request failed');
-    assertEquals(errorLog.context.statusCode, 400);
-    assertEquals(errorLog.context.errorCode, 'TEST_ERROR');
-    assertEquals(errorLog.context.userId, 'test-user');
-    assertExists(errorLog.context.duration);
+    // First log should be debug
+    assertEquals(logs[0].message, 'Request received');
+    
+    // Second log should be error
+    assertEquals(logs[1].level, 'error');
+    assertEquals(logs[1].message, 'Request failed');
+    assertEquals(logs[1].context.statusCode, 400);
+    assertEquals(logs[1].context.errorCode, 'TEST_ERROR');
+    assertEquals(logs[1].context.userId, 'test-user');
+    assertExists(logs[1].context.duration);
 
     restoreConsole();
   });
@@ -172,10 +175,16 @@ Deno.test('Logging Middleware', async (t) => {
     }
 
     // Check logs
-    const errorLog = JSON.parse(logOutput[logOutput.length - 1]);
-    assertEquals(errorLog.level, 'error');
-    assertEquals(errorLog.context.statusCode, 500);
-    assertEquals(errorLog.context.errorCode, 'INTERNAL_SERVER_ERROR');
+    assertEquals(logOutput.length, 2); // Debug log and error log
+    const logs = logOutput.map(log => JSON.parse(log));
+
+    // First log should be debug
+    assertEquals(logs[0].message, 'Request received');
+    
+    // Second log should be error
+    assertEquals(logs[1].level, 'error');
+    assertEquals(logs[1].context.statusCode, 500);
+    assertEquals(logs[1].context.errorCode, 'INTERNAL_SERVER_ERROR');
 
     restoreConsole();
   });
@@ -196,10 +205,16 @@ Deno.test('Logging Middleware', async (t) => {
     }
 
     // Check logs
-    const errorLog = JSON.parse(logOutput[logOutput.length - 1]);
-    assertEquals(errorLog.level, 'error');
-    assertEquals(errorLog.context.statusCode, 500);
-    assertEquals(errorLog.context.errorCode, 'INTERNAL_SERVER_ERROR');
+    assertEquals(logOutput.length, 2); // Debug log and error log
+    const logs = logOutput.map(log => JSON.parse(log));
+
+    // First log should be debug
+    assertEquals(logs[0].message, 'Request received');
+    
+    // Second log should be error
+    assertEquals(logs[1].level, 'error');
+    assertEquals(logs[1].context.statusCode, 500);
+    assertEquals(logs[1].context.errorCode, 'INTERNAL_SERVER_ERROR');
 
     restoreConsole();
   });
