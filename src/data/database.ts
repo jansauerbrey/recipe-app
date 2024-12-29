@@ -31,7 +31,7 @@ export class MongoDatabase implements Database {
   public ingredients: Collection<IngredientDoc>;
 
   constructor(private client: MongoClient) {
-    const dbName = Deno.env.get('MONGO_DB_NAME') || 'recipe_app_test';
+    const dbName = Deno.env.get('MONGO_DB_NAME') || 'recipe-app';
     logger.debug('Initializing MongoDB database connection', { 
       dbName,
       collections: ['tags', 'users', 'recipes', 'units', 'dishtypes', 'categories', 'ingredients']
