@@ -4,6 +4,7 @@ import { User } from '../../types/mod.ts';
 import { Status } from 'https://deno.land/std@0.208.0/http/http_status.ts';
 import { AppError, ResourceNotFoundError, ValidationError } from '../../types/errors.ts';
 import * as bcrypt from 'https://deno.land/x/bcrypt@v0.4.1/mod.ts';
+import { logger } from '../../utils/logger.ts';
 
 type UserDoc = Omit<User, 'id'> & { _id: ObjectId };
 
@@ -58,8 +59,14 @@ export class UserRepository {
   }
 
   async findByEmail(email: string): Promise<User | null> {
+    logger.debug('Looking up user by email in database', { email });
     const doc = await this.collection.findOne({ email });
-    return doc ? this.toUser(doc) : null;
+    if (!doc) {
+      logger.debug('No user found with email', { email });
+      return null;
+    }
+    logger.debug('User found with email', { userId: doc._id.toString() });
+    return this.toUser(doc);
   }
 
   async findByUsername(username: string): Promise<User | null> {
@@ -100,12 +107,18 @@ export class UserRepository {
   }
 
   async validatePassword(id: string, password: string): Promise<boolean> {
+    logger.debug('Validating password for user', { userId: id });
     const _id = this.toObjectId(id);
+    
     const doc = await this.collection.findOne({ _id });
     if (!doc) {
+      logger.debug('User not found during password validation', { userId: id });
       throw new ResourceNotFoundError('User');
     }
 
-    return bcrypt.compare(password, doc.password);
+    logger.debug('Comparing password hash');
+    const isValid = await bcrypt.compare(password, doc.password);
+    logger.debug('Password validation result', { userId: id, isValid });
+    return isValid;
   }
 }

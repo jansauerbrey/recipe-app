@@ -3,6 +3,7 @@ import { UserRepository } from '../../data/repositories/user.repository.ts';
 import { User } from '../../types/mod.ts';
 import { AuthenticationError, ResourceNotFoundError, ValidationError } from '../../types/errors.ts';
 import { generateToken } from '../../presentation/middleware/auth.middleware.ts';
+import { logger } from '../../utils/logger.ts';
 
 export interface IUserService {
   validateCredentials(email: string, password: string): Promise<string>;
@@ -25,24 +26,33 @@ export class UserService implements IUserService {
   }
 
   async validateCredentials(email: string, password: string): Promise<string> {
+    logger.debug('Validating user credentials', { email });
+
     if (!email || !password) {
+      logger.debug('Missing email or password');
       throw new ValidationError('Email and password are required');
     }
 
     if (!this.isValidEmail(email)) {
+      logger.debug('Invalid email format', { email });
       throw new ValidationError('Invalid email format');
     }
 
+    logger.debug('Looking up user by email');
     const user = await this.userRepository.findByEmail(email);
     if (!user) {
+      logger.debug('User not found with email', { email });
       throw new AuthenticationError('Invalid credentials');
     }
 
+    logger.debug('Validating password for user', { userId: user.id });
     const isValidPassword = await this.userRepository.validatePassword(user.id, password);
     if (!isValidPassword) {
+      logger.debug('Invalid password for user', { userId: user.id });
       throw new AuthenticationError('Invalid credentials');
     }
 
+    logger.debug('Credentials validated successfully, generating token', { userId: user.id });
     return generateToken(user.id, user.role);
   }
 
