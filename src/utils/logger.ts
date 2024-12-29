@@ -27,9 +27,35 @@ interface LogEntry {
 export class Logger {
   private static instance: Logger;
   private environment: string;
+  private logLevel: LogLevel;
 
   private constructor() {
     this.environment = Deno.env.get('ENVIRONMENT') || 'development';
+    this.logLevel = this.getLogLevel();
+  }
+
+  private getLogLevel(): LogLevel {
+    const configuredLevel = Deno.env.get('LOG_LEVEL')?.toLowerCase();
+    switch (configuredLevel) {
+      case 'debug':
+        return LogLevel.DEBUG;
+      case 'info':
+        return LogLevel.INFO;
+      case 'warn':
+        return LogLevel.WARN;
+      case 'error':
+        return LogLevel.ERROR;
+      default:
+        // Default to INFO in production, DEBUG in development
+        return this.environment === 'production' ? LogLevel.INFO : LogLevel.DEBUG;
+    }
+  }
+
+  private shouldLog(level: LogLevel): boolean {
+    const logLevels = [LogLevel.DEBUG, LogLevel.INFO, LogLevel.WARN, LogLevel.ERROR];
+    const configuredIndex = logLevels.indexOf(this.logLevel);
+    const messageIndex = logLevels.indexOf(level);
+    return messageIndex >= configuredIndex;
   }
 
   static getInstance(): Logger {
@@ -64,29 +90,35 @@ export class Logger {
   }
 
   debug(message: string, context: LogContext = {}): void {
-    if (this.environment === 'development' || this.environment === 'test') {
+    if (this.shouldLog(LogLevel.DEBUG)) {
       this.output(this.formatLog(LogLevel.DEBUG, message, context));
     }
   }
 
   info(message: string, context: LogContext = {}): void {
-    this.output(this.formatLog(LogLevel.INFO, message, context));
+    if (this.shouldLog(LogLevel.INFO)) {
+      this.output(this.formatLog(LogLevel.INFO, message, context));
+    }
   }
 
   warn(message: string, context: LogContext = {}): void {
-    this.output(this.formatLog(LogLevel.WARN, message, context));
+    if (this.shouldLog(LogLevel.WARN)) {
+      this.output(this.formatLog(LogLevel.WARN, message, context));
+    }
   }
 
   error(message: string, context: LogContext = {}): void {
-    if (context.error instanceof Error) {
-      context = {
-        ...context,
-        errorName: context.error.name,
-        errorMessage: context.error.message,
-        errorStack: context.error.stack,
-      };
+    if (this.shouldLog(LogLevel.ERROR)) {
+      if (context.error instanceof Error) {
+        context = {
+          ...context,
+          errorName: context.error.name,
+          errorMessage: context.error.message,
+          errorStack: context.error.stack,
+        };
+      }
+      this.output(this.formatLog(LogLevel.ERROR, message, context));
     }
-    this.output(this.formatLog(LogLevel.ERROR, message, context));
   }
 
   // Helper method for HTTP request logging
