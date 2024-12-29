@@ -59,14 +59,57 @@ export class UserRepository {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    logger.debug('Looking up user by email in database', { email });
-    const doc = await this.collection.findOne({ email });
-    if (!doc) {
-      logger.debug('No user found with email', { email });
-      return null;
+    logger.debug('Starting email lookup', { 
+      email,
+      collectionName: this.collection.name
+    });
+
+    try {
+      // Log the exact query we're about to execute
+      const filter = { email: email };
+      logger.debug('Executing findOne query', { 
+        filter,
+        collectionName: this.collection.name
+      });
+
+      // Try to count documents in collection
+      try {
+        const count = await this.collection.countDocuments({});
+        logger.debug('Collection document count', { 
+          count,
+          collectionName: this.collection.name
+        });
+      } catch (countError) {
+        logger.debug('Unable to get collection count', { 
+          error: countError instanceof Error ? countError.message : String(countError)
+        });
+      }
+
+      const doc = await this.collection.findOne(filter);
+
+      if (!doc) {
+        logger.debug('Query returned no results', { 
+          email,
+          filter
+        });
+        return null;
+      }
+
+      logger.debug('Query returned document', { 
+        userId: doc._id.toString(),
+        hasPassword: !!doc.password,
+        documentFields: Object.keys(doc)
+      });
+
+      return this.toUser(doc);
+    } catch (error) {
+      logger.error('Error during email lookup', {
+        email,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      throw error;
     }
-    logger.debug('User found with email', { userId: doc._id.toString() });
-    return this.toUser(doc);
   }
 
   async findByUsername(username: string): Promise<User | null> {

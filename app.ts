@@ -114,15 +114,25 @@ export async function createApp(): Promise<Application> {
   let retries = 3;
   while (retries > 0) {
     try {
+      const dbName = Deno.env.get('MONGO_DB_NAME') || 'recipe-app';
       // Log connection details
-      logger.info('Connecting to MongoDB...', { 
+      logger.debug('Attempting MongoDB connection', { 
         environment: Deno.env.get('ENVIRONMENT'),
         isDeployment: !!Deno.env.get('DENO_DEPLOYMENT_ID'),
-        isCI: !!Deno.env.get('CI')
+        isCI: !!Deno.env.get('CI'),
+        dbName,
+        // Log URI with credentials masked
+        uri: appConfig.MONGODB_URI.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')
       });
 
       await mongoClient.connect(appConfig.MONGODB_URI);
-      logger.info('MongoDB connection successful');
+      
+      // Test connection by listing databases
+      const dbList = await mongoClient.listDatabases();
+      logger.debug('MongoDB connection successful', {
+        availableDatabases: dbList.map(db => db.name),
+        selectedDatabase: dbName
+      });
       break;
     } catch (err: unknown) {
       logger.error('MongoDB connection error:', {
@@ -133,7 +143,9 @@ export async function createApp(): Promise<Application> {
           cause: err.cause
         } : err,
         environment: Deno.env.get('ENVIRONMENT'),
-        retriesLeft: retries - 1
+        retriesLeft: retries - 1,
+        dbName: Deno.env.get('MONGO_DB_NAME') || 'recipe-app',
+        uri: appConfig.MONGODB_URI.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')
       });
       
       if (retries === 1) {
