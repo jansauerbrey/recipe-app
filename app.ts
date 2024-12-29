@@ -92,8 +92,8 @@ const staticFileMiddleware: Middleware<AppState> = async (ctx: Context, next: Ne
 };
 
 export async function createApp(): Promise<Application> {
-  // Load environment variables from .env file in local development
-  if (Deno.env.get('DENO_DEPLOYMENT_ID') === undefined) {
+  // Load environment variables from .env file only in local development
+  if (Deno.env.get('CI') !== 'true' && Deno.env.get('DENO_DEPLOYMENT_ID') === undefined) {
     const envFile = Deno.env.get('ENVIRONMENT') === 'test' ? '.env.test' : '.env';
     await load({
       envPath: envFile,
@@ -101,20 +101,47 @@ export async function createApp(): Promise<Application> {
       allowEmptyValues: true,
     });
   }
-  // In Deno Deploy, environment variables are set through the dashboard
+  // Environment variables are set:
+  // - In GitHub Actions: through ci.yml
+  // - In Deno Deploy: through dashboard
 
   const appConfig: AppConfig = getConfig();
   const logger = console;
 
   // Initialize MongoDB connection
   const mongoClient = new MongoClient();
-  try {
-    logger.info('Connecting to MongoDB...', { uri: appConfig.MONGODB_URI });
-    await mongoClient.connect(appConfig.MONGODB_URI);
-    logger.info('MongoDB connection successful');
-  } catch (err: unknown) {
-    logger.error('MongoDB connection error:', err);
-    throw new Error(`Failed to connect to MongoDB: ${err instanceof Error ? err.message : 'Unknown error'}`);
+  let retries = 3;
+  while (retries > 0) {
+    try {
+      // Log connection details
+      logger.info('Connecting to MongoDB...', { 
+        environment: Deno.env.get('ENVIRONMENT'),
+        isDeployment: !!Deno.env.get('DENO_DEPLOYMENT_ID'),
+        isCI: !!Deno.env.get('CI')
+      });
+
+      await mongoClient.connect(appConfig.MONGODB_URI);
+      logger.info('MongoDB connection successful');
+      break;
+    } catch (err: unknown) {
+      logger.error('MongoDB connection error:', {
+        error: err instanceof Error ? {
+          name: err.name,
+          message: err.message,
+          stack: err.stack,
+          cause: err.cause
+        } : err,
+        environment: Deno.env.get('ENVIRONMENT'),
+        retriesLeft: retries - 1
+      });
+      
+      if (retries === 1) {
+        throw new Error(`Failed to connect to MongoDB: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      }
+      
+      retries--;
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retrying
+    }
   }
   
   // Create database instance

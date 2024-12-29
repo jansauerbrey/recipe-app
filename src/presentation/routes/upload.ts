@@ -15,13 +15,18 @@ export function createUploadRouter(recipeService: RecipeService): Router<AppStat
     return createMiddleware(handler);
   };
 
-  // Configure upload route
-  router.post(
-    '/api/upload/:id',
-    authMiddleware,
-    payloadLimitMiddleware,
-    routeHandler((ctx) => controller.uploadRecipeImage(ctx))
-  );
+  // Configure routes
+  router
+    .post(
+      '/api/upload/:id',
+      authMiddleware,
+      payloadLimitMiddleware,
+      routeHandler((ctx) => controller.uploadRecipeImage(ctx))
+    )
+    .get(
+      '/upload/:key*',
+      routeHandler((ctx) => controller.serveImage(ctx))
+    );
 
   return router;
 }
